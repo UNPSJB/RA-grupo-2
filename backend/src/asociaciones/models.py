@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, ForeignKey, Table, Column
+from sqlalchemy import Integer, Date, ForeignKey, Table, Column
 from src.models import ModeloBase
 
 alumno_materia = Table(
@@ -6,5 +6,6 @@ alumno_materia = Table(
     ModeloBase.metadata,
     Column("alumno_id", ForeignKey("alumnos.id"), primary_key=True),
     Column("materia_id", ForeignKey("materias.id"), primary_key=True),
-    Column("notaCursada", Integer)
+    Column("nota_cursada", Integer),
+    Column("fecha_fin_cursada", Date)
 )

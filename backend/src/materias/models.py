@@ -16,3 +16,12 @@ class Materia(ModeloBase):
         secondary=alumno_materia,
         back_populates="materias"
     )
+
+    encuesta_id: Mapped[int] = mapped_column(
+        ForeignKey("encuestas.id")
+    )  # Foreign key a Encuesta
+
+    encuesta: Mapped["src.encuestas.models.Encuesta"] = relationship(
+        "src.encuestas.models.Encuesta", back_populates="materias"
+    )
+

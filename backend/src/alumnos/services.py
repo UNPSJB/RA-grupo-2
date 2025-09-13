@@ -3,9 +3,11 @@ from sqlalchemy import delete, select, update, insert
 from sqlalchemy.orm import Session
 from src.alumnos.models import Alumno
 from src.asociaciones.models import alumno_materia
+from src.encuestas.models import Encuesta
 from src.materias.models import Materia
 from src.alumnos import schemas, exceptions
 from src.materias import schemas as materia_schemas
+from datetime import date, timedelta
 
 # operaciones para Alumno
 
@@ -15,17 +17,38 @@ def leer_alumno(db: Session, alumno_id: int) -> schemas.Alumno:
         raise exceptions.AlumnoNoEncontrado()
     return db_alumno
 
-def listar_encuestas_disponibles( db: Session, alumno_id: int) -> List[materia_schemas.Materia]: 
-    #stmt = ( 
-    #    select(Materia) 
-    #    .join(alumno_materia, Materia.id == alumno_materia.c.materia_id) 
-    #    .where(alumno_materia.c.alumno_id == alumno_id) ) 
-    #print(stmt)
-    #print(db.execute(stmt).all())
-    #return db.scalars(stmt).all()
-    alumno = db.get(Alumno, alumno_id)
-    if not alumno:
-        return []
-    return alumno.materias
+#def listar_encuestas_disponibles( db: Session, alumno_id: int) -> List[materia_schemas.Materia]: 
+#    alumno = db.get(Alumno, alumno_id)
+#    if not alumno:
+#        return []
+#    return [m.encuesta for m in alumno.materias if m.encuesta is not None]
 
-   
+#def listar_encuestas_disponibles(db: Session, alumno_id: int):
+#    fecha_limite = date.today() - timedelta(days=30)
+
+#    stmt = (
+#        select(Encuesta)
+#        .join(Materia, Encuesta.id == Materia.encuesta_id)
+#        .join(alumno_materia, Materia.id == alumno_materia.c.materia_id)
+#        .where(alumno_materia.c.alumno_id == alumno_id)
+#        .where(alumno_materia.c.fecha_fin_cursada >= fecha_limite)
+#    )
+
+#    return db.scalars(stmt).all()
+
+
+
+def listar_encuestas_disponibles(db: Session, alumno_id: int):
+    hace_un_mes = date.today() - timedelta(days=30)
+
+    stmt = (
+        select(Materia.nombre, Encuesta.nombre)
+        .join(alumno_materia, alumno_materia.c.materia_id == Materia.id)
+        .join(Encuesta, Encuesta.id == Materia.encuesta_id)
+        .where(alumno_materia.c.alumno_id == alumno_id)
+        .where(alumno_materia.c.fecha_fin_cursada >= hace_un_mes)
+    )
+
+    resultados = db.execute(stmt).all()
+
+    return [{"materia": m, "encuesta": e} for m, e in resultados] 
