@@ -1,34 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
+import EncuestasAlumno from "./components/EncuestasDisponibles"; 
+
+type EncuestaDisponible = {
+  materia: string;
+  encuesta: string;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const alumnoId = 3; // hardcodeado por ahora
+  const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
+  const [seleccionada, setSeleccionada] = useState<EncuestaDisponible | null>(null);
+
+  useEffect(() => {
+    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}/encuestas_disponibles`)
+      .then((res) => res.json())
+      .then((data: EncuestaDisponible[]) => setEncuestas(data))
+      .catch((err) => {
+        console.error("Error al obtener encuestas:", err);
+        setEncuestas([]); // 👈 para que no crashee
+      });
+  }, [alumnoId]);
+
+  if (seleccionada) { //ahora muestra solo la misma encuesta, después acá deberíamos poner para completarla
+    return (
+      <div>
+        <h1>Encuesta seleccionada</h1>
+        <p>
+          <b>Materia:</b> {seleccionada.materia}
+        </p>
+        <p>
+          <b>Encuesta:</b> {seleccionada.encuesta}
+        </p>
+
+        <button onClick={() => setSeleccionada(null)}>
+          Volver atrás
+        </button>
+
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="App">
+      <h1>Encuestas disponibles para el alumno {alumnoId}</h1>
+      <EncuestasAlumno encuestas={encuestas} onSelect={setSeleccionada}/>
+    </div>
   )
 }
 
