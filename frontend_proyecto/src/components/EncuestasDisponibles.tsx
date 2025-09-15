@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 type EncuestaDisponible = {
   materia: string;
   encuesta: string;
@@ -5,10 +7,9 @@ type EncuestaDisponible = {
 
 type Props = {
   encuestas: EncuestaDisponible[];
-  onSelect: (encuesta: EncuestaDisponible) => void;
 };
 
-export default function EncuestasDisponibles({ encuestas, onSelect}: Props) {
+export default function EncuestasDisponibles({ encuestas }: Props) {
   if (encuestas.length === 0) {
     return <p>No hay encuestas disponibles</p>;
   }
@@ -18,7 +19,6 @@ export default function EncuestasDisponibles({ encuestas, onSelect}: Props) {
       {encuestas.map((e, i) => (
         <li 
             key={i}
-            onClick={() => onSelect(e)}
             style={{
                 border: "1px solid #5e5656ff",
                 padding: "10px",
@@ -27,7 +27,9 @@ export default function EncuestasDisponibles({ encuestas, onSelect}: Props) {
                 cursor: "pointer",
             }}
         >
-          <strong>{e.materia}</strong> — {e.encuesta}
+          <Link to={`/encuestas/${i}`} style={{ textDecoration: "none", color: "inherit" }}>
+            <strong>{e.materia}</strong> — {e.encuesta}
+          </Link>
         </li>
       ))}
     </ul>
