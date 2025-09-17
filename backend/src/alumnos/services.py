@@ -8,6 +8,7 @@ from src.materias.models import Materia
 from src.alumnos import schemas, exceptions
 from src.materias import schemas as materia_schemas
 from datetime import date, timedelta
+from src.asociaciones.models import Periodo
 
 # operaciones para Alumno
 
@@ -39,14 +40,13 @@ def leer_alumno(db: Session, alumno_id: int) -> schemas.Alumno:
 
 
 def listar_encuestas_disponibles(db: Session, alumno_id: int):
-    hace_un_mes = date.today() - timedelta(days=30)
-
     stmt = (
         select(Materia.nombre, Encuesta.nombre)
         .join(alumno_materia, alumno_materia.c.materia_id == Materia.id)
         .join(Encuesta, Encuesta.id == Materia.encuesta_id)
         .where(alumno_materia.c.alumno_id == alumno_id)
-        .where(alumno_materia.c.fecha_fin_cursada >= hace_un_mes)
+        .where(alumno_materia.c.anio == 2025)
+        .where(alumno_materia.c.periodo == Periodo.PRIMER_CUATRI)
     )
 
     resultados = db.execute(stmt).all()
