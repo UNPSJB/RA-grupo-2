@@ -7,6 +7,12 @@ from src.models import ModeloBase
 
 # importamos los routers desde nuestros modulos
 
+from src.departamentos.models import Departamento
+from src.carreras.models import Carrera
+
+from src.carreras.router import router as carreras_router
+from src.departamentos.router import router as departamentos_router
+
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -38,4 +44,5 @@ app.add_middleware(
 
 # asociamos los routers a nuestra app
 
-
+app.include_router(departamentos_router)
+app.include_router(carreras_router)
