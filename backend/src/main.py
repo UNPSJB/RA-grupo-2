@@ -35,7 +35,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # asociamos los routers a nuestra app
 app.include_router(docentes_router)
 app.include_router(materias_router)
