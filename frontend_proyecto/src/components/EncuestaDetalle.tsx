@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 type EncuestaDisponible = {
@@ -8,7 +8,6 @@ type EncuestaDisponible = {
 
 export default function EncuestaDetalle() {
   const { id } = useParams(); // índice en el array
-  const navigate = useNavigate();
   const alumnoId = 3;
 
   const [, setEncuestas] = useState<EncuestaDisponible[]>([]);
@@ -33,6 +32,7 @@ export default function EncuestaDetalle() {
     return <p>No se encontró la encuesta</p>;
   }
 
+
   return (
     <div>
       <h1>Encuesta seleccionada</h1>
@@ -42,8 +42,6 @@ export default function EncuestaDetalle() {
       <p>
         <b>Encuesta:</b> {seleccionada.encuesta}
       </p>
-
-      <button onClick={() => navigate("/encuestas")}>Volver atrás</button>
     </div>
   );
 }
