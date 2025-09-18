@@ -1,24 +1,21 @@
 from pydantic import BaseModel, field_validator
 from typing import List
-from typing import Optional, List
-class MateriaBase(BaseModel):
+
+class DocenteBase(BaseModel):
     nombre: str
-    matricula: str
-    docente_id: Optional[int] = None  # Opcional para creación
+    apellido: str
     #muestra una base de como deberia ser los datos del docente
     model_config= {
         "json_schema_extra":{
             "example":{
-                "nombre": "Álgebra",
-                "matricula": "MA405",
+                "nombre": "Maria",
+                "apellido": "Nuñez",
             }
         }
     }
 
-
-class Materia(MateriaBase):
+class Docente(DocenteBase):
        id: int
 
        model_config = {"from_attributes": True}
        
-
