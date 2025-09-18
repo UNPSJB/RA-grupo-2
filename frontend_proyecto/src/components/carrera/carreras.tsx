@@ -1,4 +1,3 @@
-// carreras.tsx
 import "./carreras.css";
 import type { Carrera } from "../../types/types";
 
