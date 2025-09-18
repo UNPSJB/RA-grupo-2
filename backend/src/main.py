@@ -3,18 +3,25 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from src.database import engine
-from src.models import ModeloBase
+from src.models import Base, ModeloBase
 
-# importamos los routers desde nuestros modulos
-
+from src.docentes.models import Docente
+from src.materias.models import Materia
 from src.departamentos.models import Departamento
 from src.carreras.models import Carrera
 from src.informe_sintetico.models import InformeSintetico
+from src.alumnos.schemas import Alumno
+from src.materias.schemas import Materia
+from src.encuestas.schemas import Encuesta
 
+# importamos los routers desde nuestros modulos
 from src.carreras.router import router as carreras_router
 from src.departamentos.router import router as departamentos_router
-
 from src.informe_sintetico.router import router as informes_router
+from src.alumnos.router import router as alumnos_router
+from src.docentes.router import router as docentes_router
+from src.materias.router import router as materias_router
+from src.encuestas.router import router as encuestas_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -32,22 +39,19 @@ async def db_creation_lifespan(app: FastAPI):
 
 app = FastAPI(root_path=ROOT_PATH, lifespan=db_creation_lifespan)
 
-origins = [
-    "http://localhost:5173", # para recibir requests desde app React (puerto: 5173)
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
 # asociamos los routers a nuestra app
 
 app.include_router(departamentos_router)
 app.include_router(carreras_router)
-
+app.include_router(alumnos_router)
+app.include_router(docentes_router)
+app.include_router(materias_router)
+app.include_router(encuestas_router)
 app.include_router(informes_router)
