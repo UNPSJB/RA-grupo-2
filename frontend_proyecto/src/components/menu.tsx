@@ -11,6 +11,12 @@ export default function Menu() {
         <Link to="/docentes/1">
           <button>Ir a Docentes</button>
         </Link>
+        <Link to="/departamento">
+          <button>Ir a Carreras</button>
+        </Link>
+        <Link to="/informes">
+          <button>Ir a Informes Sintéticos</button>
+        </Link>
       </div>
     </div>
   );
