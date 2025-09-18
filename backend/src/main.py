@@ -9,9 +9,12 @@ from src.models import ModeloBase
 
 from src.departamentos.models import Departamento
 from src.carreras.models import Carrera
+from src.informe_sintetico.models import InformeSintetico
 
 from src.carreras.router import router as carreras_router
 from src.departamentos.router import router as departamentos_router
+
+from src.informe_sintetico.router import router as informes_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -46,3 +49,5 @@ app.add_middleware(
 
 app.include_router(departamentos_router)
 app.include_router(carreras_router)
+
+app.include_router(informes_router)

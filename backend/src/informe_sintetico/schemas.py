@@ -3,7 +3,7 @@ from datetime import date
 
 class InformeSinteticoBase(BaseModel):
     titulo: str
-    descripcion: str
+    contenido: str
     fecha: date
 
 class InformeSinteticoCreate(InformeSinteticoBase):
