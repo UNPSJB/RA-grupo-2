@@ -1,4 +1,4 @@
-from backend.src.departamentos.constants import ErrorCode
+from src.departamentos.constants import ErrorCode
 from src.exceptions import NotFound
 
 class DepartamentoNoEncontrado(NotFound):
