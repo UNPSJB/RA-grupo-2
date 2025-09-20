@@ -1,5 +1,6 @@
 import "./carreras.css";
 import type { Carrera } from "../../types/types";
+import { Link } from "react-router-dom";
 
 type Props = {
   carreras: Carrera[];
@@ -16,6 +17,14 @@ function ListaCarreras({ carreras }: Props) {
         <div key={carrera.id} className="carrera-item">
           <span className="carrera-numero">{index + 1}.</span>
           <span className="carrera-nombre">{carrera.nombre}</span>
+          <Link 
+            to={`/carrera/${carrera.id}`}
+            state={{ nombre: carrera.nombre }}
+            className="boton-completar"
+          >
+            Completar Informe
+          </Link>
+
         </div>
       ))}
     </div>
