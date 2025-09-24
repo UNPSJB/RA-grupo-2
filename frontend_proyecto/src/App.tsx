@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
-import EncuestasPage from "./components/EncuestasPage";
-import EncuestaDetalle from "./components/EncuestaDetalle";
+import EncuestasPage from "./components/encuesta/EncuestasPage";
+import EncuestaDetalle from "./components/encuesta/EncuestaDetalle";
 import DocentePage from "./components/docente/docentesPage";
 import Menu from "./components/menu";
 import './App.css';
