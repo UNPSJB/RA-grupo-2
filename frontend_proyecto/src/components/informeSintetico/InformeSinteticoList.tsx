@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchInformes } from "../../services/informesService";
+import { fetchInformes } from "./informesService";
 
 interface Informe {
   id: number;
