@@ -5,7 +5,7 @@ import DocentePage from "./components/docente/docentesPage";
 import Menu from "./components/menu";
 import Navbar from "./components/navbar/navbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Para la funcionalidad JavaScript
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import CarrerasPage from "./components/carrera/CarrerasPage";
@@ -13,7 +13,7 @@ import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
 
-import Footer from "./components/footer/footer"; // ← Crearemos este componente
+import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -23,7 +23,7 @@ function App() {
       {/* Navbar fijo arriba */}
       <Navbar />
       
-      {/* Contenido principal - CENTRADO y con ESPACIO */}
+      {/* Contenido principal*/}
       <main className="flex-grow-1 container-fluid mt-5 pt-4">
         {/* 
           container-fluid: Ocupa todo el ancho pero con padding
@@ -35,7 +35,6 @@ function App() {
         <div className="container">
           {/* 
             container: Centra el contenido y da un ancho máximo
-            Esto hará que tu contenido esté centrado en la página
           */}
           <Routes>
             <Route path="/" element={<Menu />} />

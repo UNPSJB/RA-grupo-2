@@ -1,4 +1,4 @@
-
+import { Link } from "react-router-dom";
 export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
@@ -7,9 +7,9 @@ export default function Navbar() {
         bg-primary: Color azul de Bootstrap (puedes cambiar por otro)
       */}
       <div className="container-fluid">
-        <a className="navbar-brand fw-bold" href="/">
+        <Link className="navbar-brand fw-bold" to="/">
           Sistema de encuestas
-        </a>
+        </Link>
         
         <button 
           className="navbar-toggler" 
@@ -25,10 +25,10 @@ export default function Navbar() {
         
         <div className="collapse navbar-collapse" id="navbarContent">
           <div className="navbar-nav">
-            <a className="nav-link" href="/encuestas">Encuestas</a>
-            <a className="nav-link" href="/docentes/1">Docentes</a>
-            <a className="nav-link" href="/departamento">Carreras</a>
-            <a className="nav-link" href="/informes">Informes Sintéticos</a>
+            <Link className="nav-link" to="/encuestas">Encuestas</Link>
+            <Link className="nav-link" to="/docentes/1">Docentes</Link>
+            <Link className="nav-link" to="/departamento">Carreras</Link>
+            <Link className="nav-link" to="/informes">Informes Sintéticos</Link>
           </div>
         </div>
       </div>
