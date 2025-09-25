@@ -1,4 +1,4 @@
-import "./docentes.css";
+//import "./docentes.css";
 import type { Docente } from "../../types/types";
 import ListaMaterias from "../materia/materias";
 
