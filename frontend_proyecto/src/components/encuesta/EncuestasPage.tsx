@@ -20,10 +20,11 @@ export default function EncuestasPage() {
       });
   }, [alumnoId]);
 
-  return (
-    <div>
-      <h1>Encuestas disponibles para el alumno {alumnoId}</h1>
-      <EncuestasDisponibles encuestas={encuestas} />
-    </div>
-  );
+return (
+  <div className="container mt-4">
+    <h1 className="mb-4">Encuestas disponibles</h1>
+    <EncuestasDisponibles encuestas={encuestas} />
+  </div>
+);
+
 }

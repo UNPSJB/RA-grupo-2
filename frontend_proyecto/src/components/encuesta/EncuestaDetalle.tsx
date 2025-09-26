@@ -33,15 +33,19 @@ export default function EncuestaDetalle() {
   }
 
 
-  return (
-    <div>
-      <h1>Encuesta seleccionada</h1>
-      <p>
-        <b>Materia:</b> {seleccionada.materia}
-      </p>
-      <p>
-        <b>Encuesta:</b> {seleccionada.encuesta}
-      </p>
+return (
+  <div className="container mt-4">
+    <div className="card">
+      <div className="card-body">
+        <h1 className="card-title mb-4">Encuesta seleccionada</h1>
+        <p className="card-text">
+          <b>Materia:</b> {seleccionada.materia}
+        </p>
+        <p className="card-text">
+          <b>Encuesta:</b> {seleccionada.encuesta}
+        </p>
+      </div>
     </div>
-  );
+  </div>
+);
 }
