@@ -15,19 +15,13 @@ export default function EncuestasDisponibles({ encuestas }: Props) {
   }
 
   return (
-    <ul>
+    <ul className="list-group">
       {encuestas.map((e, i) => (
-        <li 
-            key={i}
-            style={{
-                border: "1px solid #5e5656ff",
-                padding: "10px",
-                marginBottom: "8px",
-                borderRadius: "6px",
-                cursor: "pointer",
-            }}
-        >
-          <Link to={`/encuestas/${i}`} style={{ textDecoration: "none", color: "inherit" }}>
+        <li key={i} className="list-group-item">
+          <Link 
+            to={`/encuestas/${i}`} 
+            className="text-decoration-none text-dark d-block"
+          >
             <strong>{e.materia}</strong> — {e.encuesta}
           </Link>
         </li>
