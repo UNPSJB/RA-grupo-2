@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "./departamentos.css";
 import ListaCarreras from "../carrera/ListarCarreras";
 import type { Departamento, Carrera } from "../../types/types";
 
@@ -22,16 +21,24 @@ function DetalleDepartamento() {
 
 
   if (!departamento) {
-    return null;
+    return (
+      <div className="container py-4">
+        <div className="alert alert-warning">Cargando departamento..</div>
+      </div>
+    );
   }
 
   return (
-    <div className="departamento-container">
-      <div className="departamento-header">
-        <h1>Departamento de {departamento.nombre}</h1>
-        <h2>Carreras:</h2>
+    <div className="container py-4">
+      <div className="card">
+        <div className="card-header bg-primary text-white">
+          <h1 className="h4 mb-0">Departamento de {departamento.nombre}</h1>
+        </div>
+        <div className="card-body">
+          <h2 className="h5 mb-3">Carreras:</h2>
+          <ListaCarreras carreras={carreras} />
+        </div>
       </div>
-      <ListaCarreras carreras={carreras} />
     </div>
   );
 }
