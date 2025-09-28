@@ -5,7 +5,7 @@ import { fetchInforme } from "./informesService";
 interface Informe {
   id: number;
   titulo: string;
-  descripcion: string;
+  contenido: string;
   fecha: string;
 }
 
@@ -21,13 +21,24 @@ function InformeSinteticoDetail() {
 
   if (!informe) return <p className="p-6">Cargando...</p>;
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">{informe.titulo}</h1>
-      <p className="text-gray-600">📅 Fecha: {informe.fecha}</p>
-      <p className="mt-4">{informe.descripcion}</p>
+return (
+  <div className="container py-4">
+    <div className="card">
+      <div className="card-header bg-primary text-white">
+        <h1 className="h4 mb-0">{informe.titulo}</h1>
+      </div>
+      <div className="card-body">
+        <p className="mb-2">
+          <strong>📅 Fecha:</strong> {informe.fecha}
+        </p>
+        <div className="alert alert-info">
+          <strong>Descripción:</strong> {informe.contenido}
+        </div>
+      </div>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default InformeSinteticoDetail;
