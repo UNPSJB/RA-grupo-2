@@ -22,8 +22,27 @@ export default function DocentePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p>Cargando docente...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) {
+    return (
+      <div className="container py-4">
+        <div className="card">
+          <div className="card-body text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Cargando...</span>
+            </div>
+            <p className="mt-2">Cargando docente...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  if (error){
+    return (
+      <div className="container py-4">
+        <div className="alert alert-danger text-center">{error}</div>
+      </div>
+    );
+  }
   return <DetalleDocente docente={docente} />;
 }
