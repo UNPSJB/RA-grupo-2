@@ -21,10 +21,17 @@ export default function EncuestasPage() {
   }, [alumnoId]);
 
 return (
-  <div className="container mt-4">
-    <h1 className="mb-4">Encuestas disponibles</h1>
-    <EncuestasDisponibles encuestas={encuestas} />
-  </div>
+  <div className="container py-4">
+      <div className="card">
+        <div className="card-header bg-primary text-white">
+          <h1 className="h4 mb-0">Alumno 1</h1>
+        </div>
+        <div className="card-body">
+          <h2 className="h5 mb-3">Encuestas disponibles:</h2>
+          <EncuestasDisponibles encuestas={encuestas} />
+        </div>
+      </div>
+    </div>
 );
 
 }
