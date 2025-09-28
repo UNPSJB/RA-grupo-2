@@ -8,7 +8,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
-import CarrerasPage from "./components/carrera/CarrerasPage";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
@@ -39,7 +38,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Menu />} />
             <Route path="/departamento" element={<DetalleDepartamento />} />
-            <Route path="/carreras" element={<CarrerasPage />} />
             <Route path="/carrera/:id" element={<DetalleCarrera />} />
             <Route path="/encuestas" element={<EncuestasPage />} />
             <Route path="/encuestas/:id" element={<EncuestaDetalle />} />
