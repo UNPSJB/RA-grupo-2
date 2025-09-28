@@ -11,7 +11,6 @@ export default function CarrerasPage(){
                 setCarreras(data);
         })
 
-
             .catch((err) => {
                 console.error("Error al obtener carreras:", err);
                 setCarreras([]);
@@ -19,8 +18,8 @@ export default function CarrerasPage(){
     }, []);
 
     return (
-        <div>
-            <h1>Lista de Carreras</h1>
+        <div className="container py-4">
+            <h1 className="mb-4">Lista de Carreras</h1>
             <ListaCarreras carreras={carreras} />
         </div>
     );
