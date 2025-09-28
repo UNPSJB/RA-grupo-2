@@ -9,15 +9,23 @@ type Props = {
 
 export default function DetalleDocente ({ docente }: Props){
   if (!docente) {
-    return <p>Docente no existe</p>;
+    return (
+      <div className="container -py-4">
+        <div className="alert alert-warning text-center">Docente no existe</div>
+      </div>
+    );
   }
 
-  return(
-    <div className="DetalleDocente">
-      <h1>{docente.nombre} {docente.apellido}</h1>
-      {/* Le pasamos SOLO las materias al componente ListaMaterias */}
-      <ListaMaterias materias={docente.materias} />
-        
+ return(
+    <div className="container py-4">
+      <div className="card">
+        <div className="card-header bg-primary text-white">
+          <h1 className="h4 mb-0">{docente.nombre} {docente.apellido}</h1>
+        </div>
+        <div className="card-body">
+          <ListaMaterias materias={docente.materias} />
+        </div>
+      </div>
     </div>
   );
 }
