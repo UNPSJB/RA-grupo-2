@@ -11,21 +11,32 @@ type Props = {
 
 export default function EncuestasDisponibles({ encuestas }: Props) {
   if (encuestas.length === 0) {
-    return <p>No hay encuestas disponibles</p>;
+    return (
+      <div className="alert alert-info text-center">
+        No hay carreras disponibles
+      </div>
+    );
   }
 
   return (
-    <ul className="list-group">
+    <div className="list-group">
       {encuestas.map((e, i) => (
-        <li key={i} className="list-group-item">
-          <Link 
-            to={`/encuestas/${i}`} 
-            className="text-decoration-none text-dark d-block"
-          >
-            <strong>{e.materia}</strong> — {e.encuesta}
-          </Link>
-        </li>
+        <div key={i} className="col-12 mb-3">
+          <div className="card">
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <span className="text-muted me-3">{i + 1}.</span>
+                <span className="fw-bold">
+                  <strong>{e.materia}</strong> — {e.encuesta}{" "}
+                </span>
+              </div>
+              <Link to={`/encuestas/${i}`} className="btn btn-primary btn-sm" >
+                Completar Encuesta
+              </Link>
+            </div>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
