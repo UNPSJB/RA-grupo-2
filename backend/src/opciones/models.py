@@ -2,21 +2,19 @@ from sqlalchemy import Integer, String, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
 from typing import Optional, List
-from src.asociaciones.models import alumno_materia
+from src.asociaciones.models import pregunta_opcion
 
-
-class Encuesta(ModeloBase):
-    __tablename__ = "encuestas"
+class Opcion(ModeloBase):
+    __tablename__ = "opciones"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    nombre: Mapped[String] = mapped_column(String, index=True)
-    
-    materias: Mapped[Optional[List["src.materias.models.Materia"]]] = relationship(
-        "src.materias.models.Materia",
-        back_populates="encuesta"
-    )
-    
+    contenido: Mapped[String] = mapped_column(String, index=True)
+
     preguntas: Mapped[Optional[List["src.preguntas.models.Pregunta"]]] = relationship(
         "src.preguntas.models.Pregunta",
-        back_populates="encuesta"
+        secondary=pregunta_opcion,
+        back_populates="opciones"
     )
+
+
+    
