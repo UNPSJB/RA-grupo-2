@@ -29,7 +29,7 @@ return (
       </div>
       <div className="card-body">
         <p className="mb-2">
-          <strong>📅 Fecha:</strong> {informe.fecha}
+          <strong>Fecha:</strong> {informe.fecha}
         </p>
         <div className="alert alert-info">
           <strong>Descripción:</strong> {informe.contenido}
