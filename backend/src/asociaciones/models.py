@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, ForeignKey, Table, Column
+from sqlalchemy import Integer, String, ForeignKey, Table, Column, Enum
 from src.models import ModeloBase
 from enum import auto, StrEnum
 
@@ -6,6 +6,7 @@ class Periodo(StrEnum):
     PRIMER_CUATRI = "PRIMER_CUATRI"
     SEGUNDO_CUATRI = "SEGUNDO_CUATRI"
     ANUAL = "ANUAL"
+
 
 alumno_materia = Table(
     "alumno_materia",
