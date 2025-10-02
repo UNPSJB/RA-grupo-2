@@ -11,6 +11,7 @@ import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
+import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
 
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -44,6 +45,7 @@ function App() {
             <Route path="/docentes/:id" element={<DocentePage />} />
             <Route path="/informes" element={<InformeSinteticoList />} />
             <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
+            <Route path="/preguntas/crear" element={<CrearPreguntaCerrada />} />
           </Routes>
         </div>
       </main>
