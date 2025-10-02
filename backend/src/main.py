@@ -5,15 +5,6 @@ from fastapi import FastAPI
 from src.database import engine
 from src.models import Base, ModeloBase
 
-from src.docentes.models import Docente
-from src.materias.models import Materia
-from src.departamentos.models import Departamento
-from src.carreras.models import Carrera
-from src.informe_sintetico.models import InformeSintetico
-from src.alumnos.schemas import Alumno
-from src.materias.schemas import Materia
-from src.encuestas.schemas import Encuesta
-
 # importamos los routers desde nuestros modulos
 from src.carreras.router import router as carreras_router
 from src.departamentos.router import router as departamentos_router
@@ -22,6 +13,8 @@ from src.alumnos.router import router as alumnos_router
 from src.docentes.router import router as docentes_router
 from src.materias.router import router as materias_router
 from src.encuestas.router import router as encuestas_router
+from src.opciones.router import router as opciones_router
+from src.preguntas.router import router as preguntas_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -55,3 +48,5 @@ app.include_router(docentes_router)
 app.include_router(materias_router)
 app.include_router(encuestas_router)
 app.include_router(informes_router)
+app.include_router(opciones_router)
+app.include_router(preguntas_router)
