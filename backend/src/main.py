@@ -15,6 +15,7 @@ from src.materias.router import router as materias_router
 from src.encuestas.router import router as encuestas_router
 from src.opciones.router import router as opciones_router
 from src.preguntas.router import router as preguntas_router
+from src.categorias.router import router as categorias_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -50,3 +51,4 @@ app.include_router(encuestas_router)
 app.include_router(informes_router)
 app.include_router(opciones_router)
 app.include_router(preguntas_router)
+app.include_router(categorias_router)
