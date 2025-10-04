@@ -4,12 +4,11 @@ from typing import List, Optional
 from src import Opcion
 
 class CategoriaBase(BaseModel):
-    id: int
     cod: str
     texto: str
 
 class Categoria(CategoriaBase):
-    pass
+    id: int
 
 class CategoriaCreate(CategoriaBase):
     pass
