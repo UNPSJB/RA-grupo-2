@@ -15,6 +15,11 @@ class Encuesta(ModeloBase):
         "src.materias.models.Materia",
         back_populates="encuesta"
     )
+
+    categorias: Mapped[Optional[List["src.categorias.models.Categoria"]]] = relationship(
+        "src.categorias.models.Categoria",
+        back_populates="encuesta"
+    )
     
     preguntas: Mapped[Optional[List["src.preguntas.models.Pregunta"]]] = relationship(
         "src.preguntas.models.Pregunta",

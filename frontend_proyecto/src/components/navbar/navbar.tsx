@@ -30,6 +30,7 @@ export default function Navbar() {
             <Link className="nav-link" to="/departamento">Carreras</Link>
             <Link className="nav-link" to="/informes">Informes Sintéticos</Link>
             <Link className="nav-link" to="/preguntas/crear">Crear Pregunta</Link>
+            <Link className="nav-link" to="/encuestas/categoria-b">Categoría B</Link>
           </div>
         </div>
       </div>
