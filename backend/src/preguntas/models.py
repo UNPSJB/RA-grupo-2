@@ -10,6 +10,14 @@ class Pregunta(ModeloBase):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     enunciado: Mapped[String] = mapped_column(String, index=True)
 
+    categoria_id: Mapped[int] = mapped_column(
+        ForeignKey("categorias.id")
+    )  # Foreign key a Categoria
+
+    categoria: Mapped["src.categorias.models.Categoria"] = relationship(
+        "src.categorias.models.Categoria", back_populates="preguntas"   
+    )
+
     encuesta_id: Mapped[int] = mapped_column(
         ForeignKey("encuestas.id")
     )  # Foreign key a Encuesta
