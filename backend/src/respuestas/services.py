@@ -10,9 +10,10 @@ def _crear_respuesta_db(encuesta_completada_id: int, pregunta_id: int, opcion_id
     )
 
 
-def guardar_respuesta(db: Session, encuesta_completada_id: int, respuesta: schemas.RespuestaCreate) -> schemas.Respuesta:
+def guardar_respuesta(db: Session, respuesta: schemas.RespuestaCreate) -> schemas.Respuesta:
     respuesta_db = _crear_respuesta_db(
-        encuesta_completada_id,  
+        respuesta.encuesta_completada_id,  
+        respuesta.pregunta_id,
         respuesta.opcion_id
     )
     
@@ -23,12 +24,12 @@ def guardar_respuesta(db: Session, encuesta_completada_id: int, respuesta: schem
     return respuesta_db
 
 
-def guardar_respuestas_lote(db: Session, encuesta_completada_id: int, respuestas: List[schemas.RespuestaCreate]) -> List[schemas.Respuesta]:
+def guardar_respuestas_lote(db: Session, respuestas: List[schemas.RespuestaCreate]) -> List[schemas.Respuesta]:
     respuestas_db = []
     
     for respuesta_data in respuestas:
         respuesta_db = _crear_respuesta_db(
-            encuesta_completada_id,  
+            respuesta_data.encuesta_completada_id,  
             respuesta_data.pregunta_id,
             respuesta_data.opcion_id
         )

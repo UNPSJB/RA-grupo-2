@@ -20,3 +20,8 @@ class Encuesta(ModeloBase):
         "src.preguntas.models.Pregunta",
         back_populates="encuesta"
     )
+
+    encuestas_completadas: Mapped[Optional[List["EncuestaCompletada"]]] = relationship(
+        "EncuestaCompletada",
+        back_populates="encuesta"
+    )

@@ -10,6 +10,6 @@ class Respuesta(ModeloBase):
     opcion_id: Mapped[int] = mapped_column(ForeignKey("opciones.id"))
     encuesta_completada_id: Mapped[int] = mapped_column(ForeignKey("encuestas_completadas.id"))
     
-    pregunta: Mapped["Pregunta"] = relationship("Pregunta", back_populates="respuestas")
-    opcion: Mapped["Opcion"] = relationship("Opcion", back_populates="respuestas")
+    pregunta: Mapped["Pregunta"] = relationship("Pregunta")
+    opcion: Mapped["Opcion"] = relationship("Opcion")
     encuesta_completada: Mapped["EncuestaCompletada"] = relationship("EncuestaCompletada", back_populates="respuestas")
