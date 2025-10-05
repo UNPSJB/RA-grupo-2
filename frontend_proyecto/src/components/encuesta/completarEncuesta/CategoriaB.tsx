@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PreguntaItem from "./PreguntaItem";
 
 interface Categoria {
   id: number;
@@ -13,71 +14,79 @@ interface Pregunta {
   encuesta_id: number;
 }
 
-export default function PreguntasCategoriaBPage() {
+interface Opcion {
+  id: number;
+  contenido: string;
+  pregunta_id: number;
+}
+
+interface Props {
+  categoria: Categoria;
+}
+
+export default function PreguntasCategoria({ categoria }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
-  const [categoria, setCategoria] = useState<Categoria | null>(null);
+  const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
+  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
+  const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/categorias")
+    fetch(`http://localhost:8000/categorias/${categoria.id}/preguntas`)
       .then((res) => res.json())
-      .then((categorias: Categoria[]) => {
-        const catB = categorias.find((c) => c.cod === "B");
-        if (catB) {
-          setCategoria(catB);
-          fetch(`http://localhost:8000/categorias/${catB.id}/preguntas`)
-            .then((res) => res.json())
-            .then((preguntasData: Pregunta[]) => setPreguntas(preguntasData))
-            .catch((err) =>
-              console.error("Error al obtener preguntas de categoría B:", err)
-            );
-        }
+      .then((data: Pregunta[]) => {
+        setPreguntas(data);
+        const inicial: Record<number, number | null> = {};
+        data.forEach((p) => (inicial[p.id] = null));
+        setRespuestas(inicial);
       })
-      .catch((err) => console.error("Error al obtener categorías:", err));
-  }, []);
+      .catch((err) =>
+        console.error("Error al obtener preguntas de la categoría:", err)
+      );
+  }, [categoria.id]);
+
+const cargarOpciones = (preguntaId: number) => {
+  if (opciones[preguntaId]) return;
+
+  fetch(`http://localhost:8000/preguntas/${preguntaId}/opciones`)
+    .then((res) => res.json())
+    .then((data : Opcion[]) => {
+      const lista = data;
+      setOpciones((prev) => ({ ...prev, [preguntaId]: lista }));
+    })
+    .catch((err) => console.error("Error al cargar opciones:", err));
+};
+
+  const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
+    setRespuestas((prev) => ({ ...prev, [preguntaId]: opcionId }));
+    setDropdownAbierto(null);
+  };
 
   return (
-    <div className="container py-4">
-      <div className="card shadow">
-        <div className="card-header bg-primary text-white">
-          <h1 className="h4 mb-0">
-            Encuesta:
-          </h1>
+    <div>
+      {preguntas.length === 0 ? (
+        <div className="alert alert-warning">
+          No hay preguntas disponibles para esta categoría.
         </div>
-        <div className="card-body">
-          <h2 className="h5 mb-3"> {categoria ? `${categoria.cod}: ${categoria.texto}` : ""}</h2>
-
-          {preguntas.length === 0 ? (
-            <div className="alert alert-warning">
-              No hay preguntas disponibles para esta categoría.
-            </div>
-          ) : (
-            <div className="list-group">
-              {preguntas.map((p, i) => (
-                <div key={p.id} className="col-12 mb-3">
-                  <div className="card">
-                    <div
-                      className="card-body d-flex justify-content-between align-items-center"
-                      style={{ gap: "1rem" }}
-                    >
-                      <div className="flex-grow-1">
-                        <span className="text-muted me-2">{i + 1}.</span>
-                        <span>{p.enunciado}</span>
-                      </div>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        style={{ whiteSpace: "nowrap" }}
-                      >
-                        Seleccionar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      ) : (
+        preguntas.map((p, i) => (
+          <PreguntaItem
+            key={p.id}
+            index={i}
+            pregunta={p}
+            opciones={opciones[p.id] || []}
+            seleccionada={respuestas[p.id]}
+            dropdownAbierto={dropdownAbierto === p.id}
+            onToggle={async () => {
+              if (dropdownAbierto === p.id) setDropdownAbierto(null);
+              else {
+                await cargarOpciones(p.id);
+                setDropdownAbierto(p.id);
+              }
+            }}
+            onSeleccionar={(opcionId) => seleccionarOpcion(p.id, opcionId)}
+          />
+        ))
+      )}
     </div>
   );
 }
-

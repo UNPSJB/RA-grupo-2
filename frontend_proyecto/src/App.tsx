@@ -11,7 +11,7 @@ import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
 import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
-import PreguntasCategoriaBPage from "./components/encuesta/completarEncuesta/CategoriaB";
+import CompletarEncuesta from "./components/encuesta/completarEncuesta/CompletarEncuesta";
 
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -45,7 +45,7 @@ function App() {
             <Route path="/informes" element={<InformeSinteticoList />} />
             <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
             <Route path="/preguntas/crear" element={<CrearPreguntaCerrada />} />
-            <Route path="/encuestas/categoria-b" element={<PreguntasCategoriaBPage />} />
+            <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
           </Routes>
         </div>
       </main>
