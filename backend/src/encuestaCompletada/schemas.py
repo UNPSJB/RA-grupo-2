@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
-from src.respuestas.schemas import Respuesta, RespuestaCreate
+from src.respuestas.schemas import Respuesta, RespuestaCreateEnEncuesta
 from src.asociaciones.models import Periodo
 
 class EncuestaCompletadaBase(BaseModel):
@@ -15,7 +15,7 @@ class EncuestaCompletadaCreate(EncuestaCompletadaBase):
     pass
 
 class EncuestaCompletadaConRespuestasCreate(EncuestaCompletadaBase):
-    respuestas: List[RespuestaCreate]
+    respuestas: List[RespuestaCreateEnEncuesta]
 
 class EncuestaCompletada(EncuestaCompletadaBase):
     id: int

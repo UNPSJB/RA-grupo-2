@@ -12,3 +12,6 @@ class Respuesta(RespuestaBase):
     encuesta_completada_id: int
 
 model_config = {"from_attributes": True}
+
+class RespuestaCreateEnEncuesta(RespuestaBase):
+    pass

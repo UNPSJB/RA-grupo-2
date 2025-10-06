@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 from src.encuestaCompletada import schemas, models
 from src.encuestaCompletada import exceptions
 from src.encuestaCompletada.models import EncuestaCompletada
+from src.respuestas import schemas as respuestas_schemas
 
 def crear_encuesta_completada(db: Session, encuesta_data: schemas.EncuestaCompletadaCreate) -> schemas.EncuestaCompletada:
     encuesta_db = models.EncuestaCompletada(**encuesta_data.model_dump())
@@ -27,11 +28,14 @@ def obtener_encuestas_por_alumno(db: Session, alumno_id: int) -> List[schemas.En
     ).unique().all()
     return encuestas
 
-'''
+
 def crear_encuesta_completa_con_respuestas(db: Session, encuesta_data: schemas.EncuestaCompletadaConRespuestasCreate):
     encuesta_db = models.EncuestaCompletada(
         alumno_id=encuesta_data.alumno_id, 
-        encuesta_id=encuesta_data.encuesta_id
+        encuesta_id=encuesta_data.encuesta_id,
+        materia_id=encuesta_data.materia_id,
+        anio=encuesta_data.anio,
+        periodo=encuesta_data.periodo
     )
     db.add(encuesta_db)
     db.commit()
@@ -41,4 +45,4 @@ def crear_encuesta_completa_con_respuestas(db: Session, encuesta_data: schemas.E
     respuestas_services.guardar_respuestas_lote(db, encuesta_db.id, encuesta_data.respuestas)
     
     return obtener_encuesta_completada(db, encuesta_db.id)
-'''
+

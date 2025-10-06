@@ -10,11 +10,11 @@ router = APIRouter(prefix="/encuesta-completada", tags=["encuestas-completadas"]
 def crear_encuesta_completada(encuesta: schemas.EncuestaCompletadaCreate, db: Session = Depends(get_db)):
     return services.crear_encuesta_completada(db, encuesta)
 
-'''
+
 @router.post("/con-respuestas", response_model=schemas.EncuestaCompletada)
 def crear_encuesta_completa_con_respuestas(encuesta_data: schemas.EncuestaCompletadaConRespuestasCreate, db: Session = Depends(get_db)):
     return services.crear_encuesta_completa_con_respuestas(db, encuesta_data)
-'''
+
 
 
 @router.get("/{encuesta_id}", response_model=schemas.EncuestaCompletada)
