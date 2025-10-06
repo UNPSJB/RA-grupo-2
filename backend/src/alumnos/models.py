@@ -19,3 +19,8 @@ class Alumno(ModeloBase):
         secondary=alumno_materia,
         back_populates="alumnos"
     )
+
+    encuestas_completadas: Mapped[Optional[List["EncuestaCompletada"]]] = relationship(
+        "EncuestaCompletada",
+        back_populates="alumno"
+    )
