@@ -18,6 +18,9 @@ from src.preguntas.router import router as preguntas_router
 from src.categorias.router import router as categorias_router
 from src.respuestas.router import router as respuestas_router
 from src.encuestaCompletada.router import router as encuesta_completada_router
+from src.opciones.router import router as opciones_router
+from src.preguntas.router import router as preguntas_router
+from src.categorias.router import router as categorias_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
