@@ -12,7 +12,7 @@ export default function CompletarEncuesta() {
 
   useEffect(() => {
     const codigosDeseados = ["A", "B", "C", "D", "E", "F", "G"];
-    fetch("http://localhost:8000/categorias")
+    fetch("http://localhost:8000/encuestas/1/categorias")
       .then((res) => res.json())
       .then((todas: Categoria[]) => {
         const filtradas = todas.filter((c) =>
