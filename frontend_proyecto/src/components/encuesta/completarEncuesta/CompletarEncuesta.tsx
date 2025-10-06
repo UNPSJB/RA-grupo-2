@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PreguntasCategoria from "./CategoriaB";
+import PreguntasCategoria from "./CategoriaB"; 
 
 interface Categoria {
   id: number;
@@ -8,14 +8,24 @@ interface Categoria {
 }
 
 export default function CompletarEncuesta() {
-  const [categoria, setCategoria] = useState<Categoria | null>(null);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   useEffect(() => {
+    const codigosDeseados = ["A", "B", "C", "D", "E", "F", "G"];
     fetch("http://localhost:8000/categorias")
       .then((res) => res.json())
-      .then((categorias: Categoria[]) => {
-        const catB = categorias.find((c) => c.cod === "B");
-        if (catB) setCategoria(catB);
+      .then((todas: Categoria[]) => {
+        const filtradas = todas.filter((c) =>
+          codigosDeseados.includes(c.cod)
+        );
+
+        const ordenadas = [...filtradas].sort(
+          (a, b) =>
+            codigosDeseados.indexOf(a.cod) -
+            codigosDeseados.indexOf(b.cod)
+        );
+
+        setCategorias(ordenadas);
       })
       .catch((err) => console.error("Error al obtener categorías:", err));
   }, []);
@@ -27,15 +37,19 @@ export default function CompletarEncuesta() {
           <h1 className="h4 mb-0">Encuesta</h1>
         </div>
         <div className="card-body">
-          {categoria ? (
-            <>
-              <h2 className="h5 mb-3">
-                {categoria.cod}: {categoria.texto}
-              </h2>
-              <PreguntasCategoria categoria={categoria} />
-            </>
+          {categorias.length > 0 ? (
+            categorias.map((categoria) => (
+              <div key={categoria.id} className="mb-4">
+                <h2 className="h5 mb-3">
+                  {categoria.cod}: {categoria.texto}
+                </h2>
+                <PreguntasCategoria categoria={categoria} />
+              </div>
+            ))
           ) : (
-            <div className="alert alert-info">Cargando categoría...</div>
+            <div className="alert alert-info">
+              Cargando categorías...
+            </div>
           )}
         </div>
       </div>
