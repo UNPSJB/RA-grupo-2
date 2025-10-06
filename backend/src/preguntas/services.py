@@ -12,7 +12,6 @@ def crear_pregunta_cerrada(db: Session, pregunta: schemas.PreguntaCerradaCreate)
     _pregunta = Pregunta(
         enunciado=pregunta.enunciado,
         categoria_id=pregunta.categoria_id,
-        encuesta_id=pregunta.encuesta_id
     )
     db.add(_pregunta)
     db.commit()

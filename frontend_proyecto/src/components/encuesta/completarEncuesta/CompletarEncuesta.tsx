@@ -14,7 +14,7 @@ export default function CompletarEncuesta() {
     fetch("http://localhost:8000/categorias")
       .then((res) => res.json())
       .then((categorias: Categoria[]) => {
-        const catB = categorias.find((c) => c.cod === "C");
+        const catB = categorias.find((c) => c.cod === "B");
         if (catB) setCategoria(catB);
       })
       .catch((err) => console.error("Error al obtener categorías:", err));
