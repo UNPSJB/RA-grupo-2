@@ -12,7 +12,7 @@ import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
 import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
-
+import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -43,6 +43,7 @@ function App() {
             <Route path="/encuestas" element={<EncuestasPage />} />
             <Route path="/encuestas/:id" element={<EncuestaDetalle />} />
             <Route path="/docentes/:id" element={<DocentePage />} />
+            <Route path="/detallemateria/:id" element={<DetalleMateria />} />
             <Route path="/informes" element={<InformeSinteticoList />} />
             <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
             <Route path="/preguntas/crear" element={<CrearPreguntaCerrada />} />
