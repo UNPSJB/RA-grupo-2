@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import PreguntasCategoria from "./CategoriaB";
+import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
+import { useNavigate } from "react-router-dom";
+
 
 interface Categoria {
   id: number;
@@ -12,20 +15,21 @@ interface Respuesta {
   opcion_id: number;
 }
 
+
 export default function CompletarEncuesta() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [respuestasGlobales, setRespuestasGlobales] = useState<Respuesta[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const codigosDeseados = ["A", "B", "C", "D", "E", "F", "G"];
     fetch("http://localhost:8000/encuestas/1/categorias")
       .then((res) => res.json())
       .then((todas: Categoria[]) => {
-        const filtradas = todas.filter((c) =>
-          codigosDeseados.includes(c.cod)
-        );
+        const filtradas = todas.filter((c) => codigosDeseados.includes(c.cod));
         const ordenadas = [...filtradas].sort(
           (a, b) =>
             codigosDeseados.indexOf(a.cod) - codigosDeseados.indexOf(b.cod)
@@ -52,7 +56,7 @@ export default function CompletarEncuesta() {
     setMensaje(null);
 
     const datos = {
-      alumno_id: 3,     
+      alumno_id: 3,
       encuesta_id: 1,
       materia_id: 4,
       anio: 2022,
@@ -61,17 +65,21 @@ export default function CompletarEncuesta() {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/encuesta-completada/con-respuestas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datos),
-      });
+      const res = await fetch(
+        "http://localhost:8000/encuesta-completada/con-respuestas",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datos),
+        }
+      );
 
       if (!res.ok) throw new Error("Error al enviar encuesta");
       const data = await res.json();
 
       console.log("Encuesta completada creada:", data);
       setMensaje("Encuesta enviada con éxito.");
+      setMensajeExito("¡La pregunta fue creada con éxito!");
       setRespuestasGlobales([]);
     } catch (err) {
       console.error(err);
@@ -80,6 +88,20 @@ export default function CompletarEncuesta() {
       setEnviando(false);
     }
   };
+
+  function cerrarPagina(){
+    setMensajeExito(null);
+    navigate("/encuestas");
+  }
+
+  if (mensajeExito) {
+    return (
+      <MensajeExito
+        mensaje={mensajeExito}
+        onClose={cerrarPagina}
+      />
+    );
+  }
 
   return (
     <div className="container py-4">
