@@ -8,7 +8,6 @@ class PreguntaBase(BaseModel):
 
 class PreguntaCerradaCreate(PreguntaBase):
     categoria_id: int
-    encuesta_id: int
     enunciado: str
     opcion_ids: List[int] = Field(..., min_length=1)
 
@@ -23,7 +22,6 @@ class Pregunta(PreguntaBase):
     id: int
     enunciado: str
     categoria_id: int
-    encuesta_id: int
 
     model_config = {"from_attributes": True}
 
@@ -31,4 +29,16 @@ class Pregunta(PreguntaBase):
 class PreguntaCerrada(Pregunta):
     opciones: List[Opcion]
 
+    model_config = {"from_attributes": True}
+
+#Pregunta Abierta
+
+class PreguntaAbiertaCreate(PreguntaBase):
+    categoria_id: int
+    enunciado: str
+
+class PreguntaAbierta(Pregunta):
+   #Representa una pregunta abierta (sin opciones).
+
+    
     model_config = {"from_attributes": True}

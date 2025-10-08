@@ -32,7 +32,7 @@ export default function PreguntaForm() {
   }, []);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/categorias")
+    fetch("http://127.0.0.1:8000/encuestas/1/categorias") //hardcodeado encuesta 1
       .then((res) => res.json())
       .then((data) => setCategorias(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error cargando categorias:", err));
@@ -60,12 +60,11 @@ export default function PreguntaForm() {
       return;
     }
 
-    fetch("http://127.0.0.1:8000/preguntas", {
+    fetch("http://127.0.0.1:8000/preguntas/cerrada", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         categoria_id: Number(categoriaSeleccionada),
-        encuesta_id: 1, // HARDCODEADO
         enunciado,
         opcion_ids: opcionSeleccionadas,
       }),
