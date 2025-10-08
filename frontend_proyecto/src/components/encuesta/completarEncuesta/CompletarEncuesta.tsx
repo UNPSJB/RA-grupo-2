@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PreguntasCategoria from "./CategoriaB";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation} from "react-router-dom";
-
+import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface Categoria {
   id: number;
@@ -83,8 +83,8 @@ export default function CompletarEncuesta() {
       alumno_id: alumnoId,
       encuesta_id: encuestaId,
       materia_id: materiaId,
-      anio: 2022,
-      periodo: "SEGUNDO_CUATRI",
+      anio: ANIO_ACTUAL,
+      periodo: PERIODO_ACTUAL,
       respuestas: respuestasGlobales,
     };
 

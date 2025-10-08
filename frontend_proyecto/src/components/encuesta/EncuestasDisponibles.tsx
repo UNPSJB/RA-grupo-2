@@ -1,4 +1,7 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../constants";
+import MensajeExito from "../pregunta/preguntaCerrada/MensajeExito";
 
 type EncuestaDisponible = {
   materia: string;
@@ -13,6 +16,55 @@ type Props = {
 };
 
 export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
+  const navigate = useNavigate();
+  const [mensajeExito, setMensajeExito] = useState<string | null>(null); 
+
+  const verificarYCompletar = async (e: EncuestaDisponible) => {
+    try {
+      const params = new URLSearchParams({
+        alumno_id: alumnoId.toString(),
+        encuesta_id: e.encuesta_id.toString(),
+        materia_id: e.materia_id.toString(),
+        anio: ANIO_ACTUAL.toString(),
+        periodo: PERIODO_ACTUAL
+      });
+
+      const response = await fetch(`http://localhost:8000/encuesta-completada/existe?${params}`);
+      const data = await response.json();
+
+      if(data.existe){
+        setMensajeExito(`Ya completaste la encuesta de ${e.materia}`); 
+      } else{
+        navigate("/encuestas/categoria-b", {
+          state: {
+            alumnoId: alumnoId,
+            encuestaId: e.encuesta_id,
+            materiaId: e.materia_id,
+            nombreMateria: e.materia
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error al verificar encuesta:", error);
+      setMensajeExito("Error al verificar la encuesta");  
+    }
+  };
+
+  
+  const cerrarMensaje = () => {
+    setMensajeExito(null);
+  };
+
+  
+  if (mensajeExito) {
+    return (
+      <MensajeExito
+        mensaje={mensajeExito}
+        onClose={cerrarMensaje}
+      />
+    );
+  }
+
   if (encuestas.length === 0) {
     return (
       <div className="alert alert-info text-center">
@@ -33,17 +85,11 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
                   <strong>{e.materia}</strong> — {e.encuesta}{" "}
                 </span>
               </div>
-              <Link to={`/encuestas/categoria-b/`}
-                state={{
-                  alumnoId: alumnoId,
-                  encuestaId: e.encuesta_id,
-                  materiaId: e.materia_id,
-                  nombreMateria: e.materia
-                }}                
+              <button onClick={() => verificarYCompletar(e)}
                 className="btn btn-primary btn-sm"
               >
                 Completar Encuesta
-              </Link>
+              </button>
             </div>
           </div>
         </div>
