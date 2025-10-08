@@ -7,9 +7,14 @@ router = APIRouter(prefix="/preguntas", tags=["preguntas"])
 
 # Rutas para preguntas
 
-@router.post("/", response_model=schemas.PreguntaCerrada)
+@router.post("/cerrada", response_model=schemas.PreguntaCerrada)
 def create_pregunta_cerrada(pregunta: schemas.PreguntaCerradaCreate, db: Session = Depends(get_db)):
     return services.crear_pregunta_cerrada(db, pregunta)
+
+
+@router.post("/abierta", response_model=schemas.PreguntaAbierta)
+def create_pregunta_abierta(pregunta: schemas.PreguntaAbiertaCreate,db: Session = Depends(get_db)):
+    return services.crear_pregunta_abierta(db, pregunta)
 
 @router.get("/", response_model=list[schemas.Pregunta])
 def read_preguntas(db: Session = Depends(get_db)):

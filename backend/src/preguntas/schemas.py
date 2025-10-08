@@ -5,7 +5,8 @@ from src import Opcion
 
 class PreguntaBase(BaseModel):
     enunciado: str
-
+    tipo: Optional[str] = None  # nuevo campo
+    
 class PreguntaCerradaCreate(PreguntaBase):
     categoria_id: int
     enunciado: str
@@ -29,4 +30,16 @@ class Pregunta(PreguntaBase):
 class PreguntaCerrada(Pregunta):
     opciones: List[Opcion]
 
+    model_config = {"from_attributes": True}
+
+#Pregunta Abierta
+
+class PreguntaAbiertaCreate(PreguntaBase):
+    categoria_id: int
+    enunciado: str
+
+class PreguntaAbierta(Pregunta):
+   #Representa una pregunta abierta (sin opciones).
+
+    
     model_config = {"from_attributes": True}

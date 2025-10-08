@@ -12,6 +12,7 @@ def crear_pregunta_cerrada(db: Session, pregunta: schemas.PreguntaCerradaCreate)
     _pregunta = Pregunta(
         enunciado=pregunta.enunciado,
         categoria_id=pregunta.categoria_id,
+        tipo="cerrada" #Nuevo campo tipo
     )
     db.add(_pregunta)
     db.commit()
@@ -27,6 +28,20 @@ def crear_pregunta_cerrada(db: Session, pregunta: schemas.PreguntaCerradaCreate)
 
     return _pregunta
 
+def crear_pregunta_abierta(db: Session, pregunta: schemas.PreguntaAbiertaCreate) -> schemas.PreguntaAbierta:
+    
+    #Crea una pregunta abierta (sin opciones).
+    
+    _pregunta = Pregunta(
+        enunciado=pregunta.enunciado,
+        categoria_id=pregunta.categoria_id,
+        tipo="abierta"  #nuevo campo tipo
+    )
+    db.add(_pregunta)
+    db.commit()
+    db.refresh(_pregunta)
+
+    return _pregunta
 
 def leer_pregunta(db: Session, pregunta_id: int) -> schemas.Pregunta:
     db_pregunta = db.scalar(select(Pregunta).where(Pregunta.id == pregunta_id))
