@@ -23,9 +23,10 @@ interface Opcion {
 interface Props {
   categoria: Categoria;
   onRespuesta: (pregunta_id: number, opcion_id: number) => void;
+  onTotalPreguntas?: (id: number, cantidad: number) => void; 
 }
 
-export default function PreguntasCategoria({ categoria, onRespuesta }: Props) {
+export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreguntas }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
@@ -39,6 +40,7 @@ export default function PreguntasCategoria({ categoria, onRespuesta }: Props) {
         const inicial: Record<number, number | null> = {};
         data.forEach((p) => (inicial[p.id] = null));
         setRespuestas(inicial);
+        onTotalPreguntas?.(categoria.id, data.length);
       })
       .catch((err) =>
         console.error("Error al obtener preguntas de la categoría:", err)
@@ -60,7 +62,7 @@ const cargarOpciones = (preguntaId: number) => {
   const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: opcionId }));
     setDropdownAbierto(null);
-    onRespuesta(preguntaId, opcionId); // 👈 notifica al padre
+    onRespuesta(preguntaId, opcionId); // notifica al padre
   };
 
   return (

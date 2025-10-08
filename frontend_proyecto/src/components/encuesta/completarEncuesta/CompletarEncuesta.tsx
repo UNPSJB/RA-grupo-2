@@ -23,6 +23,7 @@ export default function CompletarEncuesta() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const codigosDeseados = ["A", "B", "C", "D", "E", "F", "G"];
@@ -46,9 +47,17 @@ export default function CompletarEncuesta() {
     });
   };
 
+  const manejarTotalPreguntas = (categoriaId: number, cantidad: number) => {
+    setPreguntasPorCategoria((prev) => ({ ...prev, [categoriaId]: cantidad }));
+  };
+
+  const totalPreguntas = Object.values(preguntasPorCategoria).reduce((a, b) => a + b, 0);
+
   const enviarEncuesta = async () => {
-    if (respuestasGlobales.length === 0) {
-      setMensaje("Debes responder al menos una pregunta antes de enviar.");
+    if (respuestasGlobales.length < totalPreguntas) {
+      setMensaje("Debes responder todas las preguntas antes de enviar.");
+      console.log("Total preguntas:", totalPreguntas);
+      console.log("Respuestas dadas:", respuestasGlobales.length);
       return;
     }
 
@@ -119,6 +128,7 @@ export default function CompletarEncuesta() {
                 <PreguntasCategoria
                   categoria={categoria}
                   onRespuesta={manejarCambioRespuestas}
+                  onTotalPreguntas={manejarTotalPreguntas}
                 />
               </div>
             ))
