@@ -27,7 +27,7 @@ class Pregunta(ModeloBase):
         "src.encuestas.models.Encuesta", back_populates="preguntas"
     )
     '''
-
+    tipo: Mapped[str] = mapped_column(String, nullable=False)
     opciones: Mapped[Optional[List["src.opciones.models.Opcion"]]] = relationship(
         "src.opciones.models.Opcion",
         secondary=pregunta_opcion,

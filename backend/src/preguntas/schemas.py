@@ -5,7 +5,8 @@ from src import Opcion
 
 class PreguntaBase(BaseModel):
     enunciado: str
-
+    tipo: Optional[str] = None  # nuevo campo
+    
 class PreguntaCerradaCreate(PreguntaBase):
     categoria_id: int
     enunciado: str
