@@ -13,3 +13,5 @@ class Encuesta(EncuestaBase):
 class EncuestaDisponible(BaseModel):
     materia: str
     encuesta: str
+    materia_id: int
+    encuesta_id: int

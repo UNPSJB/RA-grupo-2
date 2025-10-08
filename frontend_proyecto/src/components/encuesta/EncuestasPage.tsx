@@ -4,10 +4,12 @@ import EncuestasDisponibles from "./EncuestasDisponibles";
 type EncuestaDisponible = {
   materia: string;
   encuesta: string;
+  materia_id: number;
+  encuesta_id: number;
 };
 
 export default function EncuestasPage() {
-  const alumnoId = 3; // hardcodeado por ahora
+  const alumnoId = 2; // hardcodeado por ahora
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
 
   useEffect(() => {
@@ -20,18 +22,21 @@ export default function EncuestasPage() {
       });
   }, [alumnoId]);
 
-return (
-  <div className="container py-4">
-      <div className="card">
-        <div className="card-header bg-primary text-white">
-          <h1 className="h4 mb-0">Alumno 1</h1>
-        </div>
-        <div className="card-body">
-          <h2 className="h5 mb-3">Encuestas disponibles:</h2>
-          <EncuestasDisponibles encuestas={encuestas} />
+  return (
+    <div className="container py-4">
+        <div className="card">
+          <div className="card-header bg-primary text-white">
+            <h1 className="h4 mb-0">Alumno {alumnoId}</h1>
+          </div>
+          <div className="card-body">
+            <h2 className="h5 mb-3">Encuestas disponibles:</h2>
+            <EncuestasDisponibles 
+              encuestas={encuestas}
+              alumnoId={alumnoId} 
+              />
+          </div>
         </div>
       </div>
-    </div>
-);
+  );
 
 }

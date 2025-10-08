@@ -3,13 +3,16 @@ import { Link } from "react-router-dom";
 type EncuestaDisponible = {
   materia: string;
   encuesta: string;
+  materia_id: number;
+  encuesta_id: number;
 };
 
 type Props = {
   encuestas: EncuestaDisponible[];
+  alumnoId: number;
 };
 
-export default function EncuestasDisponibles({ encuestas }: Props) {
+export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
   if (encuestas.length === 0) {
     return (
       <div className="alert alert-info text-center">
@@ -30,7 +33,15 @@ export default function EncuestasDisponibles({ encuestas }: Props) {
                   <strong>{e.materia}</strong> — {e.encuesta}{" "}
                 </span>
               </div>
-              <Link to={`/encuestas/${i}`} className="btn btn-primary btn-sm" >
+              <Link to={`/encuestas/categoria-b/`}
+                state={{
+                  alumnoId: alumnoId,
+                  encuestaId: e.encuesta_id,
+                  materiaId: e.materia_id,
+                  nombreMateria: e.materia
+                }}                
+                className="btn btn-primary btn-sm"
+              >
                 Completar Encuesta
               </Link>
             </div>
