@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import PreguntasCategoria from "./CategoriaB";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation} from "react-router-dom";
+import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface Categoria {
   id: number;
@@ -25,10 +25,13 @@ export default function CompletarEncuesta() {
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const navigate = useNavigate();
   const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
+  
+  const location = useLocation();
 
   useEffect(() => {
+    const { encuestaId = 1 } = location.state || {};
     const codigosDeseados = ["A", "B", "C", "D", "E", "F", "G"];
-    fetch("http://localhost:8000/encuestas/1/categorias")
+    fetch(`http://localhost:8000/encuestas/${encuestaId}/categorias`)
       .then((res) => res.json())
       .then((todas: Categoria[]) => {
         const filtradas = todas.filter((c) => codigosDeseados.includes(c.cod));
@@ -39,7 +42,7 @@ export default function CompletarEncuesta() {
         setCategorias(ordenadas);
       })
       .catch((err) => console.error("Error al obtener categorías:", err));
-  }, []);
+  }, [location.state]);
 
   const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number | null, texto?: string) => {
     setRespuestasGlobales((prev) => {
@@ -65,12 +68,24 @@ export default function CompletarEncuesta() {
     setEnviando(true);
     setMensaje(null);
 
+    const{
+      alumnoId,
+      encuestaId,
+      materiaId
+    } = location.state || {};
+
+    if(!alumnoId || !encuestaId || !materiaId){
+      console.error("Faltan parámetros:", location.state);
+      setMensaje("Error: No se pudieron cargar los datos de la encuesta");
+      return;
+    }
+
     const datos = {
-      alumno_id: 3,
-      encuesta_id: 1,
-      materia_id: 4,
-      anio: 2022,
-      periodo: "SEGUNDO_CUATRI",
+      alumno_id: alumnoId,
+      encuesta_id: encuestaId,
+      materia_id: materiaId,
+      anio: ANIO_ACTUAL,
+      periodo: PERIODO_ACTUAL,
       respuestas: respuestasGlobales,
     };
 
@@ -89,7 +104,7 @@ export default function CompletarEncuesta() {
 
       console.log("Encuesta completada creada:", data);
       setMensaje("Encuesta enviada con éxito.");
-      setMensajeExito("¡La pregunta fue creada con éxito!");
+      setMensajeExito("¡La encuesta fue completada con éxito!");
       setRespuestasGlobales([]);
     } catch (err) {
       console.error(err);

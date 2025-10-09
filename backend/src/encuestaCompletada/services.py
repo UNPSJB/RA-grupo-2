@@ -46,3 +46,13 @@ def crear_encuesta_completa_con_respuestas(db: Session, encuesta_data: schemas.E
     
     return obtener_encuesta_completada(db, encuesta_db.id)
 
+def verificar_encuesta_existente(db: Session, alumno_id: int, encuesta_id: int, materia_id: int, anio: int, periodo: str) -> bool:
+    encuesta = db.scalar(
+        select(EncuestaCompletada)
+        .where(EncuestaCompletada.alumno_id == alumno_id)
+        .where(EncuestaCompletada.encuesta_id == encuesta_id)
+        .where(EncuestaCompletada.materia_id == materia_id)
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+    )
+    return encuesta is not None

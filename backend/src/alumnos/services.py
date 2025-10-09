@@ -41,7 +41,7 @@ def leer_alumno(db: Session, alumno_id: int) -> schemas.Alumno:
 
 def listar_encuestas_disponibles(db: Session, alumno_id: int):
     stmt = (
-        select(Materia.nombre, Encuesta.nombre)
+        select(Materia.nombre, Encuesta.nombre, Materia.id, Materia.encuesta_id)
         .join(alumno_materia, alumno_materia.c.materia_id == Materia.id)
         .join(Encuesta, Encuesta.id == Materia.encuesta_id)
         .where(alumno_materia.c.alumno_id == alumno_id)
@@ -51,4 +51,4 @@ def listar_encuestas_disponibles(db: Session, alumno_id: int):
 
     resultados = db.execute(stmt).all()
 
-    return [{"materia": m, "encuesta": e} for m, e in resultados] 
+    return [{"materia": m, "encuesta": e, "materia_id": materia_id, "encuesta_id": encuesta_id} for m, e, materia_id, encuesta_id in resultados] 
