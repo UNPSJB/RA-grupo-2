@@ -12,6 +12,7 @@ def crear_pregunta_cerrada(db: Session, pregunta: schemas.PreguntaCerradaCreate)
     _pregunta = Pregunta(
         enunciado=pregunta.enunciado,
         categoria_id=pregunta.categoria_id,
+        tipo="cerrada" #Nuevo campo tipo
     )
     db.add(_pregunta)
     db.commit()
@@ -33,9 +34,9 @@ def crear_pregunta_abierta(db: Session, pregunta: schemas.PreguntaAbiertaCreate)
     
     _pregunta = Pregunta(
         enunciado=pregunta.enunciado,
-        categoria_id=pregunta.categoria_id
+        categoria_id=pregunta.categoria_id,
+        tipo="abierta"  #nuevo campo tipo
     )
-
     db.add(_pregunta)
     db.commit()
     db.refresh(_pregunta)
