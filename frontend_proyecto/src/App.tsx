@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import EncuestasPage from "./components/encuesta/EncuestasPage";
 import EncuestaDetalle from "./components/encuesta/EncuestaDetalle";
 import DocentePage from "./components/docente/docentesPage";
-import Menu from "./components/menu";
 import Navbar from "./components/navbar/navbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -11,7 +10,14 @@ import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
+import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
+import CompletarEncuesta from "./components/encuesta/completarEncuesta/CompletarEncuesta";
 
+import SeleccionarTipoPregunta from './components/pregunta/SeleccionarTipoPregunta';
+import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPreguntaAbierta';
+
+
+import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -36,14 +42,18 @@ function App() {
             container: Centra el contenido y da un ancho máximo
           */}
           <Routes>
-            <Route path="/" element={<Menu />} />
             <Route path="/departamento" element={<DetalleDepartamento />} />
             <Route path="/carrera/:id" element={<DetalleCarrera />} />
             <Route path="/encuestas" element={<EncuestasPage />} />
             <Route path="/encuestas/:id" element={<EncuestaDetalle />} />
             <Route path="/docentes/:id" element={<DocentePage />} />
+            <Route path="/detallemateria/:id" element={<DetalleMateria />} />
             <Route path="/informes" element={<InformeSinteticoList />} />
             <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
+            <Route path="/preguntas/crear" element={<SeleccionarTipoPregunta />} />
+            <Route path="/pregunta/cerrada" element={<CrearPreguntaCerrada />} />
+            <Route path="/pregunta/abierta" element={<CrearPreguntaAbierta />} />
+            <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
           </Routes>
         </div>
       </main>

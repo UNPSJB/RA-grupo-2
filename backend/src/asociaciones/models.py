@@ -11,9 +11,17 @@ class Periodo(StrEnum):
 alumno_materia = Table(
     "alumno_materia",
     ModeloBase.metadata,
-    Column("alumno_id", ForeignKey("alumnos.id"), primary_key=True),
-    Column("materia_id", ForeignKey("materias.id"), primary_key=True),
+    Column("id", Integer, primary_key=True, index=True),
+    Column("alumno_id", ForeignKey("alumnos.id")),
+    Column("materia_id", ForeignKey("materias.id")),
     Column("nota_cursada", Integer),
     Column("anio", Integer),
     Column("periodo", String)
+)
+
+pregunta_opcion = Table(
+    "pregunta_opcion",
+    ModeloBase.metadata,
+    Column("pregunta_id", ForeignKey("preguntas.id"), primary_key=True),
+    Column("opcion_id", ForeignKey("opciones.id"), primary_key=True)
 )
