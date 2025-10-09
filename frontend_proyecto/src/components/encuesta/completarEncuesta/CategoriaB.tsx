@@ -12,6 +12,7 @@ interface Pregunta {
   enunciado: string;
   categoria_id: number;
   encuesta_id: number;
+  tipo: "cerrada" | "abierta"; // nuevo campo
 }
 
 interface Opcion {
@@ -22,14 +23,14 @@ interface Opcion {
 
 interface Props {
   categoria: Categoria;
-  onRespuesta: (pregunta_id: number, opcion_id: number) => void;
+  onRespuesta: (pregunta_id: number, opcion_id: number | null,texto?:string) => void;
   onTotalPreguntas?: (id: number, cantidad: number) => void; 
 }
 
 export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreguntas }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
-  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
+  const [respuestas, setRespuestas] = useState<Record<number, { opcion_id: number | null; texto?: string }>>({});
   const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
 
   useEffect(() => {
@@ -37,8 +38,8 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreg
       .then((res) => res.json())
       .then((data: Pregunta[]) => {
         setPreguntas(data);
-        const inicial: Record<number, number | null> = {};
-        data.forEach((p) => (inicial[p.id] = null));
+        const inicial: Record<number, { opcion_id: number | null; texto?: string }> = {};
+        data.forEach((p) => (inicial[p.id] = { opcion_id: null, texto: "" }));
         setRespuestas(inicial);
         onTotalPreguntas?.(categoria.id, data.length);
       })
@@ -60,9 +61,22 @@ const cargarOpciones = (preguntaId: number) => {
 };
 
   const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
-    setRespuestas((prev) => ({ ...prev, [preguntaId]: opcionId }));
+    setRespuestas((prev) => {
+      const nuevaRespuesta = { ...prev[preguntaId], opcion_id: opcionId };
+      const updated = { ...prev, [preguntaId]: nuevaRespuesta };
+      onRespuesta(preguntaId, opcionId, nuevaRespuesta.texto);
+      return updated;
+    });
     setDropdownAbierto(null);
-    onRespuesta(preguntaId, opcionId); // notifica al padre
+  };
+
+  const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
+    setRespuestas((prev) => {
+      const nuevaRespuesta = { ...prev[preguntaId], texto };
+      const updated = { ...prev, [preguntaId]: nuevaRespuesta };
+      onRespuesta(preguntaId, nuevaRespuesta.opcion_id, texto);
+      return updated;
+    });
   };
 
   return (
@@ -78,7 +92,9 @@ const cargarOpciones = (preguntaId: number) => {
             index={i}
             pregunta={p}
             opciones={opciones[p.id] || []}
-            seleccionada={respuestas[p.id]}
+            seleccionada={respuestas[p.id]?.opcion_id || null}
+            texto={respuestas[p.id]?.texto || ""}
+            esAbierta={p.tipo === "abierta"}
             dropdownAbierto={dropdownAbierto === p.id}
             onToggle={async () => {
               if (dropdownAbierto === p.id) setDropdownAbierto(null);
@@ -88,6 +104,7 @@ const cargarOpciones = (preguntaId: number) => {
               }
             }}
             onSeleccionar={(opcionId) => seleccionarOpcion(p.id, opcionId)}
+            onChangeTexto={(texto) => actualizarRespuestaTexto(p.id, texto)}
           />
         ))
       )}

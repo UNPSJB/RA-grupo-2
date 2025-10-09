@@ -5,7 +5,7 @@ import DocentePage from "./components/docente/docentesPage";
 import Navbar from "./components/navbar/navbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
+import Menu from "./components/menu";
 import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
@@ -42,6 +42,7 @@ function App() {
             container: Centra el contenido y da un ancho máximo
           */}
           <Routes>
+            <Route path="/" element={<Menu />} />
             <Route path="/departamento" element={<DetalleDepartamento />} />
             <Route path="/carrera/:id" element={<DetalleCarrera />} />
             <Route path="/encuestas" element={<EncuestasPage />} />

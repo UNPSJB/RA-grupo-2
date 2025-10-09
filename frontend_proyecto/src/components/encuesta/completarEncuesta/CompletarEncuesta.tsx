@@ -12,7 +12,8 @@ interface Categoria {
 
 interface Respuesta {
   pregunta_id: number;
-  opcion_id: number;
+  opcion_id: number | null;
+  texto_respuesta?: string | null; 
 }
 
 
@@ -40,10 +41,10 @@ export default function CompletarEncuesta() {
       .catch((err) => console.error("Error al obtener categorías:", err));
   }, []);
 
-  const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number) => {
+  const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number | null, texto?: string) => {
     setRespuestasGlobales((prev) => {
       const existentes = prev.filter((r) => r.pregunta_id !== pregunta_id);
-      return [...existentes, { pregunta_id, opcion_id }];
+      return [...existentes, { pregunta_id, opcion_id, texto_respuesta: texto?? null }];
     });
   };
 
