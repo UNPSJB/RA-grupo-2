@@ -23,21 +23,26 @@ function InformeSinteticoDetail() {
 
 return (
   <div className="container py-4">
-    <div className="card">
+    <div className="card shadow-sm">
       <div className="card-header bg-primary text-white">
-        <h1 className="h4 mb-0">{informe.titulo}</h1>
+        <h1 className="h5 mb-0 fw-semibold">{informe.titulo}</h1>
       </div>
+
       <div className="card-body">
         <p className="mb-2">
-          <strong>Fecha:</strong> {informe.fecha}
+          <span className="fw-semibold text-secondary">Fecha:</span>{" "}
+          <span className="text-dark">{informe.fecha}</span>
         </p>
+
         <div className="alert alert-info">
-          <strong>Descripción:</strong> {informe.contenido}
+          <span className="fw-semibold text-secondary">Descripción:</span>{" "}
+          <span className="text-dark">{informe.contenido}</span>
         </div>
       </div>
     </div>
   </div>
 );
+
 
 }
 
