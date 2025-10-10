@@ -9,7 +9,7 @@ type EncuestaDisponible = {
 };
 
 export default function EncuestasPage() {
-  const alumnoId = 2; // hardcodeado por ahora
+  const alumnoId = 3; // hardcodeado por ahora
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
 
   useEffect(() => {

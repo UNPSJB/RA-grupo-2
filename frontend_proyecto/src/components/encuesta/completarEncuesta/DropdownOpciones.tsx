@@ -22,6 +22,7 @@ export default function DropdownOpciones({
   seleccionada,
 }: Props) {
   return (
+    
     <div className="dropdown">
       <button
         className="btn btn-primary btn-sm dropdown-toggle"
@@ -30,7 +31,7 @@ export default function DropdownOpciones({
       >
         {textoBoton}
       </button>
-
+      
       <ul
         className={`dropdown-menu dropdown-menu-end ${abierta ? "show" : ""}`}
         style={{ marginTop: "5px" }}
@@ -43,7 +44,7 @@ export default function DropdownOpciones({
                 onClick={() => onSeleccionar(o.id)}
               >
                 {o.contenido}
-              </button>
+               </button>
             </li>
           ))
         ) : (

@@ -34,5 +34,3 @@ class Pregunta(ModeloBase):
         back_populates="preguntas"
     )
 
-
-    
