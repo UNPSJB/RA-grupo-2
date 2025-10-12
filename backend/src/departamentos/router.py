@@ -12,3 +12,7 @@ def leer_departamentos(db: Session = Depends(get_db)):
 @router.get("/{departamento_id}", response_model=schemas.Departamento)
 def leer_departamento(departamento_id: int, db: Session = Depends(get_db)):
     return services.leer_departamento(db, departamento_id)
+'''@router.get("/{departamento_id}/informes_catedra", response_model=list[schemas.InformeCatedra])
+def get_informes_departamento(departamento_id: int, db: Session = Depends(get_db)):
+    return services.get_informes_por_departamento(db, departamento_id)
+'''

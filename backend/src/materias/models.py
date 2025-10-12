@@ -33,3 +33,5 @@ class Materia(ModeloBase):
         "EncuestaCompletada",
         back_populates="materia"
     )
+    departamento_id: Mapped[int] = mapped_column(ForeignKey("departamentos.id"), nullable=False)
+    departamento: Mapped["Departamento"] = relationship("Departamento", back_populates="materias")

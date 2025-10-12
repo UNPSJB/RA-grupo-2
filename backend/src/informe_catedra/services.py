@@ -2,6 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.informe_catedra import models, schemas, exceptions
 from src.asociaciones.docente_materia.models import DocenteMateria
+from src.informe_catedra.models import InformeCatedra
+from src.materias.models import Materia
 
 def crear_informe_catedra(db: Session, informe: schemas.InformeCatedraCreate):
     relacion = db.scalar(select(DocenteMateria).where(DocenteMateria.id == informe.docente_materia_id))
@@ -31,9 +33,10 @@ def get_informe(db: Session, informe_id: int):
 def get_informes(db: Session):
     return db.query(models.InformeCatedra).all()
 
-def get_informes_por_docente_materia(db: Session, docente_materia_id: int):
-    informes = db.query(models.InformeCatedra).filter(
-        models.InformeCatedra.docente_materia_id == docente_materia_id
-    ).all()
+def get_informes_por_docente_materia(db: Session, departamento_id: int):
+    informes = db.query(InformeCatedra).join(InformeCatedra.docente_materia)\
+        .join("materia")\
+        .filter(Materia.departamento_id == departamento_id)\
+        .all()
     return informes
 
