@@ -20,7 +20,6 @@ class EncuestaCompletadaConRespuestasCreate(EncuestaCompletadaBase):
 class EncuestaCompletada(EncuestaCompletadaBase):
     id: int
     #fecha_completada: datetime
-    respuestas: List[Respuesta]
+    respuestas: List[Respuesta] = []
 
     model_config = {"from_attributes": True}
-

@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import EncuestasPage from "./components/encuesta/EncuestasPage";
 import EncuestaDetalle from "./components/encuesta/EncuestaDetalle";
+import EncuestaCompletadaDetalle from "./components/encuesta/encuestasCompletadas/EncuestaCompletadaDetalle"; //agregado
 import DocentePage from "./components/docente/docentesPage";
 import Navbar from "./components/navbar/navbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -41,21 +42,23 @@ function App() {
           {/* 
             container: Centra el contenido y da un ancho máximo
           */}
-          <Routes>
-            <Route path="/" element={<Menu />} />
-            <Route path="/departamento" element={<DetalleDepartamento />} />
-            <Route path="/carrera/:id" element={<DetalleCarrera />} />
-            <Route path="/encuestas" element={<EncuestasPage />} />
-            <Route path="/encuestas/:id" element={<EncuestaDetalle />} />
-            <Route path="/docentes/:id" element={<DocentePage />} />
-            <Route path="/detallemateria/:id" element={<DetalleMateria />} />
-            <Route path="/informes" element={<InformeSinteticoList />} />
-            <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
-            <Route path="/preguntas/crear" element={<SeleccionarTipoPregunta />} />
-            <Route path="/pregunta/cerrada" element={<CrearPreguntaCerrada />} />
-            <Route path="/pregunta/abierta" element={<CrearPreguntaAbierta />} />
-            <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
-          </Routes>
+        <Routes>
+          <Route path="/" element={<Menu />} />
+          <Route path="/departamento" element={<DetalleDepartamento />} />
+          <Route path="/carrera/:id" element={<DetalleCarrera />} />
+          <Route path="/encuestas" element={<EncuestasPage />} />
+          <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
+          <Route path="/encuestas/:id" element={<EncuestaDetalle />} />
+          <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
+          <Route path="/docentes/:id" element={<DocentePage />} />
+          <Route path="/detallemateria/:id" element={<DetalleMateria />} />
+          <Route path="/informes" element={<InformeSinteticoList />} />
+          <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
+          <Route path="/preguntas/crear" element={<SeleccionarTipoPregunta />} />
+          <Route path="/pregunta/cerrada" element={<CrearPreguntaCerrada />} />
+          <Route path="/pregunta/abierta" element={<CrearPreguntaAbierta />} />
+        </Routes>
+
         </div>
       </main>
       

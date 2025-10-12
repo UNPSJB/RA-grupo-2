@@ -32,3 +32,6 @@ def obtener_encuestas_por_alumno(alumno_id: int, db: Session = Depends(get_db)):
     return services.obtener_encuestas_por_alumno(db, alumno_id)
 
 
+@router.get("/con-respuestas/{encuesta_id}", response_model=schemas.EncuestaCompletada)
+def obtener_encuesta_con_respuestas(encuesta_id: int, db: Session = Depends(get_db)):
+    return services.obtener_encuesta_completada(db, encuesta_id)
