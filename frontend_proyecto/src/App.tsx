@@ -16,6 +16,8 @@ import CompletarEncuesta from "./components/encuesta/completarEncuesta/Completar
 import SeleccionarTipoPregunta from './components/pregunta/SeleccionarTipoPregunta';
 import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPreguntaAbierta';
 
+import InformeCatedraList from "./components/informeCatedra/InformeCatedraList";
+import InformeCatedraDetail from "./components/informeCatedra/InformeCatedraDetail";
 
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
@@ -55,6 +57,8 @@ function App() {
             <Route path="/pregunta/cerrada" element={<CrearPreguntaCerrada />} />
             <Route path="/pregunta/abierta" element={<CrearPreguntaAbierta />} />
             <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
+            <Route path="/informes-catedra" element={<InformeCatedraList />} />
+            <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
           </Routes>
         </div>
       </main>
