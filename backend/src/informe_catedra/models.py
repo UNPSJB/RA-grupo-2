@@ -13,10 +13,7 @@ class InformeCatedra(ModeloBase):
     anio: Mapped[int] = mapped_column(Integer, nullable=False)
     periodo: Mapped[Periodo] = mapped_column(Enum(Periodo), nullable=False)
 
-    # 🔹 Esta es la clave foránea necesaria
     docente_materia_id = Column(Integer, ForeignKey("docente_materia.id"), nullable=False)
-
-    # 🔹 Ahora sí, la relación está bien definida
     docente_materia = relationship("DocenteMateria")
 
     #docente_id: Mapped[int] = mapped_column(ForeignKey("docentes.id"), nullable=True)
