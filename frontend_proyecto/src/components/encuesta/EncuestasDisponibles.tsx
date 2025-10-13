@@ -73,27 +73,28 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
     );
   }
 
-  return (
-    <div className="list-group">
-      {encuestas.map((e, i) => (
-        <div key={i} className="col-12 mb-3">
-          <div className="card">
-            <div className="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <span className="text-muted me-3">{i + 1}.</span>
-                <span className="fw-bold">
-                  <strong>{e.materia}</strong> — {e.encuesta}{" "}
-                </span>
-              </div>
-              <button onClick={() => verificarYCompletar(e)}
-                className="btn btn-primary btn-sm"
-              >
-                Completar Encuesta
-              </button>
+return (
+  <div className="list-group">
+    {encuestas.map((e, i) => (
+      <div key={i} className="col-12 mb-3">
+        <div className="card">
+          <div className="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <span className="text-muted me-2">{i + 1}.</span>
+              <span className="fw-bold">{e.materia}</span>
+              <span className="text-dark"> — {e.encuesta}</span>
             </div>
+            <button
+              onClick={() => verificarYCompletar(e)}
+              className="btn btn-primary btn-sm"
+            >
+              Completar encuesta
+            </button>
           </div>
         </div>
-      ))}
-    </div>
-  );
+      </div>
+    ))}
+  </div>
+);
+
 }
