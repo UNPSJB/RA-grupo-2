@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.informe_catedra.models import InformeCatedra
 from src.informe_catedra import services, schemas, exceptions
+from src.departamentos import models
 router = APIRouter(prefix="/informes_catedra", tags=["informes_catedra"])
 
 @router.post("/", response_model=schemas.InformeCatedra)
@@ -47,8 +48,6 @@ def get_informe(id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exceptions.InformeNoEncontrado.DETAIL
         )
-
-@router.get("/docente_materia/{docente_materia_id}/informes", response_model=list[schemas.InformeCatedra])
-def read_informes_por_docente_materia(docente_materia_id: int, db: Session = Depends(get_db)):
-    informes = services.get_informes_por_docente_materia(db, docente_materia_id)
-    return informes
+@router.get("/{departamento_id}/informes_catedra", response_model=list[schemas.InformeCatedra])
+def get_informes_departamento(departamento_id: int, db: Session = Depends(get_db)):
+    return services.get_informes_departamento(db, departamento_id)

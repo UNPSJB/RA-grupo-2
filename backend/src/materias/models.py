@@ -8,6 +8,7 @@ from src.asociaciones.models import alumno_materia
 #con esto no da error de circulacion entre importaciones :/
 if TYPE_CHECKING:
     from src.asociaciones.docente_materia.models import DocenteMateria
+    from src.departamentos.models import Departamento
 class Materia(ModeloBase):
     __tablename__ = "materias"
 

@@ -33,9 +33,9 @@ def get_informe(db: Session, informe_id: int):
 def get_informes(db: Session):
     return db.query(models.InformeCatedra).all()
 
-def get_informes_por_docente_materia(db: Session, departamento_id: int):
+def get_informes_departamento(db: Session, departamento_id: int):
     informes = db.query(InformeCatedra).join(InformeCatedra.docente_materia)\
-        .join("materia")\
+        .join(DocenteMateria.materia)\
         .filter(Materia.departamento_id == departamento_id)\
         .all()
     return informes
