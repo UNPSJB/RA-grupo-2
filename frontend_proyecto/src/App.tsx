@@ -18,6 +18,8 @@ import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPre
 import EncuestasCompletadasPage from "./components/encuestasCompletadas/EncuestasCompletadasPage";
 import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/EncuestaCompletadaDetalle";
 
+import InformeCatedraList from "./components/informeCatedra/InformeCatedraList";
+import InformeCatedraDetail from "./components/informeCatedra/InformeCatedraDetail";
 
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
@@ -59,6 +61,8 @@ function App() {
             <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
             <Route path="/encuestas-completadas" element={<EncuestasCompletadasPage />} />
             <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
+            <Route path="/informes-catedra" element={<InformeCatedraList />} />
+            <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
           </Routes>
         </div>
       </main>

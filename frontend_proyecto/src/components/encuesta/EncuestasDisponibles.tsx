@@ -63,7 +63,7 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
         onClose={cerrarMensaje}
       />
     );
-  }
+  } 
 
   if (encuestas.length === 0) {
     return (

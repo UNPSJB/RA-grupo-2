@@ -1,6 +1,6 @@
 # backend/src/informes_sinteticos/models.py - CORREGIDO
 from sqlalchemy import Column, Integer, String, Text, Date
-from src.models import ModeloBase  # ← Usa TU ModeloBase
+from src.models import ModeloBase  
 
 class InformeSintetico(ModeloBase):
     __tablename__ = "informes_sinteticos"
