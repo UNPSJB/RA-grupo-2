@@ -5,6 +5,7 @@ from src.informeCatedraCompletado.models import DatosEstadisticosInforme, DatosE
 from src.informe_catedra.models import InformeCatedra
 from src.encuestaCompletada.models import EncuestaCompletada
 from src.materias.models import Materia
+from src.preguntas.models import Pregunta
 from src.respuestas.models import Respuesta
 from src.opciones.models import Opcion
 from src.encuestas.models import Encuesta
@@ -50,10 +51,10 @@ def obtener_datos_estadisticos(db: Session, id_materia: int, anio: int, periodo:
             porcentaje = (cantidad / total_encuestas * 100) 
 
             datos_opciones.append(
-                schemas.OpcionPorcentaje(opcion_id=opcion.id, porcentaje=round(porcentaje, 2))
+                schemas.OpcionPorcentaje(opcion_id=opcion.contenido, porcentaje=round(porcentaje, 2))
             )
         
-        datos_pregunta = schemas.DatosEstadisticosPregunta(id_pregunta=pregunta.id, datos=datos_opciones)
+        datos_pregunta = schemas.DatosEstadisticosPregunta(id_pregunta=pregunta.enunciado, datos=datos_opciones)
         datos_estadisticos.append(datos_pregunta)
         
     return datos_estadisticos
@@ -126,7 +127,6 @@ def guardar_datos_estadisticos(
 
     db.commit()
 
-
 def recuperar_datos_estadisticos(
     db: Session,
     id_informe_catedra_completado: int
@@ -140,25 +140,32 @@ def recuperar_datos_estadisticos(
     datos_estadisticos: List[schemas.DatosEstadisticosPregunta] = []
 
     for inf in informes:
+        pregunta = db.scalar(
+            select(Pregunta)  
+            .where(Pregunta.id == inf.id_pregunta_encuesta)
+        )
+
         datos_pregunta = db.scalars(
             select(DatosEstadisticosPregunta)
             .where(DatosEstadisticosPregunta.id_datos_estadisticos_informe == inf.id)
         ).all()
 
-        opciones = [
-            schemas.OpcionPorcentaje(
-                opcion_id=d.id_opcion,
-                porcentaje=d.porcentaje
+        opciones = []
+        for d in datos_pregunta:
+            opcion = db.scalar(select(Opcion).where(Opcion.id == d.id_opcion))
+
+            opciones.append(
+                schemas.OpcionPorcentaje(
+                    opcion_id=opcion.contenido if opcion else str(d.id_opcion),
+                    porcentaje=d.porcentaje
+                )
             )
-            for d in datos_pregunta
-        ]
 
         datos_estadisticos.append(
             schemas.DatosEstadisticosPregunta(
-                id_pregunta=inf.id_pregunta_encuesta,
+                id_pregunta=pregunta.enunciado if pregunta else str(inf.id_pregunta_encuesta),
                 datos=opciones
             )
         )
 
     return datos_estadisticos
-

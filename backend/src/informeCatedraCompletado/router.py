@@ -7,15 +7,15 @@ from src.asociaciones.models import Periodo
 
 router = APIRouter(prefix="/informes_catedra_completados", tags=["informes_catedra_completados"])
 
-@router.get("/datos_stadisticos/{informe_id}", response_model=List[schemas.DatosEstadisticosPregunta])
+@router.get("/datos_estadisticos", response_model=List[schemas.DatosEstadisticosPregunta])
 def get_datos_estadisticos(id_materia: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
     return services.obtener_datos_estadisticos(db, id_materia, anio, periodo)  
 
-@router.post("/{informe_id}/guardar_datos_estadisticos")
+@router.post("/guardar_datos_estadisticos/{informe_id}")
 def create_guardar_datos_estadisticos(informe_id: int, db: Session = Depends(get_db)):
     services.guardar_datos_estadisticos(db, informe_id)
     return {"message": "Datos estadísticos generados y guardados correctamente."}
 
 @router.get("/datos_estadisticos_existentes/{informe_id}", response_model=List[schemas.DatosEstadisticosPregunta])
-def get_datos_estadisticos_existentes(id_informe_catedra_completado: int, db: Session = Depends(get_db)):
-    return services.recuperar_datos_estadisticos(db, id_informe_catedra_completado)  
+def get_datos_estadisticos_existentes(informe_id: int, db: Session = Depends(get_db)):
+    return services.recuperar_datos_estadisticos(db, informe_id)  

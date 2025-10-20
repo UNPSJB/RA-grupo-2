@@ -65,6 +65,11 @@ export default function Navbar() {
                     Materias dadas
                   </Link>
                 </li>
+                <li>
+                  <Link className="dropdown-item" to="/datos-estadisticos">
+                    Datos Estadísticos
+                  </Link>
+                </li>
               </ul>
             </li>
 
