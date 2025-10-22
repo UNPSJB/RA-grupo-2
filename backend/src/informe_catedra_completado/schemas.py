@@ -1,16 +1,17 @@
 from pydantic import BaseModel
 from datetime import date
 from src.asociaciones.models import Periodo  
-class InformeCatedraBase(BaseModel):
+class InformeCatedraCompletadoBase(BaseModel):
     titulo: str
     anio: int
     periodo: Periodo
     docente_materia_id: int
     contenido: str
-class InformeCatedraCreate(InformeCatedraBase):
+class InformeCatedraCompletadoCreate(InformeCatedraCompletadoBase):
+    informe_base_id: int 
     pass
 
-class InformeCatedra(InformeCatedraBase):
+class InformeCatedraCompletado(InformeCatedraCompletadoBase):
     id: int
 
     class Config:

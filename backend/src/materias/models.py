@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Integer, String, ForeignKey, Enum
+from sqlalchemy import Integer, String, ForeignKey, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List, TYPE_CHECKING
 from enum import auto, StrEnum
@@ -8,6 +8,7 @@ from src.asociaciones.models import alumno_materia
 #con esto no da error de circulacion entre importaciones :/
 if TYPE_CHECKING:
     from src.asociaciones.docente_materia.models import DocenteMateria
+    from src.departamentos.models import Departamento
 class Materia(ModeloBase):
     __tablename__ = "materias"
 
@@ -32,4 +33,11 @@ class Materia(ModeloBase):
     encuestas_completadas: Mapped[Optional[List["EncuestaCompletada"]]] = relationship(
         "EncuestaCompletada",
         back_populates="materia"
+    )
+    departamento_id: Mapped[int] = mapped_column(ForeignKey("departamentos.id"), nullable=False)
+    departamento: Mapped["Departamento"] = relationship("Departamento", back_populates="materias")
+    informe_catedra_id = Column(Integer, ForeignKey("informe_catedra_base.id"))
+    informe_catedra_base = relationship(
+        "src.informe_catedra_base.models.InformeCatedra",
+        back_populates="materias"
     )
