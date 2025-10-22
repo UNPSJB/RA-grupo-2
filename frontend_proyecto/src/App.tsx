@@ -21,10 +21,13 @@ import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/Encuest
 import InformeCatedraList from "./components/informeCatedra/InformeCatedraList";
 import InformeCatedraDetail from "./components/informeCatedra/InformeCatedraDetail";
 
+import PruebaGuardar from "./components/informeCatedra/informeCatedraServis";
+
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 
 function App() {
   return (
@@ -63,6 +66,8 @@ function App() {
             <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
             <Route path="/informes-catedra" element={<InformeCatedraList />} />
             <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
+            <Route path="/prueba-guardar" element={<PruebaGuardar />} />
+            <Route path="*" element={<h2>Página no encontrada</h2>} />
           </Routes>
         </div>
       </main>

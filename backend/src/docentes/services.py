@@ -38,6 +38,7 @@ def ver_materias_docente(db: Session, docente_id: int):
 
     return [
         {
+            "relacion_id": r.id,
             "id": r.materia.id,
             "nombre": r.materia.nombre,
             "matricula": r.materia.matricula,
