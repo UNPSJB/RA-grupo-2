@@ -51,7 +51,7 @@ export default function InformeCatedraList() {
                         </span>
                       </div>
                       <Link
-                        to={`/informes-catedra-completado/${inf.id}`}
+                        to={`/informes-catedra/${inf.id}`}
                         className="btn btn-primary btn-sm"
                       >
                         Ver Detalle
