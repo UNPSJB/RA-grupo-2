@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from src.database import get_db
-from src.informe_catedra.models import InformeCatedra
-from src.informe_catedra import services, schemas, exceptions
+from src.informe_catedra_completado.models import InformeCatedraCompletado
+from src.informe_catedra_completado import services, schemas, exceptions
 from src.departamentos import models
-router = APIRouter(prefix="/informes_catedra", tags=["informes_catedra"])
+router = APIRouter(prefix="/informes_catedra_completado", tags=["informes_catedra_completado"])
 
-@router.post("/", response_model=schemas.InformeCatedra)
-def crear_informe_catedra(informe: schemas.InformeCatedraCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=schemas.InformeCatedraCompletado)
+def crear_informe_catedra(informe: schemas.InformeCatedraCompletadoCreate, db: Session = Depends(get_db)):
     try:
         return services.crear_informe_catedra(db, informe)
     except exceptions.DocenteMateriaNoEncontrada:
@@ -28,7 +28,7 @@ def crear_informe_catedra(informe: schemas.InformeCatedraCreate, db: Session = D
 
 @router.get("/")
 def get_informes(db: Session = Depends(get_db)):
-    informes = db.query(InformeCatedra).all()
+    informes = db.query(InformeCatedraCompletado).all()
     try:
         return informes
     except exceptions.InformeNoEncontrado:
@@ -40,7 +40,7 @@ def get_informes(db: Session = Depends(get_db)):
 
 @router.get("/{id}")
 def get_informe(id: int, db: Session = Depends(get_db)):
-    informe = db.query(InformeCatedra).filter(InformeCatedra.id == id).first()
+    informe = db.query(InformeCatedraCompletado).filter(InformeCatedraCompletado.id == id).first()
     try:
         return informe
     except exceptions.InformeNoEncontrado:
@@ -48,6 +48,6 @@ def get_informe(id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exceptions.InformeNoEncontrado.DETAIL
         )
-@router.get("/{departamento_id}/informes_catedra", response_model=list[schemas.InformeCatedra])
+@router.get("/{departamento_id}/informes_catedra", response_model=list[schemas.InformeCatedraCompletado])
 def get_informes_departamento(departamento_id: int, db: Session = Depends(get_db)):
     return services.get_informes_departamento(db, departamento_id)

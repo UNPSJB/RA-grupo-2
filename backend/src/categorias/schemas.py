@@ -6,10 +6,18 @@ from src import Opcion
 class CategoriaBase(BaseModel):
     cod: str
     texto: str
-    encuesta_id: int
 
 class Categoria(CategoriaBase):
     id: int
 
-class CategoriaCreate(CategoriaBase):
-    pass
+class CategoriaEncuesta(Categoria):
+    encuesta_id: int
+
+class CategoriaInformeBase(Categoria):
+    informe_base_id: int
+       
+class CategoriaEncuestaCreate(CategoriaBase):
+    encuesta_id: int
+
+class CategoriaInformeBaseCreate(CategoriaBase):
+    informe_base_id: int

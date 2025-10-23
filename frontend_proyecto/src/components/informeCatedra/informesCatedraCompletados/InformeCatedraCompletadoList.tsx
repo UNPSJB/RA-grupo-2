@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchInformesCatedra } from "../informeCatedra/informesService";
-import { mostrarPeriodo } from "../informeCatedra/InformeCatedraDetail"
+import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
+import type { Departamento } from "../../../types/types";
 
-interface InformeCatedra {
+interface InformeCatedraCompletado {
   id: number;
   titulo: string;
   anio: number;
@@ -11,21 +11,31 @@ interface InformeCatedra {
 }
 
 export default function InformeCatedraList() {
-  const [informes, setInformes] = useState<InformeCatedra[]>([]);
+  const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
+  const [departamento, setDepartamento] = useState<Departamento | null>(null);
+  const departamentoId = 1; 
 
   useEffect(() => {
-    fetchInformesCatedra()
+    fetch(`http://127.0.0.1:8000/departamentos/${departamentoId}`)
+      .then(res => res.json())
+      .then(setDepartamento)
+      .catch(console.error);
+    fetch(`http://127.0.0.1:8000/informes_catedra_completado/${departamentoId}/informes_catedra`)
+      .then(res => res.json())
       .then(setInformes)
-      .catch(err => console.error("Error al cargar informes:", err));
-  }, []);
+      .catch(console.error);
+  }, [departamentoId]);
 
   return (
     <div className="container py-4">
       <div className="card">
         <div className="card-header bg-primary text-white">
-          <h1 className="h4 mb-0">Informes de Cátedra</h1>
+          <h1 className="h4 mb-0">
+            <strong>Departamento de</strong> {departamento?.nombre}
+          </h1>
         </div>
         <div className="card-body">
+          <h2 className="h5 mb-3">Informes de Cátedra</h2>
           {informes.length === 0 ? (
             <p className="text-muted">No hay informes disponibles.</p>
           ) : (
@@ -41,7 +51,7 @@ export default function InformeCatedraList() {
                         </span>
                       </div>
                       <Link
-                        to={`/informes-catedra/${inf.id}`}
+                        to={`/informes-catedra-completado/${inf.id}`}
                         className="btn btn-primary btn-sm"
                       >
                         Ver Detalle

@@ -18,13 +18,16 @@ import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPre
 import EncuestasCompletadasPage from "./components/encuestasCompletadas/EncuestasCompletadasPage";
 import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/EncuestaCompletadaDetalle";
 
-import InformeCatedraList from "./components/informeCatedra/InformeCatedraList";
-import InformeCatedraDetail from "./components/informeCatedra/InformeCatedraDetail";
+import InformeCatedraList from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoList";
+import InformeCatedraDetail from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoDetail";
+import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBaseForm";
+
 
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 
 function App() {
   return (
@@ -63,6 +66,8 @@ function App() {
             <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
             <Route path="/informes-catedra" element={<InformeCatedraList />} />
             <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
+            <Route path="/informes-catedra-base" element={<InformeCatedraBaseForm />} />
+            <Route path="/informes-catedra-base/nuevo" element={<InformeCatedraBaseForm />} />
           </Routes>
         </div>
       </main>
