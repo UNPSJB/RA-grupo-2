@@ -22,6 +22,8 @@ import InformeCatedraList from "./components/informeCatedra/informesCatedraCompl
 import InformeCatedraDetail from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoDetail";
 import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBaseForm";
 
+import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
+import TablaDatosEstadisticos from "./components/datosEstadisticos/TablaDatosEstadisticos";
 
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
@@ -66,6 +68,8 @@ function App() {
             <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
             <Route path="/informes-catedra" element={<InformeCatedraList />} />
             <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
+            <Route path="/datos-estadisticos" element={<DatosEstadisticosPage />} />
+            <Route path="/datos-estadisticos/tabla" element={<TablaDatosEstadisticos />} />
             <Route path="/informes-catedra-base" element={<InformeCatedraBaseForm />} />
             <Route path="/informes-catedra-base/nuevo" element={<InformeCatedraBaseForm />} />
           </Routes>

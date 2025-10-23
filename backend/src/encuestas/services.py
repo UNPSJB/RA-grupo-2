@@ -19,10 +19,16 @@ def listar_categorias_encuesta(db: Session, encuesta_id: int) -> List[categoria_
     if db_encuesta is None:
         raise exceptions.EncuestaNoEncontrada()
     return db_encuesta.categorias
-'''
-def listar_preguntas_encuesta(db: Session, encuesta_id: int) -> List[pregunta_schemas.Pregunta]:
+
+def listar_preguntas_cerradas_encuesta(db: Session, encuesta_id: int) -> List[pregunta_schemas.Pregunta]:
     db_encuesta = db.scalar(select(Encuesta).where(Encuesta.id == encuesta_id))
     if db_encuesta is None:
         raise exceptions.EncuestaNoEncontrada()
-    return db_encuesta.preguntas
-'''
+    
+    respuestas=[]
+    for categoria in db_encuesta.categorias:
+        for pregunta in categoria.preguntas:
+            if pregunta.tipo == "cerrada":
+                respuestas.append(pregunta)
+
+    return respuestas
