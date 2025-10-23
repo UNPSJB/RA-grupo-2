@@ -49,7 +49,7 @@ export default function ManejadorCategoria({
 
     return (
         <section>
-            <h5 className="mb-3">1. Definición de Categorías (Bloques)</h5>
+            <h5 className="mb-3">1. Definición de Categorías</h5>
             
             <div className="card bg-light mb-4 p-3">
                 <div className="row">
@@ -59,7 +59,6 @@ export default function ManejadorCategoria({
                             className="form-control"
                             value={nuevaCategoriaCod}
                             onChange={(e) => setNuevaCategoriaCod(e.target.value)}
-                            placeholder="Código ÚNICO (Ej: A)"
                             disabled={cargando}
                         />
                     </div>
