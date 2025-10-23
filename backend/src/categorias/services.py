@@ -5,12 +5,20 @@ from src.categorias.models import Categoria
 from src.categorias import schemas, exceptions
 from src.preguntas import schemas as pregunta_schemas
 
-def crear_categoria(db: Session, categoria: schemas.CategoriaCreate) -> schemas.Categoria:
+def crear_categoria_encuesta(db: Session, categoria: schemas.CategoriaEncuestaCreate) -> schemas.Categoria:
     db_categoria = Categoria(**categoria.model_dump())
     db.add(db_categoria)
     db.commit()
     db.refresh(db_categoria)
     return db_categoria
+
+def crear_categoria_informe(db: Session, categoria: schemas.CategoriaInformeBaseCreate) -> schemas.Categoria:
+    db_categoria = Categoria(**categoria.model_dump())
+    db.add(db_categoria)
+    db.commit()
+    db.refresh(db_categoria)
+    return db_categoria
+
 
 def leer_categoria(db: Session, categoria_id: int) -> schemas.Categoria:
     db_categoria = db.scalar(select(Categoria).where(Categoria.id == categoria_id))

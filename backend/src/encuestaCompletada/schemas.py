@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
+#from datetime import datetime
 from typing import List
 from src.respuestas.schemas import Respuesta, RespuestaCreateEnEncuesta
 from src.asociaciones.models import Periodo

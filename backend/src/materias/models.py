@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Integer, String, ForeignKey, Enum
+from sqlalchemy import Integer, String, ForeignKey, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List, TYPE_CHECKING
 from enum import auto, StrEnum
@@ -36,3 +36,8 @@ class Materia(ModeloBase):
     )
     departamento_id: Mapped[int] = mapped_column(ForeignKey("departamentos.id"), nullable=False)
     departamento: Mapped["Departamento"] = relationship("Departamento", back_populates="materias")
+    #informe_catedra_id = Column(Integer, ForeignKey("informe_catedra_base.id"))
+    #informe_catedra_base = relationship(
+    #    "src.informe_catedra_base.models.InformeCatedra",
+    #    back_populates="materias"
+    #)

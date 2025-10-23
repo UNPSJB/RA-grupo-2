@@ -21,6 +21,10 @@ import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/Encuest
 import InformeCatedraList from "./components/informeCatedra/InformeCatedraList";
 import InformeCatedraDetail from "./components/informeCatedra/InformeCatedraDetail";
 
+import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
+import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
+
+
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -63,6 +67,8 @@ function App() {
             <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
             <Route path="/informes-catedra" element={<InformeCatedraList />} />
             <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
+            <Route path="/docentes/informes-pendientes" element={<InformesPendientesPage />} />
+            <Route path="/docentes/informe/completar" element={<InformeForm />} />
           </Routes>
         </div>
       </main>
