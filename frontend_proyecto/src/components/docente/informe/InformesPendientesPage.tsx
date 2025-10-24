@@ -47,7 +47,7 @@ export default function InformesPendientesPage() {
         materiaNombre: informe.materia_nombre,
         anio: ANIO_ACTUAL,
         periodo: PERIODO_ACTUAL,
-        informeBaseId: 1, // Asumimos que el informe base siempre es el ID 1
+        informeBaseId: 3, // Asumimos que el informe base siempre es el ID 1
       },
     });
   };

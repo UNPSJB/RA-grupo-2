@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
+import Categoria2BInforme from "./CAT2B";
+import Categoria2CInforme from "./CAT2C";
 
 interface Pregunta {
   id: number;
   enunciado: string;
+  categoria_id: number;
 }
+
 
 interface CategoriaConPreguntas {
   id: number;
+  cod: string;
   texto: string;
   preguntas: Pregunta[];
 }
@@ -32,7 +37,7 @@ export default function CompletarInformeCatedra() {
     materiaNombre,
     anio,
     periodo,
-    informeBaseId = 1,
+    informeBaseId = 3,
   } = location.state || {};
 
   useEffect(() => {
@@ -52,6 +57,9 @@ export default function CompletarInformeCatedra() {
       })
       .then((data: CategoriaConPreguntas[]) => {
         setCategoriasConPreguntas(data);
+        console.log(data);
+        console.log("Informe Base ID:", informeBaseId);
+        /*
         const respuestasIniciales: Record<number, string> = {};
         data.forEach((cat) => {
           cat.preguntas.forEach((p) => {
@@ -59,6 +67,7 @@ export default function CompletarInformeCatedra() {
           });
         });
         setRespuestas(respuestasIniciales);
+        */
       })
       .catch((err) => {
         console.error("Error fetching estructura informe:", err);
@@ -67,11 +76,14 @@ export default function CompletarInformeCatedra() {
       .finally(() => setLoading(false));
   }, [informeBaseId]);
 
+
+
   const manejarCambio = (preguntaId: number, valor: string) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
   };
 
+  /*
   const validarFormulario = (): boolean => {
     const totalPreguntas = categoriasConPreguntas.reduce(
       (acc, cat) => acc + cat.preguntas.length,
@@ -82,7 +94,8 @@ export default function CompletarInformeCatedra() {
     ).length;
     return respondidas === totalPreguntas;
   };
-  
+  */
+
   const limpiarEnunciado = (texto: string) => {
     const parts = texto.split('. ');
     if (parts.length < 2) return texto;
@@ -94,10 +107,12 @@ export default function CompletarInformeCatedra() {
   };
 
   const enviarInforme = async () => {
+    /*
     if (!validarFormulario()) {
       setMensaje("Por favor, complete todas las preguntas requeridas.");
       return;
     }
+    */
     setEnviando(true);
     setMensaje(null);
     const respuestasFormateadas = Object.entries(respuestas).map(
@@ -135,10 +150,11 @@ export default function CompletarInformeCatedra() {
       setTimeout(() => {
         navigate("/docentes/informes-pendientes");
       }, 2000);
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error("Error enviando informe:", err);
-      setMensaje(`Error: ${err.message}`);
-    } finally {
+      setMensaje(`Error: ${(err as Error).message}`);
+    }
+    finally {
       setEnviando(false);
     }
   };
@@ -163,6 +179,59 @@ export default function CompletarInformeCatedra() {
     );
   }
 
+  const renderCategoria = (categoria: CategoriaConPreguntas) => {
+    switch (categoria.cod) {
+      case "2.B":
+        return (
+          <Categoria2BInforme
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
+        );
+      case "2.C":
+        return (
+          <Categoria2CInforme
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
+
+        );
+      default:
+        return (
+          <div>
+            <div className="card shadow-sm border-0">
+              <div className="card-body">
+                <h2 className="h5 mb-3 fw-bold">{categoria.texto}</h2>
+                {categoria.preguntas.map((pregunta, i) => (
+                  <div key={pregunta.id} className="mb-4">
+                    <div className="mb-2">
+                      <span className="text-muted me-2">{i + 1}.</span>
+                      <span>
+                        {limpiarEnunciado(pregunta.enunciado)}{" "}
+                        <span className="text-danger">*</span>
+                      </span>
+                    </div>
+                    <div>
+                      <textarea
+                        id={`pregunta-${pregunta.id}`}
+                        className="form-control"
+                        rows={3}
+                        value={respuestas[pregunta.id] || ""}
+                        onChange={(e) =>
+                          manejarCambio(pregunta.id, e.target.value)
+                        }
+                        placeholder="Escriba su respuesta aquí..."
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="container py-4">
       <div className="card shadow">
@@ -176,34 +245,7 @@ export default function CompletarInformeCatedra() {
 
           {categoriasConPreguntas.map((categoria) => (
             <div key={categoria.id} className="col-12 mb-3">
-              <div className="card shadow-sm border-0">
-                <div className="card-body">
-                  <h2 className="h5 mb-3 fw-bold">{categoria.texto}</h2>
-                  {categoria.preguntas.map((pregunta, i) => (
-                    <div key={pregunta.id} className="mb-4">
-                      <div className="mb-2">
-                        <span className="text-muted me-2">{i + 1}.</span>
-                        <span>
-                          {limpiarEnunciado(pregunta.enunciado)}{" "}
-                          <span className="text-danger">*</span>
-                        </span>
-                      </div>
-                      <div>
-                        <textarea
-                          id={`pregunta-${pregunta.id}`}
-                          className="form-control"
-                          rows={3}
-                          value={respuestas[pregunta.id] || ""}
-                          onChange={(e) =>
-                            manejarCambio(pregunta.id, e.target.value)
-                          }
-                          placeholder="Escriba su respuesta aquí..."
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {renderCategoria(categoria)}
             </div>
           ))}
 
@@ -211,18 +253,17 @@ export default function CompletarInformeCatedra() {
             <button
               onClick={enviarInforme}
               className="btn btn-success btn-lg"
-              disabled={enviando || !validarFormulario()}
+              disabled={enviando}//|| !validarFormulario()}
             >
               {enviando ? "Enviando..." : "Enviar Informe"}
             </button>
 
             {mensaje && (
               <div
-                className={`mt-3 alert ${
-                  mensaje.includes("éxito")
-                    ? "alert-success"
-                    : "alert-danger"
-                }`}
+                className={`mt-3 alert ${mensaje.includes("éxito")
+                  ? "alert-success"
+                  : "alert-danger"
+                  }`}
               >
                 {mensaje}
               </div>

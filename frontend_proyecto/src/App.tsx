@@ -33,8 +33,6 @@ import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-import Categoria2BInforme from "./components/completarInformeCatedra/CAT2B";
-
 function App() {
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -77,8 +75,6 @@ function App() {
             <Route path="/informes-catedra-base/nuevo" element={<InformeCatedraBaseForm />} />
             <Route path="/docentes/informes-pendientes" element={<InformesPendientesPage />} />
             <Route path="/docentes/informe/completar" element={<InformeForm />} />
-
-            <Route path="/categoria-2b-informe" element={<Categoria2BInforme onTotalPreguntas={() => {}} onRespuesta={() => {}} />} />
           </Routes>
         </div>
       </main>

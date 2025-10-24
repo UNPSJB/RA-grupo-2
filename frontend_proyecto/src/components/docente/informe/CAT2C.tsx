@@ -10,64 +10,49 @@ interface Categoria {
   id: number;
   cod: string;
   texto: string;
+  preguntas: Pregunta[];
 }
 
 interface Props {
-  onTotalPreguntas?: (id: number, cantidad: number) => void;
-  onRespuesta: (pregunta_id: number, texto: string) => void;
+  categoria: Categoria;
+  manejarCambio: (preguntaId: number, texto: string) => void;
 }
 
-export default function Categoria2CInforme({ onTotalPreguntas, onRespuesta }: Props) {
-  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
-  const [categoria, setCategoria] = useState<Categoria>();
+export default function Categoria2CInforme({ categoria, manejarCambio }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [reflexion, setReflexion] = useState<Pregunta | null>(null);
+  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
 
   useEffect(() => {
-    const codigoDeseado = "2.C";
-    const informeId = 3; // ID del informe base
+    if (!categoria) return;
 
-    fetch(`http://localhost:8000/informes_catedra/${informeId}/categorias`)
-      .then((res) => res.json())
-      .then((todas: Categoria[]) => {
-        const filtrada = todas.find((c) => c.cod === codigoDeseado);
-        if (filtrada) setCategoria(filtrada);
-      })
-      .catch((err) => console.error("Error al obtener categorías:", err));
-  }, []);
+    const reflexionEncontrada = categoria.preguntas.find((p) =>
+      p.enunciado.toLowerCase().includes("resumen de la reflexión")
+    );
 
-  useEffect(() => {
-    if (categoria) {
-      fetch(`http://localhost:8000/categorias/${categoria.id}/preguntas`)
-        .then((res) => res.json())
-        .then((data: Pregunta[]) => {
-          const reflexion = data.find((p) =>
-            p.enunciado.toLowerCase().includes("resumen de la reflexión")
-          );
-          setReflexion(reflexion || null);
+    setReflexion(reflexionEncontrada || null);
 
-          const sinReflexion = reflexion ? data.filter((p) => p.id !== reflexion.id) : data;
-          setPreguntas(sinReflexion);
+    const sinReflexion = reflexionEncontrada
+      ? categoria.preguntas.filter((p) => p.id !== reflexionEncontrada.id)
+      : categoria.preguntas;
 
-          const inicial: Record<number, string> = {};
-          data.forEach((p) => (inicial[p.id] = ""));
-          setRespuestas(inicial);
+    setPreguntas(sinReflexion);
 
-          onTotalPreguntas?.(categoria.id, data.length);
-        })
-        .catch((err) => console.error("Error al obtener preguntas:", err));
-    }
-  }, [categoria, onTotalPreguntas]);
+    // Inicializar respuestas
+    const inicial: Record<number, string> = {};
+    categoria.preguntas.forEach((p) => {
+      inicial[p.id] = "";
+    });
+    setRespuestas(inicial);
+  }, [categoria]);
 
   const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
     setRespuestas((prev) => {
       const updated = { ...prev, [preguntaId]: texto };
-      onRespuesta(preguntaId, texto);
+      manejarCambio(preguntaId, texto);
       return updated;
     });
   };
-
-  if (!categoria) return <div>Cargando categoría...</div>;
 
   const getPregunta = (texto: string) =>
     preguntas.find((p) => p.enunciado.toLowerCase().includes(texto.toLowerCase()));
@@ -81,9 +66,7 @@ export default function Categoria2CInforme({ onTotalPreguntas, onRespuesta }: Pr
   return (
     <div className="card mt-3">
       <div className="card-header bg-primary text-white">
-        <strong>
-          {categoria.cod} - {categoria.texto}
-        </strong>
+        <strong>{categoria.cod} - {categoria.texto}</strong>
       </div>
 
       <div className="card-body p-0">
@@ -167,11 +150,12 @@ export default function Categoria2CInforme({ onTotalPreguntas, onRespuesta }: Pr
             className="form-control"
             rows={4}
             value={respuestas[reflexion.id] || ""}
-            onChange={(e) => actualizarRespuestaTexto(reflexion.id, e.target.value)}
-          ></textarea>
+            onChange={(e) =>
+              actualizarRespuestaTexto(reflexion.id, e.target.value)
+            }
+          />
         </div>
       )}
     </div>
   );
 }
-
