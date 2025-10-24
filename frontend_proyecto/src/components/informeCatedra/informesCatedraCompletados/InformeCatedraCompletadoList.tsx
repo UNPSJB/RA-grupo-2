@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { mostrarPeriodo } from "../informeCatedra/InformeCatedraDetail";
-import type { Departamento } from "../../types/types";
+import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
+import type { Departamento } from "../../../types/types";
 
-interface InformeCatedra {
+interface InformeCatedraCompletado {
   id: number;
   titulo: string;
   anio: number;
@@ -11,7 +11,7 @@ interface InformeCatedra {
 }
 
 export default function InformeCatedraList() {
-  const [informes, setInformes] = useState<InformeCatedra[]>([]);
+  const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
   const departamentoId = 1; 
 
@@ -20,7 +20,7 @@ export default function InformeCatedraList() {
       .then(res => res.json())
       .then(setDepartamento)
       .catch(console.error);
-    fetch(`http://127.0.0.1:8000/informes_catedra/${departamentoId}/informes_catedra`)
+    fetch(`http://127.0.0.1:8000/informes_catedra_completado/${departamentoId}/informes_catedra`)
       .then(res => res.json())
       .then(setInformes)
       .catch(console.error);
@@ -31,7 +31,7 @@ export default function InformeCatedraList() {
       <div className="card">
         <div className="card-header bg-primary text-white">
           <h1 className="h4 mb-0">
-            <strong>Departamento:</strong> {departamento?.nombre}
+            <strong>Departamento de</strong> {departamento?.nombre}
           </h1>
         </div>
         <div className="card-body">

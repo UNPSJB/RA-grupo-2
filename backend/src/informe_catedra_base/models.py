@@ -17,10 +17,10 @@ class InformeCatedra(ModeloBase):
     )   
 
 
-   # materias: Mapped[Optional[List["Materia"]]] = relationship(
-   #     "src.materias.models.Materia",
-   #     back_populates="informe_catedra_base"
-   # )
+    materias: Mapped[Optional[List["Materia"]]] = relationship(
+        "src.materias.models.Materia",
+        back_populates="informe_catedra_base"
+    )
     categorias: Mapped[Optional[List["Categoria"]]] = relationship(
     "Categoria",
     back_populates="informe_catedra_base")

@@ -18,8 +18,11 @@ import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPre
 import EncuestasCompletadasPage from "./components/encuestasCompletadas/EncuestasCompletadasPage";
 import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/EncuestaCompletadaDetalle";
 
-import InformeCatedraList from "./components/informeCatedra/InformeCatedraList";
-import InformeCatedraDetail from "./components/informeCatedra/InformeCatedraDetail";
+import InformeCatedraList from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoList";
+import InformeCatedraDetail from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoDetail";
+import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBaseForm";
+
+import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
@@ -29,6 +32,7 @@ import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 
 function App() {
   return (
@@ -67,8 +71,12 @@ function App() {
             <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
             <Route path="/informes-catedra" element={<InformeCatedraList />} />
             <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
+            <Route path="/datos-estadisticos" element={<DatosEstadisticosPage />} />
+            <Route path="/informes-catedra-base" element={<InformeCatedraBaseForm />} />
+            <Route path="/informes-catedra-base/nuevo" element={<InformeCatedraBaseForm />} />
             <Route path="/docentes/informes-pendientes" element={<InformesPendientesPage />} />
             <Route path="/docentes/informe/completar" element={<InformeForm />} />
+
           </Routes>
         </div>
       </main>

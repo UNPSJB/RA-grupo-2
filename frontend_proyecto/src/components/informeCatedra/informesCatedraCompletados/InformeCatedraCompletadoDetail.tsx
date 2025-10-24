@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchInformeCatedra } from "../informeCatedra/informesService";
+import { fetchInformeCatedra } from "./informesService";
 
-interface InformeCatedra {
+interface InformeCatedraCompletado {
   id: number;
   titulo: string;
   contenido: string;
@@ -24,7 +24,7 @@ export function mostrarPeriodo(periodo: string) {
 
 export default function InformeCatedraDetail() {
   const { id } = useParams<{ id: string }>();
-  const [informe, setInforme] = useState<InformeCatedra | null>(null);
+  const [informe, setInforme] = useState<InformeCatedraCompletado | null>(null);
 
   useEffect(() => {
     if (id) {

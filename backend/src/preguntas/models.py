@@ -18,15 +18,6 @@ class Pregunta(ModeloBase):
         "src.categorias.models.Categoria", back_populates="preguntas"   
     )
 
-    '''
-    encuesta_id: Mapped[int] = mapped_column(
-        ForeignKey("encuestas.id")
-    )  # Foreign key a Encuesta
-
-    encuesta: Mapped["src.encuestas.models.Encuesta"] = relationship(
-        "src.encuestas.models.Encuesta", back_populates="preguntas"
-    )
-    '''
     tipo: Mapped[str] = mapped_column(String, nullable=False)
     opciones: Mapped[Optional[List["src.opciones.models.Opcion"]]] = relationship(
         "src.opciones.models.Opcion",

@@ -9,7 +9,7 @@ class Categoria(ModeloBase):
     __tablename__ = "categorias"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    cod: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    cod: Mapped[str] = mapped_column(String, nullable=False)
     texto: Mapped[str] = mapped_column(String, nullable=False)
     encuesta_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("encuestas.id"), nullable=True) 
