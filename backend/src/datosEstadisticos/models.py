@@ -8,7 +8,7 @@ class DatosEstadisticosInforme(ModeloBase):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     id_informe_catedra_completado: Mapped[int] = mapped_column(
-        ForeignKey("informes_catedra_completado.id"), index=True
+        ForeignKey("informe_catedra_completado.id"), index=True
     )
 
     id_pregunta_encuesta: Mapped[int] = mapped_column(

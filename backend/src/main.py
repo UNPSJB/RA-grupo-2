@@ -24,6 +24,7 @@ from src.categorias.router import router as categorias_router
 from src.informe_catedra_base.router  import router as informes_catedra_base_router
 from src.informe_catedra_completado.router  import router as informes_catedra_completado_router
 from src.datosEstadisticos.router import router as datos_estadisticos_router
+from src.respuestasInforme.router import router as respuestas_informe_router
  
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -65,3 +66,4 @@ app.include_router(encuesta_completada_router)
 app.include_router(informes_catedra_base_router)
 app.include_router(informes_catedra_completado_router)
 app.include_router(datos_estadisticos_router)
+app.include_router(respuestas_informe_router)

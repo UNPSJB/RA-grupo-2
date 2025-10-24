@@ -19,7 +19,7 @@ export default function DatosEstadisticosPage() {
   const [datos, setDatos] = useState<DatosEstadisticosPregunta[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const informeId = 6;
+  const informeId = 1;
   const materiaId = 7;
   const anio = 2025;
   const periodo = "PRIMER_CUATRI";

@@ -12,7 +12,7 @@ class Respuesta(RespuestaBase):
     id: int
     encuesta_completada_id: int
 
-model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True}
 
 class RespuestaCreateEnEncuesta(RespuestaBase):
     pass

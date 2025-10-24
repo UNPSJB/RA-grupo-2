@@ -59,7 +59,6 @@ export default function ManejadorCategoria({
                             className="form-control"
                             value={nuevaCategoriaCod}
                             onChange={(e) => setNuevaCategoriaCod(e.target.value)}
-                            placeholder="Código ÚNICO (Ej: A)"
                             disabled={cargando}
                         />
                     </div>

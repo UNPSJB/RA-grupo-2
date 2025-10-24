@@ -66,8 +66,8 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/datos-estadisticos">
-                    Datos Estadísticos
+                  <Link className="dropdown-item" to="/docentes/informes-pendientes">
+                    Informes de Cátedra Pendientes
                   </Link>
                 </li>
               </ul>

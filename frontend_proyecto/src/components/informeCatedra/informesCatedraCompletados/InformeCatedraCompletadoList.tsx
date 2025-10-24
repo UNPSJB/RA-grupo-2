@@ -20,7 +20,7 @@ export default function InformeCatedraList() {
       .then(res => res.json())
       .then(setDepartamento)
       .catch(console.error);
-    fetch(`http://127.0.0.1:8000/informes_catedra_completado/${departamentoId}/informes_catedra`)
+    fetch(`http://127.0.0.1:8000/informe-catedra-completado/departamento/${departamentoId}`)
       .then(res => res.json())
       .then(setInformes)
       .catch(console.error);

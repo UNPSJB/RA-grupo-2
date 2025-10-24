@@ -173,7 +173,7 @@ export default function InformeCatedraBaseForm() {
                             </div>
                             <div className="mb-3">
                                 <label className="form-label fw-bold">Enunciado</label>
-                                <textarea className="form-control" rows={2} value={nuevoEnunciado} onChange={(e) => setNuevoEnunciado(e.target.value)} placeholder={`Enunciado de la pregunta (${nuevoTipoPregunta})...`} disabled={cargando || categorias.length === 0} />
+                                <textarea className="form-control" rows={2} value={nuevoEnunciado} onChange={(e) => setNuevoEnunciado(e.target.value)} disabled={cargando || categorias.length === 0} />
                             </div>
                             {nuevoTipoPregunta === 'cerrada' && (
                                 <OpcionesManager
