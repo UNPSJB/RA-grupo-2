@@ -45,6 +45,7 @@ export default function InformesPendientesPage() {
       state: {
         docenteMateriaId: informe.docente_materia_id,
         materiaNombre: informe.materia_nombre,
+        materiaId: informe.materia_id,
         anio: ANIO_ACTUAL,
         periodo: PERIODO_ACTUAL,
         informeBaseId: 3, // Asumimos que el informe base siempre es el ID 1

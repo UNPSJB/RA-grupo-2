@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
+import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 
 interface Pregunta {
   id: number;
@@ -18,6 +19,16 @@ interface CategoriaConPreguntas {
   preguntas: Pregunta[];
 }
 
+interface OpcionPorcentaje {
+  opcion_id: string;
+  porcentaje: number;
+}
+
+interface DatosEstadisticosPregunta {
+  id_pregunta: string;
+  datos: OpcionPorcentaje[];
+}
+
 export default function CompletarInformeCatedra() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,9 +42,11 @@ export default function CompletarInformeCatedra() {
   const [respuestas, setRespuestas] = useState<Record<number, string>>({});
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
 
   const {
     docenteMateriaId,
+    materiaId,
     materiaNombre,
     anio,
     periodo,
@@ -76,7 +89,29 @@ export default function CompletarInformeCatedra() {
       .finally(() => setLoading(false));
   }, [informeBaseId]);
 
+  useEffect(() => {
+    setDatosEstadisticos([]);
 
+    fetch(
+      `http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al obtener los datos");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.length === 0) {
+          setMensaje("No hay datos estadísticos disponibles.");
+        } else {
+          setDatosEstadisticos(data);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        setMensaje("Error al obtener los datos estadísticos.");
+      })
+      .finally(() => setLoading(false));
+  }, [materiaId, anio, periodo]);
 
   const manejarCambio = (preguntaId: number, valor: string) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
@@ -139,12 +174,29 @@ export default function CompletarInformeCatedra() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(datosParaBackend),
         }
-      );
+      )
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({
           detail: "Error desconocido al enviar.",
         }));
         throw new Error(errorData.detail || "Error al enviar el informe");
+      }
+      const data = await res.json();
+      console.log("Informe creado:", data.id);
+      
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`,
+          { method: "POST" }
+        );
+        if (response.ok) {
+          setMensaje("Datos estadísticos generados y guardados correctamente.");
+        } else {
+          setMensaje("Error al guardar los datos estadísticos.");
+        }
+      } catch (error) {
+        console.error(error);
+        setMensaje("Error al guardar datos estadisticos.");
       }
       setMensaje("¡Informe enviado con éxito!");
       setTimeout(() => {
@@ -241,6 +293,9 @@ export default function CompletarInformeCatedra() {
         <div className="card-body">
           <div className="alert alert-info mb-4">
             <strong>Año:</strong> {anio} | <strong>Periodo:</strong> {periodo}
+          </div>
+          <div>
+            <TablaDatosEstadisticos datos={datosEstadisticos} />
           </div>
 
           {categoriasConPreguntas.map((categoria) => (
