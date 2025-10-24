@@ -29,6 +29,7 @@ import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
+import Categoria2BInforme from "./components/completarInformeCatedra/CAT2B";
 
 function App() {
   return (
@@ -70,6 +71,7 @@ function App() {
             <Route path="/datos-estadisticos" element={<DatosEstadisticosPage />} />
             <Route path="/informes-catedra-base" element={<InformeCatedraBaseForm />} />
             <Route path="/informes-catedra-base/nuevo" element={<InformeCatedraBaseForm />} />
+            <Route path="/categoria-2b-informe" element={<Categoria2BInforme onTotalPreguntas={() => {}} onRespuesta={() => {}} />} />
           </Routes>
         </div>
       </main>
