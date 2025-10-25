@@ -3,7 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
+import Categoria3Informe from "./CAT3";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
+
 
 interface Pregunta {
   id: number;
@@ -43,7 +45,7 @@ export default function CompletarInformeCatedra() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
-
+ 
   const {
     docenteMateriaId,
     materiaId,
@@ -246,7 +248,13 @@ export default function CompletarInformeCatedra() {
             categoria={categoria}
             manejarCambio={(id, texto) => manejarCambio(id, texto)}
           />
-
+        );
+      case "3":
+        return (
+          <Categoria3Informe
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
         );
       default:
         return (
