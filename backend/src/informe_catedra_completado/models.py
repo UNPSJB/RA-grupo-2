@@ -14,6 +14,7 @@ class InformeCatedraCompletado(ModeloBase):
    
    titulo: Mapped[Optional[str]] = mapped_column(String, nullable=True)
    contenido: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+   cantidadAlumnos: Mapped[Optional[str]] = mapped_column(String, nullable=True)
    anio: Mapped[int] = mapped_column(Integer, nullable=True)
    periodo: Mapped[Periodo] = mapped_column(Enum(Periodo), nullable=True)
 

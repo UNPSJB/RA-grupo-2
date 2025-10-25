@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.alumnos import schemas, services
 from src.encuestas import schemas as encuestas_schemas
-from src.asociaciones.models import Periodo  # <-- CORRECCIÓN 1: Importar Periodo
+from src.asociaciones.models import Periodo  
 
 router = APIRouter(prefix="/alumnos", tags=["alumnos"])
 

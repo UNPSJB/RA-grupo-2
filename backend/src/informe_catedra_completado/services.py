@@ -70,6 +70,7 @@ def crear_informe_completado(db: Session, informe_data: schemas.InformeCatedraCo
         docente_materia_id=informe_data.docente_materia_id,
         informe_catedra_base_id=informe_data.informe_catedra_base_id,
         titulo=informe_data.titulo,
+        cantidadAlumnos=informe_data.cantidadAlumnos,
         contenido=informe_data.contenido,
         anio=informe_data.anio,
         periodo=informe_data.periodo

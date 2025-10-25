@@ -5,7 +5,6 @@ export default function PruebaFuncionalidad() {
   const [mostrar, setMostrar] = useState(false);
   const [docenteId, setDocenteId] = useState<number>(1);
   const [materiaId, setMateriaId] = useState<number>(2);
-  const [informeId, setInformeId] = useState<number>(3);
 
   const handleMostrar = () => setMostrar(true);
 
@@ -34,16 +33,6 @@ export default function PruebaFuncionalidad() {
           />
         </label>
 
-        <label style={{ marginLeft: "1rem" }}>
-          Informe ID:
-          <input
-            type="number"
-            value={informeId}
-            onChange={(e) => setInformeId(Number(e.target.value))}
-            style={{ marginLeft: "0.5rem", width: "80px" }}
-          />
-        </label>
-
         <button
           onClick={handleMostrar}
           style={{ marginLeft: "1rem", padding: "0.3rem 1rem" }}
@@ -56,10 +45,8 @@ export default function PruebaFuncionalidad() {
         <InformeCatedraCompletadoFuncion
           docenteId={docenteId}
           materiaId={materiaId}
-          informeId={informeId}
         />
       )}
     </div>
   );
 }
-    
