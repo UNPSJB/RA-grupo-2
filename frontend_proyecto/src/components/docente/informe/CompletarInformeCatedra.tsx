@@ -3,7 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
+import Categoria3Informe from "./CAT3";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
+
 
 interface Pregunta {
   id: number;
@@ -43,6 +45,7 @@ export default function CompletarInformeCatedra() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
+  const [respuestasCAT3, setRespuestasCAT3] = useState<any[]>([]);
 
   const {
     docenteMateriaId,
@@ -157,6 +160,9 @@ export default function CompletarInformeCatedra() {
         texto_respuesta: texto,
       })
     );
+
+    const respuestasCombinadas = [...respuestasFormateadas, ...respuestasCAT3];
+
     const datosParaBackend = {
       docente_materia_id: docenteMateriaId,
       informe_catedra_base_id: informeBaseId,
@@ -164,7 +170,7 @@ export default function CompletarInformeCatedra() {
       contenido: `Informe para ${materiaNombre} (${periodo} ${anio})`,
       anio: ANIO_ACTUAL,
       periodo: periodo,
-      respuestas: respuestasFormateadas,
+      respuestas: respuestasCombinadas,
     };
     try {
       const res = await fetch(
@@ -246,7 +252,13 @@ export default function CompletarInformeCatedra() {
             categoria={categoria}
             manejarCambio={(id, texto) => manejarCambio(id, texto)}
           />
-
+        );
+      case "3":
+        return (
+          <Categoria3Informe
+            categoria={categoria}
+            onRespuestasChange={setRespuestasCAT3}
+          />
         );
       default:
         return (
