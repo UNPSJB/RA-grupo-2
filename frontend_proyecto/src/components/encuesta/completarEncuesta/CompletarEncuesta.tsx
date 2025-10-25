@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PreguntasCategoria from "./CategoriaB";
+import PreguntasCategoria from "./Categoria";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation} from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";

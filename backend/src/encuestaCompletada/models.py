@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
-from datetime import datetime
+#from datetime import datetime
 from src.asociaciones.models import Periodo
 
 class EncuestaCompletada(ModeloBase):

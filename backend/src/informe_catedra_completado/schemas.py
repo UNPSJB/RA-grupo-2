@@ -1,19 +1,29 @@
 from pydantic import BaseModel
-from datetime import date
-from src.asociaciones.models import Periodo  
+from src.asociaciones.models import Periodo
+from src.respuestasInforme import schemas as respuestas_schemas
+from typing import List, Optional
+
 class InformeCatedraCompletadoBase(BaseModel):
-    titulo: str
-    anio: int
-    periodo: Periodo
     docente_materia_id: int
-    contenido: str
+    informe_catedra_base_id: int
+    titulo: Optional[str] = None
+    contenido: Optional[str] = None
+    anio: Optional[int] = None
+    periodo: Optional[Periodo] = None
+
 class InformeCatedraCompletadoCreate(InformeCatedraCompletadoBase):
-    informe_base_id: int 
     pass
+
+class InformeCatedraCompletadoConRespuestasCreate(InformeCatedraCompletadoBase):
+    respuestas: List[respuestas_schemas.RespuestaInformeBase]
+    
 
 class InformeCatedraCompletado(InformeCatedraCompletadoBase):
     id: int
+    model_config = {"from_attributes": True}
 
-    class Config:
-        from_attributes = True
-
+class InformePendiente(BaseModel):
+    materia_id: int
+    materia_nombre: str
+    docente_materia_id: int
+    model_config = {"from_attributes": True}

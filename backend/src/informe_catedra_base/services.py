@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from src.informe_catedra_base import models, schemas, exceptions
 from src.informe_catedra_completado.models import InformeCatedraCompletado
@@ -9,7 +9,7 @@ def crear_informe_catedra_base(db: Session, informe: schemas.InformeCatedraCreat
     # 1) Crear un único InformeCatedra
     db_informe = models.InformeCatedra(titulo=informe.titulo)
     db.add(db_informe)
-    db.flush()  # asegura que db_informe.id exista sin hacer commit aún
+    db.flush()  
     '''
     # 2) Asociar materias existentes (validar ids)
     if informe.materias:
@@ -35,7 +35,6 @@ def crear_informe_catedra_base(db: Session, informe: schemas.InformeCatedraCreat
             db.add(nueva)
         # db_informe.categorias = nuevas  # opcional, SQLAlchemy lo tomará por backref
     '''
-    # 4) Commit una única vez
     db.commit()
     db.refresh(db_informe)
     return db_informe
@@ -53,7 +52,6 @@ def get_informes_catedra_completados(db: Session, informe_id: int):
     informe = db.query(models.InformeCatedra).filter(models.InformeCatedra.id == informe_id).first()
     if not informe:
         raise exceptions.InformeCatedraBaseNoEncontrado()
-    # Obtener los informes completados para cada materia de un informe base
     informes_por_materia = []
     for materia in informe.materias:
         informe_completado = db.query(InformeCatedraCompletado).filter_by(
@@ -63,3 +61,17 @@ def get_informes_catedra_completados(db: Session, informe_id: int):
         if informe_completado:
             informes_por_materia.append(informe_completado)
     return informes_por_materia
+
+def get_categorias_con_preguntas_por_informe(db: Session, informe_id: int):
+
+    informe = get_informe_catedra_base(db, informe_id) 
+
+    stmt = (
+        select(Categoria)
+        .options(selectinload(Categoria.preguntas)) 
+        .where(Categoria.informe_base_id == informe_id) 
+
+    )
+    categorias_con_preguntas = db.scalars(stmt).unique().all()
+    
+    return categorias_con_preguntas

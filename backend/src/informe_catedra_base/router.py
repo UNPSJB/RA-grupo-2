@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from src.informe_catedra_base import schemas, services, exceptions
 from src.categorias import schemas as categoria_schemas
 from src.database import get_db
+from typing import List
 
 router = APIRouter(prefix="/informes_catedra",tags=["informes_catedra_base"]
 )
@@ -36,3 +37,14 @@ def get_informes_catedra_completados(informe_id: int, db: Session = Depends(get_
     except exceptions.InformeCatedraBaseNoEncontrado:
         raise HTTPException(status_code=404, detail="Informe base no encontrado")
 '''
+
+@router.get("/{informe_id}/categorias_con_preguntas", response_model=List[schemas.CategoriaConPreguntas])
+def read_categorias_con_preguntas(informe_id: int, db: Session = Depends(get_db)):
+    try:
+        categorias = services.get_categorias_con_preguntas_por_informe(db, informe_id)
+        return categorias
+    except exceptions.InformeCatedraBaseNoEncontrado:
+        raise HTTPException(status_code=404, detail="Informe base no encontrado")
+    except Exception as e:
+        print(f"Error inesperado al obtener categorías con preguntas: {e}") 
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
