@@ -9,6 +9,9 @@ class Encuesta(EncuestaBase):
 
     model_config = {"from_attributes": True}
 
+class EncuestaCreate(EncuestaBase):
+    pass
+
     
 class EncuestaDisponible(BaseModel):
     materia: str

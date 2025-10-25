@@ -8,6 +8,13 @@ from src.preguntas import schemas as pregunta_schemas
 
 # operaciones para Encuesta
 
+def crear_encuesta(db: Session, encuesta: schemas.EncuestaCreate) -> schemas.Encuesta:
+    db_encuesta = Encuesta(nombre=encuesta.nombre)
+    db.add(db_encuesta)
+    db.commit()
+    db.refresh(db_encuesta)
+    return db_encuesta
+
 def leer_encuesta(db: Session, encuesta_id: int) -> schemas.Encuesta:
     db_encuesta = db.scalar(select(Encuesta).where(Encuesta.id == encuesta_id))
     if db_encuesta is None:
