@@ -13,7 +13,7 @@ router = APIRouter(prefix="/encuestas", tags=["encuestas"])
 def read_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.leer_encuesta(db, encuesta_id)  
 
-@router.get("/{encuesta_id}/categorias", response_model=list[categoria_schemas.Categoria])
+@router.get("/{encuesta_id}/categorias", response_model=list[categoria_schemas.CategoriaEncuesta])
 def read_categorias_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.listar_categorias_encuesta(db, encuesta_id)
 

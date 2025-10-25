@@ -65,6 +65,11 @@ export default function Navbar() {
                     Materias dadas
                   </Link>
                 </li>
+                <li>
+                  <Link className="dropdown-item" to="/docentes/informes-pendientes">
+                    Informes de Cátedra Pendientes
+                  </Link>
+                </li>
               </ul>
             </li>
 
@@ -90,7 +95,7 @@ export default function Navbar() {
                 </li>
                 <li>
                   <Link className="dropdown-item" to="/informes-catedra">
-                    Informes Cátedra
+                    Informes de Cátedra Completados
                   </Link>
                 </li>
               </ul>
@@ -114,18 +119,17 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/preguntas/crear">
-                    Crear Pregunta
+                  <Link className="dropdown-item" to="/informes-catedra-base">
+                    Crear Informe de Cátedra Base
                   </Link>
                 </li>
               </ul>
             </li>
-
-            <li className="nav-item">
-            <Link className="nav-link" to="/prueba-guardar">
-              Prueba Guardar
-            </Link>
-            </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/informes-catedra-funcion">
+                  Prueba Guardar
+                </Link>
+              </li>            
           </ul>
         </div>
       </div>

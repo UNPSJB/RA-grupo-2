@@ -8,9 +8,13 @@ router = APIRouter(prefix="/categorias", tags=["categorias"])
 
 # Rutas para categorias
 
-@router.post("/", response_model=schemas.Categoria)
-def create_categoria(categoria: schemas.CategoriaCreate, db: Session = Depends(get_db)):
-    return services.crear_categoria(db, categoria)
+@router.post("/paraEncuesta/", response_model=schemas.CategoriaEncuesta)
+def create_categoria_encuesta(categoria: schemas.CategoriaEncuestaCreate, db: Session = Depends(get_db)):
+    return services.crear_categoria_encuesta(db, categoria)
+
+@router.post("/paraInforme/", response_model=schemas.CategoriaInformeBase)
+def create_categoria_informe(categoria: schemas.CategoriaInformeBaseCreate, db: Session = Depends(get_db)):
+    return services.crear_categoria_informe(db, categoria)
 
 @router.get("/", response_model=list[schemas.Categoria])
 def read_categorias(db: Session = Depends(get_db)):

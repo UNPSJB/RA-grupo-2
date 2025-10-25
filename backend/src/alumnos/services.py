@@ -47,8 +47,20 @@ def listar_encuestas_disponibles(db: Session, alumno_id: int):
         .where(alumno_materia.c.alumno_id == alumno_id)
         .where(alumno_materia.c.anio == 2025)
         .where(alumno_materia.c.periodo == Periodo.PRIMER_CUATRI)
-    )
+    )   
 
     resultados = db.execute(stmt).all()
 
     return [{"materia": m, "encuesta": e, "materia_id": materia_id, "encuesta_id": encuesta_id} for m, e, materia_id, encuesta_id in resultados] 
+
+def obtener_alumnos_por_materia_y_periodo(db: Session, materia_id: int, anio: int, periodo: Periodo) -> List[Alumno]:
+    stmt = (
+        select(Alumno)
+        .join(alumno_materia, alumno_materia.c.alumno_id == Alumno.id)
+        .where(alumno_materia.c.materia_id == materia_id)
+        .where(alumno_materia.c.anio == anio)
+        .where(alumno_materia.c.periodo == periodo)
+        .distinct()
+    )
+    return db.scalars(stmt).all()
+
