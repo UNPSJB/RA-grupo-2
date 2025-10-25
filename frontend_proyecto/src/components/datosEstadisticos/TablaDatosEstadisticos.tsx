@@ -10,13 +10,14 @@ interface DatosEstadisticosPregunta {
 
 interface TablaProps {
   datos: DatosEstadisticosPregunta[];
+  cant: number;
 }
 
-export default function TablaDatosEstadisticos({ datos }: TablaProps) {
+export default function TablaDatosEstadisticos({ datos , cant }: TablaProps) {
   if (!datos || datos.length === 0) {
     return (
       <div className="alert alert-info mt-4">
-        No hay datos estadísticos disponibles.
+        No hay encuestas completadas
       </div>
     );
   }
@@ -24,7 +25,7 @@ export default function TablaDatosEstadisticos({ datos }: TablaProps) {
   return (
     <div className="card mt-4">
       <div className="card-header bg-secondary text-white">
-        <h2 className="h5 mb-0">Datos Estadísticos</h2>
+        <h2 className="h5 mb-0">Datos Estadísticos - {cant} encuestas completadas</h2>
       </div>
 
       <div className="card-body">
