@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
+import Categoria3Informe from "./CAT3";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
+import InformeCatedraCompletadoFuncion from "./CompletarInformeCatedraFuncion";
 
 interface Pregunta {
   id: number;
@@ -43,6 +45,8 @@ export default function CompletarInformeCatedra() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
+  const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0); // nuevo
+
 
   const {
     docenteMateriaId,
@@ -113,6 +117,23 @@ export default function CompletarInformeCatedra() {
       .finally(() => setLoading(false));
   }, [materiaId, anio, periodo]);
 
+  const [cantidad, setCantidad] = useState<number>(0);
+  useEffect(() => {
+    fetch(`http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al obtener la cantidad de encuestas");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Cantidad de encuestas completadas:", data);
+        setCantidad(data); // si tenés un useState
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []); // se ejecuta una sola vez
+
+
   const manejarCambio = (preguntaId: number, valor: string) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
@@ -141,6 +162,10 @@ export default function CompletarInformeCatedra() {
     return texto;
   };
 
+   const manejarDatosGenerados = (datos: any) => {
+    setCantidadInscriptos(datos.cantidadAlumnos);
+  }; 
+
   const enviarInforme = async () => {
     /*
     if (!validarFormulario()) {
@@ -162,9 +187,11 @@ export default function CompletarInformeCatedra() {
       informe_catedra_base_id: informeBaseId,
       titulo: `Informe ${materiaNombre} ${anio}`,
       contenido: `Informe para ${materiaNombre} (${periodo} ${anio})`,
+      cantidad_inscriptos: cantidadInscriptos, // nuevo 
       anio: ANIO_ACTUAL,
       periodo: periodo,
       respuestas: respuestasFormateadas,
+
     };
     try {
       const res = await fetch(
@@ -183,7 +210,6 @@ export default function CompletarInformeCatedra() {
       }
       const data = await res.json();
       console.log("Informe creado:", data.id);
-      
       try {
         const response = await fetch(
           `http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`,
@@ -246,7 +272,13 @@ export default function CompletarInformeCatedra() {
             categoria={categoria}
             manejarCambio={(id, texto) => manejarCambio(id, texto)}
           />
-
+        );
+      case "3":
+        return (
+          <Categoria3Informe
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
         );
       default:
         return (
@@ -294,8 +326,13 @@ export default function CompletarInformeCatedra() {
           <div className="alert alert-info mb-4">
             <strong>Año:</strong> {anio} | <strong>Periodo:</strong> {periodo}
           </div>
+          <InformeCatedraCompletadoFuncion
+            docenteId={1} //hardcodeado por ahora
+            materiaId={materiaId}
+            onDatosGenerados={manejarDatosGenerados}
+          />
           <div>
-            <TablaDatosEstadisticos datos={datosEstadisticos} />
+            <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
           </div>
 
           {categoriasConPreguntas.map((categoria) => (
