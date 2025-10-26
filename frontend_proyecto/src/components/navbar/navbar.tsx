@@ -123,6 +123,11 @@ export default function Navbar() {
                     Crear Informe de Cátedra Base
                   </Link>
                 </li>
+                <li>
+                  <Link className="dropdown-item" to="/encuestas/nueva">
+                    Crear Encuesta Base
+                  </Link>
+                </li>
               </ul>
             </li>
               <li className="nav-item">
