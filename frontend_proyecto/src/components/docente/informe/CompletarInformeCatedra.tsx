@@ -277,35 +277,35 @@ export default function CompletarInformeCatedra() {
         return (
           <CategoriaEquipamiento
             categoria={categoria}
-            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+            manejarCambio={manejarCambio}
           />
         );
       case "2.B":
         return (
           <Categoria2BInforme
             categoria={categoria}
-            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+            manejarCambio={manejarCambio}
           />
         );
       case "2.C":
         return (
           <Categoria2CInforme
             categoria={categoria}
-            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+            manejarCambio={manejarCambio}
           />
         );
       case "3":
         return (
           <Categoria3Informe
             categoria={categoria}
-            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+            manejarCambio={manejarCambio}
           />
         );
       case "4":
         return (
           <Categoria4Informe
             categoria={categoria}
-            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+            manejarCambio={manejarCambio}
           />
         );
       default:
