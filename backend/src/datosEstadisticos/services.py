@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select, update, func
 from sqlalchemy.orm import Session
 from src.datosEstadisticos.models import DatosEstadisticosInforme, DatosEstadisticosPregunta
 from src.informe_catedra_completado.models import InformeCatedraCompletado
@@ -169,3 +169,21 @@ def recuperar_datos_estadisticos(
         )
 
     return datos_estadisticos
+
+
+
+def cantidad_encuestas_completadas(
+    db: Session,
+    id_materia: int,
+    anio: int,
+    periodo: str
+) -> int:
+    stmt = (
+        select(func.count())
+        .select_from(EncuestaCompletada)
+        .where(EncuestaCompletada.materia_id == id_materia)
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+    )
+    count = db.scalar(stmt)
+    return count or 0
