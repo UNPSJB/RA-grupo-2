@@ -8,6 +8,7 @@ class InformeCatedraCompletadoBase(BaseModel):
     informe_catedra_base_id: int
     titulo: Optional[str] = None
     contenido: Optional[str] = None
+    cantidadAlumnos: Optional[int] = None
     anio: Optional[int] = None
     periodo: Optional[Periodo] = None
 

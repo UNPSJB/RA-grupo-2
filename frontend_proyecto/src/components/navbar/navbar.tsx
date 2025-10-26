@@ -130,6 +130,11 @@ export default function Navbar() {
                 </li>
               </ul>
             </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/informes-catedra-funcion">
+                  Prueba Guardar
+                </Link>
+              </li>            
           </ul>
         </div>
       </div>

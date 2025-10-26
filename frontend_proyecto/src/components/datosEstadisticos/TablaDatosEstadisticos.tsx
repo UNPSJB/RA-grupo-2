@@ -24,7 +24,7 @@ export default function TablaDatosEstadisticos({ datos , cant }: TablaProps) {
 
   return (
     <div className="card mt-4">
-      <div className="card-header bg-secondary text-white">
+      <div className="card-header bg-primary text-white">
         <h2 className="h5 mb-0">Datos Estadísticos - {cant} encuestas completadas</h2>
       </div>
 
