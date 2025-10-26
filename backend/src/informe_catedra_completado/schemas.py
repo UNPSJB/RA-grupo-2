@@ -11,6 +11,8 @@ class InformeCatedraCompletadoBase(BaseModel):
     cantidadAlumnos: Optional[int] = None
     anio: Optional[int] = None
     periodo: Optional[Periodo] = None
+    cantidadComisionesTeoricas: Optional[int] = None
+    cantidadComisionesPracticas: Optional[int] = None
 
 class InformeCatedraCompletadoCreate(InformeCatedraCompletadoBase):
     pass

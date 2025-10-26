@@ -46,6 +46,10 @@ export default function CompletarInformeCatedra() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0); // nuevo
+  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
+  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
+
+
   const {
     docenteMateriaId,
     materiaId,
@@ -71,12 +75,8 @@ export default function CompletarInformeCatedra() {
         return res.json();
       })
       .then((data: CategoriaConPreguntas[]) => {
-        const dataOrdenada = [...data].sort((a, b) =>
-          a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
-        );
-
-        setCategoriasConPreguntas(dataOrdenada);
-        console.log(dataOrdenada);
+        setCategoriasConPreguntas(data);
+        console.log(data);
         console.log("Informe Base ID:", informeBaseId);
         /*
         const respuestasIniciales: Record<number, string> = {};
@@ -134,6 +134,8 @@ export default function CompletarInformeCatedra() {
         console.error(error);
       });
   }, []); // se ejecuta una sola vez
+
+
   const manejarCambio = (preguntaId: number, valor: string) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
@@ -164,6 +166,8 @@ export default function CompletarInformeCatedra() {
 
    const manejarDatosGenerados = (datos: any) => {
     setCantidadInscriptos(datos.cantidadAlumnos);
+    setCantidadComisionesTeoricas(datos.cantidadComisionesTeoricas);
+    setCantidadComisionesPracticas(datos.cantidadComisionesPracticas);
   }; 
 
   const enviarInforme = async () => {
@@ -190,6 +194,8 @@ export default function CompletarInformeCatedra() {
       cantidad_inscriptos: cantidadInscriptos, // nuevo 
       anio: ANIO_ACTUAL,
       periodo: periodo,
+      cantidadComisionesTeoricas,
+      cantidadComisionesPracticas,  
       respuestas: respuestasFormateadas,
 
     };
@@ -282,13 +288,10 @@ export default function CompletarInformeCatedra() {
         );
       default:
         return (
-          <div className="card mt-3">
-            <div className="card-header bg-primary text-white">
-              <strong>{categoria.cod} - {categoria.texto}</strong>
-            </div>
-
-            <div className="card-body p-0">
+          <div>
+            <div className="card shadow-sm border-0">
               <div className="card-body">
+                <h2 className="h5 mb-3 fw-bold">{categoria.texto}</h2>
                 {categoria.preguntas.map((pregunta, i) => (
                   <div key={pregunta.id} className="mb-4">
                     <div className="mb-2">
@@ -326,13 +329,14 @@ export default function CompletarInformeCatedra() {
           <h1 className="h4 mb-0">Completar Informe - {materiaNombre}</h1>
         </div>
         <div className="card-body">
-          <div>
-            <InformeCatedraCompletadoFuncion
+          <div className="alert alert-info mb-4">
+            <strong>Año:</strong> {anio} | <strong>Periodo:</strong> {periodo}
+          </div>
+          <InformeCatedraCompletadoFuncion
             docenteId={1} //hardcodeado por ahora
             materiaId={materiaId}
             onDatosGenerados={manejarDatosGenerados}
           />
-          </div>
           <div>
             <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
           </div>
