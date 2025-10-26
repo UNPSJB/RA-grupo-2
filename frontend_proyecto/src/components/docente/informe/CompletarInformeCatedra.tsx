@@ -1,9 +1,10 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
 import Categoria3Informe from "./CAT3";
+import Categoria4Informe from "./CAT4";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 import InformeCatedraCompletadoFuncion from "./CompletarInformeCatedraFuncion";
 
@@ -12,7 +13,6 @@ interface Pregunta {
   enunciado: string;
   categoria_id: number;
 }
-
 
 interface CategoriaConPreguntas {
   id: number;
@@ -31,6 +31,11 @@ interface DatosEstadisticosPregunta {
   datos: OpcionPorcentaje[];
 }
 
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
+};
+
 export default function CompletarInformeCatedra() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,11 +46,16 @@ export default function CompletarInformeCatedra() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
+  const [respuestas, setRespuestas] = useState<Record<number, RespuestaValor>>(
+    {}
+  );
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
-  const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
-  const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0); // nuevo
+  const [datosEstadisticos, setDatosEstadisticos] = useState<
+    DatosEstadisticosPregunta[]
+  >([]);
+  const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
+
   const {
     docenteMateriaId,
     materiaId,
@@ -121,9 +131,12 @@ export default function CompletarInformeCatedra() {
 
   const [cantidad, setCantidad] = useState<number>(0);
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
+    fetch(
+      `http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
+    )
       .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener la cantidad de encuestas");
+        if (!res.ok)
+          throw new Error("Error al obtener la cantidad de encuestas");
         return res.json();
       })
       .then((data) => {
@@ -133,8 +146,9 @@ export default function CompletarInformeCatedra() {
       .catch((error) => {
         console.error(error);
       });
-  }, []); // se ejecuta una sola vez
-  const manejarCambio = (preguntaId: number, valor: string) => {
+  }, [anio, materiaId, periodo]); // se ejecuta una sola vez
+
+  const manejarCambio = (preguntaId: number, valor: RespuestaValor) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
   };
@@ -153,18 +167,18 @@ export default function CompletarInformeCatedra() {
   */
 
   const limpiarEnunciado = (texto: string) => {
-    const parts = texto.split('. ');
+    const parts = texto.split(". ");
     if (parts.length < 2) return texto;
     const prefijo = parts[0];
     if (!isNaN(parseInt(prefijo))) {
-      return parts.slice(1).join('. ');
+      return parts.slice(1).join(". ");
     }
     return texto;
   };
 
-   const manejarDatosGenerados = (datos: any) => {
+  const manejarDatosGenerados = (datos: any) => {
     setCantidadInscriptos(datos.cantidadAlumnos);
-  }; 
+  };
 
   const enviarInforme = async () => {
     /*
@@ -176,10 +190,10 @@ export default function CompletarInformeCatedra() {
     setEnviando(true);
     setMensaje(null);
     const respuestasFormateadas = Object.entries(respuestas).map(
-      ([preguntaIdStr, texto]) => ({
+      ([preguntaIdStr, respuestaObj]) => ({
         pregunta_id: parseInt(preguntaIdStr, 10),
-        opcion_id: null,
-        texto_respuesta: texto,
+        opcion_id: respuestaObj.opcion_id,
+        texto_respuesta: respuestaObj.texto_respuesta,
       })
     );
     const datosParaBackend = {
@@ -187,11 +201,10 @@ export default function CompletarInformeCatedra() {
       informe_catedra_base_id: informeBaseId,
       titulo: `Informe ${materiaNombre} ${anio}`,
       contenido: `Informe para ${materiaNombre} (${periodo} ${anio})`,
-      cantidad_inscriptos: cantidadInscriptos, // nuevo 
+      cantidad_inscriptos: cantidadInscriptos,
       anio: ANIO_ACTUAL,
       periodo: periodo,
       respuestas: respuestasFormateadas,
-
     };
     try {
       const res = await fetch(
@@ -201,7 +214,7 @@ export default function CompletarInformeCatedra() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(datosParaBackend),
         }
-      )
+      );
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({
           detail: "Error desconocido al enviar.",
@@ -210,6 +223,7 @@ export default function CompletarInformeCatedra() {
       }
       const data = await res.json();
       console.log("Informe creado:", data.id);
+
       try {
         const response = await fetch(
           `http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`,
@@ -231,8 +245,7 @@ export default function CompletarInformeCatedra() {
     } catch (err: Error | unknown) {
       console.error("Error enviando informe:", err);
       setMensaje(`Error: ${(err as Error).message}`);
-    }
-    finally {
+    } finally {
       setEnviando(false);
     }
   };
@@ -280,11 +293,20 @@ export default function CompletarInformeCatedra() {
             manejarCambio={(id, texto) => manejarCambio(id, texto)}
           />
         );
+      case "4":
+        return (
+          <Categoria4Informe
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
+        );
       default:
         return (
           <div className="card mt-3">
             <div className="card-header bg-primary text-white">
-              <strong>{categoria.cod} - {categoria.texto}</strong>
+              <strong>
+                {categoria.cod} - {categoria.texto}
+              </strong>
             </div>
 
             <div className="card-body p-0">
@@ -303,9 +325,12 @@ export default function CompletarInformeCatedra() {
                         id={`pregunta-${pregunta.id}`}
                         className="form-control"
                         rows={3}
-                        value={respuestas[pregunta.id] || ""}
+                        value={respuestas[pregunta.id]?.texto_respuesta || ""}
                         onChange={(e) =>
-                          manejarCambio(pregunta.id, e.target.value)
+                          manejarCambio(pregunta.id, {
+                            opcion_id: null,
+                            texto_respuesta: e.target.value,
+                          })
                         }
                         placeholder="Escriba su respuesta aquí..."
                       />
@@ -328,10 +353,10 @@ export default function CompletarInformeCatedra() {
         <div className="card-body">
           <div>
             <InformeCatedraCompletadoFuncion
-            docenteId={1} //hardcodeado por ahora
-            materiaId={materiaId}
-            onDatosGenerados={manejarDatosGenerados}
-          />
+              docenteId={1} //hardcodeado por ahora
+              materiaId={materiaId}
+              onDatosGenerados={manejarDatosGenerados}
+            />
           </div>
           <div>
             <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
@@ -347,16 +372,14 @@ export default function CompletarInformeCatedra() {
             <button
               onClick={enviarInforme}
               className="btn btn-success btn-lg"
-              disabled={enviando}//|| !validarFormulario()}
+              disabled={enviando} //|| !validarFormulario()}
             >
               {enviando ? "Enviando..." : "Enviar Informe"}
             </button>
 
             {mensaje && (
               <div
-                className={`mt-3 alert ${mensaje.includes("éxito")
-                  ? "alert-success"
-                  : "alert-danger"
+                className={`mt-3 alert ${mensaje.includes("éxito") ? "alert-success" : "alert-danger"
                   }`}
               >
                 {mensaje}

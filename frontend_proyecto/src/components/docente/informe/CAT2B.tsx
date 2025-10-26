@@ -1,4 +1,10 @@
 import { useEffect, useState } from "react";
+
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
+};
+
 interface Pregunta {
   id: number;
   enunciado: string;
@@ -14,7 +20,7 @@ interface Categoria {
 
 interface Props {
   categoria: Categoria;
-  manejarCambio: (preguntaId: number, texto: string) => void;
+  manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
 }
 
 export default function Categoria2BInforme({ categoria, manejarCambio }: Props) {
@@ -46,7 +52,11 @@ export default function Categoria2BInforme({ categoria, manejarCambio }: Props) 
       ...prev,
       [preguntaId]: texto,
     }));
-    manejarCambio(preguntaId, texto);
+
+    manejarCambio(preguntaId, {
+      opcion_id: null,
+      texto_respuesta: texto,
+    });
   };
 
   return (

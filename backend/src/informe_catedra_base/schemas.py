@@ -3,7 +3,7 @@ from typing import List, Optional
 from src.materias.schemas import Materia
 from src.informe_catedra_completado.schemas import InformeCatedraCompletado
 from src.categorias.schemas import Categoria as CategoriaBase
-from src.preguntas.schemas import Pregunta
+from src.preguntas.schemas import PreguntaCerrada
 
 class InformeCatedraBase(BaseModel):
     titulo: str
@@ -21,7 +21,7 @@ class InformeCatedraCreate(InformeCatedraBase):
 
 # para obtener una lista de preguntas
 class CategoriaConPreguntas(CategoriaBase):
-    preguntas: List[Pregunta] = [] 
+    preguntas: List[PreguntaCerrada] = [] 
 
     class Config:
         from_attributes = True
