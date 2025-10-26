@@ -8,6 +8,7 @@ import Categoria4Informe from "./CAT4";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 import InformeCatedraCompletadoFuncion from "./CompletarInformeCatedraFuncion";
 
+import CategoriaEquipamiento from "./CAT1"
 interface Pregunta {
   id: number;
   enunciado: string;
@@ -272,6 +273,13 @@ export default function CompletarInformeCatedra() {
 
   const renderCategoria = (categoria: CategoriaConPreguntas) => {
     switch (categoria.cod) {
+      case "1":
+        return (
+          <CategoriaEquipamiento
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
+        );
       case "2.B":
         return (
           <Categoria2BInforme
