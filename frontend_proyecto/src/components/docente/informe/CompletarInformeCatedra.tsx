@@ -32,6 +32,11 @@ interface DatosEstadisticosPregunta {
   datos: OpcionPorcentaje[];
 }
 
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
+};
+
 export default function CompletarInformeCatedra() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,7 +47,7 @@ export default function CompletarInformeCatedra() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
+  const [respuestas, setRespuestas] = useState<Record<number, RespuestaValor>>({});
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosPregunta[]>([]);
@@ -116,7 +121,7 @@ export default function CompletarInformeCatedra() {
       .finally(() => setLoading(false));
   }, [materiaId, anio, periodo]);
 
-  const manejarCambio = (preguntaId: number, valor: string) => {
+  const manejarCambio = (preguntaId: number, valor: RespuestaValor) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
   };
@@ -154,10 +159,10 @@ export default function CompletarInformeCatedra() {
     setEnviando(true);
     setMensaje(null);
     const respuestasFormateadas = Object.entries(respuestas).map(
-      ([preguntaIdStr, texto]) => ({
+      ([preguntaIdStr, respuestaObj]) => ({
         pregunta_id: parseInt(preguntaIdStr, 10),
-        opcion_id: null,
-        texto_respuesta: texto,
+        opcion_id: respuestaObj.opcion_id,
+        texto_respuesta: respuestaObj.texto_respuesta,
       })
     );
     const datosParaBackend = {

@@ -4,6 +4,7 @@ from src.informe_catedra_base import models, schemas, exceptions
 from src.informe_catedra_completado.models import InformeCatedraCompletado
 from src.materias.models import Materia
 from src.categorias.models import Categoria
+from src.preguntas.models import Pregunta
 
 def crear_informe_catedra_base(db: Session, informe: schemas.InformeCatedraCreate):
     # 1) Crear un único InformeCatedra
@@ -68,7 +69,9 @@ def get_categorias_con_preguntas_por_informe(db: Session, informe_id: int):
 
     stmt = (
         select(Categoria)
-        .options(selectinload(Categoria.preguntas)) 
+        .options(selectinload(Categoria.preguntas)
+        .selectinload(Pregunta.opciones) 
+        )
         .where(Categoria.informe_base_id == informe_id) 
 
     )

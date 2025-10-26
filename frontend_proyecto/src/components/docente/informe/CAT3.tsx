@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
+};
+
 interface Pregunta {
   id: number;
   enunciado: string;
@@ -15,7 +20,7 @@ interface Categoria {
 
 interface Props {
   categoria: Categoria;
-  manejarCambio: (preguntaId: number, texto: string) => void;
+  manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
 }
 
 export default function Categoria3Informe({ categoria, manejarCambio }: Props) {
@@ -50,7 +55,10 @@ export default function Categoria3Informe({ categoria, manejarCambio }: Props) {
       [preguntaId]: texto,
     }));
     
-    manejarCambio(preguntaId, texto);
+    manejarCambio(preguntaId, {
+      opcion_id: null,
+      texto_respuesta: texto,
+    });
   };
 
   const findPreguntaId = (rol: string, act: string): number => {

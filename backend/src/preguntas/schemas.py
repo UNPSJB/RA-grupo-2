@@ -23,12 +23,13 @@ class Pregunta(PreguntaBase):
     id: int
     enunciado: str
     categoria_id: int
+    opciones: List[Opcion]
 
     model_config = {"from_attributes": True}
 
 
 class PreguntaCerrada(Pregunta):
-    opciones: List[Opcion]
+    #opciones: List[Opcion]
 
     model_config = {"from_attributes": True}
 
