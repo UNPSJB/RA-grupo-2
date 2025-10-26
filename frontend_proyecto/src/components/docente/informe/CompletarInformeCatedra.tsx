@@ -323,14 +323,13 @@ export default function CompletarInformeCatedra() {
           <h1 className="h4 mb-0">Completar Informe - {materiaNombre}</h1>
         </div>
         <div className="card-body">
-          <div className="alert alert-info mb-4">
-            <strong>Año:</strong> {anio} | <strong>Periodo:</strong> {periodo}
-          </div>
-          <InformeCatedraCompletadoFuncion
+          <div>
+            <InformeCatedraCompletadoFuncion
             docenteId={1} //hardcodeado por ahora
             materiaId={materiaId}
             onDatosGenerados={manejarDatosGenerados}
           />
+          </div>
           <div>
             <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
           </div>

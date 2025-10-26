@@ -103,12 +103,8 @@ export default function InformeCatedraCompletadoFuncion({
   if (!data) return <p>No hay datos para mostrar.</p>;
 
   return (
-    <div className="informe-container" style={{ width: "80%", margin: "2rem auto" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>
-        Informe de Actividad Curricular
-      </h2>
-
-      <table border={1} cellPadding={6} style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="informe-container" style={{ width: "80%", margin: "0.5rem auto" }}>
+      <table border={1} cellPadding={6} style={{ width: "100%", borderCollapse: "collapse", margin: 0 }}>
         <tbody>
           <tr><td><strong>Sede</strong></td><td>{data.sede}</td></tr>
           <tr><td><strong>Ciclo Lectivo</strong></td><td>{data.cicloLectivo}</td></tr>
