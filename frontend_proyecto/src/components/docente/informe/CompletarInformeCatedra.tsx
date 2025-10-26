@@ -4,6 +4,7 @@ import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
 import Categoria3Informe from "./CAT3";
+import Categoria4Informe from "./CAT4";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 
 
@@ -252,6 +253,13 @@ export default function CompletarInformeCatedra() {
       case "3":
         return (
           <Categoria3Informe
+            categoria={categoria}
+            manejarCambio={(id, texto) => manejarCambio(id, texto)}
+          />
+        );
+      case "4":
+        return (
+          <Categoria4Informe
             categoria={categoria}
             manejarCambio={(id, texto) => manejarCambio(id, texto)}
           />
