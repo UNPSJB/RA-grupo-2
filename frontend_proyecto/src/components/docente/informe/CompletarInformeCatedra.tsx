@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import Categoria2BInforme from "./CAT2B";
@@ -71,8 +71,12 @@ export default function CompletarInformeCatedra() {
         return res.json();
       })
       .then((data: CategoriaConPreguntas[]) => {
-        setCategoriasConPreguntas(data);
-        console.log(data);
+        const dataOrdenada = [...data].sort((a, b) =>
+          a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
+        );
+
+        setCategoriasConPreguntas(dataOrdenada);
+        console.log(dataOrdenada);
         console.log("Informe Base ID:", informeBaseId);
         /*
         const respuestasIniciales: Record<number, string> = {};
@@ -275,10 +279,13 @@ export default function CompletarInformeCatedra() {
         );
       default:
         return (
-          <div>
-            <div className="card shadow-sm border-0">
+          <div className="card mt-3">
+            <div className="card-header bg-primary text-white">
+              <strong>{categoria.cod} - {categoria.texto}</strong>
+            </div>
+
+            <div className="card-body p-0">
               <div className="card-body">
-                <h2 className="h5 mb-3 fw-bold">{categoria.texto}</h2>
                 {categoria.preguntas.map((pregunta, i) => (
                   <div key={pregunta.id} className="mb-4">
                     <div className="mb-2">
