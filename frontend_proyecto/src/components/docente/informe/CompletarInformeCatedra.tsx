@@ -57,6 +57,10 @@ export default function CompletarInformeCatedra() {
   >([]);
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
 
+  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
+  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
+
+
   const {
     docenteMateriaId,
     materiaId,
@@ -177,6 +181,8 @@ export default function CompletarInformeCatedra() {
 
   const manejarDatosGenerados = (datos: any) => {
     setCantidadInscriptos(datos.cantidadAlumnos);
+    setCantidadComisionesTeoricas(datos.cantidadComisionesTeoricas);
+    setCantidadComisionesPracticas(datos.cantidadComisionesPracticas);
   };
 
   const enviarInforme = async () => {
@@ -203,6 +209,8 @@ export default function CompletarInformeCatedra() {
       cantidad_inscriptos: cantidadInscriptos,
       anio: ANIO_ACTUAL,
       periodo: periodo,
+      cantidadComisionesTeoricas,
+      cantidadComisionesPracticas,
       respuestas: respuestasFormateadas,
     };
     try {
@@ -357,13 +365,10 @@ export default function CompletarInformeCatedra() {
           <h1 className="h4 mb-0">Completar Informe - {materiaNombre}</h1>
         </div>
         <div className="card-body">
-          <div>
-            <InformeCatedraCompletadoFuncion
-              docenteId={1} //hardcodeado por ahora
-              materiaId={materiaId}
-              onDatosGenerados={manejarDatosGenerados}
-            />
-          </div>
+          <InformeCatedraCompletadoFuncion
+            docenteMateriaId={docenteMateriaId}
+            onDatosGenerados={manejarDatosGenerados}
+          />
           <div>
             <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
           </div>

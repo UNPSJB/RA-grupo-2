@@ -73,7 +73,9 @@ def crear_informe_completado(db: Session, informe_data: schemas.InformeCatedraCo
         cantidadAlumnos=informe_data.cantidadAlumnos,
         contenido=informe_data.contenido,
         anio=informe_data.anio,
-        periodo=informe_data.periodo
+        periodo=informe_data.periodo,
+        cantidadComisionesTeoricas=informe_data.cantidadComisionesTeoricas,
+        cantidadComisionesPracticas=informe_data.cantidadComisionesPracticas,
     )
     db.add(informe_db)
     db.commit()  

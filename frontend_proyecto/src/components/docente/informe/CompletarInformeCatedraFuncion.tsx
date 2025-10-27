@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ANIO_ACTUAL } from "../../../constants";
-import { PERIODO_ACTUAL } from "../../../constants";
+import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
+
 interface InformeActividad {
   sede: string;
   cicloLectivo: number;
@@ -14,14 +14,12 @@ interface InformeActividad {
 }
 
 interface Props {
-  docenteId: number;
-  materiaId: number;
-  onDatosGenerados?: (datos: InformeActividad) => void;  
+  docenteMateriaId: number;
+  onDatosGenerados?: (datos: InformeActividad) => void;
 }
 
 export default function InformeCatedraCompletadoFuncion({
-  docenteId,
-  materiaId,
+  docenteMateriaId,
   onDatosGenerados,
 }: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
@@ -33,49 +31,46 @@ export default function InformeCatedraCompletadoFuncion({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener el informe completado para año y periodoa 
-        //se obtienen del informe completado pero sino se podria pasar por parametros
-/*        const informeRes = await fetch(
-          `http://127.0.0.1:8000/informe-catedra-completado/${informeId}`
+        // 🔹 Obtener docente_id y materia_id desde la relación intermedia
+        const relacionRes = await fetch(
+          `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
         );
-        if (!informeRes.ok) throw new Error("Error al obtener el informe");
-        const informe = await informeRes.json();
+        if (!relacionRes.ok) throw new Error("Error al obtener la relación docente-materia");
+        const relacion = await relacionRes.json();
 
-        const anio = informe.anio ?? ANIO_ACTUAL;
-        const periodo = informe.periodo;
-        if (!anio || !periodo)
-          throw new Error("El informe no contiene año o periodo válidos.");
-*/
-        //  Obtener la materia
+        const docenteId = relacion.docente_id;
+        const materiaIdRelacion = relacion.materia_id;
+        const anio = relacion.anio ?? ANIO_ACTUAL;
+        const periodo = relacion.periodo ?? PERIODO_ACTUAL;
+
+        // 🔹 Obtener la materia
         const materiaRes = await fetch(
-          `http://127.0.0.1:8000/materias/${materiaId}`
+          `http://127.0.0.1:8000/materias/${materiaIdRelacion}`
         );
         if (!materiaRes.ok) throw new Error("Error al obtener la materia");
         const materia = await materiaRes.json();
 
-        // Obtener el docente
+        // 🔹 Obtener el docente
         const docenteRes = await fetch(
           `http://127.0.0.1:8000/docentes/${docenteId}`
         );
         if (!docenteRes.ok) throw new Error("Error al obtener el docente");
         const docente = await docenteRes.json();
 
-        //  Obtener alumnos según materia, año y periodo
+        // 🔹 Obtener alumnos según materia, año y periodo
         const alumnosRes = await fetch(
-          `http://127.0.0.1:8000/alumnos/materia/${materiaId}/cursantes?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`
+          `http://127.0.0.1:8000/alumnos/materia/${materiaIdRelacion}/cursantes?anio=${anio}&periodo=${periodo}`
         );
         if (!alumnosRes.ok) throw new Error("Error al obtener alumnos");
         const alumnos = await alumnosRes.json();
 
         const cantidadAlumnos = alumnos.length;
 
-        // Genera el informe para mostrar
-        const sede = "Trelew";
-
-        const datos = {
-          sede,
-          cicloLectivo: ANIO_ACTUAL,
-          periodo: PERIODO_ACTUAL,
+        // 🔹 Generar el informe
+        const datos: InformeActividad = {
+          sede: "Trelew",
+          cicloLectivo: anio,
+          periodo: periodo,
           actividadCurricular: materia.nombre,
           codigoActividadCurricular: materia.matricula,
           docenteResponsable: `${docente.nombre} ${docente.apellido}`,
@@ -85,18 +80,16 @@ export default function InformeCatedraCompletadoFuncion({
         };
 
         setData(datos);
-        if (onDatosGenerados) {
-          onDatosGenerados(datos);
-        }
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
+        onDatosGenerados?.(datos);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchData();
-  }, [docenteId, materiaId]);
+  }, [docenteMateriaId, cantidadComisionesTeoricas, cantidadComisionesPracticas]);
 
   if (loading) return <p>Cargando informe...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
@@ -113,41 +106,40 @@ export default function InformeCatedraCompletadoFuncion({
           <tr><td><strong>Código de Actividad Curricular</strong></td><td>{data.codigoActividadCurricular}</td></tr>
           <tr><td><strong>Docente Responsable</strong></td><td>{data.docenteResponsable}</td></tr>
           <tr><td><strong>Cantidad de alumnos inscriptos</strong></td><td>{data.cantidadAlumnos}</td></tr>
-        <tr>
-          <td><strong>Cantidad de comisiones teóricas</strong></td>
-          <td>
-            <input
-              type="text"
-              value={cantidadComisionesTeoricas}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value)) {
+          <tr>
+            <td><strong>Cantidad de comisiones teóricas</strong></td>
+            <td>
+              <input
+                type="text"
+                value={cantidadComisionesTeoricas}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) {
                     setCantidadComisionesTeoricas(value === "" ? 0 : Number(value));
-                }
-              }}
-              placeholder="Ingrese un número"
-              style={{ width: "100%" }}
-            />
-          </td>
-        </tr>
-
-        <tr>
-          <td><strong>Cantidad de comisiones prácticas</strong></td>
-          <td>
-            <input
-              type="text"
-              value={cantidadComisionesPracticas}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value)) {
-                     setCantidadComisionesPracticas(value === "" ? 0 : Number(value));
-                }
-              }}
-              placeholder="Ingrese un número"
-              style={{ width: "100%" }}
-            />
-          </td>
-        </tr>
+                  }
+                }}
+                placeholder="Ingrese un número"
+                style={{ width: "100%" }}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Cantidad de comisiones prácticas</strong></td>
+            <td>
+              <input
+                type="text"
+                value={cantidadComisionesPracticas}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) {
+                    setCantidadComisionesPracticas(value === "" ? 0 : Number(value));
+                  }
+                }}
+                placeholder="Ingrese un número"
+                style={{ width: "100%" }}
+              />
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
