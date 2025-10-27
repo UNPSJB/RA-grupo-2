@@ -45,3 +45,12 @@ def ver_materias_docente(db: Session, docente_id: int):
         } 
         for r in relaciones
     ]
+    
+def obtener_relacion_docente_materia(db: Session, relacion_id: int):
+    relacion = db.scalar(
+        select(DocenteMateria).where(DocenteMateria.id == relacion_id)
+    )
+    if not relacion:
+        return None
+    return relacion
+    

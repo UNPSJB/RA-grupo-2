@@ -333,8 +333,7 @@ export default function CompletarInformeCatedra() {
             <strong>Año:</strong> {anio} | <strong>Periodo:</strong> {periodo}
           </div>
           <InformeCatedraCompletadoFuncion
-            docenteId={1} //hardcodeado por ahora
-            materiaId={materiaId}
+            docenteMateriaId={docenteMateriaId} 
             onDatosGenerados={manejarDatosGenerados}
           />
           <div>

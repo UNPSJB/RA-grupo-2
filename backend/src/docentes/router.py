@@ -6,6 +6,7 @@ from src.docentes import schemas, services
 from src.asociaciones.models import Periodo
 from src.materias.schemas import Materia
 from src.docentes import services as docente_services
+from src.asociaciones.docente_materia.models import DocenteMateria
 
 router = APIRouter(prefix="/docentes", tags=["docentes"])
 
@@ -38,3 +39,17 @@ def obtener_materias_docente(docente_id: int, db: Session = Depends(get_db)):
         "apellido": docente.apellido,
         "materias": materias
     }
+    
+@router.get("/materia_relacion/{relacion_id}")
+def obtener_relacion(relacion_id: int, db: Session = Depends(get_db)):
+    relacion = docente_services.obtener_relacion_docente_materia(db, relacion_id)
+    if not relacion:
+        return {"error": "Relación no encontrada"}
+    return {
+        "relacion_id": relacion.id,
+        "docente_id": relacion.docente_id,
+        "materia_id": relacion.materia_id,
+        "anio": relacion.anio,
+        "periodo": relacion.periodo.name,
+    }
+
