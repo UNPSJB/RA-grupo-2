@@ -206,7 +206,7 @@ export default function CompletarInformeCatedra() {
       informe_catedra_base_id: informeBaseId,
       titulo: `Informe ${materiaNombre} ${anio}`,
       contenido: `Informe para ${materiaNombre} (${periodo} ${anio})`,
-      cantidad_inscriptos: cantidadInscriptos,
+      cantidadAlumnos: cantidadInscriptos,
       anio: ANIO_ACTUAL,
       periodo: periodo,
       cantidadComisionesTeoricas,
