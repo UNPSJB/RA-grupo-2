@@ -117,9 +117,7 @@ export default function CompletarInformeCatedra() {
         return res.json();
       })
       .then((data) => {
-        if (data.length === 0) {
-          setMensaje("No hay datos estadísticos disponibles.");
-        } else {
+        if (data.length != 0) {
           setDatosEstadisticos(data);
         }
       })
