@@ -3,6 +3,7 @@ import PreguntasCategoria from "./Categoria";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation} from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
+import ROUTES from "../../../paths";
 
 interface Categoria {
   id: number;
@@ -116,7 +117,7 @@ export default function CompletarEncuesta() {
 
   function cerrarPagina(){
     setMensajeExito(null);
-    navigate("/encuestas");
+    navigate(ROUTES.ENCUESTAS_DISPONIBLES);
   }
 
   if (mensajeExito) {

@@ -1,5 +1,7 @@
 import type { Materia } from "../../types/types";
 import { Link } from "react-router-dom";
+import ROUTES from "../../paths";
+
 type Props = {
   materias: Materia[] | undefined;
 };
@@ -27,7 +29,7 @@ export default function ListaMaterias({ materias }: Props) {
                   <span className="text-dark"> – {materia.matricula}</span>
                 </div>
                 <Link
-                  to={`/detallemateria/${materia.id}`}
+                  to={ROUTES.DETALLE_MATERIA(materia.id)}
                   state={{ nombre: materia.nombre }}
                   className="btn btn-primary btn-sm"
                 >

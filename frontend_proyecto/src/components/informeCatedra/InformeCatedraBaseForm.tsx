@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CategoriaManager from "./ManejadorCategoria"; 
-import OpcionesManager from "./ManejadorOpciones";   
+import OpcionesManager from "./ManejadorOpciones";  
+import ROUTES from "../../paths"; 
 
 interface CategoriaTemp { cod: string; texto: string; }
 interface PreguntaTemp { enunciado: string; categoria_cod: string; tipo: 'abierta' | 'cerrada'; opcion_ids: number[]; }
@@ -118,7 +119,7 @@ export default function InformeCatedraBaseForm() {
             }
 
             alert("Informe creado con éxito.");
-            navigate("/");
+            navigate(ROUTES.HOME);
 
         } catch (error) {
             console.error("Error en la cascada de creación:", error);
@@ -204,7 +205,7 @@ export default function InformeCatedraBaseForm() {
                             </ul>
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
-                            <button type="button" className="btn btn-secondary" onClick={() => navigate("/")} disabled={cargando}>Cancelar</button>
+                            <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>
                             <button type="submit" className="btn btn-primary" disabled={cargando}>
                                 {cargando ? "Guardando en cascada..." : "Guardar Informe Completo"}
                             </button>

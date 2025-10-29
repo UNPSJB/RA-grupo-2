@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
 import type { Departamento } from "../../../types/types";
+import ROUTES from "../../../paths";
 
 interface InformeCatedraCompletado {
   id: number;
@@ -51,7 +52,7 @@ export default function InformeCatedraList() {
                         </span>
                       </div>
                       <Link
-                        to={`/informes-catedra/${inf.id}`}
+                        to={ROUTES.INFORME_CATEDRA_DETALLE(inf.id)}
                         className="btn btn-primary btn-sm"
                       >
                         Ver Detalle

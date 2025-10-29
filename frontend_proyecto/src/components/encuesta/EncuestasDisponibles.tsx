@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../constants";
 import MensajeExito from "../pregunta/preguntaCerrada/MensajeExito";
+import ROUTES from "../../paths";
 
 type EncuestaDisponible = {
   materia: string;
@@ -35,7 +36,7 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
       if(data.existe){
         setMensajeExito(`Ya completaste la encuesta de ${e.materia}`); 
       } else{
-        navigate("/encuestas/categoria-b", {
+        navigate(ROUTES.COMPLETAR_ENCUESTA, {
           state: {
             alumnoId: alumnoId,
             encuestaId: e.encuesta_id,

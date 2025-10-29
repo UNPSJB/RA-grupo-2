@@ -7,6 +7,7 @@ import Categoria3Informe from "./CAT3";
 import Categoria4Informe from "./CAT4";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 import InformeCatedraCompletadoFuncion from "./CompletarInformeCatedraFuncion";
+import ROUTES from "../../../paths";
 
 import CategoriaEquipamiento from "./CAT1"
 interface Pregunta {
@@ -247,7 +248,7 @@ export default function CompletarInformeCatedra() {
       }
       setMensaje("¡Informe enviado con éxito!");
       setTimeout(() => {
-        navigate("/docentes/informes-pendientes");
+        navigate(ROUTES.INFORMES_CATEDRA_PENDIENTES);
       }, 2000);
     } catch (err: Error | unknown) {
       console.error("Error enviando informe:", err);

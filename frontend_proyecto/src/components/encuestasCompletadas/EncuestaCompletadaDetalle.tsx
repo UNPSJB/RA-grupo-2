@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import ROUTES from "../../paths";
 
 interface Opcion {
   id: number;
@@ -180,7 +181,7 @@ export default function EncuestaCompletadaDetalle() {
             </div>
           )}
 
-          <Link to="/encuestas-completadas" className="btn btn-secondary mt-4">
+          <Link to= {ROUTES.ENCUESTAS_COMPLETADAS} className="btn btn-secondary mt-4">
             Volver al listado
           </Link>
         </div>

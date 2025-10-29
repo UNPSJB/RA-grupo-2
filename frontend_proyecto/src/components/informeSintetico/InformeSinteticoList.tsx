@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchInformes } from "./informesService";
+import ROUTES from "../../paths";
 
 interface Informe {
   id: number;
@@ -35,7 +36,7 @@ function InformeSinteticoList() {
                   </span>
                 </div>
                 <Link
-                  to={`/informes/${inf.id}`}
+                  to={ROUTES.INFORME_SINTETICO_DETALLE(inf.id)}
                   className="btn btn-primary btn-sm"
                 >
                   Ver Informe

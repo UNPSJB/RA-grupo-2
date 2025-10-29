@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import EncuestasPage from "./components/encuesta/EncuestasPage";
-import EncuestaDetalle from "./components/encuesta/EncuestaDetalle";
+//import EncuestaDetalle from "./components/encuesta/EncuestaDetalle";
 import DocentePage from "./components/docente/docentesPage";
 import Navbar from "./components/navbar/navbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -10,11 +10,11 @@ import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
 import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
 import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
-import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
+//import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
 import CompletarEncuesta from "./components/encuesta/completarEncuesta/CompletarEncuesta";
 
-import SeleccionarTipoPregunta from './components/pregunta/SeleccionarTipoPregunta';
-import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPreguntaAbierta';
+//import SeleccionarTipoPregunta from './components/pregunta/SeleccionarTipoPregunta';
+//import CrearPreguntaAbierta from './components/pregunta/preguntaAbierta/CrearPreguntaAbierta';
 import EncuestasCompletadasPage from "./components/encuestasCompletadas/EncuestasCompletadasPage";
 import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/EncuestaCompletadaDetalle";
 
@@ -22,7 +22,7 @@ import InformeCatedraList from "./components/informeCatedra/informesCatedraCompl
 import InformeCatedraDetail from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoDetail";
 import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBaseForm";
 
-import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
+//import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
@@ -32,6 +32,8 @@ import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+import ROUTES from "./paths";
 
 function App() {
   return (
@@ -53,29 +55,23 @@ function App() {
             container: Centra el contenido y da un ancho máximo
           */}
           <Routes>
-            <Route path="/" element={<Menu />} />
-            <Route path="/departamento" element={<DetalleDepartamento />} />
-            <Route path="/carrera/:id" element={<DetalleCarrera />} />
-            <Route path="/encuestas" element={<EncuestasPage />} />
-            <Route path="/encuestas/:id" element={<EncuestaDetalle />} />
-            <Route path="/docentes/:id" element={<DocentePage />} />
-            <Route path="/detallemateria/:id" element={<DetalleMateria />} />
-            <Route path="/informes" element={<InformeSinteticoList />} />
-            <Route path="/informes/:id" element={<InformeSinteticoDetail />} />
-            <Route path="/preguntas/crear" element={<SeleccionarTipoPregunta />} />
-            <Route path="/pregunta/cerrada" element={<CrearPreguntaCerrada />} />
-            <Route path="/pregunta/abierta" element={<CrearPreguntaAbierta />} />
-            <Route path="/encuestas/categoria-b" element={<CompletarEncuesta />} />
-            <Route path="/encuestas-completadas" element={<EncuestasCompletadasPage />} />
-            <Route path="/encuestas-completadas/:id" element={<EncuestaCompletadaDetalle />} />
-            <Route path="/informes-catedra" element={<InformeCatedraList />} />
-            <Route path="/informes-catedra/:id" element={<InformeCatedraDetail />} />
-            <Route path="/datos-estadisticos" element={<DatosEstadisticosPage />} />
-            <Route path="/informes-catedra-base" element={<InformeCatedraBaseForm />} />
-            <Route path="/informes-catedra-base/nuevo" element={<InformeCatedraBaseForm />} />
-            <Route path="/docentes/informes-pendientes" element={<InformesPendientesPage />} />
-            <Route path="/docentes/informe/completar" element={<InformeForm />} />
-            <Route path="/encuestas/nueva" element={<EncuestaBaseForm />} />
+            <Route path={ROUTES.HOME} element={<Menu />} />
+            <Route path={ROUTES.CARRERAS_DPTO} element={<DetalleDepartamento />} />
+            <Route path={ROUTES.CARRERA()} element={<DetalleCarrera />} />
+            <Route path={ROUTES.ENCUESTAS_DISPONIBLES} element={<EncuestasPage />} />
+            <Route path={ROUTES.MATERIAS_ASIGNADAS()} element={<DocentePage />} />
+            <Route path={ROUTES.DETALLE_MATERIA()} element={<DetalleMateria />} />
+            <Route path={ROUTES.INFORMES_SINTETICOS} element={<InformeSinteticoList />} />
+            <Route path={ROUTES.INFORME_SINTETICO_DETALLE()} element={<InformeSinteticoDetail />} />
+            <Route path={ROUTES.COMPLETAR_ENCUESTA} element={<CompletarEncuesta />} />
+            <Route path={ROUTES.ENCUESTAS_COMPLETADAS} element={<EncuestasCompletadasPage />} />
+            <Route path={ROUTES.ENCUESTA_COMPLETADA_DETALLE()} element={<EncuestaCompletadaDetalle />} />
+            <Route path={ROUTES.INFORMES_CATEDRA} element={<InformeCatedraList />} />
+            <Route path={ROUTES.INFORME_CATEDRA_DETALLE()} element={<InformeCatedraDetail />} />
+            <Route path={ROUTES.INFORME_CATEDRA_BASE_NUEVO} element={<InformeCatedraBaseForm />} />
+            <Route path={ROUTES.INFORMES_CATEDRA_PENDIENTES} element={<InformesPendientesPage />} />
+            <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
+            <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
           </Routes>
         </div>
       </main>

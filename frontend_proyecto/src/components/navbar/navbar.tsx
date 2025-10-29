@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
+import ROUTES from "../../paths";
 
 export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
       <div className="container-fluid">
-        <Link className="navbar-brand fw-bold" to="/">
+        <Link className="navbar-brand fw-bold" to={ROUTES.HOME}>
           Sistema de encuestas
         </Link>
 
@@ -36,12 +37,12 @@ export default function Navbar() {
               </a>
               <ul className="dropdown-menu" aria-labelledby="alumnoDropdown">
                 <li>
-                  <Link className="dropdown-item" to="/encuestas">
+                  <Link className="dropdown-item" to={ROUTES.ENCUESTAS_DISPONIBLES}>
                     Encuestas Disponibles
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/encuestas-completadas">
+                  <Link className="dropdown-item" to={ROUTES.ENCUESTAS_COMPLETADAS}>
                     Encuestas Completadas
                   </Link>
                 </li>
@@ -61,12 +62,12 @@ export default function Navbar() {
               </a>
               <ul className="dropdown-menu" aria-labelledby="docenteDropdown">
                 <li>
-                  <Link className="dropdown-item" to="/docentes/1">
+                  <Link className="dropdown-item" to={ROUTES.MATERIAS_ASIGNADAS(1)}>
                     Materias dadas
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/docentes/informes-pendientes">
+                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>
                     Informes de Cátedra Pendientes
                   </Link>
                 </li>
@@ -89,12 +90,12 @@ export default function Navbar() {
                 aria-labelledby="departamentoDropdown"
               >
                 <li>
-                  <Link className="dropdown-item" to="/departamento">
+                  <Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO}>
                     Carreras
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/informes-catedra">
+                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA}>
                     Informes de Cátedra Completados
                   </Link>
                 </li>
@@ -114,17 +115,17 @@ export default function Navbar() {
               </a>
               <ul className="dropdown-menu" aria-labelledby="secretariaDropdown">
                 <li>
-                  <Link className="dropdown-item" to="/informes">
+                  <Link className="dropdown-item" to={ROUTES.INFORMES_SINTETICOS}>
                     Informes Sintéticos
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/informes-catedra-base">
+                  <Link className="dropdown-item" to={ROUTES.INFORME_CATEDRA_BASE_NUEVO}>
                     Crear Informe de Cátedra Base
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/encuestas/nueva">
+                  <Link className="dropdown-item" to={ROUTES.ENCUESTA_BASE_NUEVA}>
                     Crear Encuesta Base
                   </Link>
                 </li>

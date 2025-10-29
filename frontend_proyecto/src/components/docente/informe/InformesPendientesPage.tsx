@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DOCENTE_ID } from "../../../constants";
 import { ANIO_ACTUAL } from "../../../constants";
 import { PERIODO_ACTUAL } from "../../../constants";
+import ROUTES from "../../../paths";
 
 type InformePendiente = {
   materia_id: number;
@@ -41,7 +42,7 @@ export default function InformesPendientesPage() {
   }, [docenteId]);
 
   const handleCompletar = (informe: InformePendiente) => {
-    navigate("/docentes/informe/completar", {
+    navigate(ROUTES.COMPLETAR_INFORME_CATEDRA, {
       state: {
         docenteMateriaId: informe.docente_materia_id,
         materiaNombre: informe.materia_nombre,

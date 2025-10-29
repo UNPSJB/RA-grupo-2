@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Materia } from "../../types/types";
 import { Link } from "react-router-dom";
+import ROUTES from "../../paths";
 
 type Respuesta = {
   id: number;
@@ -65,7 +66,7 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
                 </span>
               </div>
               <Link
-                to={`/encuestas-completadas/${e.id}`}
+                to={ROUTES.ENCUESTA_COMPLETADA_DETALLE(e.id)}
                 className="btn btn-primary btn-sm"
               >
                 Ver encuesta
