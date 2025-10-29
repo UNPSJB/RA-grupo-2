@@ -128,7 +128,10 @@ export default function CompletarInformeCatedra() {
       })
       .then((data) => {
         if (data.length != 0) {
-          setDatosEstadisticos(data);
+          const dataOrdenada = [...data].sort((a, b) =>
+          a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" })
+        );
+          setDatosEstadisticos(dataOrdenada);
         }
       })
       .catch((error) => {
@@ -297,6 +300,7 @@ export default function CompletarInformeCatedra() {
           <Categoria2BInforme
             categoria={categoria}
             manejarCambio={manejarCambio}
+            estadisticas={datosEstadisticos}
           />
         );
       case "2.C":

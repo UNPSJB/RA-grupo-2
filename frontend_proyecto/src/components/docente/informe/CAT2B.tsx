@@ -18,15 +18,34 @@ interface Categoria {
   preguntas: Pregunta[];
 }
 
+interface OpcionPorcentaje {
+  opcion_id: string;
+  porcentaje: number;
+}
+
+interface DatosEstadisticosPregunta {
+  id_pregunta: string;
+  datos: OpcionPorcentaje[];
+}
+
+interface DatosEstadisticosCategoria {
+  categoria_cod: string;
+  categoria_texto: string;
+  promedio_categoria: OpcionPorcentaje[];
+  preguntas: DatosEstadisticosPregunta[];
+}
+
 interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
+  estadisticas: DatosEstadisticosCategoria[];
 }
 
-export default function Categoria2BInforme({ categoria, manejarCambio }: Props) {
+export default function Categoria2BInforme({ categoria, manejarCambio, estadisticas }: Props) {
   const [respuestas, setRespuestas] = useState<Record<number, string>>({});
   const [observacion, setObservacion] = useState<Pregunta | null>(null);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
+  const [preguntasValor, setpreguntasValor] = useState<number[]>([]);
 
   useEffect(() => {
     if (!categoria) return;
@@ -45,7 +64,40 @@ export default function Categoria2BInforme({ categoria, manejarCambio }: Props) 
     const inicial: Record<number, string> = {};
     categoria.preguntas.forEach((p) => (inicial[p.id] = ""));
     setRespuestas(inicial);
+    setpreguntasValor([]);
   }, [categoria]);
+
+  useEffect(() => {
+    if (!estadisticas || estadisticas.length === 0) return;
+
+    const nuevasRespuestas: Record<number, string> = { ...respuestas };
+    const ids_preguntas_valor: number[] = [];
+
+    preguntas.forEach((p) => {
+      if (!p.enunciado.toLowerCase().includes("observaciones")) {
+        const catEst = estadisticas.find(
+          (e) =>
+            p.enunciado.includes(`${e.categoria_cod}:`)
+        );
+
+        if (catEst) {
+          const valor = catEst.promedio_categoria
+            .map((op) => `${op.opcion_id}: ${op.porcentaje.toFixed(2)}%`)
+            .join(" | ");
+          nuevasRespuestas[p.id] = valor;
+          ids_preguntas_valor.push(p.id);
+
+          manejarCambio(p.id, {
+            opcion_id: null,
+            texto_respuesta: valor,
+          });
+        }
+      }
+    });
+
+    setRespuestas(nuevasRespuestas);
+    setpreguntasValor(ids_preguntas_valor);
+  }, [estadisticas, categoria, preguntas]);
 
   const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
     setRespuestas((prev) => ({
@@ -84,6 +136,7 @@ export default function Categoria2BInforme({ categoria, manejarCambio }: Props) 
                     type="text"
                     className="form-control"
                     value={respuestas[p.id] || ""}
+                    readOnly={preguntasValor.includes(p.id)}
                     onChange={(e) =>
                       actualizarRespuestaTexto(p.id, e.target.value)
                     }
