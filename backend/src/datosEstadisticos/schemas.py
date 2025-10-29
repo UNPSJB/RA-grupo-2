@@ -8,3 +8,9 @@ class OpcionPorcentaje(BaseModel):
 class DatosEstadisticosPregunta(BaseModel):
     id_pregunta: str
     datos: List[OpcionPorcentaje]
+
+class DatosEstadisticosCategoria(BaseModel):
+    categoria_cod: str
+    categoria_texto: str
+    promedio_categoria: List[OpcionPorcentaje]
+    preguntas: List[DatosEstadisticosPregunta]

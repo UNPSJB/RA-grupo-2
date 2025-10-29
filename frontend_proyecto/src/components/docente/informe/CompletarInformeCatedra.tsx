@@ -33,6 +33,13 @@ interface DatosEstadisticosPregunta {
   datos: OpcionPorcentaje[];
 }
 
+interface DatosEstadisticosCategoria {
+  categoria_cod: string;
+  categoria_texto: string;
+  promedio_categoria: OpcionPorcentaje[];
+  preguntas: DatosEstadisticosPregunta[];
+}
+
 type RespuestaValor = {
   opcion_id: number | null;
   texto_respuesta: string | null;
@@ -53,9 +60,7 @@ export default function CompletarInformeCatedra() {
   );
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
-  const [datosEstadisticos, setDatosEstadisticos] = useState<
-    DatosEstadisticosPregunta[]
-  >([]);
+  const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosCategoria[]>([]);
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
 
   const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
