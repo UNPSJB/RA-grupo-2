@@ -95,22 +95,34 @@ export default function InformeCatedraCompletadoFuncion({
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
   if (!data) return <p>No hay datos para mostrar.</p>;
 
-  return (
-    <div className="informe-container" style={{ width: "80%", margin: "0.5rem auto" }}>
-      <table border={1} cellPadding={6} style={{ width: "100%", borderCollapse: "collapse", margin: 0 }}>
+return (
+  <div className="card border-light shadow-sm">
+    <div className="card-body p-0">
+      <table className="table table-borderless m-0">
         <tbody>
-          <tr><td><strong>Sede</strong></td><td>{data.sede}</td></tr>
-          <tr><td><strong>Ciclo Lectivo</strong></td><td>{data.cicloLectivo}</td></tr>
-          <tr><td><strong>Período</strong></td><td>{data.periodo}</td></tr>
-          <tr><td><strong>Actividad Curricular</strong></td><td>{data.actividadCurricular}</td></tr>
-          <tr><td><strong>Código de Actividad Curricular</strong></td><td>{data.codigoActividadCurricular}</td></tr>
-          <tr><td><strong>Docente Responsable</strong></td><td>{data.docenteResponsable}</td></tr>
-          <tr><td><strong>Cantidad de alumnos inscriptos</strong></td><td>{data.cantidadAlumnos}</td></tr>
+          {[
+            { label: "Sede", value: data.sede },
+            { label: "Ciclo Lectivo", value: data.cicloLectivo },
+            { label: "Período", value: data.periodo },
+            { label: "Actividad Curricular", value: data.actividadCurricular },
+            { label: "Código", value: data.codigoActividadCurricular },
+            { label: "Docente Responsable", value: data.docenteResponsable },
+            { label: "Alumnos inscriptos", value: data.cantidadAlumnos },
+          ].map((item, index) => (
+            <tr key={index}>
+              <td className="fw-bold" style={{ width: '35%', padding: '12px 16px' }}>
+                {item.label}
+              </td>
+              <td style={{ padding: '12px 16px' }}>{item.value}</td>
+            </tr>
+          ))}
+          
           <tr>
-            <td><strong>Cantidad de comisiones teóricas</strong></td>
-            <td>
+            <td className="fw-bold" style={{ padding: '12px 16px' }}>Comisiones teóricas</td>
+            <td style={{ padding: '12px 16px' }}>
               <input
                 type="text"
+                className="form-control form-control-sm"
                 value={cantidadComisionesTeoricas}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -118,16 +130,17 @@ export default function InformeCatedraCompletadoFuncion({
                     setCantidadComisionesTeoricas(value === "" ? 0 : Number(value));
                   }
                 }}
-                placeholder="Ingrese un número"
-                style={{ width: "100%" }}
+                style={{ maxWidth: '120px' }}
               />
             </td>
           </tr>
+          
           <tr>
-            <td><strong>Cantidad de comisiones prácticas</strong></td>
-            <td>
+            <td className="fw-bold" style={{ padding: '12px 16px' }}>Comisiones prácticas</td>
+            <td style={{ padding: '12px 16px' }}>
               <input
                 type="text"
+                className="form-control form-control-sm"
                 value={cantidadComisionesPracticas}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -135,13 +148,13 @@ export default function InformeCatedraCompletadoFuncion({
                     setCantidadComisionesPracticas(value === "" ? 0 : Number(value));
                   }
                 }}
-                placeholder="Ingrese un número"
-                style={{ width: "100%" }}
+                style={{ maxWidth: '120px' }}
               />
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-  );
+  </div>
+);
 }
