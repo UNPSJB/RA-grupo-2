@@ -43,7 +43,6 @@ export default function Categoria2CInforme({ categoria, manejarCambio }: Props) 
 
     setPreguntas(sinReflexion);
 
-    // Inicializar respuestas
     const inicial: Record<number, string> = {};
     categoria.preguntas.forEach((p) => {
       inicial[p.id] = "";
@@ -72,89 +71,108 @@ export default function Categoria2CInforme({ categoria, manejarCambio }: Props) 
   const pAprObs = getPregunta("Obstáculos: Proceso de aprendizaje");
   const pEstrategias = getPregunta("Estrategias a implementar");
 
+  const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  };
+
   return (
-    <div className="card mt-3">
-      <div className="card-header bg-primary text-white">
-        <strong>{categoria.cod} - {categoria.texto}</strong>
+    <div className="card-body p-0">
+      <div className="mb-4 p-4 border rounded bg-light">
+        <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">Aspectos positivos</h6>
+        
+        <div className="mb-3">
+          <label className="form-label fw-semibold text-dark mb-2">
+            Proceso enseñanza
+          </label>
+          <textarea
+            className="form-control"
+            rows={3}
+            value={respuestas[pEnsPos?.id || 0] || ""}
+            onChange={(e) =>
+              pEnsPos && actualizarRespuestaTexto(pEnsPos.id, e.target.value)
+            }
+            onInput={autoExpand}
+            disabled={!pEnsPos}
+            style={{ resize: 'none', minHeight: '80px' }}
+          />
+        </div>
+
+        <div>
+          <label className="form-label fw-semibold text-dark mb-2">
+            Proceso de aprendizaje
+          </label>
+          <textarea
+            className="form-control"
+            rows={3}
+            value={respuestas[pAprPos?.id || 0] || ""}
+            onChange={(e) =>
+              pAprPos && actualizarRespuestaTexto(pAprPos.id, e.target.value)
+            }
+            onInput={autoExpand}
+            disabled={!pAprPos}
+            style={{ resize: 'none', minHeight: '80px' }}
+          />
+        </div>
       </div>
 
-      <div className="card-body p-0">
-        <table className="table table-bordered m-0 align-middle">
-          <thead className="table-light text-center">
-            <tr>
-              <th colSpan={2}>Aspectos positivos</th>
-              <th colSpan={2}>Obstáculos</th>
-              <th rowSpan={2} style={{ verticalAlign: "middle" }}>
-                Estrategias a implementar
-              </th>
-            </tr>
-            <tr>
-              <th>Proceso enseñanza</th>
-              <th>Proceso de aprendizaje</th>
-              <th>Proceso enseñanza</th>
-              <th>Proceso de aprendizaje</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={respuestas[pEnsPos?.id || 0] || ""}
-                  onChange={(e) =>
-                    pEnsPos && actualizarRespuestaTexto(pEnsPos.id, e.target.value)
-                  }
-                />
-              </td>
-              <td>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={respuestas[pAprPos?.id || 0] || ""}
-                  onChange={(e) =>
-                    pAprPos && actualizarRespuestaTexto(pAprPos.id, e.target.value)
-                  }
-                />
-              </td>
-              <td>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={respuestas[pEnsObs?.id || 0] || ""}
-                  onChange={(e) =>
-                    pEnsObs && actualizarRespuestaTexto(pEnsObs.id, e.target.value)
-                  }
-                />
-              </td>
-              <td>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={respuestas[pAprObs?.id || 0] || ""}
-                  onChange={(e) =>
-                    pAprObs && actualizarRespuestaTexto(pAprObs.id, e.target.value)
-                  }
-                />
-              </td>
-              <td>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={respuestas[pEstrategias?.id || 0] || ""}
-                  onChange={(e) =>
-                    pEstrategias && actualizarRespuestaTexto(pEstrategias.id, e.target.value)
-                  }
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="mb-4 p-4 border rounded bg-light">
+        <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">Obstáculos</h6>
+        
+        <div className="mb-3">
+          <label className="form-label fw-semibold text-dark mb-2">
+            Proceso enseñanza
+          </label>
+          <textarea
+            className="form-control"
+            rows={3}
+            value={respuestas[pEnsObs?.id || 0] || ""}
+            onChange={(e) =>
+              pEnsObs && actualizarRespuestaTexto(pEnsObs.id, e.target.value)
+            }
+            onInput={autoExpand}
+            disabled={!pEnsObs}
+            style={{ resize: 'none', minHeight: '80px' }}
+          />
+        </div>
+
+        <div>
+          <label className="form-label fw-semibold text-dark mb-2">
+            Proceso de aprendizaje
+          </label>
+          <textarea
+            className="form-control"
+            rows={3}
+            value={respuestas[pAprObs?.id || 0] || ""}
+            onChange={(e) =>
+              pAprObs && actualizarRespuestaTexto(pAprObs.id, e.target.value)
+            }
+            onInput={autoExpand}
+            disabled={!pAprObs}
+            style={{ resize: 'none', minHeight: '80px' }}
+          />
+        </div>
+      </div>
+
+      <div className="mb-4 p-4 border rounded bg-light">
+        <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">Estrategias a implementar</h6>
+        <textarea
+          className="form-control"
+          rows={3}
+          value={respuestas[pEstrategias?.id || 0] || ""}
+          onChange={(e) =>
+            pEstrategias && actualizarRespuestaTexto(pEstrategias.id, e.target.value)
+          }
+          onInput={autoExpand}
+          disabled={!pEstrategias}
+          style={{ resize: 'none', minHeight: '80px' }}
+        />
       </div>
 
       {reflexion && (
-        <div className="card-footer bg-light">
-          <label className="form-label fw-bold">{reflexion.enunciado}</label>
+        <div className="mb-4 p-4 border rounded bg-light">
+          <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">{reflexion.enunciado}</h6>
           <textarea
             className="form-control"
             rows={4}
@@ -162,6 +180,8 @@ export default function Categoria2CInforme({ categoria, manejarCambio }: Props) 
             onChange={(e) =>
               actualizarRespuestaTexto(reflexion.id, e.target.value)
             }
+            onInput={autoExpand}
+            style={{ resize: 'none', minHeight: '100px' }}
           />
         </div>
       )}
