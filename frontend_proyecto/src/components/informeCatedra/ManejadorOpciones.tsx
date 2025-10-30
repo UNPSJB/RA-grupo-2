@@ -53,14 +53,32 @@ export default function ManejadorOpciones({
               alert("Error al crear la opción. Revise el backend.");
           });
     };
+    
+    const cardStyle = { 
+        backgroundColor: 'var(--color-component-bg)',
+        color: 'var(--color-text-primary)',
+        borderColor: 'var(--color-text-primary)',
+    };
+
+    const inputFieldStyle = {
+        backgroundColor: 'var(--color-input-bg)',
+        color: 'var(--color-text-primary)',
+        borderColor: 'var(--color-text-primary)',
+    };
+    
+    const listItemStyle = {
+        backgroundColor: 'var(--color-input-bg)',
+        color: 'var(--color-text-primary)',
+        borderColor: 'var(--color-text-primary)',
+    }
 
     return (
-        <div className="mb-3 border p-3 bg-white rounded">
+        <div className="mb-3 border p-3 rounded" style={cardStyle}>
             <h6 className="fw-bold">Opciones para Respuesta Cerrada</h6>
             <label className="form-label">Seleccionar Opciones existentes:</label>
             <div className="list-group mb-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
                 {opcionesCatalogo.map((opcion) => (
-                    <label key={opcion.id} className="list-group-item d-flex align-items-center">
+                    <label key={opcion.id} className="list-group-item d-flex align-items-center" style={listItemStyle}>
                         <input
                             type="checkbox"
                             className="form-check-input me-2"
@@ -81,17 +99,18 @@ export default function ManejadorOpciones({
                     onChange={(e) => setNuevaOpcionContenido(e.target.value)}
                     placeholder="Contenido de nueva opción"
                     disabled={cargando}
+                    style={inputFieldStyle} 
                 />
                 <button
                     type="button"
-                    className="btn btn-outline-success"
+                    className="btn btn-theme-success" 
                     onClick={handleCrearNuevaOpcion}
                     disabled={cargando || !nuevaOpcionContenido.trim()}
                 >
                     Crear
                 </button>
             </div>
-            {opcionesSeleccionadas.length > 0 && <p className="mt-2 small text-success">Opciones seleccionadas: {opcionesSeleccionadas.length}</p>}
+            {opcionesSeleccionadas.length > 0 && <p className="mt-2 small" style={{color: 'var(--color-text-primary)'}}>Opciones seleccionadas: {opcionesSeleccionadas.length}</p>}
         </div>
     );
 }
