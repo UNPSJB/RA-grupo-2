@@ -12,12 +12,15 @@ const ROUTES = {
   DETALLE_MATERIA: (id: number | string = ":id") => `/docentes/materias-asignadas/${id}`,
   INFORMES_CATEDRA_PENDIENTES: "/docentes/informes-pendientes",
   COMPLETAR_INFORME_CATEDRA: "/docentes/informes-pendientes/completar",
+  INFORMES_CATEDRA_COMPLETADOS: "/docentes/informes-catedra-completados",
+  INFORME_CATEDRA_COMPLETADO_DETALLE: (id: number | string = ":id") => `/docentes/informes-catedra-completados/${id}`,
 
   //DEPARTAMENTOS
   CARRERAS_DPTO: "/departamento/carreras",
   CARRERA: (id: number | string = ":id") => `/departamento/carreras/${id}`,
   INFORMES_CATEDRA: "/departamento/informes-catedra",
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
+  
 
   //SECRETARÍA ACADÉMICA
   INFORMES_SINTETICOS: "/secretaria/informes-sinteticos",
