@@ -99,15 +99,6 @@ export default function CompletarInformeCatedra() {
         setCategoriasConPreguntas(dataOrdenada);
         console.log(dataOrdenada);
         console.log("Informe Base ID:", informeBaseId);
-        /*
-        const respuestasIniciales: Record<number, string> = {};
-        data.forEach((cat) => {
-          cat.preguntas.forEach((p) => {
-            respuestasIniciales[p.id] = "";
-          });
-        });
-        setRespuestas(respuestasIniciales);
-        */
       })
       .catch((err) => {
         console.error("Error fetching estructura informe:", err);
@@ -153,30 +144,18 @@ export default function CompletarInformeCatedra() {
       })
       .then((data) => {
         console.log("Cantidad de encuestas completadas:", data);
-        setCantidad(data); // si tenés un useState
+        setCantidad(data); 
       })
       .catch((error) => {
         console.error(error);
       });
-  }, [anio, materiaId, periodo]); // se ejecuta una sola vez
+  }, [anio, materiaId, periodo]); 
 
   const manejarCambio = (preguntaId: number, valor: RespuestaValor) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
   };
 
-  /*
-  const validarFormulario = (): boolean => {
-    const totalPreguntas = categoriasConPreguntas.reduce(
-      (acc, cat) => acc + cat.preguntas.length,
-      0
-    );
-    const respondidas = Object.values(respuestas).filter(
-      (r) => r && r.trim() !== ""
-    ).length;
-    return respondidas === totalPreguntas;
-  };
-  */
 
   const limpiarEnunciado = (texto: string) => {
     const parts = texto.split(". ");
@@ -195,12 +174,6 @@ export default function CompletarInformeCatedra() {
   };
 
   const enviarInforme = async () => {
-    /*
-    if (!validarFormulario()) {
-      setMensaje("Por favor, complete todas las preguntas requeridas.");
-      return;
-    }
-    */
     setEnviando(true);
     setMensaje(null);
     const respuestasFormateadas = Object.entries(respuestas).map(
@@ -236,23 +209,6 @@ export default function CompletarInformeCatedra() {
           detail: "Error desconocido al enviar.",
         }));
         throw new Error(errorData.detail || "Error al enviar el informe");
-      }
-      const data = await res.json();
-      console.log("Informe creado:", data.id);
-
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`,
-          { method: "POST" }
-        );
-        if (response.ok) {
-          setMensaje("Datos estadísticos generados y guardados correctamente.");
-        } else {
-          setMensaje("Error al guardar los datos estadísticos.");
-        }
-      } catch (error) {
-        console.error(error);
-        setMensaje("Error al guardar datos estadisticos.");
       }
       setMensaje("¡Informe enviado con éxito!");
       setTimeout(() => {
