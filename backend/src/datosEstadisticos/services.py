@@ -7,6 +7,7 @@ from src.encuestaCompletada.models import EncuestaCompletada
 from src.materias.models import Materia
 from src.preguntas.models import Pregunta
 from src.respuestas.models import Respuesta
+from src.categorias.models import Categoria
 from src.opciones.models import Opcion
 from src.encuestas.models import Encuesta
 from src.asociaciones.models import Periodo
@@ -14,12 +15,14 @@ from src.datosEstadisticos import schemas
 from src.encuestas import services as encuesta_services
 from src.preguntas import schemas as pregunta_schemas
 
-def obtener_datos_estadisticos(db: Session, id_materia: int, anio: int, periodo: Periodo) -> List[schemas.DatosEstadisticosPregunta]:
+def obtener_datos_estadisticos(db: Session, id_materia: int, anio: int, periodo: Periodo):
     materia: Materia = db.scalar(select(Materia).where(Materia.id == id_materia))     
     encuesta: Encuesta = materia.encuesta
-    preguntas: List[pregunta_schemas.PreguntaCerrada] = encuesta_services.listar_preguntas_cerradas_encuesta(db, encuesta.id)
+    categorias: List[Categoria] = encuesta.categorias
 
-    if len(preguntas) == 0:
+    categorias = [c for c in categorias if c.cod != "A"]
+
+    if not categorias:
         return []
     
     encuestas_completadas = db.scalars(
@@ -36,29 +39,65 @@ def obtener_datos_estadisticos(db: Session, id_materia: int, anio: int, periodo:
     respuestas = db.scalars(
         select(Respuesta).where(Respuesta.encuesta_completada_id.in_(ids_encuestas))
     ).all()
-    
-    datos_estadisticos: List[schemas.DatosEstadisticosPregunta] = []
+
     total_encuestas = len(encuestas_completadas)
+    
+    resultado: List[schemas.DatosEstadisticosCategoria] = []
 
-    for pregunta in preguntas:
-        datos_opciones : List[schemas.OpcionPorcentaje] = []
-        respuestas_pregunta = [r for r in respuestas if r.pregunta_id == pregunta.id]
-        opciones: List[Opcion] = pregunta.opciones
+    for categoria in categorias:
+        if categoria.cod == "G":
+            preguntas_info = []
+        else:
+            preguntas_categoria = [p for p in categoria.preguntas if p.tipo == "cerrada"]
+            if not preguntas_categoria:
+                continue
 
-        for opcion in opciones:
-            respuestas_opcion = [r for r in respuestas_pregunta if r.opcion_id == opcion.id]
-            cantidad = len(respuestas_opcion)
-            porcentaje = (cantidad / total_encuestas * 100) 
+            preguntas_info = []
+            acumulados = {}
+            conteo = {}
 
-            datos_opciones.append(
-                schemas.OpcionPorcentaje(opcion_id=opcion.contenido, porcentaje=round(porcentaje, 2))
+            for pregunta in preguntas_categoria:
+                respuestas_pregunta = [r for r in respuestas if r.pregunta_id == pregunta.id]
+                opciones = pregunta.opciones
+
+                datos_opciones = []
+                for opcion in opciones:
+                    respuestas_opcion = [r for r in respuestas_pregunta if r.opcion_id == opcion.id]
+                    cantidad = len(respuestas_opcion)
+                    porcentaje = (cantidad / total_encuestas * 100)
+
+                    datos_opciones.append(
+                        schemas.OpcionPorcentaje(opcion_id=opcion.contenido, porcentaje=round(porcentaje, 2))
+                    )
+
+                    acumulados[opcion.contenido] = acumulados.get(opcion.contenido, 0) + porcentaje
+                    conteo[opcion.contenido] = conteo.get(opcion.contenido, 0) + 1
+
+                preguntas_info.append(
+                    schemas.DatosEstadisticosPregunta(
+                        id_pregunta=pregunta.enunciado,
+                        datos=datos_opciones
+                    )
+                )
+
+            promedio_opciones = [
+                schemas.OpcionPorcentaje(
+                    opcion_id=op,
+                    porcentaje=round(acumulados[op] / conteo[op], 2) if conteo[op] > 0 else 0.0
+                )
+                for op in acumulados.keys()
+            ]
+
+        resultado.append(
+            schemas.DatosEstadisticosCategoria(
+                categoria_cod=categoria.cod,
+                categoria_texto=categoria.texto,
+                promedio_categoria=promedio_opciones,
+                preguntas=preguntas_info
             )
-        
-        datos_pregunta = schemas.DatosEstadisticosPregunta(id_pregunta=pregunta.enunciado, datos=datos_opciones)
-        datos_estadisticos.append(datos_pregunta)
-        
-    return datos_estadisticos
+        )
 
+    return resultado
 
 def guardar_datos_estadisticos(
     db: Session,

@@ -34,6 +34,13 @@ interface DatosEstadisticosPregunta {
   datos: OpcionPorcentaje[];
 }
 
+interface DatosEstadisticosCategoria {
+  categoria_cod: string;
+  categoria_texto: string;
+  promedio_categoria: OpcionPorcentaje[];
+  preguntas: DatosEstadisticosPregunta[];
+}
+
 type RespuestaValor = {
   opcion_id: number | null;
   texto_respuesta: string | null;
@@ -54,9 +61,7 @@ export default function CompletarInformeCatedra() {
   );
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
-  const [datosEstadisticos, setDatosEstadisticos] = useState<
-    DatosEstadisticosPregunta[]
-  >([]);
+  const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosCategoria[]>([]);
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
 
   const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
@@ -124,7 +129,10 @@ export default function CompletarInformeCatedra() {
       })
       .then((data) => {
         if (data.length != 0) {
-          setDatosEstadisticos(data);
+          const dataOrdenada = [...data].sort((a, b) =>
+          a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" })
+        );
+          setDatosEstadisticos(dataOrdenada);
         }
       })
       .catch((error) => {
@@ -300,6 +308,7 @@ export default function CompletarInformeCatedra() {
           <Categoria2BInforme
             categoria={categoria}
             manejarCambio={manejarCambio}
+            estadisticas={datosEstadisticos}
             autoExpand={autoExpand}
           />
         );

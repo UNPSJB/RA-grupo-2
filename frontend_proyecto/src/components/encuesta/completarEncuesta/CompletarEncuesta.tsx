@@ -33,16 +33,13 @@ export default function CompletarEncuesta() {
 
   useEffect(() => {
     const { encuestaId = 1 } = location.state || {};
-    const codigosDeseados = ["A", "B", "C", "D", "E", "F", "G"];
     fetch(`http://localhost:8000/encuestas/${encuestaId}/categorias`)
       .then((res) => res.json())
       .then((todas: Categoria[]) => {
-        const filtradas = todas.filter((c) => codigosDeseados.includes(c.cod));
-        const ordenadas = [...filtradas].sort(
-          (a, b) =>
-            codigosDeseados.indexOf(a.cod) - codigosDeseados.indexOf(b.cod)
+        const dataOrdenada = [...todas].sort((a, b) =>
+          a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
         );
-        setCategorias(ordenadas);
+        setCategorias(dataOrdenada);
       })
       .catch((err) => console.error("Error al obtener categorías:", err));
   }, [location.state]);

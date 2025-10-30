@@ -7,9 +7,10 @@ from src.asociaciones.models import Periodo
 
 router = APIRouter(prefix="/datos_estadisticos", tags=["datos_estadisticos"])
 
-@router.get("/", response_model=List[schemas.DatosEstadisticosPregunta])
+@router.get("/", response_model=List[schemas.DatosEstadisticosCategoria])
 def get_datos_estadisticos(id_materia: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
-    return services.obtener_datos_estadisticos(db, id_materia, anio, periodo)  
+    return services.obtener_datos_estadisticos(db, id_materia, anio, periodo)
+
 
 @router.post("/guardar_datos/{informe_id}")
 def create_guardar_datos_estadisticos(informe_id: int, db: Session = Depends(get_db)):
