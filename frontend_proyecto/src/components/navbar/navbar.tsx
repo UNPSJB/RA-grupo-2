@@ -99,6 +99,7 @@ export default function Navbar() {
                 </li>
                 <li>
                     <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}> 
+                        Informes de Cátedra Pendientes
                     </Link>
                 </li>
               </ul>
@@ -148,7 +149,12 @@ export default function Navbar() {
                 </li>
                 <li>
                     <Link className="dropdown-item" to={ROUTES.INFORME_CATEDRA_BASE_NUEVO}> 
-                        Crear Informe de Cátedra Base
+                        Crear Informe de Cátedra 
+                    </Link>
+                </li>
+                <li>
+                    <Link className="dropdown-item" to={ROUTES.INFORME_CATEDRA_BASE_NUEVO}> 
+                        Crear Informe Sintético
                     </Link>
                 </li>
                 <li>
