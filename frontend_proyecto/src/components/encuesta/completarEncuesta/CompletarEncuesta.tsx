@@ -4,6 +4,8 @@ import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation} from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
+import Acordeon from '../../acordeon/Acordeon';
+
 
 interface Categoria {
   id: number;
@@ -130,25 +132,30 @@ export default function CompletarEncuesta() {
   }
 
   return (
-    <div className="container py-4">
-      <div className="card shadow">
-        <div className="card-header bg-primary text-white">
-          <h1 className="h4 mb-0">Encuesta</h1>
+    <div className="container py-5">
+      <div className="card border-0 shadow-lg rounded-4">
+        <div className="card-header bg-primary text-white rounded-top-4">
+          <h1 className="h4 mb-0 text-center">Encuesta</h1>
         </div>
         <div className="card-body">
           {categorias.length > 0 ? (
-            categorias.map((categoria) => (
-              <div key={categoria.id} className="mb-4">
-                <h2 className="h5 mb-3">
-                  {categoria.cod}: {categoria.texto}
-                </h2>
-                <PreguntasCategoria
-                  categoria={categoria}
-                  onRespuesta={manejarCambioRespuestas}
-                  onTotalPreguntas={manejarTotalPreguntas}
+            <div className="accordion"> 
+              {categorias.map((categoria) => (
+                <Acordeon 
+                  key={categoria.id} 
+                  titulo={`${categoria.cod}: ${categoria.texto}`}
+                  contenido={(
+                    <PreguntasCategoria
+                      categoria={categoria}
+                      onRespuesta={manejarCambioRespuestas}
+                      onTotalPreguntas={manejarTotalPreguntas}
+                    />
+                  )}
                 />
-              </div>
-            ))
+
+              ))}
+            </div>
+
           ) : (
             <div className="alert alert-info">Cargando categorías...</div>
           )}
@@ -157,7 +164,7 @@ export default function CompletarEncuesta() {
           <div className="text-center mt-4">
             <button
               onClick={enviarEncuesta}
-              className="btn btn-success"
+              className="btn btn-primary btn-lg px-4 rounded-pill shadow-sm"
               disabled={enviando}
             >
               {enviando ? "Enviando..." : "Enviar Encuesta"}
