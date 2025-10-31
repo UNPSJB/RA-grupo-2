@@ -71,6 +71,11 @@ export default function Navbar() {
                     Informes de Cátedra Pendientes
                   </Link>
                 </li>
+                <li>  
+                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_COMPLETADOS}>
+                    Informes de Cátedra Completados
+                  </Link>
+                </li>
               </ul>
             </li>
 
@@ -130,7 +135,7 @@ export default function Navbar() {
                   </Link>
                 </li>
               </ul>
-            </li>          
+            </li>       
           </ul>
         </div>
       </div>
