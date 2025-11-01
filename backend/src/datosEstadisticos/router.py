@@ -14,3 +14,17 @@ def get_datos_estadisticos(id_materia: int, anio: int, periodo: Periodo, db: Ses
 @router.get("/cantidad_encuestas_completadas", response_model=int)
 def get_cantidad_encuestas_completadas(id_materia: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
     return services.cantidad_encuestas_completadas(db, id_materia, anio, periodo)
+
+
+@router.get("/respuestas_abiertas", response_model=List[schemas.DatosAbiertosCategoria])
+def obtener_respuestas_abiertas(
+    id_materia: int,
+    anio: int,
+    periodo: Periodo,
+    db: Session = Depends(get_db)
+):
+    """
+    Devuelve todas las respuestas abiertas de la categoría G
+    agrupadas por pregunta, para una materia dada.
+    """
+    return services.obtener_respuestas_abiertas_por_materia(db, id_materia, anio, periodo)

@@ -113,3 +113,61 @@ def cantidad_encuestas_completadas(
     )
     count = db.scalar(stmt)
     return count or 0
+
+def obtener_respuestas_abiertas_por_materia(
+    db: Session,
+    id_materia: int,
+    anio: int,
+    periodo: Periodo
+) -> List[schemas.DatosAbiertosCategoria]:
+
+    materia: Materia = db.scalar(select(Materia).where(Materia.id == id_materia))
+    encuesta = materia.encuesta
+
+    categoria_g: Categoria = next((c for c in encuesta.categorias if c.cod == "G"), None)
+    if not categoria_g:
+        return []
+
+    encuestas_completadas = db.scalars(
+        select(EncuestaCompletada)
+        .where(EncuestaCompletada.materia_id == id_materia)
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+    ).all()
+
+    if len(encuestas_completadas) == 0:
+        return []
+
+    ids_encuestas = [e.id for e in encuestas_completadas]
+
+    respuestas_abiertas = db.scalars(
+        select(Respuesta)
+        .where(Respuesta.encuesta_completada_id.in_(ids_encuestas))
+        .where(Respuesta.texto_respuesta != None)
+    ).all()
+
+    # Agrupar respuestas por pregunta
+    resultado = []
+    for pregunta in categoria_g.preguntas[:3]:
+        respuestas_pregunta = [
+            r.texto_respuesta for r in respuestas_abiertas if r.pregunta_id == pregunta.id
+        ]
+
+        if len(respuestas_pregunta) == 0:
+            continue
+
+        resultado.append(
+            schemas.DatosAbiertosPregunta(
+                id_pregunta=pregunta.id,
+                enunciado=pregunta.enunciado,
+                respuestas=respuestas_pregunta
+            )
+        )
+
+    return [
+        schemas.DatosAbiertosCategoria(
+            categoria_cod=categoria_g.cod,
+            categoria_texto=categoria_g.texto,
+            preguntas=resultado
+        )
+    ]

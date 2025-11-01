@@ -10,6 +10,7 @@ import InformeCatedraCompletadoFuncion from "./CompletarInformeCatedraFuncion";
 import ROUTES from "../../../paths";
 
 import CategoriaEquipamiento from "./CAT1"
+import RespuestasAbiertas from "./RespuestasAbiertas";
 interface Pregunta {
   id: number;
   enunciado: string;
@@ -339,6 +340,8 @@ export default function CompletarInformeCatedra() {
             <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
           </div>
 
+          <RespuestasAbiertas docenteMateriaId={docenteMateriaId} />
+    
           {categoriasConPreguntas.map((categoria) => (
             <div key={categoria.id} className="col-12 mb-3">
               {renderCategoria(categoria)}
