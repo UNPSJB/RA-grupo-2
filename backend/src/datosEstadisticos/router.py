@@ -23,8 +23,4 @@ def obtener_respuestas_abiertas(
     periodo: Periodo,
     db: Session = Depends(get_db)
 ):
-    """
-    Devuelve todas las respuestas abiertas de la categoría G
-    agrupadas por pregunta, para una materia dada.
-    """
     return services.obtener_respuestas_abiertas_por_materia(db, id_materia, anio, periodo)
