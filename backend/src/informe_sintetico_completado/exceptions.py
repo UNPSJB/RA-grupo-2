@@ -1,4 +1,3 @@
-# backend/src/informes_sinteticos/exceptions.py
 from fastapi import HTTPException
 from .constants import ErrorCode
 

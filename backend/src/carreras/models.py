@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
 from typing import Optional, TYPE_CHECKING
@@ -12,5 +12,5 @@ class Carrera(ModeloBase):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     nombre: Mapped[str] = mapped_column(String, index=True)
     departamento_id: Mapped[int] = mapped_column(Integer, ForeignKey("departamentos.id"))
-    
     departamento: Mapped["Departamento"] = relationship("Departamento", back_populates="carreras")
+    informe_base = relationship("InformeSinteticoBase", back_populates="carrera")

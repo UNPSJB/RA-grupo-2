@@ -152,11 +152,9 @@ export default function Navbar() {
                         Crear Informe de Cátedra 
                     </Link>
                 </li>
-                <li>
-                    <Link className="dropdown-item" to={ROUTES.INFORME_CATEDRA_BASE_NUEVO}> 
-                        Crear Informe Sintético
-                    </Link>
-                </li>
+                      <Link className="dropdown-item" to={ROUTES.INFORME_SINTETICO_BASE_NUEVO}> 
+                        Crear Informe Sintético Base
+                      </Link>
                 <li>
                     <Link className="dropdown-item" to={ROUTES.ENCUESTA_BASE_NUEVA}> 
                         Crear Encuesta Base

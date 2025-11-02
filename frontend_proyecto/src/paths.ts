@@ -24,7 +24,7 @@ const ROUTES = {
   INFORME_SINTETICO_DETALLE: (id: number | string = ":id") => `/secretaria/informes-sinteticos/${id}`,
   INFORME_CATEDRA_BASE_NUEVO: "/secretaria/crear-informe-catedra-base",
   ENCUESTA_BASE_NUEVA: "/secretaria/crear-encuesta-base",
-
+  INFORME_SINTETICO_BASE_NUEVO: "/secretaria/informe-sintetico/nuevo",
 };
 
 export default ROUTES;
