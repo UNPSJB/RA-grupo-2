@@ -129,9 +129,9 @@ export default function CompletarEncuesta() {
   }
 
   return (
-    <div className="container py-5">
-      <div className="card border-0 shadow-lg rounded-4">
-        <div className="card-header bg-primary text-white rounded-top-4">
+    <div className="container py-4">
+      <div className="card border-0 shadow-lg">
+        <div className="card-header bg-primary text-white">
           <h1 className="h4 mb-0 text-center">Encuesta</h1>
         </div>
         <div className="card-body">
