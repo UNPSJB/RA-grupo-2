@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 
 type RespuestaValor = {
   opcion_id: number | null;
@@ -87,15 +87,15 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
     };
 
     if (!pEquipo || !pBibliografia) {
-        return <div className="alert alert-warning mt-3">Error: Preguntas no asociadas correctamente.</div>;
+        return <div className="alert alert-warning">Error: Preguntas no asociadas correctamente.</div>;
     }
 
     return (
-        <div className="card-body p-0">
-            <div className="mb-4 p-4 border rounded bg-light">
-                <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">
+        <Fragment>
+            <div className="mb-4">
+                <label className="form-label mb-3"> 
                     Equipamiento e insumos
-                </h6>
+                </label>
                 
                 <div className="d-flex gap-2 mb-3">
                     <input
@@ -121,7 +121,7 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
 
                 <div>
                     {itemsEquipo.map((item, index) => (
-                        <div key={index} className="d-flex align-items-center mb-2 p-2 border rounded">
+                        <div key={index} className="d-flex align-items-center mb-2 p-2 rounded-3 bg-light-subtle">
                             <span className="flex-grow-1">{item}</span>
                             <button
                                 type="button"
@@ -135,10 +135,10 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
                 </div>
             </div>
 
-            <div className="mb-4 p-4 border rounded bg-light">
-                <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">
+            <div className="mb-4">
+                <label className="form-label mb-3">
                     Bibliografía
-                </h6>
+                </label>
                 
                 <div className="d-flex gap-2 mb-3">
                     <input
@@ -164,7 +164,7 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
 
                 <div>
                     {itemsBibliografia.map((item, index) => (
-                        <div key={index} className="d-flex align-items-center mb-2 p-2 border rounded">
+                        <div key={index} className="d-flex align-items-center mb-2 p-2 rounded-3 bg-light-subtle">
                             <span className="flex-grow-1">{item}</span>
                             <button
                                 type="button"
@@ -177,6 +177,6 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
                     ))}
                 </div>
             </div>
-        </div>
+        </Fragment>
     );
 }

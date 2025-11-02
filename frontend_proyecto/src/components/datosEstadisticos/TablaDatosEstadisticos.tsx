@@ -32,7 +32,7 @@ export default function TablaDatosEstadisticos({ datos, cant }: TablaProps) {
   }
 
   const contenido = (
-    <div className="card-body">
+    <div className="card-body p-0">
       {datos.map((categoria, i) => (
         <Acordeon
           key={i}
@@ -52,7 +52,7 @@ export default function TablaDatosEstadisticos({ datos, cant }: TablaProps) {
                     {categoria.promedio_categoria.map((op, idx) => (
                       <tr key={idx}>
                         <td>{op.opcion_id}</td>
-                        <td>{op.porcentaje}%</td>
+                        <td>{op.porcentaje.toFixed(2)}%</td>
                       </tr>
                     ))}
                   </tbody>
@@ -60,32 +60,37 @@ export default function TablaDatosEstadisticos({ datos, cant }: TablaProps) {
               </div>
 
               {categoria.preguntas && categoria.preguntas.length > 0 && (
-                <div>
-                  <h6 className="fw-bold">Preguntas</h6>
-                  {categoria.preguntas.map((pregunta, j) => (
-                    <div key={j} className="mb-3">
-                      <p className="text-secondary mb-1">
-                        <strong>{pregunta.id_pregunta}</strong>
-                      </p>
-                      <table className="table table-striped table-bordered table-sm">
-                        <thead className="table-light">
-                          <tr>
-                            <th>Opción</th>
-                            <th>Porcentaje</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pregunta.datos.map((opcion, k) => (
-                            <tr key={k}>
-                              <td>{opcion.opcion_id}</td>
-                              <td>{opcion.porcentaje}%</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                <Acordeon
+                  titulo="Ver en detalle"
+                  contenido={
+                    <div className="pt-2">
+                      <h6 className="fw-bold">Preguntas</h6>
+                      {categoria.preguntas.map((pregunta, j) => (
+                        <div key={j} className="mb-3">
+                          <p className="text-secondary mb-1">
+                            <strong>{pregunta.id_pregunta}</strong>
+                          </p>
+                          <table className="table table-striped table-bordered table-sm">
+                            <thead className="table-light">
+                              <tr>
+                                <th>Opción</th>
+                                <th>Porcentaje</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {pregunta.datos.map((opcion, k) => (
+                                <tr key={k}>
+                                  <td>{opcion.opcion_id}</td>
+                                  <td>{opcion.porcentaje.toFixed(2)}%</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  }
+                />
               )}
             </div>
           }

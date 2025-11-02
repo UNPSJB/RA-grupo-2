@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface AcordeonProps {
@@ -9,49 +9,47 @@ interface AcordeonProps {
 
 export default function Acordeon({ titulo, contenido, startOpen = false }: AcordeonProps) {
   const [estaAbierto, setEstaAbierto] = useState(startOpen);
+  const elRef = useRef<HTMLDivElement>(null);
 
   const alHacerClic = () => {
+    const estabaCerrado = !estaAbierto;
+    
     setEstaAbierto(!estaAbierto);
+
+    if (estabaCerrado) {
+      setTimeout(() => {
+        if (elRef.current) {
+          elRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+          });
+        }
+      }, 100);
+    }
   };
 
-  return (
-    <div
-      className="mb-2 border rounded-3 shadow-sm"
-      style={{
-        backgroundColor: 'white',
-        borderColor: '#e5e7eb',
-        transition: 'all 0.3s ease',
-      }}
-    >
-      <button
-        onClick={alHacerClic}
-        className="w-100 text-start py-3 px-4 d-flex justify-content-between align-items-center text-dark"
-        style={{
-          backgroundColor: 'transparent',
-          border: 'none',
-          fontWeight: 600,
-          fontSize: '1rem',
-          cursor: 'pointer',
-        }}
-        aria-expanded={estaAbierto}
-      >
-        <span>{titulo}</span>
-        <span
-          style={{
-            transform: estaAbierto ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-            color: '#212529'
-          }}
-        >
-          ⌄
-        </span>
-      </button>
+  const btnClass = `accordion-button shadow-none ${estaAbierto ? '' : 'collapsed'}`;
+  const contentClass = `accordion-collapse collapse ${estaAbierto ? 'show' : ''}`;
 
-      {estaAbierto && (
-        <div className="p-4 pt-0">
+  return (
+    <div className="accordion-item mb-3 shadow-sm" ref={elRef}>
+      <h2 className="accordion-header">
+        <button 
+          className={btnClass}
+          type="button" 
+          onClick={alHacerClic}
+          aria-expanded={estaAbierto}
+          style={{ boxShadow: 'none', outline: 'none' }}
+        >
+          {titulo}
+        </button>
+      </h2>
+
+      <div className={contentClass}>
+        <div className="accordion-body">
           {contenido}
         </div>
-      )}
+      </div>
     </div>
   );
 }
