@@ -117,6 +117,13 @@ html, body {
     }
 }
 
+/* CORRECCIÓN 1: Asegurar que el texto de las preguntas se vea */
+.list-group-item,
+.list-group-item strong,
+.list-group-item span {
+    /* Forzar que el texto use el color principal (claro en modo oscuro) */
+    color: var(--color-text-primary) !important;
+}
 
 .form-control, .form-select, textarea {
     color: var(--color-text-primary) !important;

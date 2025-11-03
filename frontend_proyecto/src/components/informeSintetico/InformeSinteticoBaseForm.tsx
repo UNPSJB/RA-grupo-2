@@ -2,11 +2,32 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../paths"; 
 import { CARRERA_ID } from "../../constants";
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'; 
 
 interface PreguntaTemp { 
     enunciado: string; 
     orden: number; 
 }
+const reorder = (list: PreguntaTemp[], startIndex: number, endIndex: number): PreguntaTemp[] => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result.map((item, index) => ({
+        ...item,
+        orden: index + 1,
+    }));
+};
+const getListItemStyle = (isDragging: boolean, dragItemStyle: React.CSSProperties, draggableStyle: React.CSSProperties | undefined) => ({
+    ...dragItemStyle,
+    ...draggableStyle,
+    backgroundColor: isDragging
+        ? 'rgba(0, 123, 255, 0.2)' 
+        : dragItemStyle.backgroundColor,
+    width: isDragging ? '100%' : 'auto', 
+    
+    boxShadow: isDragging ? '0 4px 8px rgba(0, 0, 0, 0.2)' : 'none',
+});
+
 
 export default function InformeSinteticoBaseForm() {
     const navigate = useNavigate();
@@ -36,6 +57,20 @@ export default function InformeSinteticoBaseForm() {
             .filter((_, i) => i !== index)
             .map((p, i) => ({ ...p, orden: i + 1 }))
         );
+    };
+
+    const onDragEnd = (result: DropResult) => {
+        if (!result.destination) {
+            return;
+        }
+
+        const items = reorder(
+            preguntas,
+            result.source.index,
+            result.destination.index
+        );
+
+        setPreguntas(items);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -74,6 +109,7 @@ export default function InformeSinteticoBaseForm() {
             }
             
             const { id: informeBaseId } = await resInformeBase.json();
+
             for (const preg of preguntas) {
                 const urlPregunta = `http://localhost:8000/preguntas_sintetico/${informeBaseId.toString()}`;
 
@@ -82,7 +118,7 @@ export default function InformeSinteticoBaseForm() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         enunciado: preg.enunciado, 
-                        orden: preg.orden,
+                        orden: preg.orden, 
                         tipo_respuesta: 'texto', 
                     }),
                 });
@@ -137,6 +173,22 @@ export default function InformeSinteticoBaseForm() {
         color: 'var(--color-text-primary)',
         borderColor: 'var(--color-text-primary)',
     };
+    
+    const dragItemStyle: React.CSSProperties = {
+        cursor: 'grab', 
+        backgroundColor: 'var(--color-component-bg)',
+        border: '1px solid var(--color-unpsjb-border)',
+        marginBottom: '5px',
+        padding: '0.75rem 1.25rem',
+    };
+
+    const placeholderStyle = {
+        border: '2px dashed var(--color-unpsjb-blue)',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        height: '50px',
+        margin: '5px 0',
+        borderRadius: '5px'
+    }
 
     return (
         <div className="container py-4">
@@ -170,7 +222,6 @@ export default function InformeSinteticoBaseForm() {
                         <h5 className="mb-3" style={{color: 'var(--color-text-primary)'}}>Definición de Preguntas</h5>
                         <div className="card mb-4 p-3" style={inputAreaStyle}> 
                             <div className="row mb-3">
-                                
                                 <div className="col-12"> 
                                     <label className="form-label fw-bold">Enunciado</label>
                                     <textarea 
@@ -196,17 +247,54 @@ export default function InformeSinteticoBaseForm() {
                             </div>
                         </div>
                         {preguntas.length > 0 && (
-                            <ul className="list-group mb-4">
-                                {preguntas.map((preg, i) => (
-                                    <li key={i} className={`list-group-item d-flex justify-content-between align-items-center`} style={inputAreaStyle}>
-                                        <span>
-                                            <strong className={`badge bg-secondary me-2`}> Pregunta n° {preg.orden}</strong>
-                                            <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.enunciado}
-                                        </span>
-                                        <button type="button" className="btn btn-theme-danger btn-sm" onClick={() => eliminarPregunta(i)} disabled={cargando}>Eliminar</button>
-                                    </li>
-                                ))}
-                            </ul>
+                            <DragDropContext onDragEnd={onDragEnd}>
+                                <Droppable droppableId="preguntas-list">
+                                    {(provided, snapshot) => (
+                                        <ul 
+                                            className="list-group mb-4" 
+                                            {...provided.droppableProps} 
+                                            ref={provided.innerRef}
+                                            style={{
+                                                minHeight: '100px', 
+                                                height: `${preguntas.length * 60}px`, 
+                                                backgroundColor: snapshot.isDraggingOver ? placeholderStyle.backgroundColor : dragItemStyle.backgroundColor,
+                                            }} 
+                                        >
+                                            {preguntas.map((preg, i) => (
+                                                <Draggable key={`item-${i}`} draggableId={`item-${i}`} index={i}>
+                                                    {(provided, snapshot) => (
+                                                        <li 
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                            style={getListItemStyle(
+                                                                snapshot.isDragging, 
+                                                                dragItemStyle, 
+                                                                provided.draggableProps.style
+                                                            )}
+                                                            className={`list-group-item d-flex justify-content-between align-items-center`}
+                                                        >
+                                                            <span>
+                                                                <strong className={`badge bg-secondary me-2`}> Orden: {preg.orden}</strong>
+                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.enunciado}
+                                                            </span>
+                                                            <button 
+                                                                type="button" 
+                                                                className="btn btn-theme-danger btn-sm" 
+                                                                onClick={() => eliminarPregunta(i)} 
+                                                                disabled={cargando}
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        </li>
+                                                    )}
+                                                </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                        </ul>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
                             <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>

@@ -6,7 +6,8 @@ interface Informe {
   id: number;
   titulo: string;
   contenido: string;
-  fecha: string;
+  anio: number;
+  periodo: string;
 }
 
 function InformeSinteticoDetail() {
@@ -29,7 +30,7 @@ return (
       </div>
       <div className="card-body">
         <p className="mb-2">
-          <strong>Fecha:</strong> {informe.fecha}
+          <strong>Periodo:</strong> {informe.periodo} {informe.anio}
         </p>
         <div className="alert alert-info">
           <strong>Descripción:</strong> {informe.contenido}
@@ -38,7 +39,5 @@ return (
     </div>
   </div>
 );
-
 }
-
 export default InformeSinteticoDetail;

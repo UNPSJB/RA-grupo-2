@@ -20,7 +20,7 @@ const ROUTES = {
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
 
   //SECRETARÍA ACADÉMICA
-  INFORMES_SINTETICOS: "/secretaria/informes-sinteticos",
+  INFORMES_SINTETICOS: "/secretaria/informes-sinteticos-completados",
   INFORME_SINTETICO_DETALLE: (id: number | string = ":id") => `/secretaria/informes-sinteticos/${id}`,
   INFORME_CATEDRA_BASE_NUEVO: "/secretaria/crear-informe-catedra-base",
   ENCUESTA_BASE_NUEVA: "/secretaria/crear-encuesta-base",

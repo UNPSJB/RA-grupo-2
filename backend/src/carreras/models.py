@@ -14,3 +14,4 @@ class Carrera(ModeloBase):
     departamento_id: Mapped[int] = mapped_column(Integer, ForeignKey("departamentos.id"))
     departamento: Mapped["Departamento"] = relationship("Departamento", back_populates="carreras")
     informe_base = relationship("InformeSinteticoBase", back_populates="carrera")
+    informe_completado = relationship("InformeSinteticoCompletado", back_populates="carrera")
