@@ -4,7 +4,7 @@ import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation} from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
-import Acordeon from '../../acordeon/Acordeon';
+
 
 
 interface Categoria {
@@ -128,6 +128,7 @@ export default function CompletarEncuesta() {
     );
   }
 
+
   return (
     <div className="container py-4">
       <div className="card border-0 shadow-lg">
@@ -136,23 +137,35 @@ export default function CompletarEncuesta() {
         </div>
         <div className="card-body">
           {categorias.length > 0 ? (
-            <div className="accordion"> 
+            <div className="accordion accordion-flush" id="accordionEncuesta">
               {categorias.map((categoria) => (
-                <Acordeon 
-                  key={categoria.id} 
-                  titulo={`${categoria.cod}: ${categoria.texto}`}
-                  contenido={(
-                    <PreguntasCategoria
-                      categoria={categoria}
-                      onRespuesta={manejarCambioRespuestas}
-                      onTotalPreguntas={manejarTotalPreguntas}
-                    />
-                  )}
-                />
-
+                <div className="accordion-item" key={categoria.id}>
+                  <h2 className="accordion-header" id={`heading-${categoria.id}`}>
+                    <button
+                      className="accordion-button collapsed"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target={`#collapse-${categoria.id}`}
+                    >
+                      {`${categoria.cod}: ${categoria.texto}`}
+                    </button>
+                  </h2>
+                  <div
+                    id={`collapse-${categoria.id}`}
+                    className="accordion-collapse collapse"
+                    data-bs-parent="#accordionEncuesta"
+                  >
+                    <div className="accordion-body">
+                      <PreguntasCategoria
+                        categoria={categoria}
+                        onRespuesta={manejarCambioRespuestas}
+                        onTotalPreguntas={manejarTotalPreguntas}
+                      />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-
           ) : (
             <div className="alert alert-info">Cargando categorías...</div>
           )}
