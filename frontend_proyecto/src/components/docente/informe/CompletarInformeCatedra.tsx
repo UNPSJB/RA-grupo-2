@@ -60,10 +60,11 @@ export default function CompletarInformeCatedra() {
   
   const steps = [
     { id: 1, name: "Datos Generales" },
-    { id: 2, name: "1. Recursos" },
-    { id: 3, name: "2. Desarrollo Curricular" },
-    { id: 4, name: "3. Actividades del Equipo" },
-    { id: 5, name: "4. Valoración" }
+    { id: 2, name: "Datos Estadísticos" },
+    { id: 3, name: "1. Recursos" },
+    { id: 4, name: "2. Desarrollo Curricular" },
+    { id: 5, name: "3. Actividades del Equipo" },
+    { id: 6, name: "4. Valoración" }
   ];
   const totalSteps = steps.length;
 

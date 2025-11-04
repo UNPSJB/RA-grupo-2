@@ -21,15 +21,15 @@ interface ContenidoPasosProps {
   cantidad: number;
   respuestas: Record<number, RespuestaValor>;
   docenteMateriaId: number;
-  materiaId: number;
-  materiaNombre: string;
-  anio: number;
-  periodo: string;
-  cantidadInscriptos: number;
+ 
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
 }
 
+const normalizarString = (texto: string): string => {
+  if (!texto) return "";
+  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
 
 export default function ContenidoPasos({
   currentStep,
@@ -38,16 +38,12 @@ export default function ContenidoPasos({
   cantidad,
   respuestas,
   docenteMateriaId,
-  materiaId,
-  materiaNombre,
-  anio,
-  periodo,
-  cantidadInscriptos,
   manejarCambio,
   onDatosGenerados
 }: ContenidoPasosProps) {
 
   const categoria1 = categoriasConPreguntas.find(cat => cat.cod === "1");
+  const categoria2 = categoriasConPreguntas.find(cat => cat.cod === "2");
   const categoria2A = categoriasConPreguntas.find(cat => cat.cod === "2.A");
   const categoria2B = categoriasConPreguntas.find(cat => cat.cod === "2.B");
   const categoria2C = categoriasConPreguntas.find(cat => cat.cod === "2.C");
@@ -61,16 +57,10 @@ export default function ContenidoPasos({
       textarea.style.height = 'auto';
       textarea.style.height = textarea.scrollHeight + 'px';
     };
-    const limpiarEnunciado = (texto: string) => {
-      const parts = texto.split(". ");
-      if (parts.length < 2) return texto;
-      const prefijo = parts[0];
-      if (!isNaN(parseInt(prefijo))) { return parts.slice(1).join(". "); }
-      return texto;
-    };
+
     return (
       <Fragment> 
-        {categoria.preguntas.map((pregunta, i) => (
+        {categoria.preguntas.map((pregunta) => (
           <div key={pregunta.id} className="mb-4">
             <h6 className="fw-bold mb-3 text-dark">
               {pregunta.enunciado}
@@ -102,6 +92,43 @@ export default function ContenidoPasos({
     );
   };
 
+  const renderCategoria2 = (categoria: CategoriaConPreguntas) => {
+    const pTeoricas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases teoricas"));
+    const pPracticas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases practicas"));
+  
+
+    return (
+      <div className="row g-3">
+        <div className="col-md-6">
+          <label htmlFor={`preg-${pTeoricas?.id}`} className="form-label">
+            {pTeoricas?.enunciado || "Porcentaje Clases Teóricas"}
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id={`preg-${pTeoricas?.id}`}
+            value={respuestas[pTeoricas?.id || 0]?.texto_respuesta || ""}
+            onChange={(e) => pTeoricas && manejarCambio(pTeoricas.id, { opcion_id: null, texto_respuesta: e.target.value })}
+            disabled={!pTeoricas}
+          />
+        </div>
+        <div className="col-md-6">
+          <label htmlFor={`preg-${pPracticas?.id}`} className="form-label">
+            {pPracticas?.enunciado || "Porcentaje Clases Prácticas"}
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id={`preg-${pPracticas?.id}`}
+            value={respuestas[pPracticas?.id || 0]?.texto_respuesta || ""}
+            onChange={(e) => pPracticas && manejarCambio(pPracticas.id, { opcion_id: null, texto_respuesta: e.target.value })}
+            disabled={!pPracticas}
+          />
+        </div>
+      </div>
+    );
+  };
+
   const scrollTimeoutRef = useRef<number | null>(null);
 
   const handleAccordionToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -128,6 +155,22 @@ export default function ContenidoPasos({
       );
 
     case 2:
+      return (
+        <Fragment>
+          <h5 className="text-dark fw-bold mb-3">Resultados de Encuestas</h5>
+          <p className="text-muted mb-4">
+            Análisis basado en las encuestas completadas por los estudiantes.
+          </p>
+          <hr className="mb-4" />
+
+          <TablaDatosEstadisticos 
+            datos={datosEstadisticos}
+            cant={cantidad} 
+          />
+        </Fragment>
+      );
+
+    case 3:
       return categoria1 ? (
         <Fragment>
           <h5 className="text-dark fw-bold mb-3">1. Equipamiento y Bibliografía</h5>
@@ -140,13 +183,33 @@ export default function ContenidoPasos({
         </Fragment>
       ) : null;
 
-    case 3:
+    case 4:
       return (
         <Fragment>
           <h5 className="text-dark fw-bold mb-3">2. Desarrollo Curricular</h5>
           <hr className="mb-4" />
           <div className="accordion accordion-flush" id="accordionPaso3">
-            
+            {categoria2 && (
+              <div className="accordion-item">
+                <h2 className="accordion-header" id="heading2">
+                  <button 
+                    className="accordion-button collapsed" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapse2"
+                    onClick={handleAccordionToggle} 
+                  >
+                    2. Porcentaje de Horas de Clases
+                  </button>
+                </h2>
+                <div id="collapse2" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
+                  <div className="accordion-body">
+                    <p className="text-muted mb-3">{categoria2.texto}</p>
+                    {renderCategoria2(categoria2)}
+                  </div>
+                </div>
+              </div>
+            )}            
             {categoria2A && (
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2A">
@@ -185,10 +248,6 @@ export default function ContenidoPasos({
                 <div id="collapse2B" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2B.texto}</p>
-                    <TablaDatosEstadisticos 
-                      datos={datosEstadisticos}
-                      cant={cantidad} 
-                    />
                     <Categoria2BInforme
                       categoria={categoria2B}
                       manejarCambio={manejarCambio}
@@ -229,7 +288,7 @@ export default function ContenidoPasos({
         </Fragment> 
       );
 
-    case 4:
+    case 5:
       return categoria3 ? (
         <Fragment>
           <h5 className="text-dark fw-bold mb-3">3. Actividades del Equipo Docente</h5>
@@ -245,7 +304,7 @@ export default function ContenidoPasos({
         </Fragment>
       ) : null;
 
-    case 5:
+    case 6:
       return (
         <Fragment>
           {categoria4 && (
