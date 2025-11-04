@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from src.preguntas.schemas import Pregunta
 
 class RespuestaInformeBase(BaseModel):
     pregunta_id: int
@@ -12,6 +13,12 @@ class RespuestaInformeCreate(RespuestaInformeBase):
 class RespuestaInforme(RespuestaInformeBase):
     id: int
     informe_catedra_completado_id: int 
+
+    class Config:
+        from_attributes = True
+
+class RespuestaConPregunta(RespuestaInforme):
+    pregunta: Pregunta
 
     class Config:
         from_attributes = True

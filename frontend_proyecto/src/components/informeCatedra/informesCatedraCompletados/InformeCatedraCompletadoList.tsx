@@ -48,7 +48,7 @@ export default function InformeCatedraList() {
                       <div>
                         <span className="text-muted me-3">{i + 1}.</span>
                         <span className="fw-bold">
-                          {inf.titulo} – {inf.anio} ({mostrarPeriodo(inf.periodo)})
+                          {inf.titulo} – ({mostrarPeriodo(inf.periodo)})
                         </span>
                       </div>
                       <Link
