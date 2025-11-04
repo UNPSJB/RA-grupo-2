@@ -1,5 +1,5 @@
 from sqlalchemy import Integer, ForeignKey, Text, Column
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 from src.models import ModeloBase
 
 class RespuestaInformeSintetico(ModeloBase):
@@ -9,7 +9,7 @@ class RespuestaInformeSintetico(ModeloBase):
     texto_respuesta = Column(Text, nullable=False) 
     pregunta_id = Column(Integer, ForeignKey("preguntas_informe_sintetico.id"), nullable=False)
     informe_completado_id = Column(Integer, ForeignKey("informe_sintetico_completado.id"), nullable=False)
-
+    materia_id: Mapped[int] = mapped_column(ForeignKey("materias.id"))
     pregunta: Mapped["PreguntaInformeSintetico"] = relationship(
         "PreguntaInformeSintetico", 
         back_populates="respuestas"
@@ -18,3 +18,4 @@ class RespuestaInformeSintetico(ModeloBase):
         "InformeSinteticoCompletado", 
         back_populates="respuestas"
     )
+    
