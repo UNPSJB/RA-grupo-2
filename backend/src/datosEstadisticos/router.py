@@ -11,16 +11,16 @@ router = APIRouter(prefix="/datos_estadisticos", tags=["datos_estadisticos"])
 def get_datos_estadisticos(id_materia: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
     return services.obtener_datos_estadisticos(db, id_materia, anio, periodo)
 
-
-@router.post("/guardar_datos/{informe_id}")
-def create_guardar_datos_estadisticos(informe_id: int, db: Session = Depends(get_db)):
-    services.guardar_datos_estadisticos(db, informe_id)
-    return {"message": "Datos estadísticos generados y guardados correctamente."}
-
-@router.get("/recuperar_existentes/{informe_id}", response_model=List[schemas.DatosEstadisticosPregunta])
-def get_datos_estadisticos_existentes(informe_id: int, db: Session = Depends(get_db)):
-    return services.recuperar_datos_estadisticos(db, informe_id)  
-
 @router.get("/cantidad_encuestas_completadas", response_model=int)
 def get_cantidad_encuestas_completadas(id_materia: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
     return services.cantidad_encuestas_completadas(db, id_materia, anio, periodo)
+
+
+@router.get("/respuestas_abiertas", response_model=List[schemas.DatosAbiertosCategoria])
+def obtener_respuestas_abiertas(
+    id_materia: int,
+    anio: int,
+    periodo: Periodo,
+    db: Session = Depends(get_db)
+):
+    return services.obtener_respuestas_abiertas_por_materia(db, id_materia, anio, periodo)

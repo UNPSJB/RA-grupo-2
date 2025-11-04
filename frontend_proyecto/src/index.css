@@ -134,8 +134,6 @@ html, body {
 }
 
 /* --- Estilo Específico para el Dropdown de Usuario --- */
-
-/* Estilo para el botón de Cerrar Sesión (rojo discreto y adaptativo) */
 .dropdown-item.btn-theme-logout {
     background-color: var(--color-logout) !important;
     color: var(--color-logout-text) !important;

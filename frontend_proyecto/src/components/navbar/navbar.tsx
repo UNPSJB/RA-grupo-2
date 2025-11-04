@@ -21,19 +21,14 @@ export default function Navbar() {
     color: 'var(--color-text-primary)', 
   };
 
-  // Ajuste para el menú de usuario que debe estar a la derecha
   const userDropdownMenuStyle = {
     ...dropdownMenuStyle,
     right: 0, 
     left: 'auto', 
     minWidth: '220px',
   };
-
-  // *** Simulación de datos de usuario ***
   const userName = "Juan Pérez";
   const userRole = "Docente";
-  // ***************************************
-
 
   return (
     <nav 
@@ -41,10 +36,8 @@ export default function Navbar() {
       style={navbarStyle} 
     >
       <div className="container-fluid">
-        
-        {/* === IZQUIERDA: LOGO + TEXTO DE LA UNIVERSIDAD === */}
         <Link 
-          className="navbar-brand d-flex align-items-center me-5" // me-5 para más espacio
+          className="navbar-brand d-flex align-items-center me-5"
           to={ROUTES.HOME} 
           style={{ color: 'var(--color-text-primary)' }} 
         >
@@ -58,8 +51,6 @@ export default function Navbar() {
             <span style={{ fontSize: '0.75rem', marginTop: '-3px', opacity: 0.8 }}>Universidad Nacional Pública San Juan Bosco</span>
           </div>
         </Link>
-
-        {/* BOTÓN TOGGLER (para móviles) */}
         <button
           className="navbar-toggler"
           type="button"
@@ -73,7 +64,6 @@ export default function Navbar() {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarContent">
-          {/* === CENTRO: ENLACES PRINCIPALES (mx-auto para centrar) === */}
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0"> 
             
             <li className="nav-item dropdown">
@@ -119,8 +109,6 @@ export default function Navbar() {
             </li>          
           </ul>
         </div>
-        
-        {/* === DERECHA: MENÚ DE USUARIO (con nombre y rol) === */}
         <div className="navbar-nav ms-auto"> 
           <li className="nav-item dropdown d-none d-lg-block"> 
             
@@ -133,14 +121,10 @@ export default function Navbar() {
               aria-expanded="false"
               style={{ padding: '0.5rem 0.5rem' }} 
             >
-              
-              {/* Contenedor del nombre y el rol */}
               <div className="d-flex flex-column align-items-end me-3">
                   <span className="fw-bold" style={{ color: 'var(--color-text-primary)', fontSize: '1.0rem' }}>{userName}</span>
                   <span className="text-muted" style={{ color: 'var(--color-text-primary)', fontSize: '0.75rem', opacity: 0.7 }}>{userRole}</span>
               </div>
-
-              {/* Icono de Usuario (SVG Moderno) */}
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="32" 
@@ -148,7 +132,7 @@ export default function Navbar() {
                 fill="currentColor" 
                 className="user-icon-svg" 
                 viewBox="0 0 16 16"
-                style={{ color: 'var(--color-text-primary)' }} // Asegura que el SVG herede el color principal
+                style={{ color: 'var(--color-text-primary)' }} 
               >
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                 <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
@@ -157,14 +141,12 @@ export default function Navbar() {
             </a>
             
             <ul className="dropdown-menu custom-dropdown user-dropdown-menu" aria-labelledby="userDropdown" style={userDropdownMenuStyle}>
-              {/* Solo el botón de Cerrar Sesión en el dropdown */}
               <li>
                   Cerrar Sesión
               </li>
             </ul>
           </li>
         </div>
-
       </div>
     </nav>
   );
