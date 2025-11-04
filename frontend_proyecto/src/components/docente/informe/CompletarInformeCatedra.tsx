@@ -8,6 +8,7 @@ import Categoria4Informe from "./CAT4";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 import InformeCatedraCompletadoFuncion from "./CompletarInformeCatedraFuncion";
 import ROUTES from "../../../paths";
+import Acordeon from '../../acordeon/Acordeon';
 
 import CategoriaEquipamiento from "./CAT1"
 import RespuestasAbiertas from "./RespuestasAbiertas";
@@ -66,7 +67,7 @@ export default function CompletarInformeCatedra() {
 
   const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
   const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
-
+  
 
   const {
     docenteMateriaId,
@@ -244,6 +245,13 @@ export default function CompletarInformeCatedra() {
   }
 
   const renderCategoria = (categoria: CategoriaConPreguntas) => {
+
+    const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const textarea = e.target;
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    };
+
     switch (categoria.cod) {
       case "1":
         return (
@@ -258,6 +266,7 @@ export default function CompletarInformeCatedra() {
             categoria={categoria}
             manejarCambio={manejarCambio}
             estadisticas={datosEstadisticos}
+            autoExpand={autoExpand}
           />
         );
       case "2.C":
@@ -272,6 +281,7 @@ export default function CompletarInformeCatedra() {
           <Categoria3Informe
             categoria={categoria}
             manejarCambio={manejarCambio}
+            autoExpand={autoExpand}
           />
         );
       case "4":
@@ -279,95 +289,97 @@ export default function CompletarInformeCatedra() {
           <Categoria4Informe
             categoria={categoria}
             manejarCambio={manejarCambio}
+            autoExpand={autoExpand}
           />
         );
       default:
-        return (
-          <div className="card mt-3">
-            <div className="card-header bg-primary text-white">
-              <strong>
-                {categoria.cod} - {categoria.texto}
-              </strong>
+      return (
+        <div className="card-body p-0">
+          {categoria.preguntas.map((pregunta, i) => (
+            <div key={pregunta.id} className="mb-4 p-4 border rounded bg-light">
+              <h6 className="fw-bold mb-3 text-dark border-bottom pb-2">
+                {i + 1}. {limpiarEnunciado(pregunta.enunciado)}
+                <span className="text-danger ms-1">*</span>
+              </h6>
+              <textarea
+                id={`pregunta-${pregunta.id}`}
+                className="form-control"
+                rows={4}
+                value={respuestas[pregunta.id]?.texto_respuesta || ""}
+                onChange={(e) => {
+                  manejarCambio(pregunta.id, {
+                    opcion_id: null,
+                    texto_respuesta: e.target.value,
+                  });
+                  autoExpand(e); 
+                }}
+                onInput={autoExpand} 
+                placeholder="Escriba su respuesta aquí..."
+                style={{ 
+                  resize: 'none', 
+                  minHeight: '100px',
+                  overflow: 'hidden' 
+                }}
+              />
             </div>
-
-            <div className="card-body p-0">
-              <div className="card-body">
-                {categoria.preguntas.map((pregunta, i) => (
-                  <div key={pregunta.id} className="mb-4">
-                    <div className="mb-2">
-                      <span className="text-muted me-2">{i + 1}.</span>
-                      <span>
-                        {limpiarEnunciado(pregunta.enunciado)}{" "}
-                        <span className="text-danger">*</span>
-                      </span>
-                    </div>
-                    <div>
-                      <textarea
-                        id={`pregunta-${pregunta.id}`}
-                        className="form-control"
-                        rows={3}
-                        value={respuestas[pregunta.id]?.texto_respuesta || ""}
-                        onChange={(e) =>
-                          manejarCambio(pregunta.id, {
-                            opcion_id: null,
-                            texto_respuesta: e.target.value,
-                          })
-                        }
-                        placeholder="Escriba su respuesta aquí..."
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
+          ))}
+        </div>
+      );
     }
   };
 
-  return (
-    <div className="container py-4">
-      <div className="card shadow">
-        <div className="card-header bg-primary text-white">
-          <h1 className="h4 mb-0">Completar Informe - {materiaNombre}</h1>
-        </div>
-        <div className="card-body">
-          <InformeCatedraCompletadoFuncion
-            docenteMateriaId={docenteMateriaId}
-            onDatosGenerados={manejarDatosGenerados}
-          />
-          <div>
-            <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
-          </div>
+
+return (
+  <div className="container-lg py-5">
+    <div className="card border-0 shadow-lg rounded-4">
+      <div className="card-header bg-primary text-white rounded-top-4">
+        <h1 className="h4 mb-0 text-center">
+          Informe de Cátedra – {materiaNombre}
+        </h1>
+      </div>
+
+      <div className="card-body bg-light">
+        <InformeCatedraCompletadoFuncion
+          docenteMateriaId={docenteMateriaId}
+          onDatosGenerados={manejarDatosGenerados}
+        />
+
+        <div className="accordion mt-3">
+          <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
 
           <RespuestasAbiertas docenteMateriaId={docenteMateriaId} />
     
           {categoriasConPreguntas.map((categoria) => (
-            <div key={categoria.id} className="col-12 mb-3">
-              {renderCategoria(categoria)}
+            <div key={categoria.id} className="mb-3">
+              <Acordeon
+                titulo={`${categoria.cod} - ${categoria.texto}`}
+                contenido={renderCategoria(categoria)}
+              />
             </div>
           ))}
+        </div>
 
-          <div className="text-center mt-4">
-            <button
-              onClick={enviarInforme}
-              className="btn btn-success btn-lg"
-              disabled={enviando} //|| !validarFormulario()}
+        <div className="text-center mt-4">
+          <button
+            onClick={enviarInforme}
+            className="btn btn-primary btn-lg px-4 rounded-pill shadow-sm"
+            disabled={enviando}
+          >
+            {enviando ? "Enviando..." : "Enviar Informe"}
+          </button>
+
+          {mensaje && (
+            <div
+              className={`mt-3 alert ${
+                mensaje.includes("éxito") ? "alert-success" : "alert-danger"
+              }`}
             >
-              {enviando ? "Enviando..." : "Enviar Informe"}
-            </button>
-
-            {mensaje && (
-              <div
-                className={`mt-3 alert ${mensaje.includes("éxito") ? "alert-success" : "alert-danger"
-                  }`}
-              >
-                {mensaje}
-              </div>
-            )}
-          </div>
+              {mensaje}
+            </div>
+          )}
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

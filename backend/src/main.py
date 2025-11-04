@@ -8,7 +8,8 @@ from src.models import Base, ModeloBase
 # importamos los routers desde nuestros modulos
 from src.carreras.router import router as carreras_router
 from src.departamentos.router import router as departamentos_router
-from src.informe_sintetico.router import router as informes_router
+from src.informe_sintetico_completado.router import router as informes_sinteticos_completados_router
+from src.informe_sintetico_base.router import router as informe_sintetico_base_router
 from src.alumnos.router import router as alumnos_router
 from src.docentes.router import router as docentes_router
 from src.materias.router import router as materias_router
@@ -25,7 +26,8 @@ from src.informe_catedra_base.router  import router as informes_catedra_base_rou
 from src.informe_catedra_completado.router  import router as informes_catedra_completado_router
 from src.datosEstadisticos.router import router as datos_estadisticos_router
 from src.respuestasInforme.router import router as respuestas_informe_router
- 
+from src.pregunta_informe_sintetico.router import router as preguntas_sintetico_router
+from src.respuesta_informe_sintetico.router import router as respuestas_informe_sintetico_router
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -57,7 +59,8 @@ app.include_router(alumnos_router)
 app.include_router(docentes_router)
 app.include_router(materias_router)
 app.include_router(encuestas_router)
-app.include_router(informes_router)
+app.include_router(informes_sinteticos_completados_router)
+app.include_router(informe_sintetico_base_router)
 app.include_router(opciones_router)
 app.include_router(preguntas_router)
 app.include_router(categorias_router)
@@ -67,3 +70,5 @@ app.include_router(informes_catedra_base_router)
 app.include_router(informes_catedra_completado_router)
 app.include_router(datos_estadisticos_router)
 app.include_router(respuestas_informe_router)
+app.include_router(preguntas_sintetico_router)
+app.include_router(respuestas_informe_sintetico_router)

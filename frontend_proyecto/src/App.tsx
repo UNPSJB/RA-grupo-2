@@ -8,8 +8,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Menu from "./components/menu";
 import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
-import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
-import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
+import InformeSinteticoList from './components/informeSintetico/informesSinteticosCompletados/InformeSinteticoList';
+import InformeSinteticoDetail from './components/informeSintetico/informesSinteticosCompletados/InformeSinteticoDetail';
+import InformeSinteticoBaseForm from "./components/informeSintetico/InformeSinteticoBaseForm";
 //import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
 import CompletarEncuesta from "./components/encuesta/completarEncuesta/CompletarEncuesta";
 
@@ -77,6 +78,7 @@ function App() {
 
             <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
+            <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
           </Routes>
         </div>
       </main>

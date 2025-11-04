@@ -1,0 +1,59 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchInformes } from "./informesService";
+import ROUTES from "../../../paths";
+
+interface Informe {
+  id: number;
+  titulo: string;
+  anio: number; 
+  periodo: string; 
+}
+
+function InformeSinteticoList() {
+  const [informes, setInformes] = useState<Informe[]>([]);
+
+  useEffect(() => {
+    fetchInformes().then(setInformes);
+  }, []);
+
+  return (
+<div className="container py-4">
+  <div className="card">
+    <div className="card-header bg-primary text-white">
+      <h1 className="h4 mb-0">Secretaría académica</h1>
+    </div>
+    <div className="card-body">
+      <h2 className="h5 mb-3">Informes Sintéticos Completados</h2>
+      <div className="list-group">
+        {Array.isArray(informes) && informes.map((inf, i) => (
+          <div key={inf.id} className="col-12 mb-3">
+            <div className="card">
+              <div className="card-body d-flex justify-content-between align-items-center">
+                <div>
+                  <span className="text-muted me-3">{i + 1}.</span>
+                  <span className="fw-bold">
+                    {inf.titulo} – {inf.periodo} {inf.anio} 
+                  </span>
+                </div>
+                <Link
+                  to={ROUTES.INFORME_SINTETICO_DETALLE(inf.id)}
+                  className="btn btn-primary btn-sm"
+                >
+                  Ver Informe
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+        {Array.isArray(informes) && informes.length === 0 && (
+            <div className="alert alert-info">No hay informes completados disponibles.</div>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+  );
+}
+
+export default InformeSinteticoList;

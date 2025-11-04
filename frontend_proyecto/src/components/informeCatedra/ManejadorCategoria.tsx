@@ -46,12 +46,29 @@ export default function ManejadorCategoria({
         }
         setCategorias(prev => prev.filter(c => c.cod !== cod));
     };
+    const cardStyle = { 
+        backgroundColor: 'var(--color-component-bg)',
+        color: 'var(--color-text-primary)',
+        borderColor: 'var(--color-text-primary)',
+    };
+
+    const inputFieldStyle = {
+        backgroundColor: 'var(--color-input-bg)',
+        color: 'var(--color-text-primary)',
+        borderColor: 'var(--color-text-primary)',
+    };
+    
+    const listItemStyle = {
+        backgroundColor: 'var(--color-input-bg)',
+        color: 'var(--color-text-primary)',
+        borderColor: 'var(--color-text-primary)',
+    }
 
     return (
         <section>
-            <h5 className="mb-3">1. Definición de Categorías</h5>
+            <h5 className="mb-3" style={{color: 'var(--color-text-primary)'}}>1. Definición de Categorías</h5>
             
-            <div className="card bg-light mb-4 p-3">
+            <div className="card mb-4 p-3" style={cardStyle}>
                 <div className="row">
                     <div className="col-md-4 mb-2">
                         <input
@@ -60,6 +77,7 @@ export default function ManejadorCategoria({
                             value={nuevaCategoriaCod}
                             onChange={(e) => setNuevaCategoriaCod(e.target.value)}
                             disabled={cargando}
+                            style={inputFieldStyle} 
                         />
                     </div>
                     <div className="col-md-6 mb-2">
@@ -70,6 +88,7 @@ export default function ManejadorCategoria({
                             onChange={(e) => setNuevaCategoriaTexto(e.target.value)}
                             placeholder="Texto / Descripción"
                             disabled={cargando}
+                            style={inputFieldStyle} 
                         />
                     </div>
                     <div className="col-md-2 mb-2">
@@ -88,11 +107,11 @@ export default function ManejadorCategoria({
             {categorias.length > 0 && (
                 <ul className="list-group mb-4">
                     {categorias.map((cat) => (
-                        <li key={cat.cod} className="list-group-item d-flex justify-content-between align-items-center">
+                        <li key={cat.cod} className="list-group-item d-flex justify-content-between align-items-center" style={listItemStyle}>
                             <span><strong>{cat.cod}</strong>: {cat.texto}</span>
                             <button
                                 type="button"
-                                className="btn btn-danger btn-sm"
+                                className="btn btn-theme-danger btn-sm" 
                                 onClick={() => eliminarCategoria(cat.cod)}
                                 disabled={cargando}
                             >

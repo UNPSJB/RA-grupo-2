@@ -39,9 +39,10 @@ interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   estadisticas: DatosEstadisticosCategoria[];
+  autoExpand: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-export default function Categoria2BInforme({ categoria, manejarCambio, estadisticas }: Props) {
+export default function Categoria2BInforme({ categoria, manejarCambio, estadisticas, autoExpand }: Props) {
   const [respuestas, setRespuestas] = useState<Record<number, string>>({});
   const [observacion, setObservacion] = useState<Pregunta | null>(null);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
@@ -111,45 +112,44 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
     });
   };
 
-  return (
-    <div className="card mt-3">
-      <div className="card-header bg-primary text-white">
+return (
+  <>
+    <div className="card-body p-1">
+      <div className="table-responsive">
         <strong>
           {categoria.cod} - {categoria.texto}
         </strong>
       </div>
-
-      <div className="card-body p-0">
-        <table className="table table-bordered m-0">
-          <thead className="table-light">
-            <tr>
-              <th style={{ width: "70%" }}>Grupo-Denominación</th>
-              <th style={{ width: "30%" }}>Valor</th>
+      
+      <table className="table table-bordered m-0">
+        <thead className="table-light">
+          <tr>
+            <th style={{ width: "70%" }}>Grupo-Denominación</th>
+            <th style={{ width: "30%" }}>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {preguntas.map((p) => (
+            <tr key={p.id}>
+              <td>{p.enunciado}</td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={respuestas[p.id] || ""}
+                  readOnly={preguntasValor.includes(p.id)}
+                  onChange={(e) =>
+                    actualizarRespuestaTexto(p.id, e.target.value)
+                  }
+                />
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {preguntas.map((p) => (
-              <tr key={p.id}>
-                <td>{p.enunciado}</td>
-                <td>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={respuestas[p.id] || ""}
-                    readOnly={preguntasValor.includes(p.id)}
-                    onChange={(e) =>
-                      actualizarRespuestaTexto(p.id, e.target.value)
-                    }
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
 
       {observacion && (
-        <div className="card-footer bg-light">
+        <div className="mt-4">
           <label className="form-label fw-bold">
             {observacion.enunciado}
           </label>
@@ -157,12 +157,16 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
             className="form-control"
             rows={3}
             value={respuestas[observacion.id] || ""}
-            onChange={(e) =>
-              actualizarRespuestaTexto(observacion.id, e.target.value)
-            }
+            onChange={(e) => {
+              actualizarRespuestaTexto(observacion.id, e.target.value);
+              autoExpand(e);
+            }}
+            onInput={autoExpand}
+            style={{ resize: 'none' }}
           ></textarea>
         </div>
       )}
-    </div>
-  );
+    </div> 
+  </>
+);
 }
