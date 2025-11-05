@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from src.asociaciones.models import Periodo
 from src.respuestasInforme import schemas as respuestas_schemas
 from typing import List, Optional
+from src.respuestasInforme.schemas import RespuestaConPregunta
 
 class InformeCatedraCompletadoBase(BaseModel):
     docente_materia_id: int
@@ -29,4 +30,10 @@ class InformePendiente(BaseModel):
     materia_id: int
     materia_nombre: str
     docente_materia_id: int
+    model_config = {"from_attributes": True}
+
+class InformeCatedraCompletadoDetalle(InformeCatedraCompletadoBase):
+    id: int
+    respuestas_informe: List[RespuestaConPregunta] = []
+
     model_config = {"from_attributes": True}

@@ -27,7 +27,7 @@ def crear_informe_catedra_completado(
 ):
     return services.crear_informe_completado(db, informe)
 
-@router.get("/{informe_id}", response_model=schemas.InformeCatedraCompletado)
+@router.get("/{informe_id}", response_model=schemas.InformeCatedraCompletadoDetalle)
 def obtener_informe_catedra_completado(informe_id: int, db: Session = Depends(get_db)):
     return services.obtener_informe_completado(db, informe_id)
 
