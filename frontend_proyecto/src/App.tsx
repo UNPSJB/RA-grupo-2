@@ -8,8 +8,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Menu from "./components/menu";
 import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
 import DetalleCarrera from "./components/carrera/DetalleCarrera";
-import InformeSinteticoList from './components/informeSintetico/InformeSinteticoList';
-import InformeSinteticoDetail from './components/informeSintetico/InformeSinteticoDetail';
+import InformeSinteticoList from './components/informeSintetico/informesSinteticosCompletados/InformeSinteticoList';
+import InformeSinteticoDetail from './components/informeSintetico/informesSinteticosCompletados/InformeSinteticoDetail';
+import InformeSinteticoBaseForm from "./components/informeSintetico/InformeSinteticoBaseForm";
 //import CrearPreguntaCerrada from './components/pregunta/preguntaCerrada/CrearPreguntaCerrada';
 import CompletarEncuesta from "./components/encuesta/completarEncuesta/CompletarEncuesta";
 
@@ -21,6 +22,7 @@ import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/Encuest
 import InformeCatedraList from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoList";
 import InformeCatedraDetail from "./components/informeCatedra/informesCatedraCompletados/InformeCatedraCompletadoDetail";
 import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBaseForm";
+import InformeCatedraCompletadoDocente from "./components/docente/informesCompletados/mostrarInformesCompletados";
 
 //import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
 
@@ -52,7 +54,7 @@ function App() {
         
         <div className="container">
           {/* 
-            container: Centra el contenido y da un ancho máximo
+            container: ¿Centra el contenido y da un ancho máximo
           */}
           <Routes>
             <Route path={ROUTES.HOME} element={<Menu />} />
@@ -70,8 +72,13 @@ function App() {
             <Route path={ROUTES.INFORME_CATEDRA_DETALLE()} element={<InformeCatedraDetail />} />
             <Route path={ROUTES.INFORME_CATEDRA_BASE_NUEVO} element={<InformeCatedraBaseForm />} />
             <Route path={ROUTES.INFORMES_CATEDRA_PENDIENTES} element={<InformesPendientesPage />} />
+            
+            <Route path={ROUTES.INFORME_CATEDRA_COMPLETADO_DETALLE()} element={<InformeCatedraDetail />} />
+            <Route path={ROUTES.INFORMES_CATEDRA_COMPLETADOS} element={<InformeCatedraCompletadoDocente />} />
+
             <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
+            <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
           </Routes>
         </div>
       </main>

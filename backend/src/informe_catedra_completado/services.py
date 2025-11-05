@@ -39,6 +39,13 @@ def obtener_informes_pendientes(db: Session, docente_id: int,anio: int,periodo: 
     
     return pendientes
 
+def obtener_informes_completados_docente(db: Session, docente_id: int) -> List[models.InformeCatedraCompletado]:
+    informes = db.scalars(
+        select(InformeCatedraCompletado)
+        .join(DocenteMateria, InformeCatedraCompletado.docente_materia_id == DocenteMateria.id)
+        .where(DocenteMateria.docente_id == docente_id)
+    ).all()
+    return informes
 
 def verificar_informe_existente(db: Session, docente_materia_id: int) -> bool:
     informe = db.scalar(

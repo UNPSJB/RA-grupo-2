@@ -52,7 +52,7 @@ export default function Footer() {
             <div className="row d-flex align-items-center pb-2 border-bottom">
                 <div className="col-md-7 mb-2 mb-md-0">
                     <p className="mb-0 fw-bold" style={{ fontSize: '0.9rem', color: iconColor }}>
-                        Universidad Nacional de la Patagonia San Juan Bosco (UNPSJB)
+                        UNPSJB
                     </p>
                     <p className="mb-0" style={{ fontSize: '0.8rem', color: iconColor }}>
                         9 de Julio 25, U9100 Trelew, Chubut

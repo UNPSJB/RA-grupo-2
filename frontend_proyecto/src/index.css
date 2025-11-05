@@ -29,7 +29,16 @@
 
   /* Texto de Alerta/Error (para .text-danger) */
   --color-text-danger: #e04a4a;
+
+  /* Color para el fondo de Bienvenida */
+  --color-welcome-pattern-light: #E3F2FD; 
+  
+  /* Botón de cerrar sesión */
+  --color-logout: #E75858;       
+  --color-logout-hover: #D13E3E;
+  --color-logout-text: #FFFFFF; 
 }
+
 /* Definiciones de color para Modo Oscuro */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -59,10 +68,16 @@
     --color-danger-text: #FFFFFF;
   
     --color-text-danger: #e04a4a;
+
+    /* Color para el fondo de Bienvenida en modo oscuro */
+    --color-welcome-pattern-dark: #3a3f47; 
+    
+    /* Botón de cerrar sesión en modo oscuro */
+    --color-logout: #9e4646;         
+    --color-logout-hover: #7d3838;
+    --color-logout-text: #F8F9FA; 
   }
 }
-
-
 
 html, body {
     background-color: var(--color-background-primary) !important;
@@ -76,6 +91,7 @@ html, body {
     min-height: 100vh;
 }
 
+/* --- Estilos de Navegación y Dropdowns (Comunes) --- */
 .navbar .nav-item .nav-link, 
 .navbar .nav-link-animated {
     color: var(--color-text-primary) !important; 
@@ -117,10 +133,196 @@ html, body {
     }
 }
 
+/* Estilo Específico para el Dropdown de Usuario */
+.dropdown-item.btn-theme-logout {
+    background-color: var(--color-logout) !important;
+    color: var(--color-logout-text) !important;
+    border-radius: 5px; 
+    margin: 5px 10px 10px 10px; 
+    padding: 8px 15px;
+    text-align: center;
+    transition: background-color 0.2s ease;
+}
 
+.dropdown-item.btn-theme-logout:hover,
+.dropdown-item.btn-theme-logout:focus {
+    background-color: var(--color-logout-hover) !important;
+    color: var(--color-logout-text) !important;
+}
+
+/* Estilo para el Ícono de Usuario SVG (Avatar) */
+.user-icon-svg {
+    color: var(--color-text-primary) !important;
+    width: 32px; 
+    height: 32px; 
+    transition: color 0.2s ease;
+}
+
+.nav-link-animated:hover .user-icon-svg, 
+.nav-link-animated:focus .user-icon-svg {
+    color: var(--color-unpsjb-blue) !important; 
+}
+@media (prefers-color-scheme: dark) {
+    .nav-link-animated:hover .user-icon-svg,
+    .nav-link-animated:focus .user-icon-svg {
+        color: var(--color-text-primary) !important; 
+    }
+}
+
+/* Estilo para el texto del rol */
+.navbar-nav .text-muted {
+    color: var(--color-text-primary) !important;
+    opacity: 0.7 !important;
+}
+
+/* --- Estilos de Botones Generales --- */
+.btn-theme-primary {
+    background-color: var(--color-unpsjb-blue) !important; 
+    border-color: var(--color-unpsjb-blue) !important;
+    color: var(--color-dropdown-hover-text) !important; 
+}
+.btn-theme-primary:hover,
+.btn-theme-primary:focus {
+    background-color: var(--color-primary-hover) !important; 
+    border-color: var(--color-primary-hover) !important;
+    color: var(--color-dropdown-hover-text) !important; 
+}
+
+/* Botón outline primary */
+.btn-outline-theme-primary {
+    color: var(--color-unpsjb-blue) !important;
+    border-color: var(--color-unpsjb-blue) !important;
+    background-color: transparent !important;
+}
+.btn-outline-theme-primary:hover {
+    color: var(--color-dropdown-hover-text) !important;
+    background-color: var(--color-unpsjb-blue) !important;
+    border-color: var(--color-unpsjb-blue) !important;
+}
+@media (prefers-color-scheme: dark) {
+    .btn-outline-theme-primary {
+        color: var(--color-text-primary) !important;
+        border-color: var(--color-text-primary) !important;
+    }
+    .btn-outline-theme-primary:hover {
+        color: var(--color-background-primary) !important;
+        background-color: var(--color-text-primary) !important;
+        border-color: var(--color-text-primary) !important;
+    }
+}
+
+/* Estilos para el Recuadro Central de ¡Bienvenido! */
+.welcome-box {
+    background-color: var(--color-component-bg);
+    border-radius: 15px; 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); 
+    padding: 50px 20px; 
+    width: 100%; 
+    max-width: 900px; 
+    margin: 20px auto; 
+    overflow: hidden; 
+    position: relative;
+    border: none; 
+}
+
+/* Pseudo-elemento para el fondo de la bienvenida (Glassmorphism suave) */
+.welcome-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    
+    background: linear-gradient(135deg, 
+        var(--color-welcome-pattern-light) 0%, 
+        transparent 50%, 
+        var(--color-welcome-pattern-light) 100%
+    );
+    opacity: 0.5;
+    filter: blur(20px); 
+    
+    transform: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .welcome-box::before {
+        background: linear-gradient(135deg, 
+            var(--color-welcome-pattern-dark) 0%, 
+            transparent 50%, 
+            var(--color-welcome-pattern-dark) 100%
+        );
+        opacity: 0.3;
+    }
+}
+
+.welcome-icon-large {
+    font-size: 4rem;
+    color: var(--color-unpsjb-blue);
+    margin-bottom: 10px;
+}
+
+/* Estilos para las Tarjetas de Acceso Rápido */
+.access-card {
+    background-color: var(--color-component-bg) !important; 
+    border: 1px solid var(--color-component-bg) !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.access-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-unpsjb-blue) !important; 
+}
+
+.access-icon-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px auto;
+}
+
+.access-icon {
+    font-size: 1.8rem;
+    color: var(--color-unpsjb-blue); 
+}
+
+@media (prefers-color-scheme: dark) {
+    .access-card {
+        box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
+    }
+    .access-card:hover {
+        box-shadow: 0 8px 15px rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--color-primary-hover) !important;
+    }
+    .access-icon {
+        color: var(--color-text-primary);
+    }
+}
+
+/* Estilos para Footer */
+.footer-link {
+    color: var(--color-text-primary) !important;
+    opacity: 0.8;
+}
+.footer-link:hover {
+    color: var(--color-unpsjb-blue) !important;
+    opacity: 1;
+}
+
+/* --- Estilos de Formularios (conservando tu versión) --- */
 .form-control, .form-select, textarea {
     color: var(--color-text-primary) !important;
-    border-color: #ced4da !important;
+    border-color: #ced4da !important; 
 }
 
 .form-control::placeholder,
@@ -138,6 +340,7 @@ textarea::placeholder {
     }
 }
 
+/* --- Estilos de Botones (conservando tu estructura) --- */
 .btn-theme-success {
     background-color: var(--color-success) !important; 
     border-color: var(--color-success) !important;
@@ -149,7 +352,6 @@ textarea::placeholder {
     color: var(--color-success-text) !important; 
     border-color: var(--color-success-hover) !important;
 }
-
 
 .btn-theme-danger {
     background-color: var(--color-danger) !important; 
@@ -163,27 +365,12 @@ textarea::placeholder {
     border-color: var(--color-danger-hover) !important;
 }
 
-.btn-theme-primary {
-    background-color: var(--color-unpsjb-blue) !important; 
-    border-color: var(--color-unpsjb-blue) !important;
-    color: var(--color-dropdown-hover-text) !important; 
-}
-.btn-theme-primary:hover,
-.btn-theme-primary:focus {
-    background-color: var(--color-primary-hover) !important; 
-    border-color: var(--color-primary-hover) !important;
-    color: var(--color-dropdown-hover-text) !important; 
-}
-
-
-
 .btn:disabled, .btn.disabled, .btn-theme-success:disabled, .btn-theme-danger:disabled, .btn-theme-primary:disabled {
     color: #9AA3AC !important; 
     background-color: #343A40 !important; 
     border-color: #555 !important;
     opacity: 0.65;
 }
-
 
 .btn-theme-success:focus:not(:disabled), .btn-theme-primary:focus:not(:disabled) {
     box-shadow: 0 0 0 0.25rem rgba(0, 94, 194, 0.4) !important; 

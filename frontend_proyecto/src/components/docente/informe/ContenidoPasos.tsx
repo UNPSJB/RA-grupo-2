@@ -6,6 +6,7 @@ import Categoria4Informe from "./CAT4";
 import CategoriaEquipamiento from "./CAT1";
 import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 import CompletarInformeCatedraFuncion from "./CompletarInformeCatedraFuncion";
+import RespuestasAbiertas from "./RespuestasAbiertas";
 
 interface Pregunta { id: number; enunciado: string; categoria_id: number; }
 interface CategoriaConPreguntas { id: number; cod: string; texto: string; preguntas: Pregunta[]; }
@@ -167,6 +168,7 @@ export default function ContenidoPasos({
             datos={datosEstadisticos}
             cant={cantidad} 
           />
+          <RespuestasAbiertas docenteMateriaId={docenteMateriaId} />
         </Fragment>
       );
 
