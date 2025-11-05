@@ -85,10 +85,32 @@ export default function Navbar() {
             </li>
             
             <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="docenteDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Docente</a>
-              <ul className="dropdown-menu custom-dropdown" aria-labelledby="docenteDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.MATERIAS_ASIGNADAS(1)}>Materias dadas</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>Informes de Cátedra Pendientes</Link></li>
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                id="docenteDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Docente
+              </a>
+              <ul className="dropdown-menu" aria-labelledby="docenteDropdown">
+                <li>
+                  <Link className="dropdown-item" to={ROUTES.MATERIAS_ASIGNADAS(1)}>
+                    Materias dadas
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>
+                    Informes de Cátedra Pendientes
+                  </Link>
+                </li>
+                <li>  
+                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_COMPLETADOS}>
+                    Informes de Cátedra Completados
+                  </Link>
+                </li>
               </ul>
             </li>
             <li className="nav-item dropdown">

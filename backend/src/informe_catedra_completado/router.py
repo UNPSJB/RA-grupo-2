@@ -12,8 +12,8 @@ def listar_informes_pendientes(docente_id: int, anio: int, periodo: Periodo, db:
     return services.obtener_informes_pendientes(db, docente_id, anio, periodo)
 
 @router.get("/docente/{docente_id}/completados", response_model=List[schemas.InformeCatedraCompletado])
-def listar_informes_completados_docentes(docente_id: int, db: Session = Depends(get_db)):
-    return services.obtener_informes_completados_docente(db, docente_id)
+def listar_informes_completados(docente_id: int, db: Session = Depends(get_db)):
+    return services.obtener_informes_completados(db, docente_id)
 
 @router.get("/existe")
 def verificar_informe_catedra_completado(docente_materia_id: int, db: Session = Depends(get_db)):
