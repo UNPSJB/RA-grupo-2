@@ -32,3 +32,13 @@ def get_informe_completado(id: int, db: Session = Depends(get_db)):
         return informe
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informe completado: {str(e)}")
+
+@router.get("/tabla_pregunta_2B/")
+def get_tabla_pregunta_2B(anio: int, periodo: str, db: Session = Depends(get_db)):
+    try:
+        from src.materias import services as materias_services
+        materias= materias_services.listar_materia(db)
+        elementos = services.get_elementos_pregunta2B(db, materias, anio, periodo)
+        return elementos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener tabla de pregunta 2B: {str(e)}")
