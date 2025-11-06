@@ -51,13 +51,14 @@ export default function ContenidoPasos({
   const categoria3 = categoriasConPreguntas.find(cat => cat.cod === "3");
   const categoria4 = categoriasConPreguntas.find(cat => cat.cod === "4");
 
-
-  const renderCategoriaGenerica = (categoria: CategoriaConPreguntas) => {
-    const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+      const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
       const textarea = e.currentTarget;
       textarea.style.height = 'auto';
       textarea.style.height = textarea.scrollHeight + 'px';
     };
+
+  const renderCategoriaGenerica = (categoria: CategoriaConPreguntas) => {
+
 
     return (
       <Fragment> 
@@ -96,6 +97,7 @@ export default function ContenidoPasos({
   const renderCategoria2 = (categoria: CategoriaConPreguntas) => {
     const pTeoricas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases teoricas"));
     const pPracticas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases practicas"));
+    const pJustificacion = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("justificacion"));
   
 
     return (
@@ -126,6 +128,31 @@ export default function ContenidoPasos({
             disabled={!pPracticas}
           />
         </div>
+        {pJustificacion && (
+          <div className="col-12 mt-3">
+            <label htmlFor={`preg-${pJustificacion.id}`} className="form-label">
+              {pJustificacion.enunciado || "Justificación"}
+            </label>
+            <textarea
+              className="form-control"
+              id={`preg-${pJustificacion.id}`}
+              value={respuestas[pJustificacion.id]?.texto_respuesta || ""}
+              onChange={(e) =>{
+                manejarCambio(pJustificacion.id, {
+                  opcion_id: null,
+                  texto_respuesta: e.target.value,
+                });
+                autoExpand(e);
+              }}
+              onInput={autoExpand}
+              style={{
+                resize: 'none',
+                minHeight: '100px',
+                overflow: 'hidden'
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   };
