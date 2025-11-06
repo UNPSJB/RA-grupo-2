@@ -85,17 +85,18 @@ export default function Navbar() {
             </li>
             
             <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="docenteDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
+              <a 
+                className="nav-link dropdown-toggle nav-link-animated" 
+                href="#" 
+                id="alumnoDropdown" 
+                role="button" 
+                data-bs-toggle="dropdown" 
                 aria-expanded="false"
+                style={navLinkStyle}
               >
                 Docente
               </a>
-              <ul className="dropdown-menu" aria-labelledby="docenteDropdown">
+              <ul className="dropdown-menu custom-dropdown" aria-labelledby="docenteDropdown" style={dropdownMenuStyle}>
                 <li>
                   <Link className="dropdown-item" to={ROUTES.MATERIAS_ASIGNADAS(1)}>
                     Materias dadas

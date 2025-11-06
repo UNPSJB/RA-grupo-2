@@ -25,3 +25,11 @@ pregunta_opcion = Table(
     Column("pregunta_id", ForeignKey("preguntas.id"), primary_key=True),
     Column("opcion_id", ForeignKey("opciones.id"), primary_key=True)
 )
+
+materia_carrera = Table(
+    "materia_carrera",
+    ModeloBase.metadata,
+    Column("id", Integer, primary_key=True, index=True),
+    Column("materia_id", ForeignKey("materias.id")),
+    Column("carrera_id", ForeignKey("carreras.id"))
+)
