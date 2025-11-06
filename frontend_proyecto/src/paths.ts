@@ -28,6 +28,8 @@ const ROUTES = {
   INFORME_CATEDRA_BASE_NUEVO: "/secretaria/crear-informe-catedra-base",
   ENCUESTA_BASE_NUEVA: "/secretaria/crear-encuesta-base",
   INFORME_SINTETICO_BASE_NUEVO: "/secretaria/informe-sintetico/nuevo",
+
+  INFORMACION_GENERAL_DEPARTAMENTO: "/secretaria/informacion-general-departamento",
 };
 
 export default ROUTES;

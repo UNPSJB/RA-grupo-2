@@ -37,3 +37,12 @@ class InformeCatedraCompletadoDetalle(InformeCatedraCompletadoBase):
     respuestas_informe: List[RespuestaConPregunta] = []
 
     model_config = {"from_attributes": True}
+    
+class InformacionGeneral(BaseModel):
+    codigo: str
+    nombre: str
+    cantidad_alumnos: int
+    cantidad_comisiones_teoricas: int
+    cantidad_comisiones_practicas: int
+
+    model_config = {"from_attributes": True}    
