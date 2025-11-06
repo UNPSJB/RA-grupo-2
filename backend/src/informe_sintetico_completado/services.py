@@ -3,10 +3,12 @@ from sqlalchemy import select
 from src.informe_sintetico_completado import models, schemas
 from src.respuesta_informe_sintetico import services as respuestas_services 
 from typing import List
-from src.materias.schemas import Materia
+from src.materias.models import Materia
+from src.materias import schemas as materias_schemas
 from src.informe_catedra_completado.models import InformeCatedraCompletado
 from src.respuestasInforme.models import RespuestaInforme
 from src.preguntas.models import Pregunta
+from src.asociaciones.models import materia_carrera
 
 
 def get_informes_completados(db: Session):
@@ -36,7 +38,16 @@ def create_informe_completado(db: Session, informe_data: schemas.InformeSintetic
     db.refresh(db_informe)
     return db_informe
 
-def get_elementos_pregunta2B(db: Session, materias: List[Materia], anio: int, periodo: str)-> List[schemas.TablaPregunta2BItem]:
+def get_elementos_pregunta2B(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str)-> List[schemas.TablaPregunta2BItem]:
+    materias: list[schemas.Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+    
     elementos: List[schemas.TablaPregunta2BItem] = []
     for materia in materias:
         informe_completado:InformeCatedraCompletado=db.scalars(
