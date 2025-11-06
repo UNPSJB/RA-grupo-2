@@ -46,7 +46,11 @@ type RespuestaValor = {
   opcion_id: number | null;
   texto_respuesta: string | null;
 };
-
+//RespuestaPlana que viene de CAT1
+interface RespuestaPlana {
+  pregunta_id: number;
+  texto_respuesta: string;
+}
 export default function CompletarInformeCatedra() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,6 +64,10 @@ export default function CompletarInformeCatedra() {
   const [respuestas, setRespuestas] = useState<Record<number, RespuestaValor>>(
     {}
   );
+
+
+  const [respuestasCat1, setRespuestasCat1] = useState<RespuestaPlana[]>([]);
+
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosCategoria[]>([]);
@@ -158,7 +166,11 @@ export default function CompletarInformeCatedra() {
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
   };
 
-
+  //respuestas de CAT1
+  const manejarRespuestaCAT1 = (data: RespuestaPlana[]) => {
+      
+      setRespuestasCat1(data); 
+  };
   const limpiarEnunciado = (texto: string) => {
     const parts = texto.split(". ");
     if (parts.length < 2) return texto;
@@ -185,6 +197,16 @@ export default function CompletarInformeCatedra() {
         texto_respuesta: respuestaObj.texto_respuesta,
       })
     );
+    const respuestasCat1Formateadas = respuestasCat1.map(r => ({
+        pregunta_id: r.pregunta_id,
+        opcion_id: null,
+        texto_respuesta: r.texto_respuesta,
+    }));
+    //unir las respuestas
+    const respuestasFormateadasFinal = [
+      ...respuestasFormateadas, 
+      ...respuestasCat1Formateadas, 
+    ];
     const datosParaBackend = {
       docente_materia_id: docenteMateriaId,
       informe_catedra_base_id: informeBaseId,
@@ -195,7 +217,7 @@ export default function CompletarInformeCatedra() {
       periodo: periodo,
       cantidadComisionesTeoricas,
       cantidadComisionesPracticas,
-      respuestas: respuestasFormateadas,
+      respuestas: respuestasFormateadasFinal,
     };
     try {
       const res = await fetch(
@@ -257,7 +279,7 @@ export default function CompletarInformeCatedra() {
         return (
           <CategoriaEquipamiento
             categoria={categoria}
-            manejarCambio={manejarCambio}
+            manejarCambioEstructura={manejarRespuestaCAT1}
           />
         );
       case "2.B":
