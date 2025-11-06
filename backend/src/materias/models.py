@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List, TYPE_CHECKING
 from enum import auto, StrEnum
 from src.models import ModeloBase
-from src.asociaciones.models import alumno_materia
+from src.asociaciones.models import alumno_materia, materia_carrera
 #con esto no da error de circulacion entre importaciones :/
 if TYPE_CHECKING:
     from src.asociaciones.docente_materia.models import DocenteMateria
@@ -19,6 +19,12 @@ class Materia(ModeloBase):
     alumnos: Mapped[Optional[List["src.alumnos.models.Alumno"]]] = relationship(
         "src.alumnos.models.Alumno",
         secondary=alumno_materia,
+        back_populates="materias"
+    )
+
+    carreras: Mapped[Optional[List["src.carreras.models.Carrera"]]] = relationship(
+        "src.carreras.models.Carrera",
+        secondary=materia_carrera,
         back_populates="materias"
     )
 
