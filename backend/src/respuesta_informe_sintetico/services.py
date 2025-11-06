@@ -2,18 +2,20 @@ from typing import List
 from sqlalchemy.orm import Session
 from src.respuesta_informe_sintetico import schemas, models
 
-def _crear_respuesta_db(informe_completado_id: int, pregunta_id: int, texto_respuesta: str) -> models.RespuestaInformeSintetico:
+def _crear_respuesta_db(informe_completado_id: int, pregunta_id: int, texto_respuesta: str, materia_id: int) -> models.RespuestaInformeSintetico:
     return models.RespuestaInformeSintetico(
         informe_completado_id=informe_completado_id,
         pregunta_id=pregunta_id,
-        texto_respuesta=texto_respuesta
+        texto_respuesta=texto_respuesta,
+        materia_id=materia_id
     )
     
 def guardar_respuesta(db: Session, respuesta: schemas.RespuestaInformeSinteticoCreate) -> models.RespuestaInformeSintetico:
     respuesta_db = _crear_respuesta_db(
         respuesta.informe_completado_id,  
         respuesta.pregunta_id,
-        respuesta.texto_respuesta
+        respuesta.texto_respuesta,
+        respuesta.materia_id
     )
     db.add(respuesta_db)
     db.commit()
@@ -27,7 +29,8 @@ def guardar_respuestas_lote(db: Session, respuestas: List[schemas.RespuestaInfor
         respuesta_db = _crear_respuesta_db(
             respuesta_data.informe_completado_id,  
             respuesta_data.pregunta_id,
-            respuesta_data.texto_respuesta
+            respuesta_data.texto_respuesta,
+            respuesta_data.materia_id
         )
         db.add(respuesta_db)
         respuestas_db.append(respuesta_db)
