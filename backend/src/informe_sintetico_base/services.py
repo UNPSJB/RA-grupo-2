@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from src.informe_sintetico_base import models, schemas, exceptions
 from typing import List
+from src.pregunta_informe_sintetico import schemas as pregunta_schemas
 
 def crear_informe_sintetico_base(db: Session, informe: schemas.InformeSinteticoBaseCreate) -> models.InformeSinteticoBase:
     db_informe = models.InformeSinteticoBase(**informe.model_dump())
@@ -27,3 +28,7 @@ def get_informes_sinteticos_base(db: Session) -> List[schemas.InformeSinteticoBa
         )
     )
     return db.scalars(stmt).all()
+
+def get_preguntas_informe_sintetico_base(db: Session, informe_id: int) -> List[pregunta_schemas.PreguntaInformeSinteticoBase]:
+    informe = get_informe_sintetico_base(db, informe_id)
+    return informe.preguntas

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.informe_sintetico_base import schemas, services, exceptions
+from src.pregunta_informe_sintetico import schemas as pregunta_schemas
 from src.database import get_db
 from typing import List
 
@@ -18,5 +19,12 @@ def get_informes_sinteticos_base_route(db: Session = Depends(get_db)):
 def get_informe_sintetico_base_route(informe_id: int, db: Session = Depends(get_db)):
     try:
         return services.get_informe_sintetico_base(db, informe_id)
+    except exceptions.InformeSinteticoBaseNoEncontrado:
+        raise HTTPException(status_code=404, detail="Informe Base no encontrado")
+
+@router.get("/{informe_id}/preguntas", response_model=List[pregunta_schemas.PreguntaInformeSinteticoBase])
+def get_preguntas_informe_sintetico_base_route(informe_id: int, db: Session = Depends(get_db)):
+    try:
+        return services.get_preguntas_informe_sintetico_base(db, informe_id)
     except exceptions.InformeSinteticoBaseNoEncontrado:
         raise HTTPException(status_code=404, detail="Informe Base no encontrado")
