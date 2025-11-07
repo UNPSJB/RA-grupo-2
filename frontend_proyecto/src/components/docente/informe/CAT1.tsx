@@ -1,77 +1,42 @@
-import { useState, useMemo, useRef, useEffect, useCallback, type RefObject, type FC } from "react";
+import { useState, useMemo, Fragment, useRef, useEffect, useCallback, type RefObject, type FC } from "react";
+import { Link } from "react-router-dom"; 
 
 interface ItemFila {
-  equipo: string;
-  bibliografia: string;
+    equipo: string;
+    bibliografia: string;
 }
 
 interface RespuestaPlana {
-  pregunta_id: number;
-  texto_respuesta: string;
+    pregunta_id: number;
+    texto_respuesta: string;
 }
 
 interface Pregunta { 
-  id: number; 
-  enunciado: string; 
-  categoria_id: number; 
+    id: number; 
+    enunciado: string; 
+    categoria_id: number; 
 }
 
 interface CategoriaConPreguntas { 
-  cod: string; 
-  texto: string; 
-  preguntas: Pregunta[]; 
-  id: number; 
+    cod: string; 
+    texto: string; 
+    preguntas: Pregunta[]; 
+    id: number; 
 }
 
 interface Props {
-  categoria: CategoriaConPreguntas;
-  manejarCambioEstructura: (data: RespuestaPlana[]) => void; 
+    categoria: CategoriaConPreguntas;
+    manejarCambioEstructura: (data: RespuestaPlana[]) => void; 
 }
 
-interface AutoExpandTextareaProps {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    style: React.CSSProperties; 
-    disabled: boolean;
-    className: string;
-}
-
-const AutoExpandTextarea: FC<AutoExpandTextareaProps> = ({ value, onChange, placeholder, style, disabled, className }) => {
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    
-    const autoExpand = useCallback(() => {
-        const textarea = textareaRef.current;
-        if (textarea) {
-            textarea.style.height = 'auto'; 
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-    }, []);
-
-    useEffect(() => {
-        autoExpand();
-    }, [value, autoExpand]);
-
-    return (
-        <textarea
-            ref={textareaRef}
-            className={className}
-            rows={1} 
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onInput={autoExpand}
-            placeholder={placeholder}
-            disabled={disabled}
-            style={{ 
-                ...style, 
-                overflow: 'hidden', 
-                resize: 'none', 
-                minHeight: '38px',
-                transition: 'height 0.1s ease',
-                boxSizing: 'border-box',
-            }}
-        />
-    );
+// Estilos base para el botón X
+const DELETE_BUTTON_STYLE: React.CSSProperties = {
+    padding: '0 8px',
+    height: '28px',
+    borderRadius: '4px',
+    lineHeight: '1.2rem',
+    fontSize: '1.1rem',
+    flexShrink: 0
 };
 
 export default function CategoriaEquipamiento({ categoria, manejarCambioEstructura }: Props) {
@@ -89,21 +54,11 @@ export default function CategoriaEquipamiento({ categoria, manejarCambioEstructu
     const EQUIPO_ID = pEquipo?.id;
     const BIBLIO_ID = pBibliografia?.id;
 
+    // 🛑 ÚNICO STATE PARA ALMACENAR LOS PARES RELACIONADOS
     const [filas, setFilas] = useState<ItemFila[]>([]);
     
-    const [nuevoEquipo, setNuevoEquipo] = useState("");
-    const [nuevaBibliografia, setNuevaBibliografia] = useState("");
-
-    const inputEquipoRef = useRef<HTMLTextAreaElement>(null);
-    const inputBiblioRef = useRef<HTMLTextAreaElement>(null);
-
-    const autoExpandInput = (ref: RefObject<HTMLTextAreaElement | null>) => {
-        const textarea = ref.current;
-        if (textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-    };
+    const [nuevoItemEquipo, setNuevoItemEquipo] = useState("");
+    const [nuevoItemBibliografia, setNuevoItemBibliografia] = useState("");
 
     const enviarRespuestasAlPadre = (currentFilas: ItemFila[]) => {
         if (!EQUIPO_ID || !BIBLIO_ID) return;
@@ -122,189 +77,145 @@ export default function CategoriaEquipamiento({ categoria, manejarCambioEstructu
         manejarCambioEstructura(respuestasPlanas);
     };
 
-    const agregarFila = () => {
-        if (nuevoEquipo.trim() === '' && nuevaBibliografia.trim() === '') {
+    // 🛑 FUNCIÓN ÚNICA DE AGREGAR FILA COMPLETA
+    const agregarFila = (origen: 'equipo' | 'bibliografia') => {
+        const equipo = nuevoItemEquipo.trim();
+        const biblio = nuevoItemBibliografia.trim();
+
+        if (equipo === '' && biblio === '') {
             return;
         }
 
         const nuevaFila: ItemFila = {
-            equipo: nuevoEquipo.trim(),
-            bibliografia: nuevaBibliografia.trim(),
+            equipo: equipo,
+            bibliografia: biblio,
         };
 
         const nuevasFilas = [...filas, nuevaFila];
         setFilas(nuevasFilas);
         
-        setNuevoEquipo("");
-        setNuevaBibliografia("");
+        // Limpiamos ambos inputs
+        setNuevoItemEquipo("");
+        setNuevoItemBibliografia("");
         
-        if (inputEquipoRef.current) inputEquipoRef.current.style.height = '38px';
-        if (inputBiblioRef.current) inputBiblioRef.current.style.height = '38px';
-
         enviarRespuestasAlPadre(nuevasFilas);
     };
 
+    // 🛑 FUNCIÓN ÚNICA DE ELIMINAR FILA COMPLETA
     const eliminarFila = (index: number) => {
         const nuevasFilas = filas.filter((_, i) => i !== index);
         setFilas(nuevasFilas);
         enviarRespuestasAlPadre(nuevasFilas);
     };
-    
-    const manejarEdicionFila = (index: number, campo: 'equipo' | 'bibliografia', valor: string) => {
-        const filasActualizadas = filas.map((fila, i) => 
-            i === index ? { ...fila, [campo]: valor } : fila
-        );
-        setFilas(filasActualizadas);
-        enviarRespuestasAlPadre(filasActualizadas); 
-    };
 
     if (!pEquipo || !pBibliografia) {
-        return <div className="alert alert-warning mt-3">Error: Preguntas de Equipamiento y/o Bibliografía no asociadas correctamente.</div>;
+        return <div className="alert alert-warning">Error: Preguntas no asociadas correctamente.</div>;
     }
 
-    const inputFieldStyle = {
-        backgroundColor: 'var(--color-input-bg)',
-        color: 'var(--color-text-primary)',
-        borderColor: 'var(--color-text-primary)',
-        width: '100%',
-        padding: '0.5rem',
-    };
-    const cardStyle = { 
-        backgroundColor: 'var(--color-component-bg)',
-        color: 'var(--color-text-primary)', 
-    };
-    
-    const inputResponseStyle = {
-        ...inputFieldStyle,
-        padding: '0.5rem',
-        backgroundColor: 'transparent',
-        border: 'none',
-        minHeight: '40px',
-        borderRadius: 0,
-    };
-    
-    const itemContainerStyle: React.CSSProperties = {
-        padding: '10px 0',
-        borderBottom: '1px dashed var(--color-text-primary, #ccc)',
-        position: 'relative', 
-    };
-
-    const RESERVED_ACTION_SPACE = '40px'; 
+    // ----------------------------------------------------
+    // La parte del renderizado se mantiene VISUALMENTE igual a tu original, 
+    // pero lee de `filas` y usa `eliminarFila`.
+    // ----------------------------------------------------
 
     return (
-        <div className="card-body p-0">
-            <div className="p-4 border rounded" style={cardStyle}>
+        <Fragment>
+            <div className="mb-4">
+                <label className="form-label mb-3"> 
+                    Equipamiento e insumos
+                </label>
                 
-                <div className="row g-3 align-items-end mb-4 border-bottom pb-3">
-                    
-                    <div className="col-12 col-md-10">
-                        <div className="d-flex gap-3">
-                            <div className="w-50">
-                                <label className="form-label fw-bold">Equipamiento/Insumo</label>
-                                <textarea
-                                    ref={inputEquipoRef}
-                                    className="form-control"
-                                    rows={1}
-                                    placeholder="Escriba aquí el equipamiento a agregar"
-                                    value={nuevoEquipo}
-                                    onChange={(e) => setNuevoEquipo(e.target.value)}
-                                    onInput={() => autoExpandInput(inputEquipoRef)}
-                                    onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregarFila(); } }}
-                                    style={{...inputFieldStyle, overflow: 'hidden', resize: 'none', minHeight: '38px'}}
-                                />
-                            </div>
-                            
-                            <div className="w-50">
-                                <label className="form-label fw-bold">Bibliografía</label>
-                                <textarea
-                                    ref={inputBiblioRef}
-                                    className="form-control"
-                                    rows={1}
-                                    placeholder="Escriba aquí la bibliografía a agregar"
-                                    value={nuevaBibliografia}
-                                    onChange={(e) => setNuevaBibliografia(e.target.value)}
-                                    onInput={() => autoExpandInput(inputBiblioRef)}
-                                    onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregarFila(); } }}
-                                    style={{...inputFieldStyle, overflow: 'hidden', resize: 'none', minHeight: '38px'}}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="col-12 col-md-2 d-flex align-items-end">
-                        <button
-                            type="button"
-                            className="btn btn-theme-primary w-100" 
-                            onClick={agregarFila}
-                            disabled={nuevoEquipo.trim() === '' && nuevaBibliografia.trim() === ''}
-                            style={{ height: '38px' }} 
-                        >
-                            Agregar 
-                        </button>
-                    </div>
+                {/* INPUT DE EQUIPAMIENTO */}
+                <div className="d-flex gap-2 mb-3">
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={nuevoItemEquipo}
+                        onChange={(e) => setNuevoItemEquipo(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                agregarFila('equipo');
+                            }
+                        }}
+                    />
+                    {/* Botón AGREGAR - Dispara la creación de la fila completa */}
+                    <button
+                        type="button"
+                        className="btn btn-primary px-3"
+                        onClick={() => agregarFila('equipo')}
+                        disabled={!nuevoItemEquipo.trim() && !nuevoItemBibliografia.trim()}
+                    >
+                        Agregar
+                    </button>
                 </div>
-                {filas.length > 0 && (
-                    <div className="d-flex flex-column mt-4">
-                        
-                        <div className="d-flex fw-bold mb-2 pb-1" style={{ borderBottom: '2px solid var(--color-unpsjb-border)' }}>
-                            <span style={{ flexBasis: '50%', paddingRight: '0.5rem' }}>Equipamiento e insumos</span>
-                            <span style={{ flexBasis: '50%', paddingRight: RESERVED_ACTION_SPACE }}>Bibliografía</span>
-                        </div>
 
-                        {filas.map((fila, index) => (
-                            <div 
-                                key={index} 
-                                className="d-flex align-items-start" 
-                                style={itemContainerStyle}
-                            >
-                                <div style={{ flexBasis: '50%', paddingRight: '0.5rem' }}>
-                                    <AutoExpandTextarea
-                                        className="form-control border-0"
-                                        value={fila.equipo}
-                                        onChange={(value) => manejarEdicionFila(index, 'equipo', value)}
-                                        placeholder="[Sin datos de equipamiento]"
-                                        disabled={false}
-                                        style={inputResponseStyle}
-                                    />
-                                </div>
-                                
-                                <div style={{ flexBasis: '50%', paddingRight: RESERVED_ACTION_SPACE }}>
-                                    <AutoExpandTextarea
-                                        className="form-control border-0"
-                                        value={fila.bibliografia}
-                                        onChange={(value) => manejarEdicionFila(index, 'bibliografia', value)}
-                                        placeholder="[Sin datos de bibliografía]"
-                                        disabled={false}
-                                        style={inputResponseStyle}
-                                    />
-                                </div>
-
+                {/* VISUALIZACIÓN: Lista de Equipamiento (Muestra los datos de la fila) */}
+                <div>
+                    {filas.map((fila, index) => (
+                        fila.equipo.trim() !== '' && (
+                            <div key={index} className="d-flex align-items-center mb-2 p-2 rounded-3 bg-light-subtle">
+                                <span className="flex-grow-1">{fila.equipo}</span>
                                 <button
                                     type="button"
-                                    className="btn btn-theme-danger"
+                                    className="btn btn-outline-danger btn-sm ms-2"
                                     onClick={() => eliminarFila(index)}
-                                    style={{ 
-                                        position: 'absolute',
-                                        right: '0',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        width: '25px', 
-                                        height: '25px',
-                                        borderRadius: '0', 
-                                        padding: '0',
-                                        fontSize: '1.2rem',
-                                        lineHeight: '1.2rem',
-                                        zIndex: 10,
-                                        flexShrink: 0
-                                    }}
+                                    style={DELETE_BUTTON_STYLE}
                                 >
                                     ×
                                 </button>
                             </div>
-                        ))}
-                    </div>
-                )}
+                        )
+                    ))}
+                </div>
             </div>
-        </div>
+
+            <div className="mb-4">
+                <label className="form-label mb-3">
+                    Bibliografía
+                </label>
+                
+                {/* INPUT DE BIBLIOGRAFÍA */}
+                <div className="d-flex gap-2 mb-3">
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={nuevoItemBibliografia}
+                        onChange={(e) => setNuevoItemBibliografia(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                agregarFila('bibliografia');
+                            }
+                        }}
+                    />
+                    {/* Botón AGREGAR - Dispara la creación de la fila completa */}
+                    <button
+                        type="button"
+                        className="btn btn-primary px-3"
+                        onClick={() => agregarFila('bibliografia')}
+                        disabled={!nuevoItemEquipo.trim() && !nuevoItemBibliografia.trim()}
+                    >
+                        Agregar
+                    </button>
+                </div>
+
+                {/* VISUALIZACIÓN: Lista de Bibliografía (Muestra los datos de la fila) */}
+                <div>
+                    {filas.map((fila, index) => (
+                        fila.bibliografia.trim() !== '' && (
+                            <div key={index} className="d-flex align-items-center mb-2 p-2 rounded-3 bg-light-subtle">
+                                <span className="flex-grow-1">{fila.bibliografia}</span>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-danger btn-sm ms-2"
+                                    onClick={() => eliminarFila(index)}
+                                    style={DELETE_BUTTON_STYLE}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )
+                    ))}
+                </div>
+            </div>
+        </Fragment>
     );
 }

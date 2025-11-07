@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface InformeActividad {
@@ -18,7 +18,7 @@ interface Props {
   onDatosGenerados?: (datos: InformeActividad) => void;
 }
 
-export default function InformeCatedraCompletadoFuncion({
+export default function CompletarInformeCatedraFuncion({
   docenteMateriaId,
   onDatosGenerados,
 }: Props) {
@@ -91,70 +91,86 @@ export default function InformeCatedraCompletadoFuncion({
     fetchData();
   }, [docenteMateriaId, cantidadComisionesTeoricas, cantidadComisionesPracticas]);
 
-  if (loading) return <p>Cargando informe...</p>;
+  if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
   if (!data) return <p>No hay datos para mostrar.</p>;
 
-return (
-  <div className="card border-light shadow-sm">
-    <div className="card-body p-0">
-      <table className="table table-borderless m-0">
-        <tbody>
-          {[
-            { label: "Sede", value: data.sede },
-            { label: "Ciclo Lectivo", value: data.cicloLectivo },
-            { label: "Período", value: data.periodo },
-            { label: "Actividad Curricular", value: data.actividadCurricular },
-            { label: "Código", value: data.codigoActividadCurricular },
-            { label: "Docente Responsable", value: data.docenteResponsable },
-            { label: "Alumnos inscriptos", value: data.cantidadAlumnos },
-          ].map((item, index) => (
-            <tr key={index}>
-              <td className="fw-bold" style={{ width: '35%', padding: '12px 16px' }}>
-                {item.label}
-              </td>
-              <td style={{ padding: '12px 16px' }}>{item.value}</td>
-            </tr>
-          ))}
-          
-          <tr>
-            <td className="fw-bold" style={{ padding: '12px 16px' }}>Comisiones teóricas</td>
-            <td style={{ padding: '12px 16px' }}>
-              <input
-                type="text"
-                className="form-control form-control-sm"
-                value={cantidadComisionesTeoricas}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*$/.test(value)) {
-                    setCantidadComisionesTeoricas(value === "" ? 0 : Number(value));
-                  }
-                }}
-                style={{ maxWidth: '120px' }}
-              />
-            </td>
-          </tr>
-          
-          <tr>
-            <td className="fw-bold" style={{ padding: '12px 16px' }}>Comisiones prácticas</td>
-            <td style={{ padding: '12px 16px' }}>
-              <input
-                type="text"
-                className="form-control form-control-sm"
-                value={cantidadComisionesPracticas}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*$/.test(value)) {
-                    setCantidadComisionesPracticas(value === "" ? 0 : Number(value));
-                  }
-                }}
-                style={{ maxWidth: '120px' }}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+  return (
+    <Fragment>
+      <h5 className="text-dark fw-bold mb-3">
+        Información de la Cátedra
+      </h5>
+      <hr className="mb-4" />
+      <div className="row g-3">
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Materia</p>
+          <p>{data.actividadCurricular}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Código</p>
+          <p>{data.codigoActividadCurricular}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Sede</p>
+          <p>{data.sede}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Docente Responsable</p>
+          <p>{data.docenteResponsable}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Ciclo Lectivo</p>
+          <p>{data.cicloLectivo}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Período</p>
+          <p>{data.periodo}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Alumnos Inscriptos</p>
+          <p>{data.cantidadAlumnos}</p>
+        </div>
+      </div>
+      
+      <hr className="my-4" /> 
+      
+      <h5 className="text-dark fw-bold mb-3">
+        Información de Comisiones
+      </h5>
+      <div className="row g-3">
+        <div className="col-md-6">
+          <label htmlFor="comisionesTeoricas" className="form-label">
+            Comisiones Teóricas
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id="comisionesTeoricas"
+            min="0"
+            value={cantidadComisionesTeoricas}
+            onChange={(e) => {
+              const value = parseInt(e.target.value) || 0;
+              setCantidadComisionesTeoricas(value);
+            }}
+          />
+        </div>
+        <div className="col-md-6">
+          <label htmlFor="comisionesPracticas" className="form-label">
+            Comisiones Prácticas
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id="comisionesPracticas"
+            min="0"
+            value={cantidadComisionesPracticas}
+            onChange={(e) => {
+              const value = parseInt(e.target.value) || 0;
+              setCantidadComisionesPracticas(value);
+            }}
+          />
+        </div>
+      </div>
+    </Fragment> 
+  );
 }

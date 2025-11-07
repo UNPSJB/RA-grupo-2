@@ -13,7 +13,7 @@ class InformeSinteticoBaseCreate(InformeSinteticoBaseBase):
 
 class InformeSinteticoBase(InformeSinteticoBaseBase):
     id: int
-    informes_completados: List[InformeSinteticoCompletado] = []
+    #informes_completados: List[InformeSinteticoCompletado] = []
     preguntas: List[PreguntaInformeSintetico] = []
 
     class Config:

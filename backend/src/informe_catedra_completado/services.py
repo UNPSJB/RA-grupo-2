@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select
 from src.informe_catedra_completado import schemas, models, exceptions
 from src.informe_catedra_completado.models import InformeCatedraCompletado
@@ -7,6 +7,8 @@ from src.materias.models import Materia
 from src.asociaciones.docente_materia.models import DocenteMateria
 from src.asociaciones.models import Periodo
 from src.respuestasInforme import services as respuestas_services
+from src.respuestasInforme.models import RespuestaInforme
+from src.preguntas.models import Pregunta
 
 
 def obtener_informes_pendientes(db: Session, docente_id: int,anio: int,periodo: Periodo) -> List[dict]:
@@ -37,7 +39,7 @@ def obtener_informes_pendientes(db: Session, docente_id: int,anio: int,periodo: 
     
     return pendientes
 
-def obtener_informes_completados_docente(db: Session, docente_id: int) -> List[models.InformeCatedraCompletado]:
+def obtener_informes_completados(db: Session, docente_id: int) -> List[models.InformeCatedraCompletado]:
     informes = db.scalars(
         select(InformeCatedraCompletado)
         .join(DocenteMateria, InformeCatedraCompletado.docente_materia_id == DocenteMateria.id)
@@ -101,7 +103,16 @@ def crear_informe_completado(db: Session, informe_data: schemas.InformeCatedraCo
 
 
 def obtener_informe_completado(db: Session, informe_id: int) -> models.InformeCatedraCompletado:
-    informe = db.scalar(select(InformeCatedraCompletado).where(InformeCatedraCompletado.id == informe_id))
+    stmt = (
+        select(models.InformeCatedraCompletado)
+        .where(models.InformeCatedraCompletado.id == informe_id)
+        .options(
+            selectinload(models.InformeCatedraCompletado.respuestas_informe)
+            .selectinload(RespuestaInforme.pregunta)
+        )
+    )
+    
+    informe = db.scalar(stmt)
     if not informe:
         raise exceptions.InformeCompletadoNoEncontrado()
     return informe

@@ -1,41 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 
-interface Opcion {
-  id: number;
-  contenido: string;
-}
-
-interface Pregunta {
-  id: number;
-  enunciado: string;
-  categoria_id: number;
-  opciones?: Opcion[];
-}
-
-interface Categoria {
-  id: number;
-  cod: string;
-  texto: string;
-  preguntas: Pregunta[];
-}
-
-type RespuestaValor = {
-  opcion_id: number | null;
-  texto_respuesta: string | null;
-};
+type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null; };
+interface Opcion { id: number; contenido: string; }
+interface Pregunta { id: number; enunciado: string; categoria_id: number; opciones?: Opcion[]; }
+interface Categoria { id: number; cod: string; texto: string; preguntas: Pregunta[]; }
 
 interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
-  autoExpand: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  respuestas: Record<number, RespuestaValor>;
 }
 
 const normalizarString = (texto: string): string => {
   if (!texto) return ""; 
-  return texto
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
 };
 
 const ROLES = [
@@ -44,19 +22,18 @@ const ROLES = [
   { key: "auxiliar de segunda", texto: "Auxiliar de Segunda" },
 ];
 
-export default function Categoria4Informe({ categoria, manejarCambio, autoExpand}: Props) {
-  const [respuestas, setRespuestas] = useState<Record<number, RespuestaValor>>({});
+export default function Categoria4Informe({ categoria, manejarCambio, respuestas}: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
+
+  const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  };
 
   useEffect(() => {
     if (!categoria) return;
     setPreguntas(categoria.preguntas);
-
-    const inicial: Record<number, RespuestaValor> = {};
-    categoria.preguntas.forEach((p) => {
-      inicial[p.id] = { opcion_id: null, texto_respuesta: null };
-    });
-    setRespuestas(inicial);
   }, [categoria]);
 
   const actualizarRespuesta = (
@@ -68,12 +45,6 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
       opcion_id: tipo === "cerrada" ? Number(valor) || null : null,
       texto_respuesta: tipo === "abierta" ? String(valor) : null,
     };
-
-    setRespuestas((prev) => ({
-      ...prev,
-      [preguntaId]: nuevoValor,
-    }));
-
     manejarCambio(preguntaId, nuevoValor);
   };
 
@@ -83,27 +54,19 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
   ): number => {
     const searchTerm = tipo === "calificacion" ? "calificacion" : "justificacion"; 
     const expectedEnunciado = normalizarString(`${searchTerm} - ${rolKey}`);
-
     const p = preguntas.find(
       (p) => normalizarString(p.enunciado) === expectedEnunciado
     );
-    
     return p ? p.id : 0;
   };
 
-
   return (
-    <div className="card-body p-0">
+    <Fragment>
       <div className="table-responsive">
-          <table 
-            className="table table-bordered m-0 align-middle" 
-            style={{ 
-              borderRadius: '8px', 
-              overflow: 'hidden', 
-              borderColor: '#dee2e6'}}>
+        <table className="table table-bordered m-0 align-middle">
           <thead className="table-light text-center">
             <tr>
-              <th style={{ width: "30%" }}>JTP/Auxiliares</th>
+              <th style={{ width: "20%" }}>JTP/Auxiliares</th>
               <th style={{ width: "25%" }}>Calificación</th>
               <th style={{ width: "55%" }}>Justificación de la calificación</th>
             </tr>
@@ -113,7 +76,7 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
               const calificacionPId = findPreguntaId(rol.key, "calificacion");
               const justificacionPId = findPreguntaId(rol.key, "justificacion");
               const nombrePId =
-                preguntas.find((p) => p.enunciado === `Nombre - ${rol.texto}`)
+                preguntas.find((p) => normalizarString(p.enunciado) === normalizarString(`Nombre - ${rol.texto}`))
                   ?.id || 0;
 
               const preguntaCalificacion = preguntas.find(
@@ -125,13 +88,13 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
                 <tr key={rol.key}>
                   <td className="p-1">
                     <textarea
-                      className="form-control border-0 text-center"
-                      rows={2}
-                      style={{ background: "transparent", resize: "none", width: "100%"}}
-                      placeholder={`Nombre del ${rol.texto}`}
+                      className="form-control border-0"
+                      rows={1}
+                      style={{ background: "transparent", resize: 'none', width: '100%'}}
+                      placeholder={`${rol.texto}`}
                       value={respuestas[nombrePId]?.texto_respuesta || ""}
                       onChange={(e) => {
-                        actualizarRespuesta(nombrePId, e.target.value, "abierta")
+                        actualizarRespuesta(nombrePId, e.target.value, "abierta");
                         autoExpand(e);
                       }}
                       onInput={autoExpand}
@@ -140,7 +103,10 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
                   </td>
                   <td>
                     <select
-                      className="form-select"
+                      className="form-select border-0"
+                      style={{
+                        borderBottom: '1px solid #9ea5abff'
+                      }}
                       value={respuestas[calificacionPId]?.opcion_id || ""}
                       onChange={(e) =>
                         actualizarRespuesta(
@@ -161,7 +127,7 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
                   </td>
                   <td>
                     <textarea
-                      className="form-control"
+                      className="form-control border-0"
                       rows={2}
                       value={respuestas[justificacionPId]?.texto_respuesta || ""}
                       onChange={(e) => {
@@ -172,7 +138,8 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
                         );
                         autoExpand(e);
                       }}
-                      onInput={autoExpand}                      
+                      onInput={autoExpand}
+                      disabled={!justificacionPId}
                       style={{ resize: "none"}}
                     />
                   </td>
@@ -182,6 +149,6 @@ export default function Categoria4Informe({ categoria, manejarCambio, autoExpand
           </tbody>
         </table>
       </div>
-    </div>
+    </Fragment>
   );
 }

@@ -5,7 +5,7 @@
   --color-primary-hover: #004b9e; 
   
   /* Colores Principales */
-  --color-background-primary: #FFFFFF; 
+  --color-background-primary: #F8F9FA;
   --color-text-primary: #212529;      
 
   /* Colores de Componentes y Forms */
@@ -33,7 +33,7 @@
   /* Color para el fondo de Bienvenida */
   --color-welcome-pattern-light: #E3F2FD; 
   
-  /* Botón de cerrar sesión (Rojo discreto en modo claro) */
+  /* Botón de cerrar sesión */
   --color-logout: #E75858;       
   --color-logout-hover: #D13E3E;
   --color-logout-text: #FFFFFF; 
@@ -69,10 +69,10 @@
   
     --color-text-danger: #e04a4a;
 
-    /* Color para el fondo de Bienvenida */
+    /* Color para el fondo de Bienvenida en modo oscuro */
     --color-welcome-pattern-dark: #3a3f47; 
     
-    /* Botón de cerrar sesión (Rojo discreto en modo oscuro) */
+    /* Botón de cerrar sesión en modo oscuro */
     --color-logout: #9e4646;         
     --color-logout-hover: #7d3838;
     --color-logout-text: #F8F9FA; 
@@ -133,7 +133,7 @@ html, body {
     }
 }
 
-/* --- Estilo Específico para el Dropdown de Usuario --- */
+/* Estilo Específico para el Dropdown de Usuario */
 .dropdown-item.btn-theme-logout {
     background-color: var(--color-logout) !important;
     color: var(--color-logout-text) !important;
@@ -168,15 +168,14 @@ html, body {
         color: var(--color-text-primary) !important; 
     }
 }
-/* Opcional: Estilo para el texto del rol si el color se pierde */
+
+/* Estilo para el texto del rol */
 .navbar-nav .text-muted {
     color: var(--color-text-primary) !important;
     opacity: 0.7 !important;
 }
 
-
 /* --- Estilos de Botones Generales --- */
-
 .btn-theme-primary {
     background-color: var(--color-unpsjb-blue) !important; 
     border-color: var(--color-unpsjb-blue) !important;
@@ -189,6 +188,7 @@ html, body {
     color: var(--color-dropdown-hover-text) !important; 
 }
 
+/* Botón outline primary */
 .btn-outline-theme-primary {
     color: var(--color-unpsjb-blue) !important;
     border-color: var(--color-unpsjb-blue) !important;
@@ -211,9 +211,7 @@ html, body {
     }
 }
 
-
-/* --- Estilos para el Recuadro Central de ¡Bienvenido! (IMAGEN 2) --- */
-
+/* Estilos para el Recuadro Central de ¡Bienvenido! */
 .welcome-box {
     background-color: var(--color-component-bg);
     border-radius: 15px; 
@@ -268,7 +266,7 @@ html, body {
     margin-bottom: 10px;
 }
 
-/* --- Estilos para las Tarjetas de Acceso Rápido (Access Cards) --- */
+/* Estilos para las Tarjetas de Acceso Rápido */
 .access-card {
     background-color: var(--color-component-bg) !important; 
     border: 1px solid var(--color-component-bg) !important;
@@ -311,8 +309,7 @@ html, body {
     }
 }
 
-
-/* --- Estilos para Footer --- */
+/* Estilos para Footer */
 .footer-link {
     color: var(--color-text-primary) !important;
     opacity: 0.8;
@@ -322,16 +319,59 @@ html, body {
     opacity: 1;
 }
 
-.list-group-item, .list-group-item strong, .list-group-item span { color: var(--color-text-primary) !important; }
-.form-control, .form-select, textarea { color: var(--color-text-primary) !important; border-color: var(--color-text-primary) !important; }
-.form-control::placeholder, .form-select::placeholder, textarea::placeholder { color: #999 !important; opacity: 1; }
-@media (prefers-color-scheme: dark) {
-    .form-control::placeholder, .form-select::placeholder, textarea::placeholder { color: var(--color-text-primary) !important; opacity: 0.7; }
+/* --- Estilos de Formularios (conservando tu versión) --- */
+.form-control, .form-select, textarea {
+    color: var(--color-text-primary) !important;
+    border-color: #ced4da !important; 
 }
 
-.btn-theme-success { background-color: var(--color-success) !important; border-color: var(--color-success) !important; color: var(--color-success-text) !important; }
-.btn-theme-success:hover, .btn-theme-success:focus { background-color: var(--color-success-hover) !important; color: var(--color-success-text) !important; border-color: var(--color-success-hover) !important; }
-.btn-theme-danger { background-color: var(--color-danger) !important; border-color: var(--color-danger) !important; color: var(--color-danger-text) !important; }
-.btn-theme-danger:hover, .btn-theme-danger:focus { background-color: var(--color-danger-hover) !important; color: var(--color-danger-text) !important; border-color: var(--color-danger-hover) !important; }
-.btn:disabled, .btn.disabled, .btn-theme-success:disabled, .btn-theme-danger:disabled, .btn-theme-primary:disabled { color: #9AA3AC !important; background-color: #343A40 !important; border-color: #555 !important; opacity: 0.65; }
-.btn-theme-success:focus:not(:disabled), .btn-theme-primary:focus:not(:disabled) { box-shadow: 0 0 0 0.25rem rgba(0, 94, 194, 0.4) !important; }
+.form-control::placeholder,
+.form-select::placeholder,
+textarea::placeholder {
+    color: #999 !important; 
+    opacity: 1; 
+}
+@media (prefers-color-scheme: dark) {
+    .form-control::placeholder,
+    .form-select::placeholder,
+    textarea::placeholder {
+        color: var(--color-text-primary) !important; 
+        opacity: 0.7; 
+    }
+}
+
+/* --- Estilos de Botones (conservando tu estructura) --- */
+.btn-theme-success {
+    background-color: var(--color-success) !important; 
+    border-color: var(--color-success) !important;
+    color: var(--color-success-text) !important; 
+}
+.btn-theme-success:hover,
+.btn-theme-success:focus {
+    background-color: var(--color-success-hover) !important; 
+    color: var(--color-success-text) !important; 
+    border-color: var(--color-success-hover) !important;
+}
+
+.btn-theme-danger {
+    background-color: var(--color-danger) !important; 
+    border-color: var(--color-danger) !important;
+    color: var(--color-danger-text) !important; 
+}
+.btn-theme-danger:hover,
+.btn-theme-danger:focus {
+    background-color: var(--color-danger-hover) !important; 
+    color: var(--color-danger-text) !important; 
+    border-color: var(--color-danger-hover) !important;
+}
+
+.btn:disabled, .btn.disabled, .btn-theme-success:disabled, .btn-theme-danger:disabled, .btn-theme-primary:disabled {
+    color: #9AA3AC !important; 
+    background-color: #343A40 !important; 
+    border-color: #555 !important;
+    opacity: 0.65;
+}
+
+.btn-theme-success:focus:not(:disabled), .btn-theme-primary:focus:not(:disabled) {
+    box-shadow: 0 0 0 0.25rem rgba(0, 94, 194, 0.4) !important; 
+}
