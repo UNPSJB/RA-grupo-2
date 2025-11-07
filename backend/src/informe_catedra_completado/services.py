@@ -126,33 +126,3 @@ def obtener_informes_por_departamento(db: Session, departamento_id: int) -> List
     ).all()
     return informes
 
-
-def obtener_informacion_general_por_departamento(
-    db: Session, departamento_id: int
-) -> List[schemas.InformacionGeneral]:
-    query = (
-        select(
-            Materia.matricula,
-            Materia.nombre,
-            func.coalesce(func.sum(InformeCatedraCompletado.cantidadAlumnos), 0).label("cantidad_alumnos"),
-            func.coalesce(func.sum(InformeCatedraCompletado.cantidadComisionesTeoricas), 0).label("comisiones_teoricas"),
-            func.coalesce(func.sum(InformeCatedraCompletado.cantidadComisionesPracticas), 0).label("comisiones_practicas"),
-        )
-        .join(DocenteMateria, DocenteMateria.materia_id == Materia.id)
-        .join(InformeCatedraCompletado, InformeCatedraCompletado.docente_materia_id == DocenteMateria.id)
-        .where(Materia.departamento_id == departamento_id)
-        .group_by(Materia.matricula, Materia.nombre)
-    )
-
-    resultados = db.execute(query).all()
-
-    return [
-        schemas.InformacionGeneral(
-            codigo=matricula,  
-            nombre=nombre,
-            cantidad_alumnos=cant_alumnos,
-            cantidad_comisiones_teoricas=com_teoricas,
-            cantidad_comisiones_practicas=com_practicas,
-        )
-        for matricula, nombre, cant_alumnos, com_teoricas, com_practicas in resultados
-    ]

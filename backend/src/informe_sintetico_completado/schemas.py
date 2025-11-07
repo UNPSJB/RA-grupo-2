@@ -31,3 +31,13 @@ class TablaPregunta2BItem(BaseModel):
     encuesta_ET: str
     encuesta_EP: str
     juicio_valor: str
+
+class InformacionGeneral(BaseModel):
+    materia: Materia
+    codigo: str
+    nombre: str
+    cantidad_alumnos: int
+    cantidad_comisiones_teoricas: int
+    cantidad_comisiones_practicas: int
+
+    model_config = {"from_attributes": True}   
