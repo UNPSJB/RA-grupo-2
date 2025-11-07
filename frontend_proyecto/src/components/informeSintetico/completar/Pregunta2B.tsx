@@ -18,8 +18,8 @@ interface Tabla2BItem {
 
 interface Respuesta {
     pregunta_id: number;
-    materia_id: number;
     texto_respuesta: string;
+    materia_id: number;
 }
 
 interface Props {
@@ -47,6 +47,7 @@ export default function Pregunta2B({
     useEffect(() => {
         if (!departamentoId) return;
         if (!carreraId) return;
+        console.log(pregunta)
 
         const fetchData = async () => {
             try {
@@ -70,8 +71,15 @@ export default function Pregunta2B({
                 setItems(data);
                 const respuestasIniciales = data.map((itm) => ({
                     pregunta_id: pregunta.id,
+                    texto_respuesta: JSON.stringify({
+                        encuesta_B: itm.encuesta_B,
+                        encuesta_C: itm.encuesta_C,
+                        encuesta_D: itm.encuesta_D,
+                        encuesta_ET: itm.encuesta_ET,
+                        encuesta_EP: itm.encuesta_EP,
+                        juicio_valor: itm.juicio_valor,
+                    }),
                     materia_id: itm.materia.id,
-                    texto_respuesta: itm,
                 }));
                 manejarCambio?.(respuestasIniciales);
 
@@ -99,14 +107,24 @@ export default function Pregunta2B({
         const updated = [...itemsTabla];
         updated[index][field] = value;
         setItems(updated);
+
+        // ✅ Siempre incluir pregunta_id explícitamente
         const respuestas: Respuesta[] = updated.map((itm) => ({
-            pregunta_id: pregunta.id,
+            pregunta_id: pregunta.id, // <-- aseguramos que nunca se pierda
+            texto_respuesta: JSON.stringify({
+                encuesta_B: itm.encuesta_B,
+                encuesta_C: itm.encuesta_C,
+                encuesta_D: itm.encuesta_D,
+                encuesta_ET: itm.encuesta_ET,
+                encuesta_EP: itm.encuesta_EP,
+                juicio_valor: itm.juicio_valor,
+            }),
             materia_id: itm.materia.id,
-            texto_respuesta: JSON.stringify(itm),
         }));
 
         manejarCambio?.(respuestas);
     };
+
 
     return (
         <div className="container mt-4">
@@ -202,14 +220,6 @@ export default function Pregunta2B({
                             </div>
                         ))}
                     </div>
-
-                    <pre className="bg-light p-3 rounded border mt-4">
-                        {JSON.stringify(
-                            itemsTabla,
-                            null,
-                            2
-                        )}
-                    </pre>
                 </>
             )}
         </div>

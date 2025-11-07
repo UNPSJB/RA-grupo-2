@@ -29,6 +29,6 @@ def get_informes_sinteticos_base(db: Session) -> List[schemas.InformeSinteticoBa
     )
     return db.scalars(stmt).all()
 
-def get_preguntas_informe_sintetico_base(db: Session, informe_id: int) -> List[pregunta_schemas.PreguntaInformeSinteticoBase]:
+def get_preguntas_informe_sintetico_base(db: Session, informe_id: int) -> List[pregunta_schemas.PreguntaInformeSintetico]:
     informe = get_informe_sintetico_base(db, informe_id)
     return informe.preguntas

@@ -22,7 +22,7 @@ def get_informe_sintetico_base_route(informe_id: int, db: Session = Depends(get_
     except exceptions.InformeSinteticoBaseNoEncontrado:
         raise HTTPException(status_code=404, detail="Informe Base no encontrado")
 
-@router.get("/{informe_id}/preguntas", response_model=List[pregunta_schemas.PreguntaInformeSinteticoBase])
+@router.get("/{informe_id}/preguntas", response_model=List[pregunta_schemas.PreguntaInformeSintetico])
 def get_preguntas_informe_sintetico_base_route(informe_id: int, db: Session = Depends(get_db)):
     try:
         return services.get_preguntas_informe_sintetico_base(db, informe_id)
