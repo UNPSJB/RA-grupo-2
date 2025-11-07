@@ -28,6 +28,7 @@ import InformeCatedraCompletadoDocente from "./components/docente/informesComple
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
+import ProbarFuncionalidad from "./components/informeSintetico/completar/probar";
 
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";
@@ -79,6 +80,7 @@ function App() {
             <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
+            <Route path={"probar123"} element={<ProbarFuncionalidad />} />
           </Routes>
         </div>
       </main>
