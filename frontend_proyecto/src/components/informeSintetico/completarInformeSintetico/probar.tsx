@@ -184,8 +184,6 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
-
-
         
         return (
             <div className="alert alert-secondary">

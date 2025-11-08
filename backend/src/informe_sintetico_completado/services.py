@@ -131,7 +131,7 @@ def get_elementos_pregunta2(db: Session, id_dpto: int, id_carrera: int, anio: in
                 if r.pregunta.enunciado.strip() == "Clases prácticas %"), None)
         
         r_justificacion: RespuestaInforme = next((r for r in informe_completado.respuestas_informe 
-                if r.pregunta.enunciado.strip() == "Justificación de Porcentaje de Horas"), None)
+                if r.pregunta.enunciado.strip() == "Justificación"), None)
 
         elemento = schemas.TablaPregunta2Item(
             materia = materia,
