@@ -54,7 +54,7 @@ class RespuestasSeccion2C(BaseModel):
     obstaculos_ensenanza: Optional[str] = None
     obstaculos_aprendizaje: Optional[str] = None
     estrategias: Optional[str] = None
-    reflexion_docente: Optional[str] = None
+    
 
 class TablaPregunta2CItem(BaseModel):
     materia: Materia

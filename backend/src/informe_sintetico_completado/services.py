@@ -237,8 +237,6 @@ def get_elementos_pregunta2C(db: Session, id_dpto: int, id_carrera: int, anio: i
         r_est: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
                 if r.pregunta.enunciado.strip() == "Estrategias a implementar"), None)
         
-        r_ref: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
-                if r.pregunta.enunciado.strip() == "Escriba un resumen de la reflexión sobre la práctica docente que se realizó en la reunión de equipo de cátedra. En caso de corresponder, consigne nuevas estrategias a implementar (cambio de cronograma, modificación del proceso de evaluación, etc.)."), None)
         
         respuestas_obj = schemas.RespuestasSeccion2C(
             aspectos_positivos_ensenanza = r_ap_e.texto_respuesta if r_ap_e else None,
@@ -246,7 +244,6 @@ def get_elementos_pregunta2C(db: Session, id_dpto: int, id_carrera: int, anio: i
             obstaculos_ensenanza = r_o_e.texto_respuesta if r_o_e else None,
             obstaculos_aprendizaje = r_o_a.texto_respuesta if r_o_a else None,
             estrategias = r_est.texto_respuesta if r_est else None,
-            reflexion_docente = r_ref.texto_respuesta if r_ref else None
         )
 
         elemento = schemas.TablaPregunta2CItem(
