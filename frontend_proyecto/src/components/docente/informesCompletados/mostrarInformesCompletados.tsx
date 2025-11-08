@@ -38,7 +38,7 @@ export default function InformeCatedraCompletadoDocente() {
   return (
     <div className="container py-4">
       <div className="card">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
             <strong>Departamento de</strong> {departamento?.nombre}
           </h1>
@@ -62,7 +62,7 @@ export default function InformeCatedraCompletadoDocente() {
                       </div>
                       <Link
                         to={ROUTES.INFORME_CATEDRA_COMPLETADO_DETALLE(inf.id)}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-theme-primary rounded-pill px-4"
                       >
                         Ver Detalle
                       </Link>

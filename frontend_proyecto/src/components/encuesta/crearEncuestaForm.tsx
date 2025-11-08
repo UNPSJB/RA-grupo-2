@@ -133,7 +133,7 @@ export default function EncuestaBaseForm() {
     return (
         <div className="container py-4">
             <div className="card shadow">
-                <div className="card-header bg-primary text-white">
+                <div className="card-header bg-unpsjb-header">
                     <h1 className="h4 mb-0">Nueva Encuesta Base</h1>
                 </div>
                 <div className="card-body">
@@ -206,7 +206,7 @@ export default function EncuestaBaseForm() {
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
                             <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>
-                            <button type="submit" className="btn btn-primary" disabled={cargando}>
+                            <button type="submit" className="btn btn-theme-primary" disabled={cargando}>
                                 {cargando ? "Guardando en cascada..." : "Guardar Encuesta Completa"}
                             </button>
                         </div>

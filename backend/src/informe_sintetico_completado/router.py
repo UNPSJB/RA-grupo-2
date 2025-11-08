@@ -77,3 +77,21 @@ def obtener_informacion_general(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener información general: {str(e)}")
 
+
+@router.get("/tabla_pregunta_2C/", response_model=List[schemas.TablaPregunta2CItem])
+def get_preguntas_2C(
+    id_dpto: int = Query(...),
+    id_carrera: int = Query(...),
+    anio: int = Query(...),
+    periodo: str = Query(...),
+    db: Session = Depends(get_db)
+):
+    try:
+        elementos = services.get_elementos_pregunta2C(db, id_dpto, id_carrera, anio, periodo)
+        if not elementos:
+            raise HTTPException(status_code=404, detail="No se encontraron respuestas de cátedra para la sección 2.C con esos filtros.")
+        return elementos
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener respuestas de sección 2C: {str(e)}")

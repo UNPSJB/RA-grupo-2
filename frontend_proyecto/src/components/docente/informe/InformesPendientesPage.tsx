@@ -71,7 +71,7 @@ export default function InformesPendientesPage() {
   return (
     <div className="container py-4">
       <div className="card shadow">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
             Informes Pendientes ({PERIODO_ACTUAL} {ANIO_ACTUAL})
           </h1>
@@ -95,7 +95,7 @@ export default function InformesPendientesPage() {
                       </div>
                       <button
                         onClick={() => handleCompletar(informe)}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-theme-primary rounded-pill px-4"
                       >
                         Completar Informe
                       </button>

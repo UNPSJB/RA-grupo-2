@@ -24,7 +24,7 @@ function ListaCarreras({ carreras }: Props) {
               <Link
                 to={ROUTES.CARRERA(carrera.id)}
                 state={{ nombre: carrera.nombre }}
-                className="btn btn-primary btn-sm"          
+                className="btn btn-theme-primary rounded-pill px-6"          
               >
                 Completar Informe
               </Link>
