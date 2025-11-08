@@ -142,3 +142,52 @@ def get_elementos_pregunta2(db: Session, id_dpto: int, id_carrera: int, anio: in
         elementos.append(elemento)
     
     return elementos
+
+def obtener_informacion_general(
+    db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
+) -> List[schemas.InformacionGeneral]:
+    """
+    Obtiene la información general de cada materia (sin agrupar ni sumar),
+    para un departamento, carrera, año y período específicos.
+    """
+
+    # 1️⃣ Buscar las materias del departamento y carrera
+    materias: list[Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+
+    elementos: List[schemas.InformacionGeneral] = []
+
+    # 2️⃣ Buscar informe completado de cada materia
+    for materia in materias:
+        informe_completado: InformeCatedraCompletado = db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == periodo,
+                InformeCatedraCompletado.docente_materia.has(materia_id=materia.id)
+            )
+        ).first()
+
+        # Si no tiene informe, continuar
+        if not informe_completado:
+            continue
+
+        # 3️⃣ Crear el objeto con la materia y sus datos
+        elemento = schemas.InformacionGeneral(
+            materia=materia,
+            codigo=materia.matricula,
+            nombre=materia.nombre,
+            cantidad_alumnos=informe_completado.cantidadAlumnos or 0,
+            cantidad_comisiones_teoricas=informe_completado.cantidadComisionesTeoricas or 0,
+            cantidad_comisiones_practicas=informe_completado.cantidadComisionesPracticas or 0,
+        )
+
+        elementos.append(elemento)
+
+    return elementos

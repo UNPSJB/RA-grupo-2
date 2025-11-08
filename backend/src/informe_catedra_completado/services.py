@@ -1,6 +1,6 @@
 from typing import List
 from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import select
+from sqlalchemy import select, func
 from src.informe_catedra_completado import schemas, models, exceptions
 from src.informe_catedra_completado.models import InformeCatedraCompletado
 from src.materias.models import Materia
@@ -125,3 +125,4 @@ def obtener_informes_por_departamento(db: Session, departamento_id: int) -> List
         .where(Materia.departamento_id == departamento_id)
     ).all()
     return informes
+

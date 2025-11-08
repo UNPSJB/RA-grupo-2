@@ -3,9 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
+import InformacionGeneral from "./informacionGeneral";
 
 interface Pregunta {
     id: number;
+    orden: number;
     enunciado: string;
 }
 
@@ -49,7 +51,8 @@ export default function CompletarInformeSintetico() {
                 return res.json();
             })
             .then((data: Pregunta[]) => {
-                setPreguntas(data);
+                const ordenadas = data.sort((a, b) => a.orden - b.orden);
+                setPreguntas(ordenadas);
             })
             .catch((err) => {
                 console.error("Error fetching preguntas del informe:", err);
@@ -96,8 +99,6 @@ export default function CompletarInformeSintetico() {
             informe_base_id: informeBaseId,
             respuestas: respuestas,
         };
-        console.log("📦 Datos enviados al backend:", JSON.stringify(datosParaBackend, null, 2));
-        console.log("🧩 Primeras respuestas:", respuestas.slice(0, 2));
 
         try {
             const res = await fetch(
@@ -157,6 +158,18 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
+        if (/Pregunta 1/i.test(pregunta.enunciado)) {
+            return (
+                <InformacionGeneral
+                    id_dpto={dpto.id}
+                    id_carrera={carrera.id}
+                    pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
         return (
             <div className="alert alert-secondary">
                 Pregunta "{pregunta.enunciado}" sin componente asignado.
@@ -202,12 +215,16 @@ export default function CompletarInformeSintetico() {
                                 paddingRight: "15px",
                             }}
                         >
-                            {preguntas
-                                .filter((p) => p.id === preguntaActiva)
-                                .map((p) => (
-                                    <div key={p.id}>{renderPregunta(p)}</div>
-                                ))}
+                            {preguntas.map((p) => (
+                                <div
+                                    key={p.id}
+                                    style={{ display: preguntaActiva === p.id ? "block" : "none" }}
+                                >
+                                    {renderPregunta(p)}
+                                </div>
+                            ))}
                         </div>
+
                     </div>
 
                     <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">

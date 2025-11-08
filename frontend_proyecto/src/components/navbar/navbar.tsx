@@ -129,6 +129,11 @@ export default function Navbar() {
                 <li><Link className="dropdown-item" to={ROUTES.INFORME_SINTETICO_BASE_NUEVO}>Crear Informe Sintético Base</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.ENCUESTA_BASE_NUEVA}>Crear Encuesta Base</Link></li>
               </ul>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link nav-link-animated" to={ROUTES.INFORMACION_GENERAL_DEPARTAMENTO} style={navLinkStyle}>
+                Información General Departamento
+              </Link>
             </li>          
           </ul>
         </div>

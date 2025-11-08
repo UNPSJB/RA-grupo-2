@@ -37,3 +37,5 @@ class InformeCatedraCompletadoDetalle(InformeCatedraCompletadoBase):
     respuestas_informe: List[RespuestaConPregunta] = []
 
     model_config = {"from_attributes": True}
+    
+ 

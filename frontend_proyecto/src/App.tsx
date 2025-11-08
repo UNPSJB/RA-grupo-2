@@ -28,7 +28,7 @@ import InformeCatedraCompletadoDocente from "./components/docente/informesComple
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
-import ProbarFuncionalidad from "./components/informeSintetico/completar/probar";
+import ProbarFuncionalidad from "./components/informeSintetico/completarInformeSintetico/probar";
 
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";

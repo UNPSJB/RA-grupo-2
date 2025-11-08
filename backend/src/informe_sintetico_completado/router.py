@@ -4,8 +4,6 @@ from src.database import get_db
 from src.informe_sintetico_completado.models import InformeSinteticoCompletado
 from src.informe_sintetico_completado import schemas, services
 from typing import List
-
-
 router = APIRouter(prefix="/informes_sinteticos_completados", tags=["informes_sinteticos_completados"])
 
 @router.post("/completados/", response_model=schemas.InformeSinteticoCompletado, status_code=status.HTTP_201_CREATED)
@@ -43,7 +41,7 @@ def get_tabla_pregunta_2B(id_dpto: int, id_carrera: int, anio: int, periodo: str
         return elementos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener tabla de pregunta 2B: {str(e)}")
-    
+
 @router.get("/tabla_pregunta_2/", response_model=List[schemas.TablaPregunta2Item])
 def get_tabla_porcentaje_horas(
     id_dpto: int = Query(...), 
@@ -56,3 +54,26 @@ def get_tabla_porcentaje_horas(
         return elementos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener tabla de porcentaje de horas: {str(e)}")
+ 
+@router.get("/informacion-general/", response_model=List[schemas.InformacionGeneral])
+def obtener_informacion_general(
+    id_dpto: int,
+    id_carrera: int,
+    anio: int,
+    periodo: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Devuelve la información general por materia (sin agregados)
+    para el departamento, carrera, año y periodo especificados.
+    """
+    try:
+        elementos = services.obtener_informacion_general(db, id_dpto, id_carrera, anio, periodo)
+        if not elementos:
+            raise HTTPException(status_code=404, detail="No se encontraron informes completados para los filtros dados.")
+        return elementos
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener información general: {str(e)}")
+
