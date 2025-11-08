@@ -132,7 +132,7 @@ export default function CompletarEncuesta() {
   return (
     <div className="container py-4">
       <div className="card border-0 shadow-lg">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0 text-center">Encuesta</h1>
         </div>
         <div className="card-body">
@@ -174,7 +174,7 @@ export default function CompletarEncuesta() {
           <div className="text-center mt-4">
             <button
               onClick={enviarEncuesta}
-              className="btn btn-primary btn-lg px-4 rounded-pill shadow-sm"
+              className="btn btn-theme-primary rounded-pill px-4"
               disabled={enviando}
             >
               {enviando ? "Enviando..." : "Enviar Encuesta"}

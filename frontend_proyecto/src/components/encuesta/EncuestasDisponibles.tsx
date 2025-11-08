@@ -81,13 +81,14 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
           <div className="card">
             <div className="card-body d-flex justify-content-between align-items-center">
               <div>
-                <span className="text-muted me-3">{i + 1}.</span>
+                <span className="text-muted me-2">{i + 1}.</span>
                 <span className="fw-bold">
-                  <strong>{e.materia}</strong> — {e.encuesta}{" "}
+                  <span>{e.materia}</span> 
                 </span>
+                <span className="text"> — {e.encuesta}{" "} </span>
               </div>
               <button onClick={() => verificarYCompletar(e)}
-                className="btn btn-primary btn-sm"
+                className="btn btn-theme-primary rounded-pill px-6"
               >
                 Completar Encuesta
               </button>
