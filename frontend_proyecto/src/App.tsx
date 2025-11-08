@@ -28,6 +28,7 @@ import InformeCatedraCompletadoDocente from "./components/docente/informesComple
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
+import ProbarFuncionalidad from "./components/informeSintetico/completar/probar";
 
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";
@@ -36,7 +37,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import ROUTES from "./paths";
-import InformacionGeneralPage from "./components/informeSintetico/completarInformeSintetico/pruebaFuncionalidad";
 
 function App() {
   return (
@@ -80,7 +80,7 @@ function App() {
             <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
-            <Route path={ROUTES.INFORMACION_GENERAL_DEPARTAMENTO} element={<InformacionGeneralPage />} />
+            <Route path={"probar123"} element={<ProbarFuncionalidad />} />
           </Routes>
         </div>
       </main>

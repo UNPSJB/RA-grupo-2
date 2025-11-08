@@ -69,7 +69,11 @@ export default function InformacionGeneral({
                 const respuestasIniciales: Respuesta[] = data.map((m) => ({
                     pregunta_id: pregunta.id,
                     materia_id: m.materia.id,
-                    texto_respuesta: JSON.stringify(m)
+                    texto_respuesta: JSON.stringify({
+                        cant_alumnos: m.cantidad_alumnos,
+                        cant_comisiones_t: m.cantidad_comisiones_teoricas,
+                        cant_comisiones_p: m.cantidad_comisiones_practicas
+                    })
                 }));
                 manejarCambio?.(respuestasIniciales);
 
@@ -86,7 +90,7 @@ export default function InformacionGeneral({
         };
 
         fetchData();
-    }, [id_dpto, id_carrera, anio, periodo, pregunta.id, manejarCambio]);
+    }, [id_dpto, id_carrera, anio, periodo, pregunta.id]);
 
 
     const handleChange = <K extends keyof MateriaInfo>(
@@ -101,7 +105,11 @@ export default function InformacionGeneral({
         const respuestas: Respuesta[] = updated.map((m) => ({
             pregunta_id: pregunta.id,
             materia_id: m.materia.id,
-            texto_respuesta: JSON.stringify(m)
+            texto_respuesta: JSON.stringify({
+                cant_alumnos: m.cantidad_alumnos,
+                cant_comisiones_t: m.cantidad_comisiones_teoricas,
+                cant_comisiones_p: m.cantidad_comisiones_practicas
+            })
         }));
         manejarCambio?.(respuestas);
     };
@@ -172,10 +180,6 @@ export default function InformacionGeneral({
                             </div>
                         ))}
                     </div>
-
-                    <pre className="bg-light p-3 rounded border mt-4">
-                        {JSON.stringify(materias, null, 2)}
-                    </pre>
                 </>
             )}
         </div>
