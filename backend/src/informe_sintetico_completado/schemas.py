@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import List
+from typing import List, Optional
 from src.respuesta_informe_sintetico.schemas import RespuestaInformeSintetico
 from src.respuesta_informe_sintetico import schemas as respuestas_schemas
 from src.asociaciones.models import Periodo
@@ -31,6 +31,12 @@ class TablaPregunta2BItem(BaseModel):
     encuesta_ET: str
     encuesta_EP: str
     juicio_valor: str
+
+class TablaPregunta2Item(BaseModel):
+    materia: Materia
+    porcentaje_teoricas: str
+    porcentaje_practicas: str
+    justificacion: Optional[str] = None
 
 class InformacionGeneral(BaseModel):
     materia: Materia

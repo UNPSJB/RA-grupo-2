@@ -4,6 +4,7 @@ import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
 import InformacionGeneral from "./informacionGeneral";
+import Pregunta2 from "./Pregunta2";
 
 interface Pregunta {
     id: number;
@@ -170,6 +171,20 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
+
+        if (/Pregunta 2/i.test(pregunta.enunciado)) { 
+            return (
+                <Pregunta2
+                    departamentoId={dpto.id}
+                    carreraId={carrera.id}
+                    pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+        
         return (
             <div className="alert alert-secondary">
                 Pregunta "{pregunta.enunciado}" sin componente asignado.

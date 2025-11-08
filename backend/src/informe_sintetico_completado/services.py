@@ -9,6 +9,7 @@ from src.informe_catedra_completado.models import InformeCatedraCompletado
 from src.respuestasInforme.models import RespuestaInforme
 from src.preguntas.models import Pregunta
 from src.asociaciones.models import materia_carrera
+from src.asociaciones.models import Periodo
 
 
 def get_informes_completados(db: Session):
@@ -91,6 +92,55 @@ def get_elementos_pregunta2B(db: Session, id_dpto: int, id_carrera: int, anio: i
             juicio_valor = ""
         )
         elementos.append(elemento)
+    return elementos
+
+
+def get_elementos_pregunta2(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.TablaPregunta2Item]:
+    materias: list[schemas.Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+    
+    elementos: List[schemas.TablaPregunta2Item] = [] 
+    
+    for materia in materias:
+        informe_completado:InformeCatedraCompletado=db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == Periodo(periodo), 
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                    .selectinload(RespuestaInforme.pregunta)   
+            )
+        ).first()
+
+        if not informe_completado:
+            continue
+
+        r_horas: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Clases teóricas %"), None)
+        
+        r_practica: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Clases prácticas %"), None)
+        
+        r_justificacion: RespuestaInforme = next((r for r in informe_completado.respuestas_informe 
+                if r.pregunta.enunciado.strip() == "Justificación"), None)
+
+        elemento = schemas.TablaPregunta2Item(
+            materia = materia,
+            porcentaje_teoricas = r_horas.texto_respuesta if r_horas and r_horas.texto_respuesta else "-",
+            porcentaje_practicas = r_practica.texto_respuesta if r_practica and r_practica.texto_respuesta else "-",
+            justificacion = r_justificacion.texto_respuesta if r_justificacion else None
+        )
+        elementos.append(elemento)
+    
     return elementos
 
 def obtener_informacion_general(
