@@ -47,3 +47,17 @@ class InformacionGeneral(BaseModel):
     cantidad_comisiones_practicas: int
 
     model_config = {"from_attributes": True}   
+
+class RespuestasSeccion2C(BaseModel):
+    aspectos_positivos_ensenianza: Optional[str] = None
+    aspectos_positivos_aprendizaje: Optional[str] = None
+    obstaculos_ensenianza: Optional[str] = None
+    obstaculos_aprendizaje: Optional[str] = None
+    estrategias: Optional[str] = None
+    reflexion_docente: Optional[str] = None
+
+class TablaPregunta2CItem(BaseModel):
+    materia: Materia
+    respuestas: RespuestasSeccion2C
+
+    model_config = {"from_attributes": True}

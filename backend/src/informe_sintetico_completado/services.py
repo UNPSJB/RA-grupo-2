@@ -191,3 +191,68 @@ def obtener_informacion_general(
         elementos.append(elemento)
 
     return elementos
+
+
+def get_elementos_pregunta2C(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.TablaPregunta2CItem]:
+    materias: list[schemas.Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+
+    elementos: List[schemas.TablaPregunta2CItem] = []
+
+    for materia in materias:
+        informe_completado: InformeCatedraCompletado=db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == Periodo(periodo),
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                .selectinload(RespuestaInforme.pregunta)
+            )
+        ).first()
+
+        if not informe_completado:
+            continue
+
+        r_ap_e: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Aspectos positivos: Proceso Enseñanza"), None)
+        
+        r_ap_a: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Aspectos positivos: Proceso de aprendizaje"), None)
+        
+        r_o_e: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Obstáculos: Proceso Enseñanza"), None)
+        
+        r_o_a: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Obstáculos: Proceso de aprendizaje"), None)
+        
+        r_est: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Estrategias a implementar"), None)
+        
+        r_ref: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Escriba un resumen de la reflexión sobre la práctica docente que se realizó en la reunión de equipo de cátedra. En caso de corresponder, consigne nuevas estrategias a implementar (cambio de cronograma, modificación del proceso de evaluación, etc.)."), None)
+        
+        respuestas_obj = schemas.RespuestasSeccion2C(
+            aspectos_positivos_ensenanza = r_ap_e.texto_respuesta if r_ap_e else None,
+            aspectos_positivos_aprendizaje = r_ap_a.texto_respuesta if r_ap_a else None,
+            obstaculos_ensenanza = r_o_e.texto_respuesta if r_o_e else None,
+            obstaculos_aprendizaje = r_o_a.texto_respuesta if r_o_a else None,
+            estrategias = r_est.texto_respuesta if r_est else None,
+            reflexion_docente = r_ref.texto_respuesta if r_ref else None
+        )
+
+        elemento = schemas.TablaPregunta2CItem(
+            materia = materia,
+            respuestas = respuestas_obj
+        )
+        elementos.append(elemento)
+    
+    return elementos
