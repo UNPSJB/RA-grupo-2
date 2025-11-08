@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
-import InformacionGeneral from "../completarInformeSintetico/informacionGeneral";
+import InformacionGeneral from "./informacionGeneral";
 
 interface Pregunta {
     id: number;
