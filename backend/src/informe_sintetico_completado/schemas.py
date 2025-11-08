@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import List
+from typing import List, Optional
 from src.respuesta_informe_sintetico.schemas import RespuestaInformeSintetico
 from src.respuesta_informe_sintetico import schemas as respuestas_schemas
 from src.asociaciones.models import Periodo
@@ -41,3 +41,9 @@ class InformacionGeneral(BaseModel):
     cantidad_comisiones_practicas: int
 
     model_config = {"from_attributes": True}   
+    
+class TemasDesarrolladosItem(BaseModel):
+    materia: Materia
+    porcentaje_texto: Optional[str] = None 
+
+    model_config = {"from_attributes": True}

@@ -4,7 +4,7 @@ import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
 import InformacionGeneral from "./informacionGeneral";
-
+import ContenidosAlcanzados from "./contenidosAlcanzados";
 interface Pregunta {
     id: number;
     orden: number;
@@ -164,6 +164,18 @@ export default function CompletarInformeSintetico() {
                     id_dpto={dpto.id}
                     id_carrera={carrera.id}
                     pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+        if (/Pregunta 2.?a/i.test(pregunta.enunciado)) {
+            return (
+                <ContenidosAlcanzados
+                    id_dpto={dpto.id}
+                    id_carrera={carrera.id}
+                    pregunta={pregunta} 
                     anio={anio}
                     periodo={periodo}
                     manejarCambio={manejarCambio}

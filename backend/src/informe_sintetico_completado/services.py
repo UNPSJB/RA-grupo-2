@@ -141,3 +141,49 @@ def obtener_informacion_general(
         elementos.append(elemento)
 
     return elementos
+
+def obtener_temas_desarrollados(
+    db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
+) -> List[schemas.TemasDesarrolladosItem]:
+    
+    materias: list[Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+    
+    elementos: List[schemas.TemasDesarrolladosItem] = []
+    
+    for materia in materias:
+        informe_completado: InformeCatedraCompletado = db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == periodo,
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                    .selectinload(RespuestaInforme.pregunta)   
+            )
+        ).first()
+
+        if not informe_completado:
+            continue
+
+        respuesta_temas: RespuestaInforme = next(
+            (r for r in informe_completado.respuestas_informe 
+             if r.pregunta.enunciado == "Cantidad de temas desarrollados %"), 
+            None
+        )
+
+        elemento = schemas.TemasDesarrolladosItem(
+            materia = materia,
+            porcentaje_texto = respuesta_temas.texto_respuesta if respuesta_temas else None
+        )
+        elementos.append(elemento)
+        
+    return elementos

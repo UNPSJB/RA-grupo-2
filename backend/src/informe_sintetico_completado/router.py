@@ -51,10 +51,6 @@ def obtener_informacion_general(
     periodo: str,
     db: Session = Depends(get_db)
 ):
-    """
-    Devuelve la información general por materia (sin agregados)
-    para el departamento, carrera, año y periodo especificados.
-    """
     try:
         elementos = services.obtener_informacion_general(db, id_dpto, id_carrera, anio, periodo)
         if not elementos:
@@ -64,3 +60,17 @@ def obtener_informacion_general(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener información general: {str(e)}")
+
+@router.get("/temas-desarrollados/", response_model=List[schemas.TemasDesarrolladosItem])
+def obtener_temas_desarrollados(
+    id_dpto: int,
+    id_carrera: int,
+    anio: int,
+    periodo: str,
+    db: Session = Depends(get_db)
+):
+    try:
+        elementos = services.obtener_temas_desarrollados(db, id_dpto, id_carrera, anio, periodo)
+        return elementos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener temas desarrollados: {str(e)}")
