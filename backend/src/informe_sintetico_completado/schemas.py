@@ -49,9 +49,9 @@ class InformacionGeneral(BaseModel):
     model_config = {"from_attributes": True}   
 
 class RespuestasSeccion2C(BaseModel):
-    aspectos_positivos_ensenianza: Optional[str] = None
+    aspectos_positivos_ensenanza: Optional[str] = None
     aspectos_positivos_aprendizaje: Optional[str] = None
-    obstaculos_ensenianza: Optional[str] = None
+    obstaculos_ensenanza: Optional[str] = None
     obstaculos_aprendizaje: Optional[str] = None
     estrategias: Optional[str] = None
     reflexion_docente: Optional[str] = None
