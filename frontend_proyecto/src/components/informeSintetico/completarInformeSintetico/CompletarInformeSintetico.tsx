@@ -5,10 +5,8 @@ import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
 import InformacionGeneral from "./informacionGeneral";
 import ContenidosAlcanzados from "./contenidosAlcanzados";
-
-
-import Pregunta2 from "./Pregunta2";
 import Pregunta2C from "./Pregunta2C";
+import Pregunta2 from "./Pregunta2";
 
 interface Pregunta {
     id: number;
@@ -183,6 +181,18 @@ export default function CompletarInformeSintetico() {
                     id_dpto={dpto.id}
                     id_carrera={carrera.id}
                     pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+        if (/Pregunta 2.?a/i.test(pregunta.enunciado)) {
+            return (
+                <ContenidosAlcanzados
+                    id_dpto={dpto.id}
+                    id_carrera={carrera.id}
+                    pregunta={pregunta} 
                     anio={anio}
                     periodo={periodo}
                     manejarCambio={manejarCambio}
