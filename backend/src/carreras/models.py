@@ -14,9 +14,12 @@ class Carrera(ModeloBase):
     nombre: Mapped[str] = mapped_column(String, index=True)
     departamento_id: Mapped[int] = mapped_column(Integer, ForeignKey("departamentos.id"))
     departamento: Mapped["Departamento"] = relationship("Departamento", back_populates="carreras")
-    informe_base = relationship("InformeSinteticoBase", back_populates="carrera")
-    informe_completado = relationship("InformeSinteticoCompletado", back_populates="carrera")
-
+    informe_base = relationship("InformeSinteticoBase", back_populates="carreras")
+    informes_completados: Mapped[Optional[List["src.informe_sintetico_completado.models.InformeSinteticoCompletado"]]] = relationship(
+        "src.informe_sintetico_completado.models.InformeSinteticoCompletado",  
+        back_populates="carrera"
+    )
+    informe_base_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("informes_sinteticos_base.id"), nullable=True)
     materias: Mapped[Optional[List["src.materias.models.Materia"]]] = relationship(
         "src.materias.models.Materia",
         secondary=materia_carrera,

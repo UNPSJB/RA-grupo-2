@@ -30,7 +30,7 @@ function ListaCarreras({ carreras, departamento }: Props) {
                   carrera: carrera,
                   anio: ANIO_ACTUAL,             
                   periodo: PERIODO_ACTUAL,     
-                  informeBaseId: 1, //HARDCODEADO POR AHORA
+                  informeBaseId: carrera.informe_base_id,
                 }}
                 className="btn btn-theme-primary rounded-pill px-6"
               >
