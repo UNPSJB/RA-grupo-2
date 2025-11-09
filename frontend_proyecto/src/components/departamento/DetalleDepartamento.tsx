@@ -1,23 +1,25 @@
 import { useEffect, useState } from "react";
 import ListaCarreras from "../carrera/ListarCarreras";
 import type { Departamento, Carrera } from "../../types/types";
+import { useParams } from "react-router-dom";
 
 function DetalleDepartamento() {
+  const { id_dpto } = useParams<{ id_dpto: string }>();
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
   const [carreras, setCarreras] = useState<Carrera[]>([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/departamentos/1")
+    fetch(`http://127.0.0.1:8000/departamentos/${id_dpto}`)
       .then((res) => res.json())
       .then((data) => setDepartamento(data))
       .catch((err) => console.error("Error cargando departamento:", err));
 
-    fetch("http://127.0.0.1:8000/carreras/departamento/1")
+    fetch(`http://127.0.0.1:8000/carreras/departamento/${id_dpto}`)
       .then((res) => res.json())
       .then((data) => setCarreras(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error cargando carreras:", err))
 
-  }, []);
+  }, [id_dpto]);
 
 
   if (!departamento) {
@@ -36,7 +38,7 @@ function DetalleDepartamento() {
         </div>
         <div className="card-body">
           <h2 className="h5 mb-3">Carreras:</h2>
-          <ListaCarreras carreras={carreras} />
+          <ListaCarreras carreras={carreras} departamento={departamento} />
         </div>
       </div>
     </div>
