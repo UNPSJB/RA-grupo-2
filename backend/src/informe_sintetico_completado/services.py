@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from src.informe_sintetico_completado import models, schemas
 from src.respuesta_informe_sintetico import services as respuestas_services 
-from typing import List
+from typing import List, Optional
 from src.materias.models import Materia
 from src.materias import schemas as materias_schemas
 from src.informe_catedra_completado.models import InformeCatedraCompletado
@@ -10,7 +10,8 @@ from src.respuestasInforme.models import RespuestaInforme
 from src.preguntas.models import Pregunta
 from src.asociaciones.models import materia_carrera
 from src.asociaciones.models import Periodo
-
+from src.asociaciones.docente_materia.models import DocenteMateria
+from src.docentes.models import Docente
 
 def get_informes_completados(db: Session):
     return db.query(models.InformeSinteticoCompletado).all()
@@ -146,12 +147,7 @@ def get_elementos_pregunta2(db: Session, id_dpto: int, id_carrera: int, anio: in
 def obtener_informacion_general(
     db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
 ) -> List[schemas.InformacionGeneral]:
-    """
-    Obtiene la información general de cada materia (sin agrupar ni sumar),
-    para un departamento, carrera, año y período específicos.
-    """
 
-    # 1️⃣ Buscar las materias del departamento y carrera
     materias: list[Materia] = db.scalars(
         select(Materia)
         .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
@@ -163,7 +159,7 @@ def obtener_informacion_general(
 
     elementos: List[schemas.InformacionGeneral] = []
 
-    # 2️⃣ Buscar informe completado de cada materia
+
     for materia in materias:
         informe_completado: InformeCatedraCompletado = db.scalars(
             select(InformeCatedraCompletado)
@@ -173,12 +169,10 @@ def obtener_informacion_general(
                 InformeCatedraCompletado.docente_materia.has(materia_id=materia.id)
             )
         ).first()
-
-        # Si no tiene informe, continuar
+        
         if not informe_completado:
             continue
 
-        # 3️⃣ Crear el objeto con la materia y sus datos
         elemento = schemas.InformacionGeneral(
             materia=materia,
             codigo=materia.matricula,
@@ -253,9 +247,6 @@ def get_elementos_pregunta2C(db: Session, id_dpto: int, id_carrera: int, anio: i
         elementos.append(elemento)
     
     return elementos
-# src/informe_sintetico_completado/services.py
-
-# ... (otros imports) ...
 
 def obtener_temas_desarrollados(
     db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
@@ -289,31 +280,113 @@ def obtener_temas_desarrollados(
         if not informe_completado:
             continue
 
-        # --- INICIO DE LA CORRECCIÓN ---
-
-        # 1. Busca la respuesta del porcentaje
         respuesta_porcentaje: RespuestaInforme = next(
             (r for r in informe_completado.respuestas_informe 
              if r.pregunta.enunciado == "Cantidad de temas desarrollados %"), 
             None
         )
-
-        # 2. Busca la respuesta de las estrategias
         respuesta_estrategias: RespuestaInforme = next(
             (r for r in informe_completado.respuestas_informe 
-             if r.pregunta.enunciado == "Estrategias"), # <-- La nueva pregunta que buscamos
+             if r.pregunta.enunciado == "Estrategias"), 
             None
         )
 
-        # 3. Asigna cada una a su campo
         elemento = schemas.TemasDesarrolladosItem(
             materia = materia,
             porcentaje_texto = respuesta_porcentaje.texto_respuesta if respuesta_porcentaje else None,
             estrategias_texto = respuesta_estrategias.texto_respuesta if respuesta_estrategias else None
         )
         
-        # --- FIN DE LA CORRECCIÓN ---
-        
         elementos.append(elemento)
         
+    return elementos
+def get_actividades_docentes(
+    db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
+) -> List[schemas.ActividadesPorMateriaItem]:
+
+    materias: list[Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+
+    elementos: List[schemas.ActividadesPorMateriaItem] = []
+    roles_a_buscar = ["Profesor", "JTP", "Auxiliar", "Auxiliar de segunda"]
+
+    for materia in materias:
+        informe_completado: InformeCatedraCompletado = db.scalars(
+            select(InformeCatedraCompletado)
+            .join(DocenteMateria, InformeCatedraCompletado.docente_materia_id == DocenteMateria.id)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == Periodo(periodo),
+                DocenteMateria.materia_id == materia.id
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                    .selectinload(RespuestaInforme.pregunta)
+            )
+        ).first()
+
+        if not informe_completado:
+            continue
+
+        lista_docentes_actividades: List[schemas.DocenteConActividades] = []
+
+        def find_response_text(enunciado: str) -> Optional[str]:
+            r = next(
+                (r for r in informe_completado.respuestas_informe
+                    if r.pregunta.enunciado.strip() == enunciado.strip()),
+                None
+            )
+            return r.texto_respuesta if r and r.texto_respuesta else None
+
+        for rol in roles_a_buscar:
+            nombre_docente = find_response_text(f"Nombre - {rol}")
+            if not nombre_docente:
+                continue
+
+            actividades_docente = schemas.DocenteActividades(
+                capacitacion=find_response_text(f"Capacitación - {rol}"),
+                investigacion=find_response_text(f"Investigación - {rol}"),
+                extension=find_response_text(f"Extensión - {rol}"),
+                gestion=find_response_text(f"Gestión - {rol}"),
+                observaciones=find_response_text(f"Observaciones - {rol}")
+            )
+
+            lista_docentes_actividades.append(
+                schemas.DocenteConActividades(
+                    nombre_docente=nombre_docente,
+                    rol_docente=rol,
+                    actividades=actividades_docente
+                )
+            )
+
+        if not lista_docentes_actividades:
+            docente_relacion = None
+
+            docente_materia_rel = db.scalars(
+                select(DocenteMateria)
+                .options(selectinload(DocenteMateria.docente))
+                .where(DocenteMateria.id == informe_completado.docente_materia_id)
+            ).first()
+            docente_relacion = docente_materia_rel.docente if docente_materia_rel else None
+
+            if docente_relacion:
+                docente_fallback = schemas.DocenteConActividades(
+                    nombre_docente=f"{docente_relacion.apellido}, {docente_relacion.nombre}",
+                    rol_docente="Profesor",
+                    actividades=schemas.DocenteActividades()
+                )
+                lista_docentes_actividades.append(docente_fallback)
+
+        elemento = schemas.ActividadesPorMateriaItem(
+            materia=materia,
+            docentes=lista_docentes_actividades
+        )
+        elementos.append(elemento)
+
     return elementos

@@ -104,3 +104,18 @@ def get_preguntas_2C(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener respuestas de sección 2C: {str(e)}")
+
+@router.get("/actividades-docentes/", response_model=List[schemas.ActividadesPorMateriaItem])
+def get_actividades_docentes_por_materia(
+    id_dpto: int,
+    id_carrera: int,
+    anio: int,
+    periodo: str,
+    db: Session = Depends(get_db)
+):
+    try:
+        elementos = services.get_actividades_docentes(db, id_dpto, id_carrera, anio, periodo)
+        return elementos
+    except Exception as e:
+        print(f"Error en get_actividades_docentes_por_materia: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener actividades docentes: {str(e)}")

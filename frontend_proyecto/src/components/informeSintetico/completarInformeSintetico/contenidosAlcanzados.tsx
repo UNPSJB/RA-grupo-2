@@ -194,30 +194,6 @@ export default function ContenidosAlcanzados({
     );
 }
 
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
-        </div>
-    );
-}
 
 function CampoTextoLargo({
     label,

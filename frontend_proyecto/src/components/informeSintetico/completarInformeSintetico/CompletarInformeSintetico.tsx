@@ -7,6 +7,7 @@ import InformacionGeneral from "./informacionGeneral";
 import ContenidosAlcanzados from "./contenidosAlcanzados";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
+import ActividadesDocentes from "./Pregunta3";
 
 interface Pregunta {
     id: number;
@@ -210,6 +211,18 @@ export default function CompletarInformeSintetico() {
                     departamentoId={dpto.id}
                     carreraId={carrera.id}
                     pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+        if (pregunta.cod=="3") {
+            return (
+                <ActividadesDocentes
+                    id_dpto={dpto.id}
+                    id_carrera={carrera.id}
+                    pregunta={pregunta} 
                     anio={anio}
                     periodo={periodo}
                     manejarCambio={manejarCambio}
