@@ -143,7 +143,7 @@ export default function InformacionGeneral({
                                         aria-expanded="false"
                                         aria-controls={`collapse${index}`}
                                     >
-                                        {materia.nombre}
+                                        {materia.codigo} - {materia.nombre}
                                     </button>
                                 </h2>
                                 <div
@@ -154,8 +154,6 @@ export default function InformacionGeneral({
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            <CampoTexto label="Código" value={materia.codigo} readOnly />
-                                            <CampoTexto label="Nombre" value={materia.nombre} readOnly />
                                             <CampoTextoNumero
                                                 label="Cantidad de alumnos"
                                                 value={materia.cantidad_alumnos}

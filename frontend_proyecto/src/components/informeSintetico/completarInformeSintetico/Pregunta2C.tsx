@@ -130,7 +130,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
                                         aria-expanded="false"
                                         aria-controls={`collapseP2C_${index}`}
                                     >
-                                        {itm.materia.nombre}
+                                        {itm.materia.matricula} - {itm.materia.nombre}
                                     </button>
                                 </h2>
                                 <div
@@ -141,8 +141,6 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            <CampoTexto label="Código" value={itm.materia.matricula} readOnly />
-                                            <CampoTexto label="Nombre" value={itm.materia.nombre} readOnly />
                                             <CampoTextArea
                                                 label="Aspectos positivos: Proceso Enseñanza"
                                                 value={itm.respuestas.aspectos_positivos_ensenanza || ''}

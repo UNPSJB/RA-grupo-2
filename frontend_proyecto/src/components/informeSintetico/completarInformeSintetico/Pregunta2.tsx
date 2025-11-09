@@ -141,7 +141,7 @@ export default function Pregunta2({
                                         aria-expanded="false"
                                         aria-controls={`collapseP2_${index}`}
                                     >
-                                        {itm.materia.nombre}
+                                        {itm.materia.matricula} - {itm.materia.nombre}
                                     </button>
                                 </h2>
                                 <div
@@ -152,8 +152,6 @@ export default function Pregunta2({
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            <CampoTexto label="Código" value={itm.materia.matricula} readOnly />
-                                            <CampoTexto label="Nombre" value={itm.materia.nombre} readOnly />
                                             
                                             <CampoTexto
                                                 label="Porcentaje Clases Teóricas (%)"
