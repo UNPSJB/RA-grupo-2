@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PERIODO_ACTUAL } from "../../../constants";
-import type { Departamento } from "../../../types/types";
+import type { Docente } from "../../../types/types";
 import ROUTES from "../../../paths";
 
 interface InformeCatedraCompletado {
@@ -13,17 +13,19 @@ interface InformeCatedraCompletado {
 
 export default function InformeCatedraCompletadoDocente() {
   const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
-  const [departamento, setDepartamento] = useState<Departamento | null>(null);
-
-  const departamentoId = 1; 
+  const [docente, setDocente] = useState<Docente>();
   const docenteId = 2; // hardcoedado 
 
   useEffect(() => {
-    // Obtener info del departamento para mostrarlo (opcional)
-    fetch(`http://127.0.0.1:8000/departamentos/${departamentoId}`)
-      .then(res => res.json())
-      .then(setDepartamento)
-      .catch(console.error);
+
+    //docente
+    fetch(`http://127.0.0.1:8000/docentes/${docenteId}`)
+    .then(res=>{
+      if (!res.ok) throw new Error("Error al obtener el docente");
+        return res.json();
+    })
+    .then(setDocente)
+    .catch(console.error);
 
     // Informes completados del docente
     fetch(`http://127.0.0.1:8000/informe-catedra-completado/docente/${docenteId}/completados`)
@@ -33,14 +35,14 @@ export default function InformeCatedraCompletadoDocente() {
       })
       .then(setInformes)
       .catch(console.error);
-  }, [departamentoId, docenteId]);
+  }, [docenteId]);
 
   return (
     <div className="container py-4">
       <div className="card">
         <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
-            <strong>Departamento de</strong> {departamento?.nombre}
+            <strong>Docente:</strong> {docente?.nombre} {docente?.apellido}
           </h1>
         </div>
         <div className="card-body">
