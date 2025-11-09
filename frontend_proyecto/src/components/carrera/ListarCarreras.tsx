@@ -1,6 +1,7 @@
 import type { Carrera, Departamento } from "../../types/types";
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths";
+import {ANIO_ACTUAL, PERIODO_ACTUAL} from "../../constants";
 
 type Props = {
   carreras: Carrera[];
@@ -27,9 +28,9 @@ function ListaCarreras({ carreras, departamento }: Props) {
                 state={{
                   dpto: departamento,
                   carrera: carrera,
-                  anio: 2025,             //HARDCODEADO POR AHORA
-                  periodo: "PRIMER_CUATRI",
-                  informeBaseId: 1,
+                  anio: ANIO_ACTUAL,             
+                  periodo: PERIODO_ACTUAL,     
+                  informeBaseId: 1, //HARDCODEADO POR AHORA
                 }}
                 className="btn btn-theme-primary rounded-pill px-6"
               >
