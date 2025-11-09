@@ -118,3 +118,17 @@ def get_bibliografia_equipamiento(
         return elementos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener bibliografía y equipamiento: {str(e)}")
+    
+
+@router.get("/desempeno_auxiliares/", response_model=List[schemas.TablaDesempenoAuxiliar])
+def get_desempeno_auxiliares(
+    id_dpto: int = Query(...), 
+    id_carrera: int = Query(...), 
+    anio: int = Query(...), 
+    periodo: str = Query(...),
+    db: Session = Depends(get_db)):
+    try:
+        elementos = services.get_desempeno_auxiliares(db, id_dpto, id_carrera, anio, periodo)
+        return elementos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener desempeño de auxiliares: {str(e)}")

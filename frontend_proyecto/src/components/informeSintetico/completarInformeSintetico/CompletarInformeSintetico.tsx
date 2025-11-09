@@ -8,6 +8,7 @@ import ContenidosAlcanzados from "./contenidosAlcanzados";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
 import EquipamientoBibliografia from "./Pregunta1"; 
+import DesempenoAuxiliares from "./Pregunta4"; 
 interface Pregunta {
     id: number;
     cod: string
@@ -228,7 +229,18 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
-
+        if (pregunta.cod=="4") { 
+            return (
+                <DesempenoAuxiliares
+                    departamentoId={dpto.id}
+                    carreraId={carrera.id}
+                    pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
         return (
             <div className="alert alert-secondary">
                 Pregunta "{pregunta.enunciado}" sin componente asignado.
