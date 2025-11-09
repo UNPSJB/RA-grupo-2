@@ -125,7 +125,7 @@ export default function ContenidosAlcanzados({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando materias...</div>
