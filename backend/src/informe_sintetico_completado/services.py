@@ -314,7 +314,7 @@ def get_actividades_docentes(
     ).all()
 
     elementos: List[schemas.ActividadesPorMateriaItem] = []
-    roles_a_buscar = ["Profesor", "JTP", "Auxiliar", "Auxiliar de segunda"]
+    roles_a_buscar = ["Profesor", "JTP", "Auxiliar de Primera", "Auxiliar de Segunda"]
 
     for materia in materias:
         informe_completado: InformeCatedraCompletado = db.scalars(
