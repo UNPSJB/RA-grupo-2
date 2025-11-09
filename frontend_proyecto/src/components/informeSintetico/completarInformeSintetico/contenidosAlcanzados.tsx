@@ -161,7 +161,7 @@ export default function ContenidosAlcanzados({
                                         aria-expanded="false"
                                         aria-controls={`collapse${index}`}
                                     >
-                                        {item.nombre}
+                                        {item.codigo} - {item.nombre}
                                     </button>
                                 </h2>
                                 <div
@@ -172,10 +172,6 @@ export default function ContenidosAlcanzados({
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            
-                                            <CampoTexto label="Código" value={item.codigo} readOnly />
-                                            <CampoTexto label="Nombre" value={item.nombre} readOnly />
-                                            
                                             <CampoPorcentaje
                                                 label="Porcentual contenidos alcanzados (%)"
                                                 value={item.porcentaje}

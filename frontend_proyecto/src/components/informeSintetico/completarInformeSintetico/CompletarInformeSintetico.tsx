@@ -10,6 +10,7 @@ import Pregunta2 from "./Pregunta2";
 
 interface Pregunta {
     id: number;
+    cod: string
     orden: number;
     enunciado: string;
 }
@@ -56,6 +57,9 @@ export default function CompletarInformeSintetico() {
             .then((data: Pregunta[]) => {
                 const ordenadas = data.sort((a, b) => a.orden - b.orden);
                 setPreguntas(ordenadas);
+                if (ordenadas.length > 0 && preguntaActiva === null) {
+                    setPreguntaActiva(ordenadas[0].id);
+                }
             })
             .catch((err) => {
                 console.error("Error fetching preguntas del informe:", err);
@@ -149,7 +153,7 @@ export default function CompletarInformeSintetico() {
     }
 
     const renderPregunta = (pregunta: Pregunta) => {
-        if (/Pregunta 2.?b/i.test(pregunta.enunciado)) {
+        if (pregunta.cod=="2.B") {
             return (
                 <Pregunta2B
                     departamentoId={dpto.id}
@@ -161,8 +165,8 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
-        
-        if (/Pregunta 2.?c/i.test(pregunta.enunciado)) {
+
+        if (pregunta.cod=="2.C") {
             return (
                 <Pregunta2C
                     departamentoId={dpto.id}
@@ -175,7 +179,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-        if (/Pregunta 1/i.test(pregunta.enunciado)) {
+        if (pregunta.cod=="0") {
             return (
                 <InformacionGeneral
                     id_dpto={dpto.id}
@@ -187,19 +191,7 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
-        if (/Pregunta 2.?a/i.test(pregunta.enunciado)) {
-            return (
-                <ContenidosAlcanzados
-                    id_dpto={dpto.id}
-                    id_carrera={carrera.id}
-                    pregunta={pregunta} 
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-        if (/Pregunta 2.?a/i.test(pregunta.enunciado)) {
+        if (pregunta.cod=="2.A") {
             return (
                 <ContenidosAlcanzados
                     id_dpto={dpto.id}
@@ -212,9 +204,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-
-
-        if (/Pregunta 2/i.test(pregunta.enunciado)) { 
+        if (pregunta.cod=="2") {
             return (
                 <Pregunta2
                     departamentoId={dpto.id}
@@ -226,7 +216,7 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
-        
+
         return (
             <div className="alert alert-secondary">
                 Pregunta "{pregunta.enunciado}" sin componente asignado.
@@ -258,7 +248,7 @@ export default function CompletarInformeSintetico() {
                                         }}
                                         style={{ cursor: "pointer", fontWeight: 500 }}
                                     >
-                                        {p.enunciado}
+                                        {p.cod}
                                     </a>
                                 </li>
                             ))}
@@ -267,7 +257,6 @@ export default function CompletarInformeSintetico() {
                         <div
                             className="step-content-container"
                             style={{
-                                height: "500px",
                                 overflowY: "auto",
                                 paddingRight: "15px",
                             }}

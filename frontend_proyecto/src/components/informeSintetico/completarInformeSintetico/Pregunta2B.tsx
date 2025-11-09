@@ -3,6 +3,7 @@ import type { Materia } from "../../../types/types";
 
 interface Pregunta {
     id: number;
+    cod: string;
     enunciado: string;
 }
 
@@ -108,9 +109,8 @@ export default function Pregunta2B({
         updated[index][field] = value;
         setItems(updated);
 
-        // ✅ Siempre incluir pregunta_id explícitamente
         const respuestas: Respuesta[] = updated.map((itm) => ({
-            pregunta_id: pregunta.id, // <-- aseguramos que nunca se pierda
+            pregunta_id: pregunta.id, 
             texto_respuesta: JSON.stringify({
                 encuesta_B: itm.encuesta_B,
                 encuesta_C: itm.encuesta_C,
@@ -142,7 +142,7 @@ export default function Pregunta2B({
                 </div>
             ) : (
                 <>
-                    <div className="accordion" id="accordionMaterias">
+                    <div className="accordion" id="accordionMateriasPregunta2B">
                         {itemsTabla.map((itm, index) => (
                             <div className="accordion-item" key={index}>
                                 <h2 className="accordion-header" id={`heading${index}`}>
@@ -154,19 +154,17 @@ export default function Pregunta2B({
                                         aria-expanded="false"
                                         aria-controls={`collapse${index}`}
                                     >
-                                        {itm.materia.nombre}
+                                        {itm.materia.matricula} - {itm.materia.nombre}
                                     </button>
                                 </h2>
                                 <div
                                     id={`collapse${index}`}
                                     className="accordion-collapse collapse"
                                     aria-labelledby={`heading${index}`}
-                                    data-bs-parent="#accordionMaterias"
+                                    data-bs-parent="#accordionMateriasPregunta2B"
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            <CampoTexto label="Código" value={itm.materia.matricula} readOnly />
-                                            <CampoTexto label="Nombre" value={itm.materia.nombre} readOnly />
                                             <CampoTexto
                                                 label="Encuesta a alumnos: Categoria B"
                                                 value={itm.encuesta_B}

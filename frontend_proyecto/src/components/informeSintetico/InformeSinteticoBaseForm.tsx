@@ -4,6 +4,7 @@ import ROUTES from "../../paths";
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'; 
 
 interface PreguntaTemp { 
+    cod: string;
     enunciado: string; 
     orden: number; 
 }
@@ -35,20 +36,23 @@ export default function InformeSinteticoBaseForm() {
     const [cargando, setCargando] = useState(false);
     const [preguntas, setPreguntas] = useState<PreguntaTemp[]>([]);
     const [nuevoTextoPregunta, setNuevoTextoPregunta] = useState("");
+    const [nuevoCodPregunta, setNuevoCodPregunta] = useState("");
 
     const agregarPregunta = () => {
-        if (!nuevoTextoPregunta.trim()) {
-            alert("Debe ingresar el texto de la pregunta.");
+        if (!nuevoTextoPregunta.trim() || !nuevoCodPregunta.trim()) {
+            alert("Debe ingresar el codigo y el texto de la pregunta.");
             return;
         }
 
         const nuevaPregunta: PreguntaTemp = {
+            cod: nuevoCodPregunta,
             enunciado: nuevoTextoPregunta, 
             orden: preguntas.length + 1, 
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
         setNuevoTextoPregunta("");
+        setNuevoCodPregunta("");
     };
 
     const eliminarPregunta = (index: number) => {
@@ -115,6 +119,7 @@ export default function InformeSinteticoBaseForm() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
+                        cod: preg.cod,
                         enunciado: preg.enunciado, 
                         orden: preg.orden, 
                         tipo_respuesta: 'texto', 
@@ -221,6 +226,15 @@ export default function InformeSinteticoBaseForm() {
                         <div className="card mb-4 p-3" style={inputAreaStyle}> 
                             <div className="row mb-3">
                                 <div className="col-12"> 
+                                    <label className="form-label fw-bold">Codigo</label>
+                                    <textarea 
+                                        className="form-control" 
+                                        rows={2} 
+                                        value={nuevoCodPregunta} 
+                                        onChange={(e) => setNuevoCodPregunta(e.target.value)} 
+                                        disabled={cargando}
+                                        style={inputFieldStyle}
+                                    />
                                     <label className="form-label fw-bold">Enunciado</label>
                                     <textarea 
                                         className="form-control" 
@@ -238,7 +252,7 @@ export default function InformeSinteticoBaseForm() {
                                     type="button" 
                                     className="btn btn-theme-primary" 
                                     onClick={agregarPregunta} 
-                                    disabled={cargando || !nuevoTextoPregunta.trim()} 
+                                    disabled={cargando || !nuevoCodPregunta.trim() || !nuevoTextoPregunta.trim()} 
                                 >
                                     Agregar Pregunta a la Lista
                                 </button>
@@ -274,7 +288,7 @@ export default function InformeSinteticoBaseForm() {
                                                         >
                                                             <span>
                                                                 <strong className={`badge bg-secondary me-2`}> Orden: {preg.orden}</strong>
-                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.enunciado}
+                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.cod}-{preg.enunciado}
                                                             </span>
                                                             <button 
                                                                 type="button" 
