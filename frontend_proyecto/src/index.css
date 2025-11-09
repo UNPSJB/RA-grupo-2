@@ -188,6 +188,11 @@ html, body {
     color: var(--color-dropdown-hover-text) !important; 
 }
 
+.bg-unpsjb-header {
+    background-color: var(--color-unpsjb-blue) !important; 
+    color: var(--color-dropdown-hover-text) !important; 
+}
+
 /* Botón outline primary */
 .btn-outline-theme-primary {
     color: var(--color-unpsjb-blue) !important;
@@ -375,3 +380,22 @@ textarea::placeholder {
 .btn-theme-success:focus:not(:disabled), .btn-theme-primary:focus:not(:disabled) {
     box-shadow: 0 0 0 0.25rem rgba(0, 94, 194, 0.4) !important; 
 }
+
+.nav-pills .nav-link {
+    color: var(--color-text-primary);
+    opacity: 0.7;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-pills .nav-link:hover {
+    opacity: 1;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    background-color: var(--color-unpsjb-blue) !important;
+    color: var(--color-dropdown-hover-text) !important;
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+

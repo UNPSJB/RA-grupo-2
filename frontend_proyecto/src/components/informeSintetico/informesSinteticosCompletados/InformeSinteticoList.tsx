@@ -20,7 +20,7 @@ function InformeSinteticoList() {
   return (
 <div className="container py-4">
   <div className="card">
-    <div className="card-header bg-primary text-white">
+    <div className="card-header bg-unpsjb-header">
       <h1 className="h4 mb-0">Secretaría académica</h1>
     </div>
     <div className="card-body">
@@ -33,12 +33,13 @@ function InformeSinteticoList() {
                 <div>
                   <span className="text-muted me-3">{i + 1}.</span>
                   <span className="fw-bold">
-                    {inf.titulo} – {inf.periodo} {inf.anio} 
+                    {inf.titulo} 
                   </span>
+                  <span className="text"> – {inf.periodo} {inf.anio}</span>
                 </div>
                 <Link
                   to={ROUTES.INFORME_SINTETICO_DETALLE(inf.id)}
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-theme-primary rounded-pill px-4"
                 >
                   Ver Informe
                 </Link>

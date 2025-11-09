@@ -185,7 +185,7 @@ return (
     <div className="bg-light">
       <div className="container-lg py-4">
         <div className="card shadow-sm border-0 rounded-3">
-          <div className="card-header bg-primary text-white">
+          <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">
               Informe de Cátedra – {materiaNombre}
             </h1>
@@ -241,7 +241,7 @@ return (
               {currentStep < totalSteps && (
                 <button
                   onClick={nextStep}
-                  className="btn btn-primary rounded-pill px-4"
+                  className="btn btn-theme-primary rounded-pill px-4"
                 >
                   Siguiente
                 </button>

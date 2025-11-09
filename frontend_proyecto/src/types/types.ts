@@ -8,6 +8,7 @@ export interface Carrera {
   id: number;
   nombre: string;
   departamento_id: number;
+  informe_base_id: number;
 }
 export interface Materia {
   id: number;

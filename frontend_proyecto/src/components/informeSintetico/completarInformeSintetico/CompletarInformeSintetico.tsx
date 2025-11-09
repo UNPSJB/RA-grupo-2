@@ -5,6 +5,11 @@ import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
 import InformacionGeneral from "./informacionGeneral";
 import ContenidosAlcanzados from "./contenidosAlcanzados";
+
+
+import Pregunta2 from "./Pregunta2";
+import Pregunta2C from "./Pregunta2C";
+
 interface Pregunta {
     id: number;
     orden: number;
@@ -117,7 +122,7 @@ export default function CompletarInformeSintetico() {
             }
             setMensaje("¡Informe enviado con éxito!");
             setTimeout(() => {
-                navigate(ROUTES.CARRERAS_DPTO);
+                navigate(ROUTES.CARRERAS_DPTO(dpto.id));
             }, 2000);
         } catch (err: Error | unknown) {
             console.error("Error enviando informe:", err);
@@ -158,6 +163,20 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
+        
+        if (/Pregunta 2.?c/i.test(pregunta.enunciado)) {
+            return (
+                <Pregunta2C
+                    departamentoId={dpto.id}
+                    carreraId={carrera.id}
+                    pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+
         if (/Pregunta 1/i.test(pregunta.enunciado)) {
             return (
                 <InformacionGeneral
@@ -182,6 +201,22 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
+
+
+
+        if (/Pregunta 2/i.test(pregunta.enunciado)) { 
+            return (
+                <Pregunta2
+                    departamentoId={dpto.id}
+                    carreraId={carrera.id}
+                    pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+        
         return (
             <div className="alert alert-secondary">
                 Pregunta "{pregunta.enunciado}" sin componente asignado.

@@ -1,7 +1,6 @@
 import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../paths"; 
-import { CARRERA_ID } from "../../constants";
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'; 
 
 interface PreguntaTemp { 
@@ -89,8 +88,7 @@ export default function InformeSinteticoBaseForm() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     titulo,
-                    descripcion: descripcion || null,
-                    carrera_id: CARRERA_ID, 
+                    descripcion: descripcion || null
                 }),
             });
 

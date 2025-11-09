@@ -16,8 +16,9 @@ const ROUTES = {
   INFORME_CATEDRA_COMPLETADO_DETALLE: (id: number | string = ":id") => `/docentes/informes-catedra-completados/${id}`,
 
   //DEPARTAMENTOS
-  CARRERAS_DPTO: "/departamento/carreras",
+  CARRERAS_DPTO: (id_dpto:number | string = ":id_dpto") => `/departamento/${id_dpto}/carreras`,
   CARRERA: (id: number | string = ":id") => `/departamento/carreras/${id}`,
+  COMPLETAR_INFORME_SINTETICO: "/departamento/carreras/completar-informe-sintetico",
   INFORMES_CATEDRA: "/departamento/informes-catedra",
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
   

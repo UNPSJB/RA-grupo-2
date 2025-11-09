@@ -155,7 +155,7 @@ export default function InformeCatedraBaseForm() {
     return (
         <div className="container py-4">
             <div className="card shadow" style={cardStyle}>
-                <div style={cardHeaderStyle} className="card-header text-white">
+                <div style={cardHeaderStyle} className="card-header bg-unpsjb-header">
                     <h1 className="h4 mb-0">Nuevo Informe de Cátedra Base</h1>
                 </div>
                 <div className="card-body">
