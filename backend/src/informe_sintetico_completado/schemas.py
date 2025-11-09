@@ -32,6 +32,12 @@ class TablaPregunta2BItem(BaseModel):
     encuesta_EP: str
     juicio_valor: str
 
+class TablaPregunta2Item(BaseModel):
+    materia: Materia
+    porcentaje_teoricas: str
+    porcentaje_practicas: str
+    justificacion: Optional[str] = None
+
 class InformacionGeneral(BaseModel):
     materia: Materia
     codigo: str
@@ -45,5 +51,20 @@ class InformacionGeneral(BaseModel):
 class TemasDesarrolladosItem(BaseModel):
     materia: Materia
     porcentaje_texto: Optional[str] = None 
+    estrategias_texto: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+class RespuestasSeccion2C(BaseModel):
+    aspectos_positivos_ensenanza: Optional[str] = None
+    aspectos_positivos_aprendizaje: Optional[str] = None
+    obstaculos_ensenanza: Optional[str] = None
+    obstaculos_aprendizaje: Optional[str] = None
+    estrategias: Optional[str] = None
+    
+
+class TablaPregunta2CItem(BaseModel):
+    materia: Materia
+    respuestas: RespuestasSeccion2C
 
     model_config = {"from_attributes": True}

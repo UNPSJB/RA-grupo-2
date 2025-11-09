@@ -15,6 +15,7 @@ interface Respuesta {
 interface TemasFetchItem {
     materia: Materia;
     porcentaje_texto: string | null;
+    estrategias_texto: string | null;
 }
 
 interface ContenidosItem {
@@ -80,7 +81,7 @@ export default function ContenidosAlcanzados({
                         codigo: m.materia.matricula || 'N/A', 
                         nombre: m.materia.nombre,
                         porcentaje: initialPorcentaje,
-                        estrategias: ""
+                        estrategias: m.estrategias_texto || ""
                     };
                 });
                 
