@@ -399,3 +399,7 @@ textarea::placeholder {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.no-bold th {
+  font-weight: 500 !important;
+  color: inherit; /* opcional, si querés mantener color por defecto */
+}

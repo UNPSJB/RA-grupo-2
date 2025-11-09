@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
-
-interface Pregunta {
-    id: number;
-    enunciado: string;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    materia_id: number;
-    texto_respuesta: string;
-}
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextArea, CampoPorcentaje } from "./Campos";
 
 interface TemasFetchItem {
     materia: Materia;
@@ -135,7 +125,7 @@ export default function ContenidosAlcanzados({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando materias...</div>
@@ -177,7 +167,7 @@ export default function ContenidosAlcanzados({
                                                 value={item.porcentaje}
                                                 onChange={(v) => handleChange(index, "porcentaje", v)}
                                             />
-                                            <CampoTextoLargo
+                                            <CampoTextArea
                                                 label="Estrategias propuestas"
                                                 value={item.estrategias}
                                                 onChange={(v) => handleChange(index, "estrategias", v)}
@@ -190,96 +180,6 @@ export default function ContenidosAlcanzados({
                     </div>
                 </>
             )}
-        </div>
-    );
-}
-
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
-        </div>
-    );
-}
-
-function CampoTextoLargo({
-    label,
-    value,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-}) {
-    return (
-        <div className="col-12">
-            <label className="form-label">{label}</label>
-            <textarea
-                className="form-control"
-                rows={3}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-            />
-        </div>
-    );
-}
-
-function CampoPorcentaje({
-    label,
-    value,
-    onChange,
-}: {
-    label: string;
-    value: number | null;
-    onChange: (v: number | null) => void;
-}) {
-    
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        if (val === "") {
-            onChange(null);
-            return;
-        }
-        
-        const num = Number(val);
-        if (num >= 0 && num <= 100) {
-            onChange(num);
-        } else if (num > 100) {
-            onChange(100);
-        } else if (num < 0) {
-            onChange(0);
-        }
-    };
-
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="number"
-                className="form-control"
-                min={0}
-                max={100}
-                value={value === null ? "" : value} 
-                onChange={handleChange}
-                placeholder="Ej: 80"
-            />
         </div>
     );
 }

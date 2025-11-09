@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
-
-interface Pregunta { id: number; enunciado: string; }
-// Interfaz que viene del backend (strings consolidados)
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 interface NecesidadesItem { materia: Materia; equipamiento: string; bibliografia: string; }
-// Interfaz del estado local (arrays separados por respuesta)
+
 interface NecesidadesEstado { materia: Materia; equipamiento: string[]; bibliografia: string[]; }
-interface Respuesta { pregunta_id: number; texto_respuesta: string; materia_id: number; }
+
 interface Props {
     departamentoId: number; carreraId: number; pregunta: Pregunta; anio: number; periodo: string;
     manejarCambio?: (items: Respuesta[]) => void;
@@ -16,7 +13,6 @@ type EditableFields = 'bibliografia' | 'equipamiento';
 export default function EquipamientoBibliografia({
     departamentoId, carreraId, pregunta, anio, periodo, manejarCambio
 }: Props) {
-    // Se usa NecesidadesEstado para el estado interno (maneja arrays)
     const [itemsTabla, setItems] = useState<NecesidadesEstado[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -42,8 +38,6 @@ export default function EquipamientoBibliografia({
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                // 🌟 MODIFICACIÓN CLAVE: Función para dividir el string. 
-                // Ya no se añade el campo vacío al final. Solo devuelve líneas reales.
                 const separar = (s: string): string[] => {
                     return s === '-' ? [] : s.split('\n').filter(line => line.trim() !== '');
                 };
@@ -56,7 +50,6 @@ export default function EquipamientoBibliografia({
                 
                 setItems(dataParseada);
 
-                // Generar respuestas iniciales (JOIN de nuevo para enviar al padre)
                 const respuestasIniciales: Respuesta[] = dataParseada.map((itm) => ({
                     pregunta_id: pregunta.id,
                     texto_respuesta: JSON.stringify({
@@ -83,8 +76,6 @@ export default function EquipamientoBibliografia({
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
 
-    // 🌟 MODIFICACIÓN CLAVE: Función de cambio simplificada. 
-    // Solo permite actualizar el valor en un índice.
     const handleArrayChange = (
         materiaIndex: number,
         field: EditableFields,
@@ -93,18 +84,14 @@ export default function EquipamientoBibliografia({
     ) => {
         const updated = [...itemsTabla];
         
-        // 1. Actualizar el valor directamente.
         updated[materiaIndex][field][arrayIndex] = value;
         
-        // 2. Se elimina la lógica para agregar un nuevo campo vacío.
 
         setItems(updated);
 
-        // 3. Generar respuestas para el padre (filtrando líneas vacías)
         const respuestas: Respuesta[] = updated.map((itm) => ({
             pregunta_id: pregunta.id, 
             texto_respuesta: JSON.stringify({
-                // El filtro asegura que las líneas vacías editadas no se envíen
                 bibliografia: itm.bibliografia.filter(s => s.trim() !== '').join('\n'),
                 equipamiento: itm.equipamiento.filter(s => s.trim() !== '').join('\n'),
             }),
@@ -117,7 +104,7 @@ export default function EquipamientoBibliografia({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
@@ -159,7 +146,6 @@ export default function EquipamientoBibliografia({
                                                 data={itm.equipamiento}
                                                 field="equipamiento"
                                                 materiaIndex={index}
-                                                // Se ajusta la firma del onChange
                                                 onChange={(mIndex, f, v, aIndex) => handleArrayChange(mIndex, f, v, aIndex)}
                                             />
                                         </div>
@@ -169,7 +155,6 @@ export default function EquipamientoBibliografia({
                                                 data={itm.bibliografia}
                                                 field="bibliografia"
                                                 materiaIndex={index}
-                                                // Se ajusta la firma del onChange
                                                 onChange={(mIndex, f, v, aIndex) => handleArrayChange(mIndex, f, v, aIndex)}
                                             />
                                         </div>
@@ -184,12 +169,10 @@ export default function EquipamientoBibliografia({
     );
 }
 
-// 🌟 Componente EditableList simplificado (No permite agregar ni eliminar)
 interface EditableListProps {
     data: string[];
     field: EditableFields;
     materiaIndex: number;
-    // La función de cambio solo necesita los parámetros de actualización
     onChange: (materiaIndex: number, field: EditableFields, value: string, arrayIndex: number) => void;
 }
 
@@ -206,10 +189,8 @@ const EditableList: React.FC<EditableListProps> = ({ data, field, materiaIndex, 
                             className="form-control"
                             placeholder="Edite la necesidad..."
                             value={item}
-                            // Solo llama a la función de actualización
                             onChange={(e) => onChange(materiaIndex, field, e.target.value, arrayIndex)}
                         />
-                        {/* Se ha quitado el botón de eliminar */}
                     </div>
                 ))
             )}

@@ -14,7 +14,7 @@ function DetalleDepartamento() {
       .then((data) => setDepartamento(data))
       .catch((err) => console.error("Error cargando departamento:", err));
 
-    fetch(`http://127.0.0.1:8000/carreras/departamento/${id_dpto}`)
+    fetch(`http://127.0.0.1:8000/carreras/departamento/${id_dpto}/informes_pendientes`)
       .then((res) => res.json())
       .then((data) => setCarreras(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error cargando carreras:", err))
@@ -37,7 +37,7 @@ function DetalleDepartamento() {
           <h1 className="h4 mb-0">Departamento de {departamento.nombre}</h1>
         </div>
         <div className="card-body">
-          <h2 className="h5 mb-3">Carreras:</h2>
+          <h2 className="h5 mb-3">Informes sinteticos pendientes:</h2>
           <ListaCarreras carreras={carreras} departamento={departamento} />
         </div>
       </div>

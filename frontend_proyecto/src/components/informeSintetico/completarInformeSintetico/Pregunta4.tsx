@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Materia } from "../../../types/types";
+import { CampoTextArea, CampoCheckbox } from "./Campos";
 
 const CALIFICACIONES = [
     { code: 'E', label: 'E' },
@@ -122,10 +123,12 @@ export default function DesempenoAuxiliares({
         if (typeof value === 'boolean' && field.startsWith('calificacion_')) {
             CALIFICACIONES.forEach(c => {
                 const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
-                (aux[califKey] as boolean) = false; 
+                (aux[califKey] as boolean) = false;
             });
             
-            (aux[field] as boolean) = value; 
+            if (value === true) {
+                (aux[field] as boolean) = true; 
+            }
         
         } else if (typeof value === 'string' && field === 'justificacion') {
             (aux[field] as string) = value;
@@ -209,22 +212,18 @@ export default function DesempenoAuxiliares({
                                                     {CALIFICACIONES.map(c => {
                                                         const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
                                                         return (
-                                                            <td key={c.code} className="text-center align-middle">
-                                                                <input
-                                                                    type="radio"
-                                                                    name={`calif-${mIndex}-${aIndex}`}
-                                                                    checked={aux[califKey] as boolean}
-                                                                    onChange={(e) => handleChange(mIndex, aIndex, califKey, e.target.checked)}
-                                                                />
-                                                            </td>
+                                                            <CampoCheckbox
+                                                                key={c.code}
+                                                                checked={aux[califKey] as boolean}
+                                                                onChange={(isChecked) => handleChange(mIndex, aIndex, califKey, isChecked)}
+                                                            />
                                                         );
                                                     })}
                                                     <td>
-                                                        <textarea
-                                                            className="form-control form-control-sm border-0"
-                                                            rows={2}
+                                                        <CampoTextArea
+                                                            label=""
                                                             value={aux.justificacion}
-                                                            onChange={(e) => handleChange(mIndex, aIndex, 'justificacion', e.target.value)}
+                                                            onChange={(v) => handleChange(mIndex, aIndex, 'justificacion', v)}
                                                         />
                                                     </td>
                                                 </tr>

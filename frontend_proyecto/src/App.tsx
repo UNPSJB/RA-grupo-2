@@ -36,6 +36,7 @@ import Footer from "./components/footer/footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
+
 import ROUTES from "./paths";
 
 function App() {

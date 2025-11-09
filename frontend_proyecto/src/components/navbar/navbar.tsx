@@ -117,7 +117,7 @@ export default function Navbar() {
             <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="departamentoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Departamento</a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="departamentoDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO(1)}>Carreras</Link></li>
+                <li><Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO(1)}>Informes Sinteticos Pendientes</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA}>Informes de Cátedra Completados</Link></li>
               </ul>
             </li>

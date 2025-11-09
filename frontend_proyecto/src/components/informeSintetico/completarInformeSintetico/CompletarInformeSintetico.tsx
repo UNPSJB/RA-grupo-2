@@ -3,25 +3,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
-import InformacionGeneral from "./informacionGeneral";
-import ContenidosAlcanzados from "./contenidosAlcanzados";
+import InformacionGeneral from "./Pregunta0";
+import ContenidosAlcanzados from "./Pregunta2A";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
+import ActividadesDocentes from "./Pregunta3";
 import EquipamientoBibliografia from "./Pregunta1"; 
+import type {Pregunta, Respuesta} from "../../../types/types";
 import DesempenoAuxiliares from "./Pregunta4"; 
 import ObservacionesComentarios from "./ObservacionesComentarios"; 
-interface Pregunta {
-    id: number;
-    cod: string
-    orden: number;
-    enunciado: string;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id?: number;
-}
 
 export default function CompletarInformeSintetico() {
     const location = useLocation();
@@ -43,6 +33,11 @@ export default function CompletarInformeSintetico() {
     } = location.state || {};
 
     useEffect(() => {
+        if(!dpto || !carrera){
+            setError("Se requiere un departamento y una carrera");
+            setLoading(false);
+            return;
+        }
         if (!informeBaseId) {
             setError("ID de informe base no encontrado.");
             setLoading(false);
@@ -106,6 +101,7 @@ export default function CompletarInformeSintetico() {
             anio: ANIO_ACTUAL,
             periodo: periodo,
             informe_base_id: informeBaseId,
+            carrera_id: carrera.id,
             respuestas: respuestas,
         };
 
@@ -230,6 +226,18 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
+        if (pregunta.cod=="3") {
+            return (
+                <ActividadesDocentes
+                    id_dpto={dpto.id}
+                    id_carrera={carrera.id}
+                    pregunta={pregunta} 
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
         if (pregunta.cod=="4") { 
             return (
                 <DesempenoAuxiliares
@@ -261,7 +269,7 @@ export default function CompletarInformeSintetico() {
         <div className="bg-light">
             <div className="container-lg py-4">
                 <div className="card shadow-sm border-0 rounded-3">
-                    <div className="card-header bg-primary text-white">
+                    <div className="card-header bg-unpsjb-header">
                         <h1 className="h4 mb-0 text-center">
                             Informe Sintético – {carrera.nombre}
                         </h1>

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { CampoTextArea } from "./Campos"; 
+
 interface Pregunta {
     id: number;
     enunciado: string;
@@ -28,10 +30,10 @@ export default function ObservacionesComentarios({
         });
     }, [pregunta.id]); 
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const nuevoContenido = e.target.value;
+    const handleContentChange = (nuevoContenido: string) => {
         setContenido(nuevoContenido);
 
+        // Serializamos el contenido
         const respuestaSerializada = JSON.stringify({
             observaciones_comentarios: nuevoContenido
         });
@@ -46,12 +48,10 @@ export default function ObservacionesComentarios({
     return (
         <div className="container mt-4">
             <h4 className="mb-3">{pregunta.enunciado}</h4>
-            <textarea
-                className="form-control"
-                rows={12}
-                placeholder="Escriba aquí las observaciones o comentarios generales del departamento..."
+            <CampoTextArea
+                label="" 
                 value={contenido}
-                onChange={handleChange}
+                onChange={handleContentChange}
             />
         </div>
     );

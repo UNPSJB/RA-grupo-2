@@ -12,6 +12,7 @@ class InformeSinteticoCompletadoBase(BaseModel):
     anio: int
     periodo: Periodo
     informe_base_id: int 
+    carrera_id: int
 
 class InformeSinteticoCompletadoCreate(InformeSinteticoCompletadoBase):
     respuestas: List[respuestas_schemas.RespuestaInformeSinteticoBase]
@@ -66,6 +67,25 @@ class RespuestasSeccion2C(BaseModel):
 class TablaPregunta2CItem(BaseModel):
     materia: Materia
     respuestas: RespuestasSeccion2C
+
+    model_config = {"from_attributes": True}
+    
+class DocenteActividades(BaseModel):
+    capacitacion: Optional[str] = None
+    investigacion: Optional[str] = None
+    extension: Optional[str] = None
+    gestion: Optional[str] = None
+    observaciones: Optional[str] = None
+
+class DocenteConActividades(BaseModel):
+    nombre_docente: str
+    rol_docente: str
+    actividades: DocenteActividades
+
+
+class ActividadesPorMateriaItem(BaseModel):
+    materia: Materia
+    docentes: List[DocenteConActividades]
 
     model_config = {"from_attributes": True}
 

@@ -22,3 +22,16 @@ export interface Docente {
   apellido: string;
   materias: Materia[];
 }
+
+export interface Pregunta {
+    id: number;
+    cod: string;
+    orden: number;
+    enunciado: string;
+}
+
+export interface Respuesta {
+    pregunta_id: number;
+    materia_id?: number;
+    texto_respuesta: string;
+}
