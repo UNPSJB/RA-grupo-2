@@ -5,7 +5,7 @@ import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
 import InformacionGeneral from "./informacionGeneral";
 import Pregunta2 from "./Pregunta2";
-
+import EquipamientoBibliografia from "./Pregunta1"; 
 interface Pregunta {
     id: number;
     orden: number;
@@ -147,6 +147,19 @@ export default function CompletarInformeSintetico() {
     }
 
     const renderPregunta = (pregunta: Pregunta) => {
+
+        if (/Pregunta 1.1/i.test(pregunta.enunciado)) { 
+        return (
+            <EquipamientoBibliografia 
+                departamentoId={dpto.id}
+                carreraId={carrera.id}
+                pregunta={pregunta}
+                anio={anio}
+                periodo={periodo}
+                manejarCambio={manejarCambio}
+            />
+        );
+    }
         if (/Pregunta 2.?b/i.test(pregunta.enunciado)) {
             return (
                 <Pregunta2B

@@ -14,6 +14,7 @@ interface OpcionPorcentaje { opcion_id: string; porcentaje: number; }
 interface DatosEstadisticosPregunta { id_pregunta: string; datos: OpcionPorcentaje[]; }
 interface DatosEstadisticosCategoria { categoria_cod: string; categoria_texto: string; promedio_categoria: OpcionPorcentaje[]; preguntas: DatosEstadisticosPregunta[]; }
 type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null; };
+interface RespuestaPlana { pregunta_id: number; texto_respuesta: string; } // Nueva interfaz
 
 interface ContenidoPasosProps {
   currentStep: number;
@@ -25,6 +26,7 @@ interface ContenidoPasosProps {
  
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
+  manejarRespuestaCAT1: (data: RespuestaPlana[]) => void;
 }
 
 const normalizarString = (texto: string): string => {
@@ -40,7 +42,8 @@ export default function ContenidoPasos({
   respuestas,
   docenteMateriaId,
   manejarCambio,
-  onDatosGenerados
+  onDatosGenerados,
+  manejarRespuestaCAT1
 }: ContenidoPasosProps) {
 
   const categoria1 = categoriasConPreguntas.find(cat => cat.cod === "1");
@@ -207,7 +210,7 @@ export default function ContenidoPasos({
           <hr className="mb-4" />
           <CategoriaEquipamiento
             categoria={categoria1}
-            manejarCambio={manejarCambio}
+            manejarCambioEstructura={manejarRespuestaCAT1}
           />
         </Fragment>
       ) : null;

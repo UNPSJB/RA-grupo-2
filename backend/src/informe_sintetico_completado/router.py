@@ -77,3 +77,19 @@ def obtener_informacion_general(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener información general: {str(e)}")
 
+@router.get("/bibliografia_equipamiento/", response_model=List[schemas.EquipamientoBibliografia]) # ⬅️ CAMBIO AQUÍ
+def get_bibliografia_equipamiento(
+    id_dpto: int = Query(...), 
+    id_carrera: int = Query(...), 
+    anio: int = Query(...), 
+    periodo: str = Query(...),
+    db: Session = Depends(get_db)):
+    """
+    Devuelve las respuestas de 'bibliografia' y 'equipamiento' por materia 
+    para el departamento, carrera, año y periodo especificados.
+    """
+    try:
+        elementos = services.get_bibliografia_equipamiento(db, id_dpto, id_carrera, anio, periodo)
+        return elementos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener bibliografía y equipamiento: {str(e)}")
