@@ -28,7 +28,7 @@ import InformeCatedraCompletadoDocente from "./components/docente/informesComple
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
-import ProbarFuncionalidad from "./components/informeSintetico/completarInformeSintetico/probar";
+import CompletarInformeSintetico from "./components/informeSintetico/completarInformeSintetico/CompletarInformeSintetico";
 
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";
@@ -59,8 +59,9 @@ function App() {
           */}
           <Routes>
             <Route path={ROUTES.HOME} element={<Menu />} />
-            <Route path={ROUTES.CARRERAS_DPTO} element={<DetalleDepartamento />} />
+            <Route path={ROUTES.CARRERAS_DPTO()} element={<DetalleDepartamento />} />
             <Route path={ROUTES.CARRERA()} element={<DetalleCarrera />} />
+            <Route path={ROUTES.COMPLETAR_INFORME_SINTETICO} element={<CompletarInformeSintetico />} />
             <Route path={ROUTES.ENCUESTAS_DISPONIBLES} element={<EncuestasPage />} />
             <Route path={ROUTES.MATERIAS_ASIGNADAS()} element={<DocentePage />} />
             <Route path={ROUTES.DETALLE_MATERIA()} element={<DetalleMateria />} />
@@ -80,7 +81,6 @@ function App() {
             <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
-            <Route path={"probar123"} element={<ProbarFuncionalidad />} />
           </Routes>
         </div>
       </main>
