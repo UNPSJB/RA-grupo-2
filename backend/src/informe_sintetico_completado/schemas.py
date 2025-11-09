@@ -87,3 +87,8 @@ class ActividadesPorMateriaItem(BaseModel):
     docentes: List[DocenteConActividades]
 
     model_config = {"from_attributes": True}
+
+class EquipamientoBibliografia(BaseModel):
+    materia: Materia
+    bibliografia: str
+    equipamiento: str

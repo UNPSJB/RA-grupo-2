@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"; 
 import type { Materia } from "../../../types/types";
+import { CampoCheckbox } from "./Campos";
 
 
 interface Pregunta {
@@ -129,7 +130,7 @@ export default function ActividadesDocentes({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos de docentes...</div>
@@ -141,7 +142,7 @@ export default function ActividadesDocentes({
                 <>
                     <div className="table-responsive">
                         <table className="table table-bordered table-hover table-sm align-middle">
-                            <thead className="table-light text-center">
+                            <thead className="table-light text-center no-bold">
                                 <tr>
                                     <th style={{width: '20%'}}>Espacio curricular</th>
                                     <th style={{width: '20%'}}>Responsable, Profesor, JTP y/o Auxiliares</th>
@@ -166,14 +167,14 @@ export default function ActividadesDocentes({
                                             <tr key={docenteIndex}>
                                                 {docenteIndex === 0 && (
                                                     <td rowSpan={itemMateria.docentes.length} style={{verticalAlign: 'middle'}}>
-                                                        <strong>{itemMateria.materia.matricula}</strong>
+                                                        {itemMateria.materia.matricula}
                                                         <br />
                                                         {itemMateria.materia.nombre}
                                                     </td>
                                                 )}
                                                 
                                                 <td>
-                                                    <strong>{itemDocente.nombre_docente}</strong>
+                                                    {itemDocente.nombre_docente}
                                                     <br />
                                                     <small className="text-muted">{itemDocente.rol_docente}</small>
                                                 </td>
@@ -209,7 +210,7 @@ export default function ActividadesDocentes({
                                         {itemMateria.docentes.length === 0 && (
                                             <tr>
                                                 <td>
-                                                    <strong>{itemMateria.materia.matricula}</strong>
+                                                    {itemMateria.materia.matricula}
                                                     <br />
                                                     {itemMateria.materia.nombre}
                                                 </td>
@@ -226,28 +227,5 @@ export default function ActividadesDocentes({
                 </>
             )}
         </div>
-    );
-}
-
-function CampoCheckbox({
-    checked,
-    onChange,
-}: {
-    checked: boolean;
-    onChange: (v: boolean) => void;
-}) {
-    return (
-        <td 
-            className="text-center" 
-            style={{ 
-                cursor: 'pointer', 
-                fontWeight: 'bold', 
-                fontSize: '1.2rem',
-                userSelect: 'none'
-            }}
-            onClick={() => onChange(!checked)}
-        >
-            {checked ? 'X' : '-'}
-        </td>
     );
 }

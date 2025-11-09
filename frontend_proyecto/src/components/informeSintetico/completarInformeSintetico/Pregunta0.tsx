@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
-
-interface Pregunta {
-    id: number;
-    cod: string;
-    enunciado: string;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    materia_id: number;
-    texto_respuesta: string;
-}
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextoNumero } from "./Campos";
 
 interface MateriaInfo {
     materia: Materia;
@@ -117,7 +106,7 @@ export default function InformacionGeneral({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
@@ -181,58 +170,6 @@ export default function InformacionGeneral({
                     </div>
                 </>
             )}
-        </div>
-    );
-}
-
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
-        </div>
-    );
-}
-
-function CampoTextoNumero({
-    label,
-    value,
-    onChange,
-}: {
-    label: string;
-    value: number;
-    onChange: (v: number) => void;
-}) {
-    return (
-        <div className="col-md-4">
-            <label className="form-label">{label}</label>
-            <input
-                type="number"
-                className="form-control"
-                min={0}
-                max={10000}
-                value={value}
-                onChange={(e) => {
-                    const num = Number(e.target.value);
-                    if (num >= 0) onChange(num);
-                }}
-            />
         </div>
     );
 }

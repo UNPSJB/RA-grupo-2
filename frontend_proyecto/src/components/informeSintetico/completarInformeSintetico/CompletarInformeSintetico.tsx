@@ -3,24 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
-import InformacionGeneral from "./informacionGeneral";
-import ContenidosAlcanzados from "./contenidosAlcanzados";
+import InformacionGeneral from "./Pregunta0";
+import ContenidosAlcanzados from "./Pregunta2A";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
 import ActividadesDocentes from "./Pregunta3";
-
-interface Pregunta {
-    id: number;
-    cod: string
-    orden: number;
-    enunciado: string;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
-}
+import EquipamientoBibliografia from "./Pregunta1"; 
+import type {Pregunta, Respuesta} from "../../../types/types";
 
 export default function CompletarInformeSintetico() {
     const location = useLocation();
@@ -154,6 +143,18 @@ export default function CompletarInformeSintetico() {
     }
 
     const renderPregunta = (pregunta: Pregunta) => {
+         if (pregunta.cod=="1") { 
+        return (
+            <EquipamientoBibliografia 
+                departamentoId={dpto.id}
+                carreraId={carrera.id}
+                pregunta={pregunta}
+                anio={anio}
+                periodo={periodo}
+                manejarCambio={manejarCambio}
+            />
+        );
+    }
         if (pregunta.cod=="2.B") {
             return (
                 <Pregunta2B
@@ -241,7 +242,7 @@ export default function CompletarInformeSintetico() {
         <div className="bg-light">
             <div className="container-lg py-4">
                 <div className="card shadow-sm border-0 rounded-3">
-                    <div className="card-header bg-primary text-white">
+                    <div className="card-header bg-unpsjb-header">
                         <h1 className="h4 mb-0 text-center">
                             Informe Sintético – {carrera.nombre}
                         </h1>

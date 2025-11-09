@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
-
-interface Pregunta {
-    id: number;
-    cod: string;
-    enunciado: string;
-}
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextArea, CampoTexto } from "./Campos";
 
 interface Tabla2BItem {
     materia: Materia
@@ -15,12 +10,6 @@ interface Tabla2BItem {
     encuesta_ET: string
     encuesta_EP: string
     juicio_valor: string
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
 }
 
 interface Props {
@@ -128,7 +117,7 @@ export default function Pregunta2B({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
@@ -165,8 +154,9 @@ export default function Pregunta2B({
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
+                                            <label className="form-label">Encuestas a Alumnos:</label>
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria B"
+                                                label="Categoria B"
                                                 value={itm.encuesta_B}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_B", v)
@@ -174,7 +164,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria C"
+                                                label="Categoria C"
                                                 value={itm.encuesta_C}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_C", v)
@@ -182,7 +172,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria D"
+                                                label="Categoria D"
                                                 value={itm.encuesta_D}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_D", v)
@@ -190,7 +180,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria ET"
+                                                label="Categoria ET"
                                                 value={itm.encuesta_ET}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_ET", v)
@@ -198,14 +188,14 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria EP"
+                                                label="Categoria EP"
                                                 value={itm.encuesta_EP}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_EP", v)
                                                 }
                                             />
 
-                                            <CampoTexto
+                                            <CampoTextArea
                                                 label="Juicio de valor"
                                                 value={itm.juicio_valor}
                                                 onChange={(v) =>
@@ -224,27 +214,3 @@ export default function Pregunta2B({
     );
 }
 
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
-        </div>
-    );
-}

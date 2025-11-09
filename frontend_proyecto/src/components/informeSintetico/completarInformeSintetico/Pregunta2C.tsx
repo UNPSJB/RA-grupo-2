@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
-
-interface Pregunta {
-    id: number;
-    cod: string;
-    enunciado: string;
-}
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextArea } from "./Campos";
 
 interface RespuestasSeccion2C {
     aspectos_positivos_ensenanza: string | null;
@@ -18,12 +13,6 @@ interface RespuestasSeccion2C {
 interface TablaPregunta2CItem {
     materia: Materia;
     respuestas: RespuestasSeccion2C;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
 }
 
 interface Props {
@@ -104,7 +93,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
@@ -184,50 +173,6 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
                     </div>
                 </>
             )}
-        </div>
-    );
-}
-
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-            />
-        </div>
-    );
-}
-
-function CampoTextArea({
-    label,
-    value,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-12">
-            <label className="form-label">{label}</label>
-            <textarea
-                className="form-control"
-                rows={4}
-                value={value}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
         </div>
     );
 }

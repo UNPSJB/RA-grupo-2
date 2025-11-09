@@ -390,3 +390,71 @@ def get_actividades_docentes(
         elementos.append(elemento)
 
     return elementos
+def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.EquipamientoBibliografia]:
+
+    pregunta_equipamiento = db.scalars(select(Pregunta.id).where(Pregunta.enunciado.ilike("equipamiento"))).first()
+    pregunta_bibliografia = db.scalars(select(Pregunta.id).where(Pregunta.enunciado.ilike("bibliografia"))).first()
+    
+    if not pregunta_equipamiento or not pregunta_bibliografia:
+        return []
+    
+    ID_EQUIPAMIENTO = pregunta_equipamiento
+    ID_BIBLIOGRAFIA = pregunta_bibliografia
+
+    materias: list[Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+    
+    elementos: List[schemas.EquipamientoBibliografia] = [] 
+    
+    for materia in materias:
+
+        informes_completados: List[InformeCatedraCompletado] = db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == Periodo(periodo), 
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                    .selectinload(RespuestaInforme.pregunta)   
+            )
+        ).all() 
+
+        if not informes_completados:
+            continue
+
+        respuestas_biblio = set()
+        respuestas_equip = set()
+        
+        for informe in informes_completados:
+            
+            r_bibliografia: RespuestaInforme = next((r for r in informe.respuestas_informe
+                    if r.pregunta_id == ID_BIBLIOGRAFIA and r.texto_respuesta and r.texto_respuesta.strip() != '-'), None) 
+            
+            r_equipamiento: RespuestaInforme = next((r for r in informe.respuestas_informe
+                    if r.pregunta_id == ID_EQUIPAMIENTO and r.texto_respuesta and r.texto_respuesta.strip() != '-'), None) 
+            
+            if r_bibliografia:
+                respuestas_biblio.add(r_bibliografia.texto_respuesta.strip())
+            
+            if r_equipamiento:
+                respuestas_equip.add(r_equipamiento.texto_respuesta.strip())
+        
+        bibliografia_consolidada = "; ".join(respuestas_biblio) if respuestas_biblio else "-"
+        equipamiento_consolidado = "; ".join(respuestas_equip) if respuestas_equip else "-"
+
+        elemento = schemas.EquipamientoBibliografia(
+            materia = materia,
+            bibliografia = bibliografia_consolidada,
+            equipamiento = equipamiento_consolidado
+        )
+        elementos.append(elemento)
+    
+    return elementos
