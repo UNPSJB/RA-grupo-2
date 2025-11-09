@@ -9,6 +9,7 @@ import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
 import EquipamientoBibliografia from "./Pregunta1"; 
 import DesempenoAuxiliares from "./Pregunta4"; 
+import ObservacionesComentarios from "./ObservacionesComentarios"; 
 interface Pregunta {
     id: number;
     cod: string
@@ -19,7 +20,7 @@ interface Pregunta {
 interface Respuesta {
     pregunta_id: number;
     texto_respuesta: string;
-    materia_id: number;
+    materia_id?: number;
 }
 
 export default function CompletarInformeSintetico() {
@@ -238,6 +239,14 @@ export default function CompletarInformeSintetico() {
                     anio={anio}
                     periodo={periodo}
                     manejarCambio={manejarCambio}
+                />
+            );
+        }
+        if (pregunta.cod=="5") { 
+            return (
+                <ObservacionesComentarios
+                    pregunta={pregunta}
+                    manejarCambio={manejarCambio} 
                 />
             );
         }
