@@ -84,10 +84,7 @@ def get_bibliografia_equipamiento(
     anio: int = Query(...), 
     periodo: str = Query(...),
     db: Session = Depends(get_db)):
-    """
-    Devuelve las respuestas de 'bibliografia' y 'equipamiento' por materia 
-    para el departamento, carrera, año y periodo especificados.
-    """
+
     try:
         elementos = services.get_bibliografia_equipamiento(db, id_dpto, id_carrera, anio, periodo)
         return elementos

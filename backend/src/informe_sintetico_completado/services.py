@@ -192,15 +192,8 @@ def obtener_informacion_general(
 
     return elementos
 
-# Services.py (Nueva versión de la función get_necesidades_bibliografia_equipamiento)
-
 def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.EquipamientoBibliografia]:
-    """
-    Obtiene y CONSOLIDA las respuestas de 'bibliografia' y 'equipamiento' 
-    de TODOS los informes de cátedra para una materia, departamento, carrera, año y período.
-    """
-    
-    # 1️⃣ Obtener IDs de Preguntas (Se mantiene para robustez)
+
     pregunta_equipamiento = db.scalars(select(Pregunta.id).where(Pregunta.enunciado.ilike("equipamiento"))).first()
     pregunta_bibliografia = db.scalars(select(Pregunta.id).where(Pregunta.enunciado.ilike("bibliografia"))).first()
     
@@ -209,8 +202,7 @@ def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, an
     
     ID_EQUIPAMIENTO = pregunta_equipamiento
     ID_BIBLIOGRAFIA = pregunta_bibliografia
-    
-    # 2️⃣ Buscar las materias
+
     materias: list[Materia] = db.scalars(
         select(Materia)
         .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
@@ -222,9 +214,8 @@ def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, an
     
     elementos: List[schemas.EquipamientoBibliografia] = [] 
     
-    # 3️⃣ Procesar por materia
     for materia in materias:
-        # 🌟 CAMBIO CLAVE: Obtener TODOS los informes completados para esta materia y período
+
         informes_completados: List[InformeCatedraCompletado] = db.scalars(
             select(InformeCatedraCompletado)
             .where(
@@ -236,7 +227,7 @@ def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, an
                 selectinload(InformeCatedraCompletado.respuestas_informe)
                     .selectinload(RespuestaInforme.pregunta)   
             )
-        ).all() # ⬅️ CAMBIADO DE .first() A .all()
+        ).all() 
 
         if not informes_completados:
             continue
@@ -244,14 +235,11 @@ def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, an
         respuestas_biblio = set()
         respuestas_equip = set()
         
-        # 4️⃣ Iterar sobre TODOS los informes y extraer las respuestas
         for informe in informes_completados:
             
-            # Buscar la respuesta de bibliografía en este informe
             r_bibliografia: RespuestaInforme = next((r for r in informe.respuestas_informe
                     if r.pregunta_id == ID_BIBLIOGRAFIA and r.texto_respuesta and r.texto_respuesta.strip() != '-'), None) 
             
-            # Buscar la respuesta de equipamiento en este informe
             r_equipamiento: RespuestaInforme = next((r for r in informe.respuestas_informe
                     if r.pregunta_id == ID_EQUIPAMIENTO and r.texto_respuesta and r.texto_respuesta.strip() != '-'), None) 
             
@@ -260,13 +248,10 @@ def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, an
             
             if r_equipamiento:
                 respuestas_equip.add(r_equipamiento.texto_respuesta.strip())
-        separador = "\n\n--- RESPUESTA SEPARADA ---\n\n"
         
-        # Consolida todas las respuestas únicas
-        bibliografia_consolidada = separador.join(respuestas_biblio) if respuestas_biblio else "-"
-        equipamiento_consolidado = separador.join(respuestas_equip) if respuestas_equip else "-"
-        
-        # 6️⃣ Mapear al nuevo Schema
+        bibliografia_consolidada = "; ".join(respuestas_biblio) if respuestas_biblio else "-"
+        equipamiento_consolidado = "; ".join(respuestas_equip) if respuestas_equip else "-"
+
         elemento = schemas.EquipamientoBibliografia(
             materia = materia,
             bibliografia = bibliografia_consolidada,

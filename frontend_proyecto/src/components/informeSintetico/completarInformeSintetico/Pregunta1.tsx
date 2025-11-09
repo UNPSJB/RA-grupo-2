@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Materia } from "../../../types/types";
 
-// --- INTERFACES DEL FRONTEND ---
-
 interface Pregunta {
     id: number;
     enunciado: string;
@@ -30,7 +28,6 @@ interface Props {
     manejarCambio?: (items: Respuesta[]) => void;
 }
 
-// Tipo que define solo los campos editables (que son string)
 type EditableFields = 'bibliografia' | 'equipamiento'; 
 
 export default function EquipamientoBibliografia({
@@ -52,8 +49,6 @@ export default function EquipamientoBibliografia({
             try {
                 setIsLoading(true);
                 setError(null);
-
-                // LLAMADA AL ENDPOINT CREADO
                 const res = await fetch(
                     `http://127.0.0.1:8000/informes_sinteticos_completados/bibliografia_equipamiento/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
                 );
@@ -70,7 +65,6 @@ export default function EquipamientoBibliografia({
 
                 setItems(data);
 
-                // Prepara las respuestas iniciales para el componente padre
                 const respuestasIniciales: Respuesta[] = data.map((itm) => ({
                     pregunta_id: pregunta.id,
                     texto_respuesta: JSON.stringify({
@@ -97,19 +91,16 @@ export default function EquipamientoBibliografia({
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
 
-    // Maneja los cambios en los campos de texto y notifica al padre
     const handleChange = (
         index: number,
-        field: EditableFields, // <-- Usa el tipo restringido aquí
-        value: string // <-- El valor es siempre string
+        field: EditableFields,
+        value: string 
     ) => {
         const updated = [...itemsTabla];
         
         // Asignación segura
         updated[index][field] = value; 
         setItems(updated);
-
-        // Prepara el array de respuestas para manejarCambio
         const respuestas: Respuesta[] = updated.map((itm) => ({
             pregunta_id: pregunta.id, 
             texto_respuesta: JSON.stringify({
@@ -162,21 +153,17 @@ export default function EquipamientoBibliografia({
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            {/* Mostrar la Bibliografía */}
                                             <CampoTexto
                                                 label="Necesidad de Equipamiento"
                                                 value={itm.equipamiento}
-                                                // La clave debe ser 'bibliografia'
                                                 onChange={(v) =>
                                                     handleChange(index, "equipamiento", v)
                                                 }
                                             />
-
-                                            {/* Mostrar el Equipamiento */}
                                             <CampoTexto
                                                 label="Necesidad de Bibliografia"
                                                 value={itm.bibliografia}
-                                                // La clave debe ser 'equipamiento'
+                                     
                                                 onChange={(v) =>
                                                     handleChange(index, "bibliografia", v)
                                                 }
