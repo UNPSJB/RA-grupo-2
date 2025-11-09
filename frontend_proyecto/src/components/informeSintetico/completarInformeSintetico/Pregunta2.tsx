@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
-import { CampoTextArea } from "./Campos";
+import { CampoTextArea, CampoPorcentaje } from "./Campos";
 
 
 interface TablaPregunta2Item {
     materia: Materia;
-    porcentaje_teoricas: string;
-    porcentaje_practicas: string;
+    porcentaje_teoricas: number | null;
+    porcentaje_practicas: number | null;
     justificacion: string | null;
 }
 
@@ -52,7 +52,19 @@ export default function Pregunta2({
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                setItems(data);
+                const itemsIniciales: TablaPregunta2Item[] = data.map((itm) => {
+                    const teoricas = parseFloat(itm.porcentaje_teoricas || "");
+                    const practicas = parseFloat(itm.porcentaje_practicas || "");
+
+                    return {
+                        materia: itm.materia,
+                        porcentaje_teoricas: isNaN(teoricas) ? null : teoricas,
+                        porcentaje_practicas: isNaN(practicas) ? null : practicas,
+                        justificacion: itm.justificacion || "",
+                    };
+                });
+
+                setItems(itemsIniciales);
 
                 const respuestasIniciales = data.map((itm) => ({
                     pregunta_id: pregunta.id,
@@ -143,7 +155,7 @@ export default function Pregunta2({
                                     <div className="accordion-body">
                                         <div className="row g-3">
                                             
-                                            <CampoTextArea
+                                            <CampoPorcentaje
                                                 label="Porcentaje Clases Teóricas (%)"
                                                 value={itm.porcentaje_teoricas}
                                                 onChange={(v) =>
@@ -151,7 +163,7 @@ export default function Pregunta2({
                                                 }
                                             />
 
-                                            <CampoTextArea
+                                            <CampoPorcentaje
                                                 label="Porcentaje Clases Prácticas (%)"
                                                 value={itm.porcentaje_practicas}
                                                 onChange={(v) =>

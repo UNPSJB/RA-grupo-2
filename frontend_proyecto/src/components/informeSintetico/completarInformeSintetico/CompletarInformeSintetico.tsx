@@ -8,18 +8,7 @@ import ContenidosAlcanzados from "./Pregunta2A";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
 import EquipamientoBibliografia from "./Pregunta1"; 
-interface Pregunta {
-    id: number;
-    cod: string
-    orden: number;
-    enunciado: string;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
-}
+import type {Pregunta, Respuesta} from "../../../types/types";
 
 export default function CompletarInformeSintetico() {
     const location = useLocation();

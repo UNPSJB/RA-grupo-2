@@ -26,6 +26,7 @@ export interface Docente {
 export interface Pregunta {
     id: number;
     cod: string;
+    orden: number;
     enunciado: string;
 }
 
