@@ -109,9 +109,8 @@ export default function Pregunta2B({
         updated[index][field] = value;
         setItems(updated);
 
-        // ✅ Siempre incluir pregunta_id explícitamente
         const respuestas: Respuesta[] = updated.map((itm) => ({
-            pregunta_id: pregunta.id, // <-- aseguramos que nunca se pierda
+            pregunta_id: pregunta.id, 
             texto_respuesta: JSON.stringify({
                 encuesta_B: itm.encuesta_B,
                 encuesta_C: itm.encuesta_C,

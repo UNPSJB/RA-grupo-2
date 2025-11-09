@@ -152,7 +152,7 @@ export default function CompletarInformeSintetico() {
     }
 
     const renderPregunta = (pregunta: Pregunta) => {
-        if (/2.?b/i.test(pregunta.cod)) {
+        if (pregunta.cod=="2.B") {
             return (
                 <Pregunta2B
                     departamentoId={dpto.id}
@@ -165,7 +165,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-        if (/2.?c/i.test(pregunta.cod)) {
+        if (pregunta.cod=="2.C") {
             return (
                 <Pregunta2C
                     departamentoId={dpto.id}
@@ -178,7 +178,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-        if (/0/i.test(pregunta.cod)) {
+        if (pregunta.cod=="0") {
             return (
                 <InformacionGeneral
                     id_dpto={dpto.id}
@@ -191,7 +191,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-        if (/2/i.test(pregunta.cod)) {
+        if (pregunta.cod=="2") {
             return (
                 <Pregunta2
                     departamentoId={dpto.id}
