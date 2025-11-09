@@ -154,8 +154,9 @@ export default function Pregunta2B({
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
+                                            <label className="form-label">Encuestas a Alumnos:</label>
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria B"
+                                                label="Categoria B"
                                                 value={itm.encuesta_B}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_B", v)
@@ -163,7 +164,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria C"
+                                                label="Categoria C"
                                                 value={itm.encuesta_C}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_C", v)
@@ -171,7 +172,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria D"
+                                                label="Categoria D"
                                                 value={itm.encuesta_D}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_D", v)
@@ -179,7 +180,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria ET"
+                                                label="Categoria ET"
                                                 value={itm.encuesta_ET}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_ET", v)
@@ -187,7 +188,7 @@ export default function Pregunta2B({
                                             />
 
                                             <CampoTexto
-                                                label="Encuesta a alumnos: Categoria EP"
+                                                label="Categoria EP"
                                                 value={itm.encuesta_EP}
                                                 onChange={(v) =>
                                                     handleChange(index, "encuesta_EP", v)
