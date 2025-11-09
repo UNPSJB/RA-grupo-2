@@ -1,10 +1,10 @@
 import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../paths"; 
-import { CARRERA_ID } from "../../constants";
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'; 
 
 interface PreguntaTemp { 
+    cod: string;
     enunciado: string; 
     orden: number; 
 }
@@ -28,9 +28,6 @@ const getListItemStyle = (isDragging: boolean, dragItemStyle: React.CSSPropertie
     boxShadow: isDragging ? '0 4px 8px rgba(0, 0, 0, 0.2)' : 'none',
 });
 
-// Opciones predefinidas para el desplegable
-const ENUNCIADO_OPTIONS = ["1", "2", "2A", "2B", "2C", "3", "4", "5"];
-
 
 export default function InformeSinteticoBaseForm() {
     const navigate = useNavigate();
@@ -39,27 +36,23 @@ export default function InformeSinteticoBaseForm() {
     const [cargando, setCargando] = useState(false);
     const [preguntas, setPreguntas] = useState<PreguntaTemp[]>([]);
     const [nuevoTextoPregunta, setNuevoTextoPregunta] = useState("");
-    // NUEVO: Estado para el prefijo seleccionado
-    const [tipoEnunciado, setTipoEnunciado] = useState(ENUNCIADO_OPTIONS[0]);
+    const [nuevoCodPregunta, setNuevoCodPregunta] = useState("");
 
     const agregarPregunta = () => {
-        if (!nuevoTextoPregunta.trim()) {
-            alert("Debe ingresar el texto de la pregunta.");
+        if (!nuevoTextoPregunta.trim() || !nuevoCodPregunta.trim()) {
+            alert("Debe ingresar el codigo y el texto de la pregunta.");
             return;
         }
 
-        // CONCATENACIÓN CLAVE: Combina el tipo de enunciado con el texto
-        const enunciadoCompleto = `${tipoEnunciado}. ${nuevoTextoPregunta.trim()}`;
-
         const nuevaPregunta: PreguntaTemp = {
-            enunciado: enunciadoCompleto, // Guarda el texto concatenado
+            cod: nuevoCodPregunta,
+            enunciado: nuevoTextoPregunta, 
             orden: preguntas.length + 1, 
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
         setNuevoTextoPregunta("");
-        // Opcional: Reiniciar el desplegable a la primera opción después de agregar:
-        // setTipoEnunciado(ENUNCIADO_OPTIONS[0]); 
+        setNuevoCodPregunta("");
     };
 
     const eliminarPregunta = (index: number) => {
@@ -99,8 +92,7 @@ export default function InformeSinteticoBaseForm() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     titulo,
-                    descripcion: descripcion || null,
-                    carrera_id: CARRERA_ID, 
+                    descripcion: descripcion || null
                 }),
             });
 
@@ -127,7 +119,8 @@ export default function InformeSinteticoBaseForm() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        enunciado: preg.enunciado, // Se envía el enunciado concatenado
+                        cod: preg.cod,
+                        enunciado: preg.enunciado, 
                         orden: preg.orden, 
                         tipo_respuesta: 'texto', 
                     }),
@@ -161,8 +154,6 @@ export default function InformeSinteticoBaseForm() {
             setCargando(false);
         }
     };
-    
-    // --- ESTILOS ---
     const cardStyle = { 
         backgroundColor: 'var(--color-component-bg)',
         border: '1px solid var(--color-unpsjb-border)', 
@@ -210,7 +201,6 @@ export default function InformeSinteticoBaseForm() {
                 </div>
                 <div className="card-body">
                     <form onSubmit={handleSubmit}>  
-                        {/* Sección Título y Descripción */}
                         <div className="mb-4 p-3 border rounded" style={inputAreaStyle}> 
                             <label className="form-label fw-bold">Título del Informe</label>
                             <input 
@@ -232,39 +222,28 @@ export default function InformeSinteticoBaseForm() {
                                 style={inputFieldStyle}
                             />
                         </div>
-
                         <h5 className="mb-3" style={{color: 'var(--color-text-primary)'}}>Definición de Preguntas</h5>
-                        
-                        {/* Sección de Añadir Pregunta con Desplegable */}
                         <div className="card mb-4 p-3" style={inputAreaStyle}> 
                             <div className="row mb-3">
                                 <div className="col-12"> 
+                                    <label className="form-label fw-bold">Codigo</label>
+                                    <textarea 
+                                        className="form-control" 
+                                        rows={2} 
+                                        value={nuevoCodPregunta} 
+                                        onChange={(e) => setNuevoCodPregunta(e.target.value)} 
+                                        disabled={cargando}
+                                        style={inputFieldStyle}
+                                    />
                                     <label className="form-label fw-bold">Enunciado</label>
-                                    
-                                    <div className="d-flex gap-2"> {/* Contenedor flex para el desplegable y el textarea */}
-                                        {/* NUEVO: Desplegable para el Prefijo de la Pregunta */}
-                                        <select
-                                            className="form-select flex-shrink-0" // flex-shrink-0 mantiene el tamaño del select
-                                            value={tipoEnunciado}
-                                            onChange={(e) => setTipoEnunciado(e.target.value)}
-                                            disabled={cargando}
-                                            style={{...inputFieldStyle, width: 'auto'}} // Estilo y ancho automático
-                                        >
-                                            {ENUNCIADO_OPTIONS.map(option => (
-                                                <option key={option} value={option}>{option}</option>
-                                            ))}
-                                        </select>
-
-                                        {/* Textarea para el resto del enunciado */}
-                                        <textarea 
-                                            className="form-control" 
-                                            rows={2} 
-                                            value={nuevoTextoPregunta} 
-                                            onChange={(e) => setNuevoTextoPregunta(e.target.value)} 
-                                            disabled={cargando}
-                                            style={inputFieldStyle}
-                                        />
-                                    </div> {/* Fin del d-flex */}
+                                    <textarea 
+                                        className="form-control" 
+                                        rows={2} 
+                                        value={nuevoTextoPregunta} 
+                                        onChange={(e) => setNuevoTextoPregunta(e.target.value)} 
+                                        disabled={cargando}
+                                        style={inputFieldStyle}
+                                    />
                                 </div>
                             </div>
                             
@@ -273,14 +252,12 @@ export default function InformeSinteticoBaseForm() {
                                     type="button" 
                                     className="btn btn-theme-primary" 
                                     onClick={agregarPregunta} 
-                                    disabled={cargando || !nuevoTextoPregunta.trim()} 
+                                    disabled={cargando || !nuevoCodPregunta.trim() || !nuevoTextoPregunta.trim()} 
                                 >
                                     Agregar Pregunta a la Lista
                                 </button>
                             </div>
                         </div>
-                        
-                        {/* Lista de Preguntas (Drag & Drop) */}
                         {preguntas.length > 0 && (
                             <DragDropContext onDragEnd={onDragEnd}>
                                 <Droppable droppableId="preguntas-list">
@@ -291,7 +268,7 @@ export default function InformeSinteticoBaseForm() {
                                             ref={provided.innerRef}
                                             style={{
                                                 minHeight: '100px', 
-                                                // La altura ya no es necesaria, minHeight es suficiente para el placeholder
+                                                height: `${preguntas.length * 60}px`, 
                                                 backgroundColor: snapshot.isDraggingOver ? placeholderStyle.backgroundColor : dragItemStyle.backgroundColor,
                                             }} 
                                         >
@@ -311,7 +288,7 @@ export default function InformeSinteticoBaseForm() {
                                                         >
                                                             <span>
                                                                 <strong className={`badge bg-secondary me-2`}> Orden: {preg.orden}</strong>
-                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.enunciado}
+                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.cod}-{preg.enunciado}
                                                             </span>
                                                             <button 
                                                                 type="button" 
@@ -331,8 +308,6 @@ export default function InformeSinteticoBaseForm() {
                                 </Droppable>
                             </DragDropContext>
                         )}
-                        
-                        {/* Botones Finales */}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
                             <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>
                             <button type="submit" className="btn btn-theme-primary" disabled={cargando}>

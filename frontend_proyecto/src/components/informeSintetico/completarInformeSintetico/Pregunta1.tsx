@@ -1,44 +1,23 @@
 import { useEffect, useState } from "react";
 import type { Materia } from "../../../types/types";
 
-interface Pregunta {
-    id: number;
-    enunciado: string;
-}
-
-interface NecesidadesItem {
-    materia: Materia;
-    equipamiento: string;
-    bibliografia: string;
-    
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
-}
-
+interface Pregunta { id: number; enunciado: string; }
+// Interfaz que viene del backend (strings consolidados)
+interface NecesidadesItem { materia: Materia; equipamiento: string; bibliografia: string; }
+// Interfaz del estado local (arrays separados por respuesta)
+interface NecesidadesEstado { materia: Materia; equipamiento: string[]; bibliografia: string[]; }
+interface Respuesta { pregunta_id: number; texto_respuesta: string; materia_id: number; }
 interface Props {
-    departamentoId: number;
-    carreraId: number;
-    pregunta: Pregunta;
-    anio: number;
-    periodo: string;
+    departamentoId: number; carreraId: number; pregunta: Pregunta; anio: number; periodo: string;
     manejarCambio?: (items: Respuesta[]) => void;
 }
-
 type EditableFields = 'bibliografia' | 'equipamiento'; 
 
 export default function EquipamientoBibliografia({
-    departamentoId,
-    carreraId,
-    pregunta,
-    anio,
-    periodo,
-    manejarCambio
+    departamentoId, carreraId, pregunta, anio, periodo, manejarCambio
 }: Props) {
-    const [itemsTabla, setItems] = useState<NecesidadesItem[]>([]); 
+    // Se usa NecesidadesEstado para el estado interno (maneja arrays)
+    const [itemsTabla, setItems] = useState<NecesidadesEstado[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -63,13 +42,26 @@ export default function EquipamientoBibliografia({
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                setItems(data);
+                // 🌟 MODIFICACIÓN CLAVE: Función para dividir el string. 
+                // Ya no se añade el campo vacío al final. Solo devuelve líneas reales.
+                const separar = (s: string): string[] => {
+                    return s === '-' ? [] : s.split('\n').filter(line => line.trim() !== '');
+                };
 
-                const respuestasIniciales: Respuesta[] = data.map((itm) => ({
+                const dataParseada: NecesidadesEstado[] = data.map(item => ({
+                    materia: item.materia,
+                    equipamiento: separar(item.equipamiento),
+                    bibliografia: separar(item.bibliografia),
+                }));
+                
+                setItems(dataParseada);
+
+                // Generar respuestas iniciales (JOIN de nuevo para enviar al padre)
+                const respuestasIniciales: Respuesta[] = dataParseada.map((itm) => ({
                     pregunta_id: pregunta.id,
                     texto_respuesta: JSON.stringify({
-                        bibliografia: itm.bibliografia,
-                        equipamiento: itm.equipamiento,
+                        bibliografia: itm.bibliografia.filter(s => s.trim() !== '').join('\n'),
+                        equipamiento: itm.equipamiento.filter(s => s.trim() !== '').join('\n'),
                     }),
                     materia_id: itm.materia.id,
                 }));
@@ -91,21 +83,30 @@ export default function EquipamientoBibliografia({
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
 
-    const handleChange = (
-        index: number,
+    // 🌟 MODIFICACIÓN CLAVE: Función de cambio simplificada. 
+    // Solo permite actualizar el valor en un índice.
+    const handleArrayChange = (
+        materiaIndex: number,
         field: EditableFields,
-        value: string 
+        value: string,
+        arrayIndex: number
     ) => {
         const updated = [...itemsTabla];
         
-        // Asignación segura
-        updated[index][field] = value; 
+        // 1. Actualizar el valor directamente.
+        updated[materiaIndex][field][arrayIndex] = value;
+        
+        // 2. Se elimina la lógica para agregar un nuevo campo vacío.
+
         setItems(updated);
+
+        // 3. Generar respuestas para el padre (filtrando líneas vacías)
         const respuestas: Respuesta[] = updated.map((itm) => ({
             pregunta_id: pregunta.id, 
             texto_respuesta: JSON.stringify({
-                bibliografia: itm.bibliografia,
-                equipamiento: itm.equipamiento,
+                // El filtro asegura que las líneas vacías editadas no se envíen
+                bibliografia: itm.bibliografia.filter(s => s.trim() !== '').join('\n'),
+                equipamiento: itm.equipamiento.filter(s => s.trim() !== '').join('\n'),
             }),
             materia_id: itm.materia.id,
         }));
@@ -129,79 +130,89 @@ export default function EquipamientoBibliografia({
                     No hay necesidades de equipamiento/bibliografía reportadas.
                 </div>
             ) : (
-                <>
-                    <div className="accordion" id="accordionNecesidades">
-                        {itemsTabla.map((itm, index) => (
-                            <div className="accordion-item" key={index}>
-                                <h2 className="accordion-header" id={`headingN${index}`}>
-                                    <button
-                                        className="accordion-button collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapseN${index}`}
-                                        aria-expanded="false"
-                                        aria-controls={`collapseN${index}`}
-                                    >
-                                        {itm.materia.nombre} ({itm.materia.matricula})
-                                    </button>
-                                </h2>
-                                <div
-                                    id={`collapseN${index}`}
-                                    className="accordion-collapse collapse"
-                                    aria-labelledby={`headingN${index}`}
-                                    data-bs-parent="#accordionNecesidades"
+                <div className="accordion" id="accordionNecesidades">
+                    {itemsTabla.map((itm, index) => (
+                        <div className="accordion-item" key={index}>
+                            <h2 className="accordion-header" id={`headingN${index}`}>
+                                <button
+                                    className="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target={`#collapseN${index}`}
+                                    aria-expanded="false"
+                                    aria-controls={`collapseN${index}`}
                                 >
-                                    <div className="accordion-body">
-                                        <div className="row g-3">
-                                            <CampoTexto
-                                                label="Necesidad de Equipamiento"
-                                                value={itm.equipamiento}
-                                                onChange={(v) =>
-                                                    handleChange(index, "equipamiento", v)
-                                                }
+                                    {itm.materia.nombre} ({itm.materia.matricula})
+                                </button>
+                            </h2>
+                            <div
+                                id={`collapseN${index}`}
+                                className="accordion-collapse collapse"
+                                aria-labelledby={`headingN${index}`}
+                                data-bs-parent="#accordionNecesidades"
+                            >
+                                <div className="accordion-body">
+                                    <div className="row g-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Necesidad de Equipamiento</label>
+                                            <EditableList
+                                                data={itm.equipamiento}
+                                                field="equipamiento"
+                                                materiaIndex={index}
+                                                // Se ajusta la firma del onChange
+                                                onChange={(mIndex, f, v, aIndex) => handleArrayChange(mIndex, f, v, aIndex)}
                                             />
-                                            <CampoTexto
-                                                label="Necesidad de Bibliografia"
-                                                value={itm.bibliografia}
-                                     
-                                                onChange={(v) =>
-                                                    handleChange(index, "bibliografia", v)
-                                                }
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Necesidad de Bibliografía</label>
+                                            <EditableList
+                                                data={itm.bibliografia}
+                                                field="bibliografia"
+                                                materiaIndex={index}
+                                                // Se ajusta la firma del onChange
+                                                onChange={(mIndex, f, v, aIndex) => handleArrayChange(mIndex, f, v, aIndex)}
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </>
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
     );
 }
 
-// Función auxiliar para renderizar campos de texto (reutilizada de tus otros archivos)
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
+// 🌟 Componente EditableList simplificado (No permite agregar ni eliminar)
+interface EditableListProps {
+    data: string[];
+    field: EditableFields;
+    materiaIndex: number;
+    // La función de cambio solo necesita los parámetros de actualización
+    onChange: (materiaIndex: number, field: EditableFields, value: string, arrayIndex: number) => void;
+}
+
+const EditableList: React.FC<EditableListProps> = ({ data, field, materiaIndex, onChange }) => {
     return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <textarea
-                className="form-control"
-                rows={3} // Usamos textarea para permitir respuestas largas
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
+        <div className="list-group">
+            {data.length === 0 ? (
+                <div className="alert alert-info py-1">No hay ítems.</div>
+            ) : (
+                data.map((item, arrayIndex) => (
+                    <div key={arrayIndex} className="input-group mb-2">
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Edite la necesidad..."
+                            value={item}
+                            // Solo llama a la función de actualización
+                            onChange={(e) => onChange(materiaIndex, field, e.target.value, arrayIndex)}
+                        />
+                        {/* Se ha quitado el botón de eliminar */}
+                    </div>
+                ))
+            )}
         </div>
     );
-}
+};

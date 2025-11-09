@@ -7,14 +7,17 @@ interface Pregunta {
     enunciado: string;
 }
 
-interface Tabla2BItem {
-    materia: Materia
-    encuesta_B: string
-    encuesta_C: string
-    encuesta_D: string
-    encuesta_ET: string
-    encuesta_EP: string
-    juicio_valor: string
+interface RespuestasSeccion2C {
+    aspectos_positivos_ensenanza: string | null;
+    aspectos_positivos_aprendizaje: string | null;
+    obstaculos_ensenanza: string | null;
+    obstaculos_aprendizaje: string | null;
+    estrategias: string | null;
+}
+
+interface TablaPregunta2CItem {
+    materia: Materia;
+    respuestas: RespuestasSeccion2C;
 }
 
 interface Respuesta {
@@ -32,23 +35,13 @@ interface Props {
     manejarCambio?: (items: Respuesta[]) => void;
 }
 
-
-export default function Pregunta2B({
-    departamentoId,
-    carreraId,
-    pregunta,
-    anio,
-    periodo,
-    manejarCambio
-}: Props) {
-    const [itemsTabla, setItems] = useState<Tabla2BItem[]>([]);
+export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, periodo, manejarCambio}: Props) {
+    const [itemsTabla, setItems] = useState<TablaPregunta2CItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!departamentoId) return;
-        if (!carreraId) return;
-        console.log(pregunta)
+        if (!departamentoId || !carreraId) return;
 
         const fetchData = async () => {
             try {
@@ -56,36 +49,28 @@ export default function Pregunta2B({
                 setError(null);
 
                 const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2B/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                    `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2C/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
                 );
 
                 if (!res.ok) {
                     throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
                 }
-
                 const data = await res.json();
-
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
                 setItems(data);
+
                 const respuestasIniciales = data.map((itm) => ({
                     pregunta_id: pregunta.id,
-                    texto_respuesta: JSON.stringify({
-                        encuesta_B: itm.encuesta_B,
-                        encuesta_C: itm.encuesta_C,
-                        encuesta_D: itm.encuesta_D,
-                        encuesta_ET: itm.encuesta_ET,
-                        encuesta_EP: itm.encuesta_EP,
-                        juicio_valor: itm.juicio_valor,
-                    }),
+                    texto_respuesta: JSON.stringify(itm.respuestas), 
                     materia_id: itm.materia.id,
                 }));
                 manejarCambio?.(respuestasIniciales);
 
             } catch (err) {
-                console.error("Error al obtener información:", err);
+                console.error("Error al obtener información (Pregunta 2C):", err);
                 if (err instanceof Error) {
                     setError(err.message);
                 } else {
@@ -99,32 +84,23 @@ export default function Pregunta2B({
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
-    // Actualizo el estado local y notifica al padre
-    const handleChange = <K extends keyof Tabla2BItem>(
+    const handleChange = (
         index: number,
-        field: K,
-        value: Tabla2BItem[K]
+        field: keyof RespuestasSeccion2C, 
+        value: string | null
     ) => {
         const updated = [...itemsTabla];
-        updated[index][field] = value;
+        updated[index].respuestas[field] = value;
         setItems(updated);
 
         const respuestas: Respuesta[] = updated.map((itm) => ({
-            pregunta_id: pregunta.id, 
-            texto_respuesta: JSON.stringify({
-                encuesta_B: itm.encuesta_B,
-                encuesta_C: itm.encuesta_C,
-                encuesta_D: itm.encuesta_D,
-                encuesta_ET: itm.encuesta_ET,
-                encuesta_EP: itm.encuesta_EP,
-                juicio_valor: itm.juicio_valor,
-            }),
+            pregunta_id: pregunta.id,
+            texto_respuesta: JSON.stringify(itm.respuestas),
             materia_id: itm.materia.id,
         }));
 
         manejarCambio?.(respuestas);
     };
-
 
     return (
         <div className="container mt-4">
@@ -142,76 +118,64 @@ export default function Pregunta2B({
                 </div>
             ) : (
                 <>
-                    <div className="accordion" id="accordionMateriasPregunta2B">
+                    <div className="accordion" id="accordionMateriasPregunta2C">
                         {itemsTabla.map((itm, index) => (
-                            <div className="accordion-item" key={index}>
-                                <h2 className="accordion-header" id={`heading${index}`}>
+                            <div className="accordion-item" key={itm.materia.id}>
+                                <h2 className="accordion-header" id={`headingP2C_${index}`}>
                                     <button
                                         className="accordion-button collapsed"
                                         type="button"
                                         data-bs-toggle="collapse"
-                                        data-bs-target={`#collapse${index}`}
+                                        data-bs-target={`#collapseP2C_${index}`}
                                         aria-expanded="false"
-                                        aria-controls={`collapse${index}`}
+                                        aria-controls={`collapseP2C_${index}`}
                                     >
                                         {itm.materia.matricula} - {itm.materia.nombre}
                                     </button>
                                 </h2>
                                 <div
-                                    id={`collapse${index}`}
+                                    id={`collapseP2C_${index}`}
                                     className="accordion-collapse collapse"
-                                    aria-labelledby={`heading${index}`}
-                                    data-bs-parent="#accordionMateriasPregunta2B"
+                                    aria-labelledby={`headingP2C_${index}`}
+                                    data-bs-parent="#accordionMateriasPregunta2C"
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            <CampoTexto
-                                                label="Encuesta a alumnos: Categoria B"
-                                                value={itm.encuesta_B}
+                                            <CampoTextArea
+                                                label="Aspectos positivos: Proceso Enseñanza"
+                                                value={itm.respuestas.aspectos_positivos_ensenanza || ''}
                                                 onChange={(v) =>
-                                                    handleChange(index, "encuesta_B", v)
+                                                    handleChange(index, "aspectos_positivos_ensenanza", v)
                                                 }
                                             />
-
-                                            <CampoTexto
-                                                label="Encuesta a alumnos: Categoria C"
-                                                value={itm.encuesta_C}
+                                            <CampoTextArea
+                                                label="Aspectos positivos: Proceso de aprendizaje"
+                                                value={itm.respuestas.aspectos_positivos_aprendizaje || ''}
                                                 onChange={(v) =>
-                                                    handleChange(index, "encuesta_C", v)
+                                                    handleChange(index, "aspectos_positivos_aprendizaje", v)
                                                 }
                                             />
-
-                                            <CampoTexto
-                                                label="Encuesta a alumnos: Categoria D"
-                                                value={itm.encuesta_D}
+                                            <CampoTextArea
+                                                label="Obstáculos: Proceso Enseñanza"
+                                                value={itm.respuestas.obstaculos_ensenanza || ''}
                                                 onChange={(v) =>
-                                                    handleChange(index, "encuesta_D", v)
+                                                    handleChange(index, "obstaculos_ensenanza", v)
                                                 }
                                             />
-
-                                            <CampoTexto
-                                                label="Encuesta a alumnos: Categoria ET"
-                                                value={itm.encuesta_ET}
+                                            <CampoTextArea
+                                                label="Obstáculos: Proceso de aprendizaje"
+                                                value={itm.respuestas.obstaculos_aprendizaje || ''}
                                                 onChange={(v) =>
-                                                    handleChange(index, "encuesta_ET", v)
+                                                    handleChange(index, "obstaculos_aprendizaje", v)
                                                 }
                                             />
-
-                                            <CampoTexto
-                                                label="Encuesta a alumnos: Categoria EP"
-                                                value={itm.encuesta_EP}
+                                            <CampoTextArea
+                                                label="Estrategias a implementar"
+                                                value={itm.respuestas.estrategias || ''}
                                                 onChange={(v) =>
-                                                    handleChange(index, "encuesta_EP", v)
+                                                    handleChange(index, "estrategias", v)
                                                 }
-                                            />
-
-                                            <CampoTexto
-                                                label="Juicio de valor"
-                                                value={itm.juicio_valor}
-                                                onChange={(v) =>
-                                                    handleChange(index, "juicio_valor", v)
-                                                }
-                                            />
+                                            />            
                                         </div>
                                     </div>
                                 </div>
@@ -228,12 +192,10 @@ function CampoTexto({
     label,
     value,
     readOnly = false,
-    onChange,
 }: {
     label: string;
     value: string;
     readOnly?: boolean;
-    onChange?: (v: string) => void;
 }) {
     return (
         <div className="col-md-6">
@@ -243,6 +205,27 @@ function CampoTexto({
                 className="form-control"
                 value={value}
                 readOnly={readOnly}
+            />
+        </div>
+    );
+}
+
+function CampoTextArea({
+    label,
+    value,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    onChange?: (v: string) => void;
+}) {
+    return (
+        <div className="col-12">
+            <label className="form-label">{label}</label>
+            <textarea
+                className="form-control"
+                rows={4}
+                value={value}
                 onChange={(e) => onChange?.(e.target.value)}
             />
         </div>

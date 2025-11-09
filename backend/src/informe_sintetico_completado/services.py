@@ -192,6 +192,131 @@ def obtener_informacion_general(
 
     return elementos
 
+
+def get_elementos_pregunta2C(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.TablaPregunta2CItem]:
+    materias: list[schemas.Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+
+    elementos: List[schemas.TablaPregunta2CItem] = []
+
+    for materia in materias:
+        informe_completado: InformeCatedraCompletado=db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == Periodo(periodo),
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                .selectinload(RespuestaInforme.pregunta)
+            )
+        ).first()
+
+        if not informe_completado:
+            continue
+
+        r_ap_e: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Aspectos positivos: Proceso Enseñanza"), None)
+        
+        r_ap_a: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Aspectos positivos: Proceso de aprendizaje"), None)
+        
+        r_o_e: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Obstáculos: Proceso Enseñanza"), None)
+        
+        r_o_a: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Obstáculos: Proceso de aprendizaje"), None)
+        
+        r_est: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado.strip() == "Estrategias a implementar"), None)
+        
+        
+        respuestas_obj = schemas.RespuestasSeccion2C(
+            aspectos_positivos_ensenanza = r_ap_e.texto_respuesta if r_ap_e else None,
+            aspectos_positivos_aprendizaje = r_ap_a.texto_respuesta if r_ap_a else None,
+            obstaculos_ensenanza = r_o_e.texto_respuesta if r_o_e else None,
+            obstaculos_aprendizaje = r_o_a.texto_respuesta if r_o_a else None,
+            estrategias = r_est.texto_respuesta if r_est else None,
+        )
+
+        elemento = schemas.TablaPregunta2CItem(
+            materia = materia,
+            respuestas = respuestas_obj
+        )
+        elementos.append(elemento)
+    
+    return elementos
+# src/informe_sintetico_completado/services.py
+
+# ... (otros imports) ...
+
+def obtener_temas_desarrollados(
+    db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
+) -> List[schemas.TemasDesarrolladosItem]:
+    
+    materias: list[Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(
+            Materia.departamento_id == id_dpto,
+            materia_carrera.c.carrera_id == id_carrera
+        )
+    ).all()
+    
+    elementos: List[schemas.TemasDesarrolladosItem] = []
+    
+    for materia in materias:
+        informe_completado: InformeCatedraCompletado = db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == periodo,
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe)
+                    .selectinload(RespuestaInforme.pregunta)   
+            )
+        ).first()
+
+        if not informe_completado:
+            continue
+
+        # --- INICIO DE LA CORRECCIÓN ---
+
+        # 1. Busca la respuesta del porcentaje
+        respuesta_porcentaje: RespuestaInforme = next(
+            (r for r in informe_completado.respuestas_informe 
+             if r.pregunta.enunciado == "Cantidad de temas desarrollados %"), 
+            None
+        )
+
+        # 2. Busca la respuesta de las estrategias
+        respuesta_estrategias: RespuestaInforme = next(
+            (r for r in informe_completado.respuestas_informe 
+             if r.pregunta.enunciado == "Estrategias"), # <-- La nueva pregunta que buscamos
+            None
+        )
+
+        # 3. Asigna cada una a su campo
+        elemento = schemas.TemasDesarrolladosItem(
+            materia = materia,
+            porcentaje_texto = respuesta_porcentaje.texto_respuesta if respuesta_porcentaje else None,
+            estrategias_texto = respuesta_estrategias.texto_respuesta if respuesta_estrategias else None
+        )
+        
+        # --- FIN DE LA CORRECCIÓN ---
+        
+        elementos.append(elemento)
+        
+    return elementos
 def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.EquipamientoBibliografia]:
 
     pregunta_equipamiento = db.scalars(select(Pregunta.id).where(Pregunta.enunciado.ilike("equipamiento"))).first()

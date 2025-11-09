@@ -14,7 +14,6 @@ interface OpcionPorcentaje { opcion_id: string; porcentaje: number; }
 interface DatosEstadisticosPregunta { id_pregunta: string; datos: OpcionPorcentaje[]; }
 interface DatosEstadisticosCategoria { categoria_cod: string; categoria_texto: string; promedio_categoria: OpcionPorcentaje[]; preguntas: DatosEstadisticosPregunta[]; }
 type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null; };
-interface RespuestaPlana { pregunta_id: number; texto_respuesta: string; } // Nueva interfaz
 
 interface ContenidoPasosProps {
   currentStep: number;
@@ -26,7 +25,6 @@ interface ContenidoPasosProps {
  
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
-  manejarRespuestaCAT1: (data: RespuestaPlana[]) => void;
 }
 
 const normalizarString = (texto: string): string => {
@@ -42,8 +40,7 @@ export default function ContenidoPasos({
   respuestas,
   docenteMateriaId,
   manejarCambio,
-  onDatosGenerados,
-  manejarRespuestaCAT1
+  onDatosGenerados
 }: ContenidoPasosProps) {
 
   const categoria1 = categoriasConPreguntas.find(cat => cat.cod === "1");
@@ -60,48 +57,28 @@ export default function ContenidoPasos({
       textarea.style.height = textarea.scrollHeight + 'px';
     };
 
-  const renderCategoriaGenerica = (categoria: CategoriaConPreguntas) => {
+    const handlePercentageChange = (
+    pregunta: Pregunta | undefined, 
+    valor: string
+    ) => {
+    if (!pregunta) return;
 
+    if (valor === "") {
+      manejarCambio(pregunta.id, { opcion_id: null, texto_respuesta: "" });
+      return;
+    }
 
-    return (
-      <Fragment> 
-        {categoria.preguntas.map((pregunta) => (
-          <div key={pregunta.id} className="mb-4">
-            <h6 className="fw-bold mb-3 text-dark">
-              {pregunta.enunciado}
-              <span className="text-danger ms-1">*</span>
-            </h6>
-            <textarea
-              id={`pregunta-${pregunta.id}`}
-              className="form-control"
-              rows={4}
-              value={respuestas[pregunta.id]?.texto_respuesta || ""}
-              onChange={(e) => {
-                manejarCambio(pregunta.id, {
-                  opcion_id: null,
-                  texto_respuesta: e.target.value,
-                });
-                autoExpand(e);
-              }}
-              onInput={autoExpand}
-              placeholder="Escriba su respuesta aquí..."
-              style={{ 
-                resize: 'none', 
-                minHeight: '100px',
-                overflow: 'hidden' 
-              }}
-            />
-          </div>
-        ))}
-      </Fragment>
-    );
+    const num = Number(valor);
+
+    if (!isNaN(num) && num >= 0 && num <= 100) {
+      manejarCambio(pregunta.id, { opcion_id: null, texto_respuesta: valor });
+    }
   };
 
   const renderCategoria2 = (categoria: CategoriaConPreguntas) => {
     const pTeoricas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases teoricas"));
     const pPracticas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases practicas"));
     const pJustificacion = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("justificacion"));
-  
 
     return (
       <div className="row g-3">
@@ -109,32 +86,44 @@ export default function ContenidoPasos({
           <label htmlFor={`preg-${pTeoricas?.id}`} className="form-label">
             {pTeoricas?.enunciado || "Porcentaje Clases Teóricas"}
           </label>
-          <input
-            type="number"
-            className="form-control"
-            id={`preg-${pTeoricas?.id}`}
-            value={respuestas[pTeoricas?.id || 0]?.texto_respuesta || ""}
-            onChange={(e) => pTeoricas && manejarCambio(pTeoricas.id, { opcion_id: null, texto_respuesta: e.target.value })}
-            disabled={!pTeoricas}
-          />
+          <div className="input-group">
+            <input
+              type="number"
+              className="form-control"
+              id={`preg-${pTeoricas?.id}`}
+              value={respuestas[pTeoricas?.id || 0]?.texto_respuesta || ""}
+              onChange={(e) => handlePercentageChange(pTeoricas, e.target.value)}
+              disabled={!pTeoricas}
+              min="0"
+              max="100"
+              aria-describedby="teoricas-addon"
+            />
+          </div>
         </div>
+
         <div className="col-md-6">
           <label htmlFor={`preg-${pPracticas?.id}`} className="form-label">
             {pPracticas?.enunciado || "Porcentaje Clases Prácticas"}
           </label>
-          <input
-            type="number"
-            className="form-control"
-            id={`preg-${pPracticas?.id}`}
-            value={respuestas[pPracticas?.id || 0]?.texto_respuesta || ""}
-            onChange={(e) => pPracticas && manejarCambio(pPracticas.id, { opcion_id: null, texto_respuesta: e.target.value })}
-            disabled={!pPracticas}
-          />
+          <div className="input-group">
+            <input
+              type="number"
+              className="form-control"
+              id={`preg-${pPracticas?.id}`}
+              value={respuestas[pPracticas?.id || 0]?.texto_respuesta || ""}
+              onChange={(e) => handlePercentageChange(pPracticas, e.target.value)}
+              disabled={!pPracticas}
+              min="0"
+              max="100"
+              aria-describedby="practicas-addon"
+            />
+          </div>
         </div>
+
         {pJustificacion && (
           <div className="col-12 mt-3">
             <label htmlFor={`preg-${pJustificacion.id}`} className="form-label">
-              {pJustificacion.enunciado || "Justificación"}
+              {pJustificacion.enunciado}
             </label>
             <textarea
               className="form-control"
@@ -147,7 +136,62 @@ export default function ContenidoPasos({
                 });
                 autoExpand(e);
               }}
-              onInput={autoExpand}
+              onInput={autoExpand} 
+              style={{
+                resize: 'none',
+                minHeight: '100px',
+                overflow: 'hidden'
+              }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCategoria2A = (categoria: CategoriaConPreguntas) => {
+    const pPorcentaje = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("cantidad de temas desarrollados"));
+    const pEstrategias = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("estrategias"));
+  
+    return (
+      <div className="row g-3">
+        {pPorcentaje && (
+          <div className="col-md-4"> 
+            <label htmlFor={`preg-${pPorcentaje.id}`} className="form-label">
+              {pPorcentaje.enunciado}
+            </label>
+            <div className="input-group">
+              <input
+                type="number"
+                className="form-control"
+                id={`preg-${pPorcentaje.id}`}
+                value={respuestas[pPorcentaje.id || 0]?.texto_respuesta || ""}
+                onChange={(e) => handlePercentageChange(pPorcentaje, e.target.value)}
+                min="0"
+                max="100" 
+                aria-describedby="porcentaje-addon"
+              />
+            </div>
+          </div>
+        )}
+
+        {pEstrategias && (
+          <div className="col-12 mt-3">
+            <label htmlFor={`preg-${pEstrategias.id}`} className="form-label">
+              {pEstrategias.enunciado}
+            </label>
+            <textarea
+              className="form-control"
+              id={`preg-${pEstrategias.id}`}
+              value={respuestas[pEstrategias.id]?.texto_respuesta || ""}
+              onChange={(e) =>{
+                manejarCambio(pEstrategias.id, {
+                  opcion_id: null,
+                  texto_respuesta: e.target.value,
+                });
+                autoExpand(e);
+              }}
+              onInput={autoExpand} 
               style={{
                 resize: 'none',
                 minHeight: '100px',
@@ -210,7 +254,7 @@ export default function ContenidoPasos({
           <hr className="mb-4" />
           <CategoriaEquipamiento
             categoria={categoria1}
-            manejarCambioEstructura={manejarRespuestaCAT1}
+            manejarCambio={manejarCambio}
           />
         </Fragment>
       ) : null;
@@ -258,7 +302,7 @@ export default function ContenidoPasos({
                 <div id="collapse2A" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2A.texto}</p>
-                    {renderCategoriaGenerica(categoria2A)}
+                    {renderCategoria2A(categoria2A)}
                   </div>
                 </div>
               </div>

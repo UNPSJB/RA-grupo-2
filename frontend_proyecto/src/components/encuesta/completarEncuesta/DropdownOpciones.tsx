@@ -25,7 +25,7 @@ export default function DropdownOpciones({
     
     <div className="dropdown">
       <button
-        className="btn btn-primary btn-sm dropdown-toggle"
+        className="btn btn-theme-primary btn-sm dropdown-toggle"
         type="button"
         onClick={onToggle}
       >

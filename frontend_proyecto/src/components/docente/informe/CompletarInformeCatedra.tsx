@@ -38,10 +38,7 @@ type RespuestaValor = {
   opcion_id: number | null;
   texto_respuesta: string | null;
 };
-interface RespuestaPlana {
-  pregunta_id: number;
-  texto_respuesta: string;
-}
+
 export default function CompletarInformeCatedra() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,7 +53,7 @@ export default function CompletarInformeCatedra() {
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
   const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
   const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
-  const [respuestasCat1, setRespuestasCat1] = useState<RespuestaPlana[]>([]); // Estado de CAT1
+  
   const { docenteMateriaId, materiaId, materiaNombre, anio, periodo, informeBaseId = 3 } = location.state || {};
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -124,9 +121,7 @@ export default function CompletarInformeCatedra() {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("complete")) setMensaje(null);
   };
-  const manejarRespuestaCAT1 = (data: RespuestaPlana[]) => {
-        setRespuestasCat1(data);
-    };
+
   const manejarDatosGenerados = (datos: any) => {
     setCantidadInscriptos(datos.cantidadAlumnos);
     setCantidadComisionesTeoricas(datos.cantidadComisionesTeoricas);
@@ -142,15 +137,6 @@ export default function CompletarInformeCatedra() {
       opcion_id: respuestaObj.opcion_id,
       texto_respuesta: respuestaObj.texto_respuesta,
     }));
-    const respuestasCat1Formateadas = respuestasCat1.map(r => ({
-            pregunta_id: r.pregunta_id,
-            opcion_id: null,
-            texto_respuesta: r.texto_respuesta,
-    }));
-    const respuestasFormateadasFinal = [
-            ...respuestasFormateadas,
-            ...respuestasCat1Formateadas, // <<-- Aquí se unen los pares de Equipamiento/Biblio
-        ];
     const datosParaBackend = {
       docente_materia_id: docenteMateriaId,
       informe_catedra_base_id: informeBaseId,
@@ -161,7 +147,7 @@ export default function CompletarInformeCatedra() {
       periodo: periodo,
       cantidadComisionesTeoricas,
       cantidadComisionesPracticas,
-      respuestas: respuestasFormateadasFinal,
+      respuestas: respuestasFormateadas,
     };
     try {
       const res = await fetch("http://127.0.0.1:8000/informe-catedra-completado/", {
@@ -199,7 +185,7 @@ return (
     <div className="bg-light">
       <div className="container-lg py-4">
         <div className="card shadow-sm border-0 rounded-3">
-          <div className="card-header bg-primary text-white">
+          <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">
               Informe de Cátedra – {materiaNombre}
             </h1>
@@ -238,7 +224,6 @@ return (
                 docenteMateriaId={docenteMateriaId}
                 manejarCambio={manejarCambio}
                 onDatosGenerados={manejarDatosGenerados}
-                manejarRespuestaCAT1={manejarRespuestaCAT1}
               />
             </div>
           </div> 
@@ -256,7 +241,7 @@ return (
               {currentStep < totalSteps && (
                 <button
                   onClick={nextStep}
-                  className="btn btn-primary rounded-pill px-4"
+                  className="btn btn-theme-primary rounded-pill px-4"
                 >
                   Siguiente
                 </button>

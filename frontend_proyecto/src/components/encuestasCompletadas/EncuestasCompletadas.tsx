@@ -67,7 +67,7 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
               </div>
               <Link
                 to={ROUTES.ENCUESTA_COMPLETADA_DETALLE(e.id)}
-                className="btn btn-primary btn-sm"
+                className="btn btn-theme-primary rounded-pill px-6"
               >
                 Ver encuesta
               </Link>

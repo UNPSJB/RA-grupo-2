@@ -3,7 +3,6 @@ import type { Materia } from "../../../types/types";
 
 interface Pregunta {
     id: number;
-    cod: string;
     enunciado: string;
 }
 
@@ -13,16 +12,21 @@ interface Respuesta {
     texto_respuesta: string;
 }
 
-interface MateriaInfo {
+interface TemasFetchItem {
+    materia: Materia;
+    porcentaje_texto: string | null;
+    estrategias_texto: string | null;
+}
+
+interface ContenidosItem {
     materia: Materia;
     codigo: string;
     nombre: string;
-    cantidad_alumnos: number;
-    cantidad_comisiones_teoricas: number;
-    cantidad_comisiones_practicas: number;
+    porcentaje: number | null;
+    estrategias: string;
 }
 
-interface InformacionGeneralProps {
+interface ContenidosProps {
     id_dpto: number;
     id_carrera: number;
     anio: number;
@@ -31,15 +35,15 @@ interface InformacionGeneralProps {
     manejarCambio?: (respuestas: Respuesta[]) => void;
 }
 
-export default function InformacionGeneral({
+export default function ContenidosAlcanzados({
     id_dpto,
     id_carrera,
     anio,
     periodo,
     pregunta,
     manejarCambio,
-}: InformacionGeneralProps) {
-    const [materias, setMaterias] = useState<MateriaInfo[]>([]);
+}: ContenidosProps) {
+    const [items, setItems] = useState<ContenidosItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -50,8 +54,9 @@ export default function InformacionGeneral({
             try {
                 setIsLoading(true);
                 setError(null);
+                
                 const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/informacion-general/?id_dpto=${id_dpto}&id_carrera=${id_carrera}&anio=${anio}&periodo=${periodo}`
+                    `http://127.0.0.1:8000/informes_sinteticos_completados/temas-desarrollados/?id_dpto=${id_dpto}&id_carrera=${id_carrera}&anio=${anio}&periodo=${periodo}`
                 );
 
                 if (!res.ok) {
@@ -59,27 +64,41 @@ export default function InformacionGeneral({
                     throw new Error(`Error HTTP ${res.status}: ${errData.detail || res.statusText}`);
                 }
 
-                const data: MateriaInfo[] = await res.json();
+                const data: TemasFetchItem[] = await res.json();
 
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                setMaterias(data);
+                const itemsIniciales: ContenidosItem[] = data.map((m) => {
+                    let initialPorcentaje: number | null = parseFloat(m.porcentaje_texto || "");
+                    if (isNaN(initialPorcentaje)) {
+                        initialPorcentaje = null;
+                    }
 
-                const respuestasIniciales: Respuesta[] = data.map((m) => ({
+                    return {
+                        materia: m.materia,
+                        codigo: m.materia.matricula || 'N/A', 
+                        nombre: m.materia.nombre,
+                        porcentaje: initialPorcentaje,
+                        estrategias: m.estrategias_texto || ""
+                    };
+                });
+                
+                setItems(itemsIniciales);
+
+                const respuestasIniciales: Respuesta[] = itemsIniciales.map((item) => ({
                     pregunta_id: pregunta.id,
-                    materia_id: m.materia.id,
+                    materia_id: item.materia.id,
                     texto_respuesta: JSON.stringify({
-                        cant_alumnos: m.cantidad_alumnos,
-                        cant_comisiones_t: m.cantidad_comisiones_teoricas,
-                        cant_comisiones_p: m.cantidad_comisiones_practicas
+                        porcentaje: item.porcentaje,
+                        estrategias: item.estrategias
                     })
                 }));
                 manejarCambio?.(respuestasIniciales);
 
             } catch (err) {
-                console.error("Error al obtener información general:", err);
+                console.error("Error al obtener lista de materias:", err);
                 if (err instanceof Error) {
                     setError(err.message);
                 } else {
@@ -94,22 +113,21 @@ export default function InformacionGeneral({
     }, [id_dpto, id_carrera, anio, periodo, pregunta.id]);
 
 
-    const handleChange = <K extends keyof MateriaInfo>(
+    const handleChange = <K extends keyof ContenidosItem>(
         index: number,
         field: K,
-        value: MateriaInfo[K]
+        value: ContenidosItem[K]
     ) => {
-        const updated = [...materias];
+        const updated = [...items];
         updated[index][field] = value;
-        setMaterias(updated);
+        setItems(updated);
 
-        const respuestas: Respuesta[] = updated.map((m) => ({
+        const respuestas: Respuesta[] = updated.map((item) => ({
             pregunta_id: pregunta.id,
-            materia_id: m.materia.id,
+            materia_id: item.materia.id,
             texto_respuesta: JSON.stringify({
-                cant_alumnos: m.cantidad_alumnos,
-                cant_comisiones_t: m.cantidad_comisiones_teoricas,
-                cant_comisiones_p: m.cantidad_comisiones_practicas
+                porcentaje: item.porcentaje,
+                estrategias: item.estrategias
             })
         }));
         manejarCambio?.(respuestas);
@@ -120,20 +138,20 @@ export default function InformacionGeneral({
             <h4 className="mb-3">{pregunta.enunciado}</h4>
 
             {isLoading ? (
-                <div className="text-center text-secondary">Cargando datos...</div>
+                <div className="text-center text-secondary">Cargando materias...</div>
             ) : error ? (
                 <div className="alert alert-danger">
                     <strong>Error:</strong> {error}
                 </div>
-            ) : materias.length === 0 ? (
+            ) : items.length === 0 ? (
                 <div className="alert alert-warning">
-                    No hay información disponible.
+                    No hay materias para esta selección.
                 </div>
             ) : (
                 <>
-                    <div className="accordion" id="accordionMaterias">
-                        {materias.map((materia, index) => (
-                            <div className="accordion-item" key={index}>
+                    <div className="accordion" id="accordionContenidos">
+                        {items.map((item, index) => (
+                            <div className="accordion-item" key={item.materia.id}>
                                 <h2 className="accordion-header" id={`heading${index}`}>
                                     <button
                                         className="accordion-button collapsed"
@@ -143,35 +161,26 @@ export default function InformacionGeneral({
                                         aria-expanded="false"
                                         aria-controls={`collapse${index}`}
                                     >
-                                        {materia.codigo} - {materia.nombre}
+                                        {item.codigo} - {item.nombre}
                                     </button>
                                 </h2>
                                 <div
                                     id={`collapse${index}`}
                                     className="accordion-collapse collapse"
                                     aria-labelledby={`heading${index}`}
-                                    data-bs-parent="#accordionMaterias"
+                                    data-bs-parent="#accordionContenidos"
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
-                                            <CampoTextoNumero
-                                                label="Cantidad de alumnos"
-                                                value={materia.cantidad_alumnos}
-                                                onChange={(v) => handleChange(index, "cantidad_alumnos", v)}
+                                            <CampoPorcentaje
+                                                label="Porcentual contenidos alcanzados (%)"
+                                                value={item.porcentaje}
+                                                onChange={(v) => handleChange(index, "porcentaje", v)}
                                             />
-                                            <CampoTextoNumero
-                                                label="Comisiones Teóricas"
-                                                value={materia.cantidad_comisiones_teoricas}
-                                                onChange={(v) =>
-                                                    handleChange(index, "cantidad_comisiones_teoricas", v)
-                                                }
-                                            />
-                                            <CampoTextoNumero
-                                                label="Comisiones Prácticas"
-                                                value={materia.cantidad_comisiones_practicas}
-                                                onChange={(v) =>
-                                                    handleChange(index, "cantidad_comisiones_practicas", v)
-                                                }
+                                            <CampoTextoLargo
+                                                label="Estrategias propuestas"
+                                                value={item.estrategias}
+                                                onChange={(v) => handleChange(index, "estrategias", v)}
                                             />
                                         </div>
                                     </div>
@@ -210,28 +219,66 @@ function CampoTexto({
     );
 }
 
-function CampoTextoNumero({
+function CampoTextoLargo({
     label,
     value,
     onChange,
 }: {
     label: string;
-    value: number;
-    onChange: (v: number) => void;
+    value: string;
+    onChange: (v: string) => void;
 }) {
     return (
-        <div className="col-md-4">
+        <div className="col-12">
+            <label className="form-label">{label}</label>
+            <textarea
+                className="form-control"
+                rows={3}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        </div>
+    );
+}
+
+function CampoPorcentaje({
+    label,
+    value,
+    onChange,
+}: {
+    label: string;
+    value: number | null;
+    onChange: (v: number | null) => void;
+}) {
+    
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (val === "") {
+            onChange(null);
+            return;
+        }
+        
+        const num = Number(val);
+        if (num >= 0 && num <= 100) {
+            onChange(num);
+        } else if (num > 100) {
+            onChange(100);
+        } else if (num < 0) {
+            onChange(0);
+        }
+    };
+
+    return (
+        <div className="col-md-6">
             <label className="form-label">{label}</label>
             <input
                 type="number"
                 className="form-control"
                 min={0}
-                max={10000}
-                value={value}
-                onChange={(e) => {
-                    const num = Number(e.target.value);
-                    if (num >= 0) onChange(num);
-                }}
+                max={100}
+                value={value === null ? "" : value} 
+                onChange={handleChange}
+                placeholder="Ej: 80"
             />
         </div>
     );

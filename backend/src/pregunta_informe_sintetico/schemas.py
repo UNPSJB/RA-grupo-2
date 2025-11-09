@@ -3,6 +3,7 @@ from enum import Enum as PyEnum
 
 class PreguntaInformeSinteticoBase(BaseModel):
     orden: int
+    cod: str
     enunciado: str
     
 

@@ -1,12 +1,14 @@
-import type { Carrera } from "../../types/types";
+import type { Carrera, Departamento } from "../../types/types";
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths";
+import {ANIO_ACTUAL, PERIODO_ACTUAL} from "../../constants";
 
 type Props = {
   carreras: Carrera[];
+  departamento: Departamento;
 };
 
-function ListaCarreras({ carreras }: Props) {
+function ListaCarreras({ carreras, departamento }: Props) {
   if (!carreras || carreras.length === 0) {
     return <div className="alert alert-info text-center">No hay carreras disponibles</div>;
   }
@@ -22,14 +24,20 @@ function ListaCarreras({ carreras }: Props) {
                 <span className="fw-bold">{carrera.nombre}</span>
               </div>
               <Link
-                to={ROUTES.CARRERA(carrera.id)}
-                state={{ nombre: carrera.nombre }}
-                className="btn btn-primary btn-sm"          
+                to={ROUTES.COMPLETAR_INFORME_SINTETICO}
+                state={{
+                  dpto: departamento,
+                  carrera: carrera,
+                  anio: ANIO_ACTUAL,             
+                  periodo: PERIODO_ACTUAL,     
+                  informeBaseId: carrera.informe_base_id,
+                }}
+                className="btn btn-theme-primary rounded-pill px-6"
               >
                 Completar Informe
               </Link>
             </div>
-          </div>   
+          </div>
         </div>
       ))}
     </div>

@@ -117,7 +117,7 @@ export default function Navbar() {
             <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="departamentoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Departamento</a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="departamentoDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO}>Carreras</Link></li>
+                <li><Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO(1)}>Carreras</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA}>Informes de Cátedra Completados</Link></li>
               </ul>
             </li>
@@ -129,12 +129,7 @@ export default function Navbar() {
                 <li><Link className="dropdown-item" to={ROUTES.INFORME_SINTETICO_BASE_NUEVO}>Crear Informe Sintético Base</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.ENCUESTA_BASE_NUEVA}>Crear Encuesta Base</Link></li>
               </ul>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link nav-link-animated" to={ROUTES.INFORMACION_GENERAL_DEPARTAMENTO} style={navLinkStyle}>
-                Información General Departamento
-              </Link>
-            </li>          
+            </li>        
           </ul>
         </div>
         <div className="navbar-nav ms-auto"> 
