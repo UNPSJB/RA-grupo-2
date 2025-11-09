@@ -119,7 +119,7 @@ export default function CompletarInformeSintetico() {
             }
             setMensaje("¡Informe enviado con éxito!");
             setTimeout(() => {
-                navigate(ROUTES.CARRERAS_DPTO);
+                navigate(ROUTES.CARRERAS_DPTO(dpto.id));
             }, 2000);
         } catch (err: Error | unknown) {
             console.error("Error enviando informe:", err);
