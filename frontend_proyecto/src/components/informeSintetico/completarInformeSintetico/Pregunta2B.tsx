@@ -143,7 +143,7 @@ export default function Pregunta2B({
                 </div>
             ) : (
                 <>
-                    <div className="accordion" id="accordionMaterias">
+                    <div className="accordion" id="accordionMateriasPregunta2B">
                         {itemsTabla.map((itm, index) => (
                             <div className="accordion-item" key={index}>
                                 <h2 className="accordion-header" id={`heading${index}`}>
@@ -162,7 +162,7 @@ export default function Pregunta2B({
                                     id={`collapse${index}`}
                                     className="accordion-collapse collapse"
                                     aria-labelledby={`heading${index}`}
-                                    data-bs-parent="#accordionMaterias"
+                                    data-bs-parent="#accordionMateriasPregunta2B"
                                 >
                                     <div className="accordion-body">
                                         <div className="row g-3">
