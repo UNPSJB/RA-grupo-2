@@ -104,3 +104,17 @@ def get_preguntas_2C(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener respuestas de sección 2C: {str(e)}")
+    
+@router.get("/bibliografia_equipamiento/", response_model=List[schemas.EquipamientoBibliografia]) # ⬅️ CAMBIO AQUÍ
+def get_bibliografia_equipamiento(
+    id_dpto: int = Query(...), 
+    id_carrera: int = Query(...), 
+    anio: int = Query(...), 
+    periodo: str = Query(...),
+    db: Session = Depends(get_db)):
+
+    try:
+        elementos = services.get_bibliografia_equipamiento(db, id_dpto, id_carrera, anio, periodo)
+        return elementos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener bibliografía y equipamiento: {str(e)}")

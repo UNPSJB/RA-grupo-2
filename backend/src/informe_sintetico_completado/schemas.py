@@ -68,3 +68,8 @@ class TablaPregunta2CItem(BaseModel):
     respuestas: RespuestasSeccion2C
 
     model_config = {"from_attributes": True}
+
+class EquipamientoBibliografia(BaseModel):
+    materia: Materia
+    bibliografia: str
+    equipamiento: str

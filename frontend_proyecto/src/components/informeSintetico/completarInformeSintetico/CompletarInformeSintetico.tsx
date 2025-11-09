@@ -7,7 +7,7 @@ import InformacionGeneral from "./informacionGeneral";
 import ContenidosAlcanzados from "./contenidosAlcanzados";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
-
+import EquipamientoBibliografia from "./Pregunta1"; 
 interface Pregunta {
     id: number;
     cod: string
@@ -153,6 +153,18 @@ export default function CompletarInformeSintetico() {
     }
 
     const renderPregunta = (pregunta: Pregunta) => {
+         if (pregunta.cod=="1") { 
+        return (
+            <EquipamientoBibliografia 
+                departamentoId={dpto.id}
+                carreraId={carrera.id}
+                pregunta={pregunta}
+                anio={anio}
+                periodo={periodo}
+                manejarCambio={manejarCambio}
+            />
+        );
+    }
         if (pregunta.cod=="2.B") {
             return (
                 <Pregunta2B
