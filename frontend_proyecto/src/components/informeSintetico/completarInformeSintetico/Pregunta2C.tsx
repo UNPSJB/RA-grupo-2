@@ -3,6 +3,7 @@ import type { Materia } from "../../../types/types";
 
 interface Pregunta {
     id: number;
+    cod: string;
     enunciado: string;
 }
 

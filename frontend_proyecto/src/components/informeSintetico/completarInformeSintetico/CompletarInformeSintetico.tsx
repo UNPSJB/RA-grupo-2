@@ -9,6 +9,7 @@ import Pregunta2C from "./Pregunta2C";
 
 interface Pregunta {
     id: number;
+    cod: string
     orden: number;
     enunciado: string;
 }
@@ -148,7 +149,7 @@ export default function CompletarInformeSintetico() {
     }
 
     const renderPregunta = (pregunta: Pregunta) => {
-        if (/Pregunta 2.?b/i.test(pregunta.enunciado)) {
+        if (/2.?b/i.test(pregunta.cod)) {
             return (
                 <Pregunta2B
                     departamentoId={dpto.id}
@@ -161,7 +162,7 @@ export default function CompletarInformeSintetico() {
             );
         }
         
-        if (/Pregunta 2.?c/i.test(pregunta.enunciado)) {
+        if (/2.?c/i.test(pregunta.cod)) {
             return (
                 <Pregunta2C
                     departamentoId={dpto.id}
@@ -174,7 +175,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-        if (/Pregunta 1/i.test(pregunta.enunciado)) {
+        if (/0/i.test(pregunta.cod)) {
             return (
                 <InformacionGeneral
                     id_dpto={dpto.id}
@@ -187,7 +188,7 @@ export default function CompletarInformeSintetico() {
             );
         }
 
-        if (/Pregunta 2/i.test(pregunta.enunciado)) { 
+        if (/2/i.test(pregunta.cod)) { 
             return (
                 <Pregunta2
                     departamentoId={dpto.id}
@@ -231,7 +232,7 @@ export default function CompletarInformeSintetico() {
                                         }}
                                         style={{ cursor: "pointer", fontWeight: 500 }}
                                     >
-                                        {p.enunciado}
+                                        {p.cod}
                                     </a>
                                 </li>
                             ))}
