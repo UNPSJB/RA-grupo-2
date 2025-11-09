@@ -69,7 +69,7 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
   if (encuestas.length === 0) {
     return (
       <div className="alert alert-info text-center">
-        No hay carreras disponibles
+        No hay encuestas pendientes
       </div>
     );
   }
