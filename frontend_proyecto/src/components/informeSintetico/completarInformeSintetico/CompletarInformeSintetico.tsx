@@ -31,6 +31,11 @@ export default function CompletarInformeSintetico() {
     } = location.state || {};
 
     useEffect(() => {
+        if(!dpto || !carrera){
+            setError("Se requiere un departamento y una carrera");
+            setLoading(false);
+            return;
+        }
         if (!informeBaseId) {
             setError("ID de informe base no encontrado.");
             setLoading(false);
@@ -94,6 +99,7 @@ export default function CompletarInformeSintetico() {
             anio: ANIO_ACTUAL,
             periodo: periodo,
             informe_base_id: informeBaseId,
+            carrera_id: carrera.id,
             respuestas: respuestas,
         };
 

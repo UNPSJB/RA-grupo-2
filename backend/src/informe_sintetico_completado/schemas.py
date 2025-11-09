@@ -12,6 +12,7 @@ class InformeSinteticoCompletadoBase(BaseModel):
     anio: int
     periodo: Periodo
     informe_base_id: int 
+    carrera_id: int
 
 class InformeSinteticoCompletadoCreate(InformeSinteticoCompletadoBase):
     respuestas: List[respuestas_schemas.RespuestaInformeSinteticoBase]
