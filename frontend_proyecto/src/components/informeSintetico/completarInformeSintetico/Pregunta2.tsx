@@ -1,23 +1,13 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextArea } from "./Campos";
 
-interface Pregunta {
-    id: number;
-    cod: string;
-    enunciado: string;
-}
 
 interface TablaPregunta2Item {
     materia: Materia;
     porcentaje_teoricas: string;
     porcentaje_practicas: string;
     justificacion: string | null;
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
 }
 
 interface Props {
@@ -153,7 +143,7 @@ export default function Pregunta2({
                                     <div className="accordion-body">
                                         <div className="row g-3">
                                             
-                                            <CampoTexto
+                                            <CampoTextArea
                                                 label="Porcentaje Clases Teóricas (%)"
                                                 value={itm.porcentaje_teoricas}
                                                 onChange={(v) =>
@@ -161,7 +151,7 @@ export default function Pregunta2({
                                                 }
                                             />
 
-                                            <CampoTexto
+                                            <CampoTextArea
                                                 label="Porcentaje Clases Prácticas (%)"
                                                 value={itm.porcentaje_practicas}
                                                 onChange={(v) =>
@@ -169,7 +159,7 @@ export default function Pregunta2({
                                                 }
                                             />
 
-                                            <CampoTexto
+                                            <CampoTextArea
                                                 label="Justificación"
                                                 value={itm.justificacion || ''}
                                                 onChange={(v) =>
@@ -184,31 +174,6 @@ export default function Pregunta2({
                     </div>
                 </>
             )}
-        </div>
-    );
-}
-
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
         </div>
     );
 }

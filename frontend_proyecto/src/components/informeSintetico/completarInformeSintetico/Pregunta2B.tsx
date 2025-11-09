@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
-
-interface Pregunta {
-    id: number;
-    cod: string;
-    enunciado: string;
-}
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextArea, CampoTexto } from "./Campos";
 
 interface Tabla2BItem {
     materia: Materia
@@ -15,12 +10,6 @@ interface Tabla2BItem {
     encuesta_ET: string
     encuesta_EP: string
     juicio_valor: string
-}
-
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
 }
 
 interface Props {
@@ -205,7 +194,7 @@ export default function Pregunta2B({
                                                 }
                                             />
 
-                                            <CampoTexto
+                                            <CampoTextArea
                                                 label="Juicio de valor"
                                                 value={itm.juicio_valor}
                                                 onChange={(v) =>
@@ -224,27 +213,3 @@ export default function Pregunta2B({
     );
 }
 
-function CampoTexto({
-    label,
-    value,
-    readOnly = false,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    readOnly?: boolean;
-    onChange?: (v: string) => void;
-}) {
-    return (
-        <div className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-                type="text"
-                className="form-control"
-                value={value}
-                readOnly={readOnly}
-                onChange={(e) => onChange?.(e.target.value)}
-            />
-        </div>
-    );
-}

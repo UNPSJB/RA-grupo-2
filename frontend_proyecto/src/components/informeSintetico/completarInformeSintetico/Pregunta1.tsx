@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 
-interface Pregunta { id: number; enunciado: string; }
+
 // Interfaz que viene del backend (strings consolidados)
 interface NecesidadesItem { materia: Materia; equipamiento: string; bibliografia: string; }
 // Interfaz del estado local (arrays separados por respuesta)
 interface NecesidadesEstado { materia: Materia; equipamiento: string[]; bibliografia: string[]; }
-interface Respuesta { pregunta_id: number; texto_respuesta: string; materia_id: number; }
+
 interface Props {
     departamentoId: number; carreraId: number; pregunta: Pregunta; anio: number; periodo: string;
     manejarCambio?: (items: Respuesta[]) => void;
