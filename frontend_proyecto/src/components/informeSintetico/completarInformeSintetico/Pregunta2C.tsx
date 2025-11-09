@@ -12,7 +12,6 @@ interface RespuestasSeccion2C {
     obstaculos_ensenanza: string | null;
     obstaculos_aprendizaje: string | null;
     estrategias: string | null;
-    reflexion_docente: string | null;
 }
 
 interface TablaPregunta2CItem {
@@ -177,14 +176,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
                                                 onChange={(v) =>
                                                     handleChange(index, "estrategias", v)
                                                 }
-                                            />
-                                            <CampoTextArea
-                                                label="Reflexión sobre la práctica docente"
-                                                value={itm.respuestas.reflexion_docente || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "reflexion_docente", v)
-                                                }
-                                              />
+                                            />            
                                         </div>
                                     </div>
                                 </div>
