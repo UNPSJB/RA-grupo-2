@@ -35,7 +35,12 @@ class InformePendiente(BaseModel):
 class InformeCatedraCompletadoDetalle(InformeCatedraCompletadoBase):
     id: int
     respuestas_informe: List[RespuestaConPregunta] = []
+    materiaId: int
+    materiaNombre: Optional[str] = None
+    materiaCodigo: Optional[str] = None
+    sede: Optional[str] = None
+    docenteResponsable: Optional[str] = None
+    docente_materia_id: int 
+    informe_catedra_base_id: int 
 
     model_config = {"from_attributes": True}
-    
- 
