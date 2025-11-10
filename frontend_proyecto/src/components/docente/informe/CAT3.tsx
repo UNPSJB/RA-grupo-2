@@ -22,6 +22,7 @@ interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   respuestas: Record<number, RespuestaValor>;
+  isReadOnly?: boolean;
 }
 
 const normalizarString = (texto: string): string => {
@@ -29,7 +30,7 @@ const normalizarString = (texto: string): string => {
   return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
-export default function Categoria3Informe({ categoria, manejarCambio, respuestas }: Props) {
+export default function Categoria3Informe({ categoria, manejarCambio, respuestas, isReadOnly = false }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const roles = ["Profesor", "JTP", "Auxiliar de Primera", "Auxiliar de Segunda"];
   const actividades = ["Capacitación", "Investigación", "Extensión", "Gestión", "Observaciones"];
@@ -60,6 +61,8 @@ export default function Categoria3Informe({ categoria, manejarCambio, respuestas
   };
 
   const handleAccordionToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isReadOnly) return;
+    
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
@@ -88,38 +91,45 @@ export default function Categoria3Informe({ categoria, manejarCambio, respuestas
           <div className="accordion-item" key={rol}>
             <h2 className="accordion-header" id={headingId}>
               <button 
-                className="accordion-button collapsed" 
+                className={`accordion-button ${isReadOnly ? "" : "collapsed"}`}
                 type="button" 
                 data-bs-toggle="collapse" 
                 data-bs-target={`#${collapseId}`}
                 onClick={handleAccordionToggle}
+                disabled={isReadOnly}
               >
                 {rol}
               </button>
             </h2>
             <div 
               id={collapseId} 
-              className="accordion-collapse collapse" 
+              className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} 
               data-bs-parent="#accordionPaso4"
             >
               <div className="accordion-body">
                 <div className="mb-3">
-                  <label htmlFor={`preg-nombre-${nombrePreguntaId}`} className="form-label">
+                  <label htmlFor={`preg-nombre-${nombrePreguntaId}`} className="form-label fw-bold">
                     Nombre del {rol}
                   </label>
-                  <textarea
-                    id={`preg-nombre-${nombrePreguntaId}`}
-                    className="form-control"
-                    rows={1}
-                    value={respuestas[nombrePreguntaId]?.texto_respuesta || ""}
-                    onChange={(e) => {
-                      actualizarRespuesta(nombrePreguntaId, e.target.value);
-                      autoExpand(e);
-                    }}
-                    onInput={autoExpand}
-                    disabled={!nombrePreguntaId}
-                    style={{ resize: "none" }}
-                  />
+                  {isReadOnly ? (
+                    <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+                      {respuestas[nombrePreguntaId]?.texto_respuesta || "—"}
+                    </p>
+                  ) : (
+                    <textarea
+                      id={`preg-nombre-${nombrePreguntaId}`}
+                      className="form-control"
+                      rows={1}
+                      value={respuestas[nombrePreguntaId]?.texto_respuesta || ""}
+                      onChange={(e) => {
+                        actualizarRespuesta(nombrePreguntaId, e.target.value);
+                        autoExpand(e);
+                      }}
+                      onInput={autoExpand}
+                      disabled={!nombrePreguntaId}
+                      style={{ resize: "none" }}
+                    />
+                  )}
                 </div>
                 
                 {actividades.map((act) => {
@@ -128,22 +138,28 @@ export default function Categoria3Informe({ categoria, manejarCambio, respuestas
                   
                   return (
                     <div key={`${rol}-${act}`} className="mb-3">
-                      <label htmlFor={`preg-${pId}`} className="form-label">
+                      <label htmlFor={`preg-${pId}`} className="form-label fw-bold">
                         {label}
                       </label>
-                      <textarea
-                        id={`preg-${pId}`}
-                        className="form-control"
-                        rows={3}
-                        value={respuestas[pId]?.texto_respuesta || ""}
-                        onChange={(e) => {
-                          actualizarRespuesta(pId, e.target.value);
-                          autoExpand(e);
-                        }}
-                        onInput={autoExpand}
-                        style={{ resize: 'none'}}
-                        disabled={!pId}
-                      />
+                      {isReadOnly ? (
+                        <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+                          {respuestas[pId]?.texto_respuesta || "—"}
+                        </p>
+                      ) : (
+                        <textarea
+                          id={`preg-${pId}`}
+                          className="form-control"
+                          rows={3}
+                          value={respuestas[pId]?.texto_respuesta || ""}
+                          onChange={(e) => {
+                            actualizarRespuesta(pId, e.target.value);
+                            autoExpand(e);
+                          }}
+                          onInput={autoExpand}
+                          style={{ resize: 'none'}}
+                          disabled={!pId}
+                        />
+                      )}
                     </div>
                   );
                 })}

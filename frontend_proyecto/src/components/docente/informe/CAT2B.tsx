@@ -40,9 +40,10 @@ interface Props {
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   estadisticas: DatosEstadisticosCategoria[];
   respuestas: Record<number, RespuestaValor>;
+  isReadOnly?: boolean;
 }
 
-export default function Categoria2BInforme({ categoria, manejarCambio, estadisticas, respuestas }: Props) {
+export default function Categoria2BInforme({ categoria, manejarCambio, estadisticas, respuestas, isReadOnly = false}: Props) {
   const [observacion, setObservacion] = useState<Pregunta | null>(null);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
 
@@ -65,7 +66,8 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
   }, [categoria]);
 
   useEffect(() => {
-    if (!estadisticas || estadisticas.length === 0 || preguntas.length === 0) return;
+    if (isReadOnly || !estadisticas || estadisticas.length === 0 || preguntas.length === 0) return;
+    
     preguntas.forEach((p) => {
       const catEst = estadisticas.find((e) => p.enunciado.includes(`${e.categoria_cod}:`));
       if (catEst) {
@@ -80,7 +82,7 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
         }
       }
     });
-  }, [estadisticas, preguntas, respuestas, manejarCambio]);
+  }, [isReadOnly, estadisticas, preguntas, respuestas, manejarCambio]);
 
   const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
     manejarCambio(preguntaId, {
@@ -120,17 +122,24 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
       {observacion && (
         <div className="mt-4">
           <label className="form-label fw-bold">{observacion.enunciado}</label>
-          <textarea
-            className="form-control"
-            rows={3}
-            value={respuestas[observacion.id]?.texto_respuesta || ""}
-            onChange={(e) => {
-              actualizarRespuestaTexto(observacion.id, e.target.value);
-              autoExpand(e);
-            }}
-            onInput={autoExpand}
-            style={{ resize: "none" }}
-          ></textarea>
+          
+          {isReadOnly ? (
+            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+              {respuestas[observacion.id]?.texto_respuesta || "—"}
+            </p>
+          ) : (
+            <textarea
+              className="form-control"
+              rows={3}
+              value={respuestas[observacion.id]?.texto_respuesta || ""}
+              onChange={(e) => {
+                actualizarRespuestaTexto(observacion.id, e.target.value);
+                autoExpand(e);
+              }}
+              onInput={autoExpand}
+              style={{ resize: "none" }}
+            ></textarea>
+          )}
         </div>
       )}
     </Fragment>
