@@ -126,3 +126,53 @@ def obtener_informes_por_departamento(db: Session, departamento_id: int) -> List
     ).all()
     return informes
 
+
+def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
+    stmt = (
+        select(models.InformeCatedraCompletado)
+        .where(models.InformeCatedraCompletado.id == informe_id)
+        .options(
+            selectinload(models.InformeCatedraCompletado.respuestas_informe)
+            .selectinload(RespuestaInforme.pregunta),
+            joinedload(models.InformeCatedraCompletado.docente_materia) 
+                .joinedload(DocenteMateria.materia),
+            joinedload(models.InformeCatedraCompletado.docente_materia)
+                .joinedload(DocenteMateria.docente)
+        )
+    )
+    
+    informe = db.scalar(stmt)
+    if not informe:
+        raise exceptions.InformeCompletadoNoEncontrado()
+    
+    informe_dict = {
+        "id": informe.id,
+        "docente_materia_id": informe.docente_materia_id,
+        "informe_catedra_base_id": informe.informe_catedra_base_id,
+        "titulo": informe.titulo,
+        "contenido": informe.contenido,
+        "cantidadAlumnos": informe.cantidadAlumnos,
+        "anio": informe.anio,
+        "periodo": informe.periodo,
+        "cantidadComisionesTeoricas": informe.cantidadComisionesTeoricas,
+        "cantidadComisionesPracticas": informe.cantidadComisionesPracticas,
+        "respuestas_informe": informe.respuestas_informe,
+        
+        "materiaId": -1, 
+        "materiaNombre": None,
+        "materiaCodigo": None,
+        "docenteResponsable": None,
+        "sede": "Trelew" 
+    }
+
+    if informe.docente_materia:
+        if informe.docente_materia.materia:
+            informe_dict["materiaId"] = informe.docente_materia.materia.id
+            informe_dict["materiaNombre"] = informe.docente_materia.materia.nombre
+            informe_dict["materiaCodigo"] = informe.docente_materia.materia.matricula
+        
+        if informe.docente_materia.docente:
+            docente = informe.docente_materia.docente
+            informe_dict["docenteResponsable"] = f"{docente.nombre} {docente.apellido}"
+
+    return informe_dict
