@@ -10,6 +10,8 @@ import Pregunta2 from "./Pregunta2";
 import ActividadesDocentes from "./Pregunta3";
 import EquipamientoBibliografia from "./Pregunta1"; 
 import type {Pregunta, Respuesta} from "../../../types/types";
+import DesempenoAuxiliares from "./Pregunta4"; 
+import ObservacionesComentarios from "./Pregunta5"; 
 
 export default function CompletarInformeSintetico() {
     const location = useLocation();
@@ -236,7 +238,26 @@ export default function CompletarInformeSintetico() {
                 />
             );
         }
-
+        if (pregunta.cod=="4") { 
+            return (
+                <DesempenoAuxiliares
+                    departamentoId={dpto.id}
+                    carreraId={carrera.id}
+                    pregunta={pregunta}
+                    anio={anio}
+                    periodo={periodo}
+                    manejarCambio={manejarCambio}
+                />
+            );
+        }
+        if (pregunta.cod=="5") { 
+            return (
+                <ObservacionesComentarios
+                    pregunta={pregunta}
+                    manejarCambio={manejarCambio} 
+                />
+            );
+        }
         return (
             <div className="alert alert-secondary">
                 Pregunta "{pregunta.enunciado}" sin componente asignado.

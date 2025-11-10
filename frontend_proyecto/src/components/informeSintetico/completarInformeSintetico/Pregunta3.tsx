@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react"; 
 import type { Materia } from "../../../types/types";
-import { CampoCheckbox } from "./Campos";
-
+import { CampoCheckbox, CampoTextArea } from "./Campos"; // Asegúrate de que la ruta a Campos sea correcta
 
 interface Pregunta {
     id: number;
@@ -139,92 +138,99 @@ export default function ActividadesDocentes({
             ) : listaMaterias.length === 0 ? (
                 <div className="alert alert-warning">No hay materias para esta selección.</div>
             ) : (
-                <>
-                    <div className="table-responsive">
-                        <table className="table table-bordered table-hover table-sm align-middle">
-                            <thead className="table-light text-center no-bold">
-                                <tr>
-                                    <th style={{width: '20%'}}>Espacio curricular</th>
-                                    <th style={{width: '20%'}}>Responsable, Profesor, JTP y/o Auxiliares</th>
-                                    <th colSpan={4}>Desarrollo de actividades</th>
-                                    <th style={{width: '20%'}}>Observaciones-Comentarios</th>
-                                </tr>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    <th style={{width: '10%'}}>Capacitación</th>
-                                    <th style={{width: '10%'}}>Investigación</th>
-                                    <th style={{width: '10%'}}>Extensión</th>
-                                    <th style={{width: '10%'}}>Gestión</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
+                <div className="accordion" id="accordionActividades">
+                    {listaMaterias.map((itemMateria, materiaIndex) => (
+                        <div key={itemMateria.materia.id} className="accordion-item">
                             
-                            <tbody>
-                                {listaMaterias.map((itemMateria, materiaIndex) => (
-                                    <React.Fragment key={itemMateria.materia.id}>
-                                        {itemMateria.docentes.map((itemDocente, docenteIndex) => (
-                                            <tr key={docenteIndex}>
-                                                {docenteIndex === 0 && (
-                                                    <td rowSpan={itemMateria.docentes.length} style={{verticalAlign: 'middle'}}>
-                                                        {itemMateria.materia.matricula}
-                                                        <br />
-                                                        {itemMateria.materia.nombre}
-                                                    </td>
-                                                )}
-                                                
-                                                <td>
-                                                    {itemDocente.nombre_docente}
-                                                    <br />
-                                                    <small className="text-muted">{itemDocente.rol_docente}</small>
-                                                </td>
-                                                
-                                                <CampoCheckbox 
-                                                    checked={itemDocente.actividades.capacitacion}
-                                                    onChange={(v) => handleChange(materiaIndex, docenteIndex, 'capacitacion', v)}
-                                                />
-                                                <CampoCheckbox 
-                                                    checked={itemDocente.actividades.investigacion}
-                                                    onChange={(v) => handleChange(materiaIndex, docenteIndex, 'investigacion', v)}
-                                                />
-                                                <CampoCheckbox 
-                                                    checked={itemDocente.actividades.extension}
-                                                    onChange={(v) => handleChange(materiaIndex, docenteIndex, 'extension', v)}
-                                                />
-                                                <CampoCheckbox 
-                                                    checked={itemDocente.actividades.gestion}
-                                                    onChange={(v) => handleChange(materiaIndex, docenteIndex, 'gestion', v)}
-                                                />
+                            <h2 className="accordion-header" id={`headingAct${materiaIndex}`}>
+                                <button
+                                    className="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target={`#collapseAct${materiaIndex}`}
+                                    aria-expanded="false"
+                                    aria-controls={`collapseAct${materiaIndex}`}
+                                >
+                                    {itemMateria.materia.matricula} - {itemMateria.materia.nombre}
+                                </button>
+                            </h2>
 
-                                                <td>
-                                                    <textarea 
-                                                        className="form-control form-control-sm"
-                                                        rows={2}
-                                                        placeholder="Observaciones..."
-                                                        value={itemDocente.actividades.observaciones || ""}
-                                                        onChange={(e) => handleChange(materiaIndex, docenteIndex, 'observaciones', e.target.value)}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {itemMateria.docentes.length === 0 && (
-                                            <tr>
-                                                <td>
-                                                    {itemMateria.materia.matricula}
-                                                    <br />
-                                                    {itemMateria.materia.nombre}
-                                                </td>
-                                                <td colSpan={6} className="text-center text-muted">
-                                                    No se encontraron docentes para esta materia.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
+                            <div
+                                id={`collapseAct${materiaIndex}`}
+                                className="accordion-collapse collapse"
+                                aria-labelledby={`headingAct${materiaIndex}`}
+                                data-bs-parent="#accordionActividades"
+                            >
+                                <div className="accordion-body p-0">
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-hover table-sm align-middle mb-0">
+                                            <thead className="table-light text-center no-bold">
+                                                <tr>
+                                                    <th style={{width: '20%'}}>Responsable, Profesor, JTP y/o Auxiliares</th>
+                                                    <th colSpan={4}>Desarrollo de actividades</th>
+                                                    <th style={{width: '20%'}}>Observaciones-Comentarios</th>
+                                                </tr>
+                                                <tr>
+                                                    <th></th>
+                                                    <th style={{width: '10%'}}>Capacitación</th>
+                                                    <th style={{width: '10%'}}>Investigación</th>
+                                                    <th style={{width: '10%'}}>Extensión</th>
+                                                    <th style={{width: '10%'}}>Gestión</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            
+                                            <tbody>
+                                                {itemMateria.docentes.map((itemDocente, docenteIndex) => (
+                                                    <tr key={docenteIndex}>
+                                                        
+                                                        <td>
+                                                            {itemDocente.nombre_docente}
+                                                            <br />
+                                                            <small className="text-muted">{itemDocente.rol_docente}</small>
+                                                        </td>
+                                                        
+                                                        <CampoCheckbox 
+                                                            checked={itemDocente.actividades.capacitacion}
+                                                            onChange={(v) => handleChange(materiaIndex, docenteIndex, 'capacitacion', v)}
+                                                        />
+                                                        <CampoCheckbox 
+                                                            checked={itemDocente.actividades.investigacion}
+                                                            onChange={(v) => handleChange(materiaIndex, docenteIndex, 'investigacion', v)}
+                                                        />
+                                                        <CampoCheckbox 
+                                                            checked={itemDocente.actividades.extension}
+                                                            onChange={(v) => handleChange(materiaIndex, docenteIndex, 'extension', v)}
+                                                        />
+                                                        <CampoCheckbox 
+                                                            checked={itemDocente.actividades.gestion}
+                                                            onChange={(v) => handleChange(materiaIndex, docenteIndex, 'gestion', v)}
+                                                        />
+
+                                                        <td>
+                                                            <CampoTextArea
+                                                                label={null}
+                                                                value={itemDocente.actividades.observaciones || ""}
+                                                                onChange={(v) => handleChange(materiaIndex, docenteIndex, 'observaciones', v)}
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {itemMateria.docentes.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={6} className="text-center text-muted">
+                                                            No se encontraron docentes para esta materia.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
     );

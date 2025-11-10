@@ -10,16 +10,16 @@ export function CampoTextArea({
     value,
     onChange,
 }: {
-    label: string;
+    label: string|null;
     value: string;
     onChange?: (v: string) => void;
 }) {
     return (
         <div className="col-12">
-            <label className="form-label">{label}</label>
+            {label && <label className="form-label">{label}</label>}
             <textarea
                 className="form-control"
-                rows={1}
+                rows={2}
                 value={value}
                 onChange={
                     (e) => {onChange?.(e.target.value);
