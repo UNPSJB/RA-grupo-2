@@ -16,12 +16,11 @@ interface InformeActividad {
 interface Props {
   docenteMateriaId: number;
   onDatosGenerados?: (datos: InformeActividad) => void;
+  isReadOnly?: boolean;
+  datosIniciales?: Partial<InformeActividad>;
 }
 
-export default function CompletarInformeCatedraFuncion({
-  docenteMateriaId,
-  onDatosGenerados,
-}: Props) {
+export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDatosGenerados, isReadOnly = false, datosIniciales }: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +28,18 @@ export default function CompletarInformeCatedraFuncion({
   const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
 
   useEffect(() => {
+    if (isReadOnly) {
+      if (datosIniciales && datosIniciales.actividadCurricular) {
+        setData(datosIniciales as InformeActividad);
+        setLoading(false);
+      } else if (!datosIniciales) {
+         setLoading(false); 
+      }
+      return;
+    }
+
     const fetchData = async () => {
       try {
-        // 🔹 Obtener docente_id y materia_id desde la relación intermedia
         const relacionRes = await fetch(
           `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
         );
@@ -43,21 +51,18 @@ export default function CompletarInformeCatedraFuncion({
         const anio = relacion.anio ?? ANIO_ACTUAL;
         const periodo = relacion.periodo ?? PERIODO_ACTUAL;
 
-        // 🔹 Obtener la materia
         const materiaRes = await fetch(
           `http://127.0.0.1:8000/materias/${materiaIdRelacion}`
         );
         if (!materiaRes.ok) throw new Error("Error al obtener la materia");
         const materia = await materiaRes.json();
 
-        // 🔹 Obtener el docente
         const docenteRes = await fetch(
           `http://127.0.0.1:8000/docentes/${docenteId}`
         );
         if (!docenteRes.ok) throw new Error("Error al obtener el docente");
         const docente = await docenteRes.json();
 
-        // 🔹 Obtener alumnos según materia, año y periodo
         const alumnosRes = await fetch(
           `http://127.0.0.1:8000/alumnos/materia/${materiaIdRelacion}/cursantes?anio=${anio}&periodo=${periodo}`
         );
@@ -66,7 +71,6 @@ export default function CompletarInformeCatedraFuncion({
 
         const cantidadAlumnos = alumnos.length;
 
-        // 🔹 Generar el informe
         const datos: InformeActividad = {
           sede: "Trelew",
           cicloLectivo: anio,
@@ -89,11 +93,13 @@ export default function CompletarInformeCatedraFuncion({
     };
 
     fetchData();
-  }, [docenteMateriaId, cantidadComisionesTeoricas, cantidadComisionesPracticas]);
+  }, [docenteMateriaId, cantidadComisionesTeoricas, cantidadComisionesPracticas, isReadOnly, datosIniciales]);
 
   if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
-  if (!data) return <p>No hay datos para mostrar.</p>;
+  if (!data) {
+     return isReadOnly ? <p>Cargando...</p> : <p>No hay datos para mostrar.</p>;
+  }
 
   return (
     <Fragment>
@@ -142,33 +148,47 @@ export default function CompletarInformeCatedraFuncion({
           <label htmlFor="comisionesTeoricas" className="form-label">
             Comisiones Teóricas
           </label>
-          <input
-            type="number"
-            className="form-control"
-            id="comisionesTeoricas"
-            min="0"
-            value={cantidadComisionesTeoricas}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 0;
-              setCantidadComisionesTeoricas(value);
-            }}
-          />
+          
+          {isReadOnly ? (
+            <p className="form-control-plaintext ps-2 pt-0">
+              {data?.cantidadComisionesTeoricas ?? 'N/A'}
+            </p>
+          ) : (
+            <input
+              type="number"
+              className="form-control"
+              id="comisionesTeoricas"
+              min="0"
+              value={cantidadComisionesTeoricas}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                setCantidadComisionesTeoricas(value);
+              }}
+            />
+          )}
         </div>
         <div className="col-md-6">
           <label htmlFor="comisionesPracticas" className="form-label">
             Comisiones Prácticas
           </label>
-          <input
-            type="number"
-            className="form-control"
-            id="comisionesPracticas"
-            min="0"
-            value={cantidadComisionesPracticas}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 0;
-              setCantidadComisionesPracticas(value);
-            }}
-          />
+          
+          {isReadOnly ? (
+            <p className="form-control-plaintext ps-2 pt-0">
+              {data?.cantidadComisionesPracticas ?? 'N/A'}
+            </p>
+          ) : (
+            <input
+              type="number"
+              className="form-control"
+              id="comisionesPracticas"
+              min="0"
+              value={cantidadComisionesPracticas}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                setCantidadComisionesPracticas(value);
+              }}
+            />
+          )}
         </div>
       </div>
     </Fragment> 

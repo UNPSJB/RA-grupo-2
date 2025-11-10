@@ -9,6 +9,7 @@ interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   respuestas: Record<number, RespuestaValor>;
+  isReadOnly?: boolean;
 }
 
 const normalizarString = (texto: string): string => {
@@ -22,7 +23,7 @@ const ROLES = [
   { key: "auxiliar de segunda", texto: "Auxiliar de Segunda" },
 ];
 
-export default function Categoria4Informe({ categoria, manejarCambio, respuestas}: Props) {
+export default function Categoria4Informe({ categoria, manejarCambio, respuestas, isReadOnly = false }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
 
   const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
@@ -59,6 +60,14 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
     );
     return p ? p.id : 0;
   };
+  
+  const getOpcionTexto = (preguntaId: number): string => {
+    const opcionId = respuestas[preguntaId]?.opcion_id;
+    if (!opcionId) return "—";
+    const pregunta = preguntas.find(p => p.id === preguntaId);
+    const opcion = pregunta?.opciones?.find(o => o.id === opcionId);
+    return opcion?.contenido || "—";
+  };
 
   return (
     <Fragment>
@@ -87,61 +96,79 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
               return (
                 <tr key={rol.key}>
                   <td className="p-1">
-                    <textarea
-                      className="form-control border-0"
-                      rows={1}
-                      style={{ background: "transparent", resize: 'none', width: '100%'}}
-                      placeholder={`${rol.texto}`}
-                      value={respuestas[nombrePId]?.texto_respuesta || ""}
-                      onChange={(e) => {
-                        actualizarRespuesta(nombrePId, e.target.value, "abierta");
-                        autoExpand(e);
-                      }}
-                      onInput={autoExpand}
-                      disabled={!nombrePId}
-                    />
+                    {isReadOnly ? (
+                      <p className="form-control-plaintext px-2">
+                        {respuestas[nombrePId]?.texto_respuesta || rol.texto}
+                      </p>
+                    ) : (
+                      <textarea
+                        className="form-control border-0"
+                        rows={1}
+                        style={{ background: "transparent", resize: 'none', width: '100%'}}
+                        placeholder={`${rol.texto}`}
+                        value={respuestas[nombrePId]?.texto_respuesta || ""}
+                        onChange={(e) => {
+                          actualizarRespuesta(nombrePId, e.target.value, "abierta");
+                          autoExpand(e);
+                        }}
+                        onInput={autoExpand}
+                        disabled={!nombrePId}
+                      />
+                    )}
                   </td>
                   <td>
-                    <select
-                      className="form-select border-0"
-                      style={{
-                        borderBottom: '1px solid #9ea5abff'
-                      }}
-                      value={respuestas[calificacionPId]?.opcion_id || ""}
-                      onChange={(e) =>
-                        actualizarRespuesta(
-                          calificacionPId,
-                          e.target.value,
-                          "cerrada"
-                        )
-                      }
-                      disabled={!calificacionPId}
-                    >
-                      <option value="">Seleccionar</option>
-                      {opciones.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {opt.contenido}
-                        </option>
-                      ))}
-                    </select>
+                    {isReadOnly ? (
+                      <p className="form-control-plaintext px-2">
+                        {getOpcionTexto(calificacionPId)}
+                      </p>
+                    ) : (
+                      <select
+                        className="form-select border-0"
+                        style={{
+                          borderBottom: '1px solid #9ea5abff'
+                        }}
+                        value={respuestas[calificacionPId]?.opcion_id || ""}
+                        onChange={(e) =>
+                          actualizarRespuesta(
+                            calificacionPId,
+                            e.target.value,
+                            "cerrada"
+                          )
+                        }
+                        disabled={!calificacionPId}
+                      >
+                        <option value="">Seleccionar</option>
+                        {opciones.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.contenido}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </td>
                   <td>
-                    <textarea
-                      className="form-control border-0"
-                      rows={2}
-                      value={respuestas[justificacionPId]?.texto_respuesta || ""}
-                      onChange={(e) => {
-                        actualizarRespuesta(
-                          justificacionPId,
-                          e.target.value,
-                          "abierta"
-                        );
-                        autoExpand(e);
-                      }}
-                      onInput={autoExpand}
-                      disabled={!justificacionPId}
-                      style={{ resize: "none"}}
-                    />
+                    {isReadOnly ? (
+                      <p className="form-control-plaintext px-2" style={{ whiteSpace: 'pre-wrap' }}>
+                        {respuestas[justificacionPId]?.texto_respuesta || "—"}
+                      </p>
+                    ) : (
+                      <textarea
+                        className="form-control border-0"
+                        rows={2}
+                        value={respuestas[justificacionPId]?.texto_respuesta || ""}
+                        onChange={(e) => {
+                          actualizarRespuesta(
+                            justificacionPId,
+                            e.target.value,
+                            "abierta"
+                          );
+                          autoExpand(e);
+                        }}
+                        onInput={autoExpand}
+                        disabled={!justificacionPId}
+                        style={{ resize: "none"}}
+                      />
+                    )}
                   </td>
                 </tr>
               );

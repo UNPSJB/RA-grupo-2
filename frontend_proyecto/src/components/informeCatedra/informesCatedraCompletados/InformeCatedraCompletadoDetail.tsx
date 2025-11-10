@@ -1,11 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import ROUTES from "../../../paths";
-
-interface Opcion {
-  id: number;
-  contenido: string;
-}
+import ContenidoPasos from "../../docente/informe/ContenidoPasos"; 
 
 interface Categoria {
   id: number;
@@ -35,13 +31,28 @@ interface InformeCompletadoDetalle {
   anio: number | null;
   periodo: string | null;
   respuestas_informe: RespuestaConPregunta[];
+  cantidadAlumnos: number;
+  cantidadComisionesTeoricas: number;
+  cantidadComisionesPracticas: number;
+  materiaNombre?: string; 
+  materiaCodigo?: string;
+  sede?: string;
+  docenteResponsable?: string;
+  materiaId: number; 
+  docente_materia_id: number;
+  informe_catedra_base_id: number;
 }
 
-type GrupoDeRespuestas = {
-  idCategoria: number;
-  nombreCategoria: string;
-  codCategoria: string;
-  respuestas: RespuestaConPregunta[];
+interface CategoriaConPreguntas {
+  id: number;
+  cod: string;
+  texto: string;
+  preguntas: Pregunta[];
+}
+
+type RespuestaValor = { 
+  opcion_id: number | null; 
+  texto_respuesta: string | null; 
 };
 
 export function mostrarPeriodo(periodo: string) {
@@ -62,12 +73,22 @@ export default function InformeCatedraDetalle() {
   const [informe, setInforme] = useState<InformeCompletadoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mapaCategorias, setMapaCategorias] = useState<Map<number, {texto: string, cod: string}>>(new Map());
-
-  const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
-
-  const limpiarEnunciado = (enunciado: string): string => {
-    return enunciado.replace(/\s*\(.*\)\s*$/, '').trim();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [datosEstadisticos, setDatosEstadisticos] = useState<any[]>([]);
+  const [cantidad, setCantidad] = useState<number>(0);
+  const [gruposBase, setGruposBase] = useState<CategoriaConPreguntas[]>([]);
+  
+  const steps = [
+    { id: 1, name: "Datos Generales" },
+    { id: 2, name: "Datos Estadísticos" },
+    { id: 3, name: "1. Recursos" },
+    { id: 4, name: "2. Desarrollo Curricular" },
+    { id: 5, name: "3. Actividades del Equipo" },
+    { id: 6, name: "4. Valoración" }
+  ];
+  
+  const goToStep = (stepId: number) => {
+    setCurrentStep(stepId);
   };
 
   useEffect(() => {
@@ -77,111 +98,85 @@ export default function InformeCatedraDetalle() {
       return;
     }
 
-    const fetchInforme = fetch(`http://127.0.0.1:8000/informe-catedra-completado/${id}`)
-      .then(res => res.ok ? res.json() : Promise.reject(new Error("Error al obtener el informe")));
-    
-    const fetchCategorias = fetch(`http://127.0.0.1:8000/categorias/`)
-      .then(res => res.ok ? res.json() : Promise.reject(new Error("Error al obtener categorías")));
-
-    Promise.all([fetchInforme, fetchCategorias])
-      .then(async ([dataInforme, dataCategorias]: [InformeCompletadoDetalle, Categoria[]]) => {
-        setInforme(dataInforme);
-      
-        const nuevoMapa = new Map<number, {texto: string, cod: string}>();
-        dataCategorias.forEach(cat => { nuevoMapa.set(cat.id, { texto: cat.texto, cod: cat.cod });
-        });
-        setMapaCategorias(nuevoMapa);
+    const fetchInforme = async () => {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/informe-catedra-completado/${id}`);
+        if (!res.ok) throw new Error("Error al obtener el informe");
+        const dataInforme: InformeCompletadoDetalle = await res.json();
         
-        const opcionesTemp: Record<number, Opcion[]> = {};
+        setInforme(dataInforme);
 
-        const buscarOpciones = dataInforme.respuestas_informe
-          .filter(r => r.pregunta.tipo === 'cerrada' && r.pregunta.id)
-          .map(async (r) => {
-            const preguntaId = r.pregunta.id;
-            if (opcionesTemp[preguntaId]) return;
+        if (dataInforme.informe_catedra_base_id) {
+            const resBase = await fetch(`http://127.0.0.1:8000/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`);
+            if (!resBase.ok) throw new Error("No se pudo cargar la estructura base del informe.");
+            
+            const dataBase: CategoriaConPreguntas[] = await resBase.json();
+            const dataOrdenada = [...dataBase].sort((a, b) => 
+              a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
+            );
 
-            try{
-              const resOpciones = await fetch(`http://127.0.0.1:8000/preguntas/${preguntaId}/opciones`);
-              if(resOpciones.ok) {
-                const ops: Opcion[] = await resOpciones.json();
-                opcionesTemp[preguntaId] = ops;
-              }
-            } catch (e) {
-              console.error(`Error al cargar opciones para pregunta ${preguntaId}:`, e);
+            dataOrdenada.forEach(grupo => {
+              grupo.preguntas.sort((a, b) => a.id - b.id); 
+            });
+
+            setGruposBase(dataOrdenada);
+        }
+        
+        const { materiaId, anio, periodo } = dataInforme;
+          
+        fetch(`http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && data.length > 0) {
+              const dataOrdenada = [...data].sort((a, b) => a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" }));
+              setDatosEstadisticos(dataOrdenada);
             }
-          });
+          })
+          .catch((error) => console.error("Error fetching datos estadísticos:", error));
 
-        await Promise.all(buscarOpciones);
-        setOpciones(opcionesTemp);
-      })
-      .catch((err) => {
+        fetch(`http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
+          .then((res) => res.json())
+          .then((data) => setCantidad(data))
+          .catch((error) => console.error("Error fetching cantidad encuestas:", error));
+          
+      } catch (err: any) {
         console.error(err);
         setError(err.message);
-      })
-      .finally(() => setLoading(false));
-          
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchInforme();
   }, [id]);
 
-  const gruposOrdenados = useMemo((): GrupoDeRespuestas[] => {
-    if (!informe || mapaCategorias.size === 0) return [];
-
-    const gruposTemp: Record<number, { id: number, nombre: string, cod: string, respuestas: RespuestaConPregunta[]} > = {};
+  const respuestasFormateadas = useMemo((): Record<number, RespuestaValor> => {
+    if (!informe) return {};
+    const mapaRespuestas: Record<number, RespuestaValor> = {};
     
-    for (const respuesta of informe.respuestas_informe) {
-      const catId = respuesta.pregunta.categoria_id;
-      const catInfo = mapaCategorias.get(catId);
-      const nombreCat = catInfo?.texto || `Categoría ID ${catId}`;
-      const codCat = catInfo?.cod || `Z${catId}`;
-
-      if (!gruposTemp[catId]) {
-        gruposTemp[catId] = {id: catId, nombre: nombreCat, cod: codCat, respuestas: []};
-      }
-      gruposTemp[catId].respuestas.push(respuesta);
-    }
-
-    Object.values(gruposTemp).forEach(grupo => {
-      grupo.respuestas.sort((a, b) => a.pregunta.id - b.pregunta.id);
-    })
-
-    const gruposComoArray = Object.values(gruposTemp);
-    
-    gruposComoArray.sort((a, b) => {
-      const normalizarCodigo = (cod: string) => {
-        if (/^\d+$/.test(cod)) {
-          return cod.padStart(2, '0');
-        }
-        const numMatch = cod.match(/^\d+/);
-        const letraMatch = cod.match(/[A-Za-z]+$/);
-        if (numMatch && letraMatch) {
-          return numMatch[0].padStart(2, '0') + letraMatch[0];
-        }
-        return cod;
+    for (const r of informe.respuestas_informe) {
+      mapaRespuestas[r.pregunta.id] = {
+        opcion_id: r.opcion_id,
+        texto_respuesta: r.texto_respuesta
       };
-
-      const codA = normalizarCodigo(a.cod);
-      const codB = normalizarCodigo(b.cod);
-      
-      return codA.localeCompare(codB);
-    });
-
-    return gruposComoArray.map(g => ({
-      idCategoria: g.id,
-      nombreCategoria: g.nombre,
-      codCategoria: g.cod,
-      respuestas: g.respuestas
-    }));
-  }, [informe, mapaCategorias]);
-
-  const getRespuestaTexto = (r: RespuestaConPregunta): string => {
-    if (r.pregunta.tipo === 'cerrada' && r.opcion_id) {
-      const opcionesDePregunta = opciones[r.pregunta.id] || [];
-      const opcionEncontrada = opcionesDePregunta.find(op => op.id === r.opcion_id);
-      
-      return opcionEncontrada ? opcionEncontrada.contenido : `[Opción ID: ${r.opcion_id}]`;
     }
-    
-    return r.texto_respuesta?.trim() || "—";
-  };
+    return mapaRespuestas;
+  }, [informe]);
+
+  const datosGenerales = useMemo(() => {
+    if (!informe) return {};
+    return {
+      cicloLectivo: informe.anio ?? undefined,
+      periodo: informe.periodo ?? undefined,
+      cantidadAlumnos: informe.cantidadAlumnos,
+      cantidadComisionesTeoricas: informe.cantidadComisionesTeoricas,
+      cantidadComisionesPracticas: informe.cantidadComisionesPracticas,
+      actividadCurricular: informe.materiaNombre, 
+      codigoActividadCurricular: informe.materiaCodigo,
+      sede: informe.sede,
+      docenteResponsable: informe.docenteResponsable,
+    }
+  }, [informe]);
 
   if (loading) {
     return (
@@ -194,7 +189,6 @@ export default function InformeCatedraDetalle() {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="container py-4">
@@ -208,7 +202,6 @@ export default function InformeCatedraDetalle() {
       </div>
     );
   }
-
   if (!informe) {
     return (
       <div className="container py-4">
@@ -223,73 +216,72 @@ export default function InformeCatedraDetalle() {
   }
 
   return (
-    <div className="container py-4">
-      <div className="card shadow-sm">
-        <div className="card-header bg-unpsjb-header">
-          <h1 className="h4 mb-0">{informe.titulo || "Informe sin título"}</h1>
-        </div>
-        
-        <div className="card-body">
-          <div className="alert alert-info">
-            <div className="row">
-              {informe.anio && (
-                <div className="col-md-6">
-                  <strong>Año:</strong> {informe.anio}
-                </div>
-              )}
-              {informe.periodo && (
-                <div className="col-md-6">
-                  <strong>Período:</strong> {mostrarPeriodo(informe.periodo)}
-                </div>
-              )}
-            </div>
-            {informe.contenido && (
-              <div className="mt-2">
-                <strong>Contenido adicional:</strong>
-                <p className="mb-0 mt-1" style={{ whiteSpace: 'pre-wrap' }}>
-                  {informe.contenido}
-                </p>
-              </div>
-            )}
+    <div className="bg-light">
+      <div className="container-lg py-4">
+        <div className="card shadow-sm border-0 rounded-3">
+          
+          <div className="card-header bg-unpsjb-header">
+            <h1 className="h4 mb-0 text-center">
+              {informe.titulo || "Informe de Cátedra"}
+            </h1>
           </div>
 
-          <h5 className="mt-4 border-bottom pb-2">Respuestas del Informe</h5>
+          <div className="card-body p-4 p-md-5">
+            <ul className="nav nav-pills nav-fill mb-4">
+              {steps.map(step => (
+                <li key={step.id} className="nav-item">
+                  <a
+                    className={`nav-link ${currentStep === step.id ? 'active' : 'text-muted'}`}
+                    onClick={(e) => { e.preventDefault(); goToStep(step.id); }}
+                    href="#"
+                    style={{ cursor: 'pointer', fontWeight: 500 }}
+                  >
+                    {step.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
 
-          {gruposOrdenados.length > 0 ? (
-            gruposOrdenados.map((grupo) => (
-              <div key={grupo.idCategoria} className="card shadow-sm mb-4">
-                <div className="card-header bg-light">
-                  <h6 className="fw-bold text mb-3">
-                    {grupo.nombreCategoria}
-                  </h6>
-                </div>
-
-                <div className="card-body">
-                  <ul className="list-group list-group-flush">
-                    {grupo.respuestas.map((r) => (
-                      <li key={r.id} className="list-group-item px-0 py-3">
-                        <strong className="d-block mb-0">
-                          {limpiarEnunciado(r.pregunta.enunciado)}
-                        </strong>
-                        <p className="mb-0 text-muted" style={{ whiteSpace: 'pre-wrap' }}>
-                          {getRespuestaTexto(r)}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="alert alert-secondary mt-3">
-              No hay respuestas registradas para este informe.
+            <div 
+              className="step-content-container" 
+              style={{ 
+                height: '500px', 
+                overflowY: 'auto',
+                paddingRight: '15px' 
+              }}
+            >
+              <ContenidoPasos
+                currentStep={currentStep}
+                isReadOnly={true}
+                categoriasConPreguntas={gruposBase} 
+                respuestas={respuestasFormateadas} 
+                datosEstadisticos={datosEstadisticos}
+                cantidad={cantidad}
+                docenteMateriaId={informe.docente_materia_id}
+                datosIniciales={datosGenerales}
+                manejarCambio={() => {}} 
+                onDatosGenerados={() => {}}
+              />
             </div>
-          )}
+          </div> 
 
-          <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-secondary mt-4">
-            Volver al listado
-          </Link>
-        </div>
+          <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
+            <div className="d-flex justify-content-between">
+              <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-outline-secondary rounded-pill px-4">
+                Volver al listado
+              </Link>
+              <button
+                className="btn btn-theme-primary rounded-pill px-4"
+                onClick={() => goToStep(currentStep + 1)}
+                disabled={currentStep === steps.length} 
+              >
+                Siguiente
+              </button>
+
+            </div>
+          </div>
+
+        </div> 
       </div>
     </div>
   );

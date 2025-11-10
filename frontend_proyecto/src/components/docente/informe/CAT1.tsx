@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment } from "react";
+import { useState, useMemo, Fragment, useEffect } from "react";
 
 type RespuestaValor = {
   opcion_id: number | null;
@@ -21,9 +21,11 @@ interface CategoriaConPreguntas {
 interface Props {
   categoria: CategoriaConPreguntas;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
+  isReadOnly?: boolean;
+  respuestas: Record<number, RespuestaValor>;
 }
 
-export default function CategoriaEquipamiento({ categoria, manejarCambio }: Props) {
+export default function CategoriaEquipamiento({ categoria, manejarCambio, isReadOnly = false, respuestas }: Props) {
     const pEquipo = useMemo(() => 
       categoria.preguntas.find(p => p.enunciado.toLowerCase().includes("equipamiento")), 
       [categoria.preguntas]
@@ -34,10 +36,22 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
       [categoria.preguntas]
     );
 
+    const respuestaEquipo = pEquipo ? (respuestas[pEquipo.id]?.texto_respuesta || "") : "";
+    const respuestaBiblio = pBibliografia ? (respuestas[pBibliografia.id]?.texto_respuesta || "") : "";
+
     const [itemsEquipo, setItemsEquipo] = useState<string[]>([]);
     const [itemsBibliografia, setItemsBibliografia] = useState<string[]>([]);
+    
     const [nuevoItemEquipo, setNuevoItemEquipo] = useState("");
     const [nuevoItemBibliografia, setNuevoItemBibliografia] = useState("");
+
+    useEffect(() => {
+        setItemsEquipo(respuestaEquipo.split('\n').filter(Boolean));
+    }, [respuestaEquipo]);
+
+    useEffect(() => {
+        setItemsBibliografia(respuestaBiblio.split('\n').filter(Boolean));
+    }, [respuestaBiblio]);
 
     const enviarRespuestasAlPadre = (equipoItems: string[], biblioItems: string[]) => {
         if (pEquipo) {
@@ -93,88 +107,108 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio }: Prop
     return (
         <Fragment>
             <div className="mb-4">
-                <label className="form-label mb-3"> 
+                <label className="form-label mb-3 fw-bold"> 
                     Equipamiento e insumos
                 </label>
                 
-                <div className="d-flex gap-2 mb-3">
-                    <input
-                        type="text"
-                        className="form-control"
-                        value={nuevoItemEquipo}
-                        onChange={(e) => setNuevoItemEquipo(e.target.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                                agregarItemEquipo();
-                            }
-                        }}
-                    />
-                    <button
-                        type="button"
-                        className="btn btn-primary px-3"
-                        onClick={agregarItemEquipo}
-                        disabled={!nuevoItemEquipo.trim()}
-                    >
-                        Agregar
-                    </button>
-                </div>
+                {!isReadOnly && (
+                    <div className="d-flex gap-2 mb-3 fw-bold">
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={nuevoItemEquipo}
+                            onChange={(e) => setNuevoItemEquipo(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    agregarItemEquipo();
+                                }
+                            }}
+                        />
+                        <button
+                            type="button"
+                            className="btn btn-primary px-3"
+                            onClick={agregarItemEquipo}
+                            disabled={!nuevoItemEquipo.trim()}
+                        >
+                            Agregar
+                        </button>
+                    </div>
+                )}
 
                 <div>
-                    {itemsEquipo.map((item, index) => (
-                        <div key={index} className="d-flex align-items-center mb-2 p-2 rounded-3 bg-light-subtle">
-                            <span className="flex-grow-1">{item}</span>
-                            <button
-                                type="button"
-                                className="btn btn-outline-danger btn-sm ms-2"
-                                onClick={() => eliminarItemEquipo(index)}
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
+                    {itemsEquipo.length > 0 ? (
+                         <ul className="list-group">
+                            {itemsEquipo.map((item, index) => (
+                                <li key={index} className="list-group-item d-flex align-items-center">
+                                    <span className="flex-grow-1">{item}</span>
+                                    {!isReadOnly && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-danger btn-sm ms-2"
+                                            onClick={() => eliminarItemEquipo(index)}
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        isReadOnly && <p className="text-muted fst-italic">No se reportó equipamiento.</p>
+                    )}
                 </div>
             </div>
 
             <div className="mb-4">
-                <label className="form-label mb-3">
+                <label className="form-label mb-3 fw-bold">
                     Bibliografía
                 </label>
                 
-                <div className="d-flex gap-2 mb-3">
-                    <input
-                        type="text"
-                        className="form-control"
-                        value={nuevoItemBibliografia}
-                        onChange={(e) => setNuevoItemBibliografia(e.target.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                                agregarItemBibliografia();
-                            }
-                        }}
-                    />
-                    <button
-                        type="button"
-                        className="btn btn-primary px-3"
-                        onClick={agregarItemBibliografia}
-                        disabled={!nuevoItemBibliografia.trim()}
-                    >
-                        Agregar
-                    </button>
-                </div>
+                {!isReadOnly && (
+                    <div className="d-flex gap-2 mb-3">
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={nuevoItemBibliografia}
+                            onChange={(e) => setNuevoItemBibliografia(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    agregarItemBibliografia();
+                                }
+                            }}
+                        />
+                        <button
+                            type="button"
+                            className="btn btn-primary px-3"
+                            onClick={agregarItemBibliografia}
+                            disabled={!nuevoItemBibliografia.trim()}
+                        >
+                            Agregar
+                        </button>
+                    </div>
+                )}
 
                 <div>
-                    {itemsBibliografia.map((item, index) => (
-                        <div key={index} className="d-flex align-items-center mb-2 p-2 rounded-3 bg-light-subtle">
-                            <span className="flex-grow-1">{item}</span>
-                            <button
-                                type="button"
-                                className="btn btn-outline-danger btn-sm ms-2"
-                                onClick={() => eliminarItemBibliografia(index)}
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
+                    {itemsBibliografia.length > 0 ? (
+                         <ul className="list-group">
+                            {itemsBibliografia.map((item, index) => (
+                                <li key={index} className="list-group-item d-flex align-items-center">
+                                    <span className="flex-grow-1">{item}</span>
+                                    {!isReadOnly && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-danger btn-sm ms-2"
+                                            onClick={() => eliminarItemBibliografia(index)}
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        isReadOnly && <p className="text-muted fst-italic">No se reportó bibliografía.</p>
+                    )}
                 </div>
             </div>
         </Fragment>

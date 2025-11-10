@@ -22,9 +22,10 @@ interface ContenidoPasosProps {
   cantidad: number;
   respuestas: Record<number, RespuestaValor>;
   docenteMateriaId: number;
- 
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
+  isReadOnly?: boolean;
+  datosIniciales?: any;
 }
 
 const normalizarString = (texto: string): string => {
@@ -40,7 +41,9 @@ export default function ContenidoPasos({
   respuestas,
   docenteMateriaId,
   manejarCambio,
-  onDatosGenerados
+  onDatosGenerados,
+  isReadOnly = false,
+  datosIniciales
 }: ContenidoPasosProps) {
 
   const categoria1 = categoriasConPreguntas.find(cat => cat.cod === "1");
@@ -51,25 +54,22 @@ export default function ContenidoPasos({
   const categoria3 = categoriasConPreguntas.find(cat => cat.cod === "3");
   const categoria4 = categoriasConPreguntas.find(cat => cat.cod === "4");
 
-      const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
-      const textarea = e.currentTarget;
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
-    };
+  const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  };
 
-    const handlePercentageChange = (
+  const handlePercentageChange = (
     pregunta: Pregunta | undefined, 
     valor: string
-    ) => {
+  ) => {
     if (!pregunta) return;
-
     if (valor === "") {
       manejarCambio(pregunta.id, { opcion_id: null, texto_respuesta: "" });
       return;
     }
-
     const num = Number(valor);
-
     if (!isNaN(num) && num >= 0 && num <= 100) {
       manejarCambio(pregunta.id, { opcion_id: null, texto_respuesta: valor });
     }
@@ -83,66 +83,84 @@ export default function ContenidoPasos({
     return (
       <div className="row g-3">
         <div className="col-md-6">
-          <label htmlFor={`preg-${pTeoricas?.id}`} className="form-label">
+          <label htmlFor={`preg-${pTeoricas?.id}`} className="form-label fw-bold">
             {pTeoricas?.enunciado || "Porcentaje Clases Teóricas"}
           </label>
-          <div className="input-group">
-            <input
-              type="number"
-              className="form-control"
-              id={`preg-${pTeoricas?.id}`}
-              value={respuestas[pTeoricas?.id || 0]?.texto_respuesta || ""}
-              onChange={(e) => handlePercentageChange(pTeoricas, e.target.value)}
-              disabled={!pTeoricas}
-              min="0"
-              max="100"
-              aria-describedby="teoricas-addon"
-            />
-          </div>
+          {isReadOnly ? (
+            <p className="form-control-plaintext ps-1">
+              {respuestas[pTeoricas?.id || 0]?.texto_respuesta || "0"}%
+            </p>
+          ) : (
+            <div className="input-group">
+              <input
+                type="number"
+                className="form-control"
+                id={`preg-${pTeoricas?.id}`}
+                value={respuestas[pTeoricas?.id || 0]?.texto_respuesta || ""}
+                onChange={(e) => handlePercentageChange(pTeoricas, e.target.value)}
+                disabled={!pTeoricas}
+                min="0"
+                max="100"
+                aria-describedby="teoricas-addon"
+              />
+            </div>
+          )}
         </div>
 
         <div className="col-md-6">
-          <label htmlFor={`preg-${pPracticas?.id}`} className="form-label">
+          <label htmlFor={`preg-${pPracticas?.id}`} className="form-label fw-bold">
             {pPracticas?.enunciado || "Porcentaje Clases Prácticas"}
           </label>
-          <div className="input-group">
-            <input
-              type="number"
-              className="form-control"
-              id={`preg-${pPracticas?.id}`}
-              value={respuestas[pPracticas?.id || 0]?.texto_respuesta || ""}
-              onChange={(e) => handlePercentageChange(pPracticas, e.target.value)}
-              disabled={!pPracticas}
-              min="0"
-              max="100"
-              aria-describedby="practicas-addon"
-            />
-          </div>
+          {isReadOnly ? (
+            <p className="form-control-plaintext ps-1">
+              {respuestas[pPracticas?.id || 0]?.texto_respuesta || "0"}%
+            </p>
+          ) : (
+            <div className="input-group">
+              <input
+                type="number"
+                className="form-control"
+                id={`preg-${pPracticas?.id}`}
+                value={respuestas[pPracticas?.id || 0]?.texto_respuesta || ""}
+                onChange={(e) => handlePercentageChange(pPracticas, e.target.value)}
+                disabled={!pPracticas}
+                min="0"
+                max="100"
+                aria-describedby="practicas-addon"
+              />
+            </div>
+          )}
         </div>
 
         {pJustificacion && (
           <div className="col-12 mt-3">
-            <label htmlFor={`preg-${pJustificacion.id}`} className="form-label">
+            <label htmlFor={`preg-${pJustificacion.id}`} className="form-label fw-bold">
               {pJustificacion.enunciado}
             </label>
-            <textarea
-              className="form-control"
-              id={`preg-${pJustificacion.id}`}
-              value={respuestas[pJustificacion.id]?.texto_respuesta || ""}
-              onChange={(e) =>{
-                manejarCambio(pJustificacion.id, {
-                  opcion_id: null,
-                  texto_respuesta: e.target.value,
-                });
-                autoExpand(e);
-              }}
-              onInput={autoExpand} 
-              style={{
-                resize: 'none',
-                minHeight: '100px',
-                overflow: 'hidden'
-              }}
-            />
+            {isReadOnly ? (
+              <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+                {respuestas[pJustificacion.id]?.texto_respuesta || "—"}
+              </p>
+            ) : (
+              <textarea
+                className="form-control"
+                id={`preg-${pJustificacion.id}`}
+                value={respuestas[pJustificacion.id]?.texto_respuesta || ""}
+                onChange={(e) =>{
+                  manejarCambio(pJustificacion.id, {
+                    opcion_id: null,
+                    texto_respuesta: e.target.value,
+                  });
+                  autoExpand(e);
+                }}
+                onInput={autoExpand} 
+                style={{
+                  resize: 'none',
+                  minHeight: '100px',
+                  overflow: 'hidden'
+                }}
+              />
+            )}
           </div>
         )}
       </div>
@@ -157,47 +175,59 @@ export default function ContenidoPasos({
       <div className="row g-3">
         {pPorcentaje && (
           <div className="col-md-4"> 
-            <label htmlFor={`preg-${pPorcentaje.id}`} className="form-label">
+            <label htmlFor={`preg-${pPorcentaje.id}`} className="form-label fw-bold">
               {pPorcentaje.enunciado}
             </label>
-            <div className="input-group">
-              <input
-                type="number"
-                className="form-control"
-                id={`preg-${pPorcentaje.id}`}
-                value={respuestas[pPorcentaje.id || 0]?.texto_respuesta || ""}
-                onChange={(e) => handlePercentageChange(pPorcentaje, e.target.value)}
-                min="0"
-                max="100" 
-                aria-describedby="porcentaje-addon"
-              />
-            </div>
+            {isReadOnly ? (
+              <p className="form-control-plaintext ps-1">
+                {respuestas[pPorcentaje.id || 0]?.texto_respuesta || "0"}%
+              </p>
+            ) : (
+              <div className="input-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  id={`preg-${pPorcentaje.id}`}
+                  value={respuestas[pPorcentaje.id || 0]?.texto_respuesta || ""}
+                  onChange={(e) => handlePercentageChange(pPorcentaje, e.target.value)}
+                  min="0"
+                  max="100" 
+                  aria-describedby="porcentaje-addon"
+                />
+              </div>
+            )}
           </div>
         )}
 
         {pEstrategias && (
           <div className="col-12 mt-3">
-            <label htmlFor={`preg-${pEstrategias.id}`} className="form-label">
+            <label htmlFor={`preg-${pEstrategias.id}`} className="form-label fw-bold">
               {pEstrategias.enunciado}
             </label>
-            <textarea
-              className="form-control"
-              id={`preg-${pEstrategias.id}`}
-              value={respuestas[pEstrategias.id]?.texto_respuesta || ""}
-              onChange={(e) =>{
-                manejarCambio(pEstrategias.id, {
-                  opcion_id: null,
-                  texto_respuesta: e.target.value,
-                });
-                autoExpand(e);
-              }}
-              onInput={autoExpand} 
-              style={{
-                resize: 'none',
-                minHeight: '100px',
-                overflow: 'hidden'
-              }}
-            />
+            {isReadOnly ? (
+              <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+                {respuestas[pEstrategias.id]?.texto_respuesta || "—"}
+              </p>
+            ) : (
+              <textarea
+                className="form-control"
+                id={`preg-${pEstrategias.id}`}
+                value={respuestas[pEstrategias.id]?.texto_respuesta || ""}
+                onChange={(e) =>{
+                  manejarCambio(pEstrategias.id, {
+                    opcion_id: null,
+                    texto_respuesta: e.target.value,
+                  });
+                  autoExpand(e);
+                }}
+                onInput={autoExpand} 
+                style={{
+                  resize: 'none',
+                  minHeight: '100px',
+                  overflow: 'hidden'
+                }}
+              />
+            )}
           </div>
         )}
       </div>
@@ -207,6 +237,8 @@ export default function ContenidoPasos({
   const scrollTimeoutRef = useRef<number | null>(null);
 
   const handleAccordionToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isReadOnly) return;
+    
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
@@ -226,6 +258,8 @@ export default function ContenidoPasos({
         <CompletarInformeCatedraFuncion
           docenteMateriaId={docenteMateriaId}
           onDatosGenerados={onDatosGenerados}
+          isReadOnly={isReadOnly}
+          datosIniciales={datosIniciales}
         />
       );
 
@@ -255,6 +289,8 @@ export default function ContenidoPasos({
           <CategoriaEquipamiento
             categoria={categoria1}
             manejarCambio={manejarCambio}
+            isReadOnly={isReadOnly}
+            respuestas={respuestas}
           />
         </Fragment>
       ) : null;
@@ -269,16 +305,17 @@ export default function ContenidoPasos({
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2">
                   <button 
-                    className="accordion-button collapsed" 
+                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2"
-                    onClick={handleAccordionToggle} 
+                    onClick={handleAccordionToggle}
+                    disabled={isReadOnly}
                   >
                     2. Porcentaje de Horas de Clases
                   </button>
                 </h2>
-                <div id="collapse2" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
+                <div id="collapse2" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2.texto}</p>
                     {renderCategoria2(categoria2)}
@@ -290,16 +327,17 @@ export default function ContenidoPasos({
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2A">
                   <button 
-                    className="accordion-button collapsed" 
+                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2A"
-                    onClick={handleAccordionToggle} 
+                    onClick={handleAccordionToggle}
+                    disabled={isReadOnly}
                   >
                     2.A. Totalidad de Contenidos
                   </button>
                 </h2>
-                <div id="collapse2A" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
+                <div id="collapse2A" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2A.texto}</p>
                     {renderCategoria2A(categoria2A)}
@@ -312,16 +350,17 @@ export default function ContenidoPasos({
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2B">
                   <button 
-                    className="accordion-button collapsed" 
+                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2B"
                     onClick={handleAccordionToggle}
+                    disabled={isReadOnly}
                   >
                     2.B. Análisis de Encuestas
                   </button>
                 </h2>
-                <div id="collapse2B" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
+                <div id="collapse2B" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2B.texto}</p>
                     <Categoria2BInforme
@@ -329,6 +368,7 @@ export default function ContenidoPasos({
                       manejarCambio={manejarCambio}
                       estadisticas={datosEstadisticos}
                       respuestas={respuestas}
+                      isReadOnly={isReadOnly}
                     />
                   </div>
                 </div>
@@ -339,22 +379,24 @@ export default function ContenidoPasos({
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2C">
                   <button 
-                    className="accordion-button collapsed" 
+                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2C"
                     onClick={handleAccordionToggle}
+                    disabled={isReadOnly}
                   >
                     2.C. Reflexión Docente
                   </button>
                 </h2>
-                <div id="collapse2C" className="accordion-collapse collapse" data-bs-parent="#accordionPaso3">
+                <div id="collapse2C" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2C.texto}</p>
                     <Categoria2CInforme
                       categoria={categoria2C}
                       manejarCambio={manejarCambio}
                       respuestas={respuestas}
+                      isReadOnly={isReadOnly}
                     />
                   </div>
                 </div>
@@ -375,6 +417,7 @@ export default function ContenidoPasos({
               categoria={categoria3}
               manejarCambio={manejarCambio}
               respuestas={respuestas}
+              isReadOnly={isReadOnly}
             />
           </div>
         </Fragment>
@@ -392,6 +435,7 @@ export default function ContenidoPasos({
                 categoria={categoria4}
                 manejarCambio={manejarCambio}
                 respuestas={respuestas}
+                isReadOnly={isReadOnly}
               />
             </div>
           )}
