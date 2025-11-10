@@ -93,3 +93,19 @@ class EquipamientoBibliografia(BaseModel):
     materia: Materia
     bibliografia: str
     equipamiento: str
+
+class DesempenoAuxiliarDetalle(BaseModel):
+    espacio_curricular: str
+    nombre_apellido: str
+    calificacion_E: bool = False  
+    calificacion_MB: bool = False 
+    calificacion_B: bool = False  
+    calificacion_R: bool = False  
+    calificacion_I: bool = False  
+    justificacion: str
+
+class TablaDesempenoAuxiliar(BaseModel):
+    materia: Materia
+    auxiliares: List[DesempenoAuxiliarDetalle]
+    
+    model_config = {"from_attributes": True}

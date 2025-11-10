@@ -32,6 +32,6 @@ export interface Pregunta {
 
 export interface Respuesta {
     pregunta_id: number;
-    materia_id: number;
+    materia_id?: number;
     texto_respuesta: string;
 }

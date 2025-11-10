@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, selectinload
-from sqlalchemy import select
+from sqlalchemy import select, func, or_
 from src.informe_sintetico_completado import models, schemas
 from src.respuesta_informe_sintetico import services as respuestas_services 
 from typing import List, Optional
@@ -12,7 +12,7 @@ from src.asociaciones.models import materia_carrera
 from src.asociaciones.models import Periodo
 from src.asociaciones.docente_materia.models import DocenteMateria
 from src.docentes.models import Docente
-
+from src.categorias.models import Categoria
 def get_informes_completados(db: Session):
     return db.query(models.InformeSinteticoCompletado).all()
 
@@ -454,6 +454,132 @@ def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, an
             materia = materia,
             bibliografia = bibliografia_consolidada,
             equipamiento = equipamiento_consolidado
+        )
+        elementos.append(elemento)
+    
+    return elementos
+
+def get_desempeno_auxiliares(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.TablaDesempenoAuxiliar]:
+
+    categoria_desempeno = db.scalars(
+        select(Categoria.id)
+        .where(Categoria.cod == '4')
+        .where(func.lower(Categoria.texto).contains('auxiliares'))
+        .limit(1)
+    ).first()
+    
+    if not categoria_desempeno:
+        categoria_desempeno = db.scalars(
+            select(Categoria.id)
+            .where(func.lower(Categoria.texto).contains('4.'))
+            .where(func.lower(Categoria.texto).contains('auxiliares'))
+            .limit(1)
+        ).first()
+        
+    if not categoria_desempeno:
+        return []
+        
+    ID_CATEGORIA_DESEMPENO = categoria_desempeno
+
+    ROLES_LOGICOS = ['jtp', 'auxiliar de primera', 'auxiliar de segunda']
+    TIPOS_PREGUNTA = ['nombre', 'calificación', 'justificación']
+
+    sub_filtros = [func.lower(Pregunta.enunciado).contains(rol) for rol in ROLES_LOGICOS]
+    
+    preguntas_relevantes = db.execute(
+        select(Pregunta.id, Pregunta.enunciado)
+        .where(or_(*sub_filtros)) 
+        .where(Pregunta.categoria_id == ID_CATEGORIA_DESEMPENO)
+    ).all()
+    print("Preguntas encontradas:", preguntas_relevantes)
+    
+    mapa_ids = {}
+    
+    for id_pregunta, enunciado in preguntas_relevantes: 
+        enunciado_lower = enunciado.lower()
+        
+        rol_key = next((r for r in ROLES_LOGICOS if r in enunciado_lower), None)
+        tipo_key = next((t for t in TIPOS_PREGUNTA if t in enunciado_lower), None)
+        
+        if rol_key and tipo_key:
+            if rol_key not in mapa_ids:
+                mapa_ids[rol_key] = {}
+            mapa_ids[rol_key][tipo_key] = id_pregunta
+
+    materias: list[Materia] = db.scalars(
+        select(Materia)
+        .join(materia_carrera, Materia.id == materia_carrera.c.materia_id)
+        .where(Materia.departamento_id == id_dpto, materia_carrera.c.carrera_id == id_carrera)
+    ).all()
+    
+    elementos: List[schemas.TablaDesempenoAuxiliar] = [] 
+    
+    for materia in materias:
+        informes_completados = db.scalars(
+            select(InformeCatedraCompletado)
+            .where(
+                InformeCatedraCompletado.anio == anio,
+                InformeCatedraCompletado.periodo == Periodo(periodo), 
+                InformeCatedraCompletado.docente_materia.has(materia_id = materia.id)
+            )
+            .options(
+                selectinload(InformeCatedraCompletado.respuestas_informe).selectinload(RespuestaInforme.pregunta),
+                selectinload(InformeCatedraCompletado.respuestas_informe).selectinload(RespuestaInforme.opcion)
+            )
+        ).all()
+
+        if not informes_completados:
+            continue
+
+        auxiliares_consolidados: List[schemas.DesempenoAuxiliarDetalle] = []
+        auxiliares_set = set() 
+        
+        for informe in informes_completados:
+            
+            for rol_key, ids_del_rol in mapa_ids.items(): 
+                
+                id_nombre = ids_del_rol.get('nombre')
+                id_calif = ids_del_rol.get('calificación')
+                id_just = ids_del_rol.get('justificación')
+                
+                if not all([id_nombre, id_calif, id_just]):
+                    continue
+                
+                r_nombre: RespuestaInforme = next((r for r in informe.respuestas_informe
+                    if r.pregunta_id == id_nombre and r.texto_respuesta and r.texto_respuesta.strip()), None)
+                
+                r_calificacion: RespuestaInforme = next((r for r in informe.respuestas_informe
+                    if r.pregunta_id == id_calif), None) 
+                
+                r_justificacion: RespuestaInforme = next((r for r in informe.respuestas_informe
+                    if r.pregunta_id == id_just and r.texto_respuesta), None)
+
+                nombre_aux = r_nombre.texto_respuesta.strip() if r_nombre else None
+                
+                if nombre_aux and nombre_aux not in auxiliares_set:
+                    auxiliares_set.add(nombre_aux)
+                    
+                    calif_codigo = ""
+                    if r_calificacion and r_calificacion.opcion and r_calificacion.opcion.contenido:
+                        calif_codigo = r_calificacion.opcion.contenido.split(' ')[0].strip().upper() 
+
+                    justificacion_texto = r_justificacion.texto_respuesta.strip() if r_justificacion and r_justificacion.texto_respuesta else ""
+                    
+                    detalle = schemas.DesempenoAuxiliarDetalle(
+                        espacio_curricular=materia.nombre,
+                        nombre_apellido=nombre_aux,
+                        calificacion_E=(calif_codigo == 'E'),
+                        calificacion_MB=(calif_codigo == 'MB'),
+                        calificacion_B=(calif_codigo == 'B'),
+                        calificacion_R=(calif_codigo == 'R'),
+                        calificacion_I=(calif_codigo == 'I'),
+                        justificacion=justificacion_texto
+                    )
+                    auxiliares_consolidados.append(detalle)
+        
+        elemento = schemas.TablaDesempenoAuxiliar(
+            materia = materia,
+            auxiliares = auxiliares_consolidados
         )
         elementos.append(elemento)
     
