@@ -47,7 +47,7 @@ export default function ObservacionesComentarios({
 
     return (
         <div className="container mt-4">
-            <h4 className="mb-3">{pregunta.enunciado}</h4>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
             <CampoTextArea
                 label="" 
                 value={contenido}
