@@ -49,13 +49,13 @@ const boolsToCode = (detalle: DesempenoAuxiliarDetalle): string => {
     if (detalle.calificacion_B) return 'B';
     if (detalle.calificacion_R) return 'R';
     if (detalle.calificacion_I) return 'I';
-    return '-'; 
+    return '-';
 };
 
 export default function DesempenoAuxiliares({
     departamentoId, carreraId, pregunta, anio, periodo, manejarCambio
 }: Props) {
-    const [itemsTabla, setItems] = useState<TablaDesempenoAuxiliar[]>([]); 
+    const [itemsTabla, setItems] = useState<TablaDesempenoAuxiliar[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -76,13 +76,13 @@ export default function DesempenoAuxiliares({
                     throw new Error(`Error HTTP ${res.status}: ${errData.detail || res.statusText}`);
                 }
                 const data: TablaDesempenoAuxiliar[] = await res.json();
-                
+
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
                 setItems(data);
-                
+
                 const respuestasIniciales = data.map(materiaItem => ({
                     pregunta_id: pregunta.id,
                     materia_id: materiaItem.materia.id,
@@ -115,7 +115,7 @@ export default function DesempenoAuxiliares({
         materiaIndex: number,
         auxIndex: number,
         field: keyof DesempenoAuxiliarDetalle,
-        value: string | boolean 
+        value: string | boolean
     ) => {
         const updatedItems = [...itemsTabla];
         const aux = updatedItems[materiaIndex].auxiliares[auxIndex];
@@ -125,15 +125,15 @@ export default function DesempenoAuxiliares({
                 const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
                 (aux[califKey] as boolean) = false;
             });
-            
+
             if (value === true) {
-                (aux[field] as boolean) = true; 
+                (aux[field] as boolean) = true;
             }
-        
+
         } else if (typeof value === 'string' && field === 'justificacion') {
             (aux[field] as string) = value;
         } else if (typeof value === 'string' && field === 'nombre_apellido') {
-            (aux[field] as string) = value; 
+            (aux[field] as string) = value;
         }
 
         setItems(updatedItems);
@@ -163,7 +163,7 @@ export default function DesempenoAuxiliares({
             <div className="accordion" id="accordionDesempenoAuxiliares">
                 {itemsTabla.map((materiaItem, mIndex) => (
                     <div key={materiaItem.materia.id} className="accordion-item">
-                        
+
                         <h2 className="accordion-header" id={`headingAux${mIndex}`}>
                             <button
                                 className="accordion-button collapsed"
@@ -176,7 +176,7 @@ export default function DesempenoAuxiliares({
                                 Espacio Curricular: {materiaItem.materia.nombre} ({materiaItem.materia.matricula})
                             </button>
                         </h2>
-                        
+
                         <div
                             id={`collapseAux${mIndex}`}
                             className="accordion-collapse collapse"
@@ -185,29 +185,27 @@ export default function DesempenoAuxiliares({
                         >
                             <div className="accordion-body p-0">
                                 <div className="table-responsive">
-                                    <table className="table table-bordered table-sm mb-0">
-                                        <thead className="table-secondary">
+                                    <table className="table table-bordered table-hover table-sm align-middle mb-0">
+                                        <thead className="table-light text-center no-bold">
                                             <tr>
                                                 <th style={{ width: '20%' }}>Nombre y Apellido JTP/Auxiliar</th>
-                                                <th colSpan={5} className="text-center">Calificación desempeño auxiliares</th>
+                                                <th colSpan={5}>Calificación desempeño auxiliares</th>
                                                 <th style={{ width: '40%' }}>Justificación de la calificación</th>
                                             </tr>
                                             <tr>
                                                 <th></th>
-                                                {CALIFICACIONES.map(c => <th key={c.code} className="text-center" style={{ width: '5%' }}>{c.label}</th>)}
+                                                {CALIFICACIONES.map(c => (
+                                                    <th key={c.code} style={{ width: '5%' }}>{c.label}</th>
+                                                ))}
                                                 <th></th>
                                             </tr>
                                         </thead>
+
                                         <tbody>
                                             {materiaItem.auxiliares.map((aux, aIndex) => (
                                                 <tr key={aux.nombre_apellido}>
                                                     <td>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control form-control-sm border-0"
-                                                            value={aux.nombre_apellido}
-                                                            readOnly 
-                                                        />
+                                                        {aux.nombre_apellido}
                                                     </td>
                                                     {CALIFICACIONES.map(c => {
                                                         const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
@@ -228,9 +226,17 @@ export default function DesempenoAuxiliares({
                                                     </td>
                                                 </tr>
                                             ))}
+                                            {materiaItem.auxiliares.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={7} className="text-center text-muted">
+                                                        No se encontraron auxiliares para esta materia.
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
+
                             </div>
                         </div>
                     </div>

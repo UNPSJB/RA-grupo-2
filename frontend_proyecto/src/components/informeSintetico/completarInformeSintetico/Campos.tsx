@@ -19,7 +19,7 @@ export function CampoTextArea({
             <label className="form-label">{label}</label>
             <textarea
                 className="form-control"
-                rows={1}
+                rows={2}
                 value={value}
                 onChange={
                     (e) => {onChange?.(e.target.value);
