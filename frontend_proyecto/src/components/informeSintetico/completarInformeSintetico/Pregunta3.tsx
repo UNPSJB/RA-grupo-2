@@ -209,7 +209,7 @@ export default function ActividadesDocentes({
 
                                                         <td>
                                                             <CampoTextArea
-                                                                label=""
+                                                                label={null}
                                                                 value={itemDocente.actividades.observaciones || ""}
                                                                 onChange={(v) => handleChange(materiaIndex, docenteIndex, 'observaciones', v)}
                                                             />

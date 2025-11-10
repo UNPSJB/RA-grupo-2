@@ -219,7 +219,7 @@ export default function DesempenoAuxiliares({
                                                     })}
                                                     <td>
                                                         <CampoTextArea
-                                                            label=""
+                                                            label={null}
                                                             value={aux.justificacion}
                                                             onChange={(v) => handleChange(mIndex, aIndex, 'justificacion', v)}
                                                         />

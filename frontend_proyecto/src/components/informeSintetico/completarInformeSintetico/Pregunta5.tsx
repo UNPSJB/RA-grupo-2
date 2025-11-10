@@ -49,7 +49,7 @@ export default function ObservacionesComentarios({
         <div className="container mt-4">
             <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
             <CampoTextArea
-                label="" 
+                label={null}
                 value={contenido}
                 onChange={handleContentChange}
             />
