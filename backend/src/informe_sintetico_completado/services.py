@@ -300,6 +300,7 @@ def obtener_temas_desarrollados(
         elementos.append(elemento)
         
     return elementos
+
 def get_actividades_docentes(
     db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str
 ) -> List[schemas.ActividadesPorMateriaItem]:
@@ -327,8 +328,10 @@ def get_actividades_docentes(
             )
             .options(
                 selectinload(InformeCatedraCompletado.respuestas_informe)
-                    .selectinload(RespuestaInforme.pregunta)
-            )
+                    .selectinload(RespuestaInforme.pregunta),
+                selectinload(InformeCatedraCompletado.docente_materia)
+                    .selectinload(DocenteMateria.docente)
+        )
         ).first()
 
         if not informe_completado:
@@ -344,44 +347,82 @@ def get_actividades_docentes(
             )
             return r.texto_respuesta if r and r.texto_respuesta else None
 
-        for rol in roles_a_buscar:
-            nombre_docente = find_response_text(f"Nombre - {rol}")
-            if not nombre_docente:
-                continue
-
+        docente_relacion = (
+            informe_completado.docente_materia.docente
+            if informe_completado.docente_materia and informe_completado.docente_materia.docente
+            else None
+        )
+        if docente_relacion:
             actividades_docente = schemas.DocenteActividades(
-                capacitacion=find_response_text(f"Capacitación - {rol}"),
-                investigacion=find_response_text(f"Investigación - {rol}"),
-                extension=find_response_text(f"Extensión - {rol}"),
-                gestion=find_response_text(f"Gestión - {rol}"),
-                observaciones=find_response_text(f"Observaciones - {rol}")
+                capacitacion=find_response_text("Capacitación - Profesor"),
+                investigacion=find_response_text("Investigación - Profesor"),
+                extension=find_response_text("Extensión - Profesor"),
+                gestion=find_response_text("Gestión - Profesor"),
+                observaciones=find_response_text("Observaciones - Profesor")
             )
-
             lista_docentes_actividades.append(
                 schemas.DocenteConActividades(
-                    nombre_docente=nombre_docente,
-                    rol_docente=rol,
+                    nombre_docente=f"{docente_relacion.apellido}, {docente_relacion.nombre}",
+                    rol_docente="Profesor",
                     actividades=actividades_docente
                 )
             )
 
-        if not lista_docentes_actividades:
-            docente_relacion = None
-
-            docente_materia_rel = db.scalars(
-                select(DocenteMateria)
-                .options(selectinload(DocenteMateria.docente))
-                .where(DocenteMateria.id == informe_completado.docente_materia_id)
-            ).first()
-            docente_relacion = docente_materia_rel.docente if docente_materia_rel else None
-
-            if docente_relacion:
-                docente_fallback = schemas.DocenteConActividades(
-                    nombre_docente=f"{docente_relacion.apellido}, {docente_relacion.nombre}",
-                    rol_docente="Profesor",
-                    actividades=schemas.DocenteActividades()
+        if informe_completado.JTP:
+            actividades_jtp = schemas.DocenteActividades(
+                capacitacion=find_response_text("Capacitación - JTP"),
+                investigacion=find_response_text("Investigación - JTP"),
+                extension=find_response_text("Extensión - JTP"),
+                gestion=find_response_text("Gestión - JTP"),
+                observaciones=find_response_text("Observaciones - JTP")
+            )
+            lista_docentes_actividades.append(
+                schemas.DocenteConActividades(
+                    nombre_docente=informe_completado.JTP,
+                    rol_docente="JTP",
+                    actividades=actividades_jtp
                 )
-                lista_docentes_actividades.append(docente_fallback)
+            )
+
+        if informe_completado.aux_primera:
+            actividades_aux1 = schemas.DocenteActividades(
+                capacitacion=find_response_text("Capacitación - Auxiliar de Primera"),
+                investigacion=find_response_text("Investigación - Auxiliar de Primera"),
+                extension=find_response_text("Extensión - Auxiliar de Primera"),
+                gestion=find_response_text("Gestión - Auxiliar de Primera"),
+                observaciones=find_response_text("Observaciones - Auxiliar de Primera")
+            )
+            lista_docentes_actividades.append(
+                schemas.DocenteConActividades(
+                    nombre_docente=informe_completado.aux_primera,
+                    rol_docente="Auxiliar de Primera",
+                    actividades=actividades_aux1
+                )
+            )
+
+        if informe_completado.aux_segunda:
+            actividades_aux2 = schemas.DocenteActividades(
+                capacitacion=find_response_text("Capacitación - Auxiliar de Segunda"),
+                investigacion=find_response_text("Investigación - Auxiliar de Segunda"),
+                extension=find_response_text("Extensión - Auxiliar de Segunda"),
+                gestion=find_response_text("Gestión - Auxiliar de Segunda"),
+                observaciones=find_response_text("Observaciones - Auxiliar de Segunda")
+            )
+            lista_docentes_actividades.append(
+                schemas.DocenteConActividades(
+                    nombre_docente=informe_completado.aux_segunda,
+                    rol_docente="Auxiliar de Segunda",
+                    actividades=actividades_aux2
+                )
+            )
+
+        if not lista_docentes_actividades and docente_relacion:
+            docente_fallback = schemas.DocenteConActividades(
+                nombre_docente=f"{docente_relacion.apellido}, {docente_relacion.nombre}",
+                rol_docente="Profesor",
+                actividades=schemas.DocenteActividades()
+            )
+            lista_docentes_actividades.append(docente_fallback)
 
         elemento = schemas.ActividadesPorMateriaItem(
             materia=materia,
@@ -390,6 +431,7 @@ def get_actividades_docentes(
         elementos.append(elemento)
 
     return elementos
+
 def get_bibliografia_equipamiento(db: Session, id_dpto: int, id_carrera: int, anio: int, periodo: str) -> List[schemas.EquipamientoBibliografia]:
 
     pregunta_equipamiento = db.scalars(select(Pregunta.id).where(Pregunta.enunciado.ilike("equipamiento"))).first()
@@ -505,6 +547,8 @@ def get_desempeno_auxiliares(db: Session, id_dpto: int, id_carrera: int, anio: i
             if rol_key not in mapa_ids:
                 mapa_ids[rol_key] = {}
             mapa_ids[rol_key][tipo_key] = id_pregunta
+    
+    print("Mapa IDs:", mapa_ids)
 
     materias: list[Materia] = db.scalars(
         select(Materia)
@@ -535,18 +579,23 @@ def get_desempeno_auxiliares(db: Session, id_dpto: int, id_carrera: int, anio: i
         auxiliares_set = set() 
         
         for informe in informes_completados:
-            
-            for rol_key, ids_del_rol in mapa_ids.items(): 
+            roles_y_nombres = {
+                "JTP": informe.JTP,
+                "Auxiliar de Primera": informe.aux_primera,
+                "Auxiliar de Segunda": informe.aux_segunda,
+            }
+            for rol_key, nombre_aux in roles_y_nombres.items():
+                if not nombre_aux:
+                    continue
+                ids_del_rol = mapa_ids.get(rol_key.lower())
+                if not ids_del_rol:
+                    continue
                 
-                id_nombre = ids_del_rol.get('nombre')
                 id_calif = ids_del_rol.get('calificación')
                 id_just = ids_del_rol.get('justificación')
                 
-                if not all([id_nombre, id_calif, id_just]):
+                if not all([id_calif, id_just]):
                     continue
-                
-                r_nombre: RespuestaInforme = next((r for r in informe.respuestas_informe
-                    if r.pregunta_id == id_nombre and r.texto_respuesta and r.texto_respuesta.strip()), None)
                 
                 r_calificacion: RespuestaInforme = next((r for r in informe.respuestas_informe
                     if r.pregunta_id == id_calif), None) 
@@ -554,8 +603,6 @@ def get_desempeno_auxiliares(db: Session, id_dpto: int, id_carrera: int, anio: i
                 r_justificacion: RespuestaInforme = next((r for r in informe.respuestas_informe
                     if r.pregunta_id == id_just and r.texto_respuesta), None)
 
-                nombre_aux = r_nombre.texto_respuesta.strip() if r_nombre else None
-                
                 if nombre_aux and nombre_aux not in auxiliares_set:
                     auxiliares_set.add(nombre_aux)
                     
