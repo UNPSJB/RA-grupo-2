@@ -22,7 +22,7 @@ interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   respuestas: Record<number, RespuestaValor>;
-  nombresFuncion: { JTP: string; aux1: string; aux2: string }; 
+  nombresFuncion: { JTP: string | null; aux1: string | null; aux2: string | null };
   isReadOnly?: boolean;
 }
 
@@ -83,16 +83,26 @@ export default function Categoria3Informe({
     }, 360);
   };
 
+  const rolesFiltrados = isReadOnly
+    ? roles.filter((rol) => {
+      return actividades.some((act) => {
+        const pId = findPreguntaId(rol, act);
+        const respuesta = respuestas[pId]?.texto_respuesta?.trim();
+        return !!respuesta; 
+      });
+    })
+    : roles;
+
   return (
     <Fragment>
-      {roles.map((rol, index) => {
+      {rolesFiltrados.map((rol, index) => {
         const collapseId = `collapse-rol-${index}`;
         const headingId = `heading-rol-${index}`;
 
         let habilitado = true;
-        if (rol === "JTP" && !nombresFuncion.JTP.trim()) habilitado = false;
-        if (rol === "Auxiliar de Primera" && !nombresFuncion.aux1.trim()) habilitado = false;
-        if (rol === "Auxiliar de Segunda" && !nombresFuncion.aux2.trim()) habilitado = false;
+        if (rol === "JTP" && !nombresFuncion?.JTP?.trim()) habilitado = false;
+        if (rol === "Auxiliar de Primera" && !nombresFuncion?.aux1?.trim()) habilitado = false;
+        if (rol === "Auxiliar de Segunda" && !nombresFuncion?.aux2?.trim()) habilitado = false;
 
         return (
           <div className="accordion-item" key={rol}>

@@ -24,7 +24,7 @@ interface ContenidoPasosProps {
   docenteMateriaId: number;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
-  nombresFuncion: { JTP: string; aux1: string; aux2: string };
+  nombresFuncion: { JTP: string | null; aux1: string | null; aux2: string | null };
   setNombresFuncion?: {
     SetJTP: React.Dispatch<React.SetStateAction<string>>;
     SetAux1: React.Dispatch<React.SetStateAction<string>>;

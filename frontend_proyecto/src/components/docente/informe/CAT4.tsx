@@ -77,12 +77,16 @@ export default function Categoria4Informe({
 
   const getNombreFuncion = (rolKey: string): string => {
     if (!nombresFuncion) return "";
-    if (rolKey === "jtp") return nombresFuncion.JTP || "";
-    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1 || "";
-    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2 || "";
+    if (rolKey === "jtp") return nombresFuncion.JTP? nombresFuncion.JTP : "";
+    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1? nombresFuncion.aux1 : "";
+    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2? nombresFuncion.aux2 : "";
     return "";
   };
 
+  const rolesVisibles = isReadOnly
+    ? ROLES.filter((rol) => getNombreFuncion(rol.key).trim()) // solo los que tienen nombre
+    : ROLES;
+ 
   return (
     <Fragment>
       <div className="table-responsive">
@@ -95,7 +99,7 @@ export default function Categoria4Informe({
             </tr>
           </thead>
           <tbody>
-            {ROLES.map((rol) => {
+            {rolesVisibles.map((rol) => {
               const calificacionPId = findPreguntaId(rol.key, "calificacion");
               const justificacionPId = findPreguntaId(rol.key, "justificacion");
 
@@ -109,7 +113,6 @@ export default function Categoria4Informe({
 
               return (
                 <tr key={rol.key} style={{ opacity: habilitado ? 1 : 0.6 }}>
-                  {/* Columna: Rol + nombre */}
                   <td className="p-2">
                     <strong>{rol.texto}</strong>
                     {nombre ? (
@@ -119,7 +122,6 @@ export default function Categoria4Informe({
                     )}
                   </td>
 
-                  {/* Columna: calificación */}
                   <td>
                     {isReadOnly ? (
                       <p className="form-control-plaintext px-2">
@@ -149,7 +151,6 @@ export default function Categoria4Informe({
                     )}
                   </td>
 
-                  {/* Columna: justificación */}
                   <td>
                     {isReadOnly ? (
                       <p

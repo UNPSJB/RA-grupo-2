@@ -35,7 +35,7 @@ export default function CompletarInformeCatedraFuncion({
   isReadOnly = false,
   datosIniciales,
   nombresFuncion,
-  setNombresFuncion
+  setNombresFuncion,
 }: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,7 +126,7 @@ export default function CompletarInformeCatedraFuncion({
     datosIniciales,
     JTP,
     aux1,
-    aux2
+    aux2,
   ]);
 
   if (loading) return <p>Cargando información de la cátedra...</p>;
@@ -170,10 +170,12 @@ export default function CompletarInformeCatedraFuncion({
         </div>
         <div className="col-md-12">
           {isReadOnly ? (
-            <div className="col-md-4">
-              <p className="mb-1 text-muted small">JTP</p>
-              <p>{data.JTP}</p>
-            </div>
+            data.JTP?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">JTP</p>
+                <p>{data.JTP}</p>
+              </div>
+            )
           ) : (
             <>
               <label htmlFor="JTP" className="form-label">
@@ -194,10 +196,12 @@ export default function CompletarInformeCatedraFuncion({
         </div>
         <div className="col-md-12">
           {isReadOnly ? (
-            <div className="col-md-4">
-              <p className="mb-1 text-muted small">Auxiliar de Primera</p>
-              <p>{data.aux1}</p>
-            </div>
+            data.aux1?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">Auxiliar de Primera</p>
+                <p>{data.aux1}</p>
+              </div>
+            )
           ) : (
             <>
               <label htmlFor="aux1" className="form-label">
@@ -219,10 +223,12 @@ export default function CompletarInformeCatedraFuncion({
         </div>
         <div className="col-md-12">
           {isReadOnly ? (
-            <div className="col-md-4">
-              <p className="mb-1 text-muted small">Auxiliar de Segunda</p>
-              <p>{data.aux2}</p>
-            </div>
+            data.aux2?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">Auxiliar de Segunda</p>
+                <p>{data.aux2}</p>
+              </div>
+            )
           ) : (
             <>
               <label htmlFor="aux2" className="form-label">
