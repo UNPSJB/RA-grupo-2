@@ -181,7 +181,7 @@ export default function AsignarFormularios() {
                   <option value="">(Opcional) Ninguna</option>
                   {encuestas.map((enc) => (
                     <option key={enc.id} value={enc.id}>
-                      {enc.nombre} - ID: {enc.id}
+                      {enc.nombre} 
                     </option>
                   ))}
                 </select>
@@ -199,7 +199,7 @@ export default function AsignarFormularios() {
                   <option value="">(Opcional) Ninguno</option>
                   {informes.map((inf) => (
                     <option key={inf.id} value={inf.id}>
-                      {inf.titulo} - ID:{inf.id}
+                      {inf.titulo}
                     </option>
                   ))}
                 </select>
