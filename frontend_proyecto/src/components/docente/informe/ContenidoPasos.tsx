@@ -24,6 +24,12 @@ interface ContenidoPasosProps {
   docenteMateriaId: number;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
+  nombresFuncion: { JTP: string; aux1: string; aux2: string };
+  setNombresFuncion?: {
+    SetJTP: React.Dispatch<React.SetStateAction<string>>;
+    SetAux1: React.Dispatch<React.SetStateAction<string>>;
+    SetAux2: React.Dispatch<React.SetStateAction<string>>;
+  };
   isReadOnly?: boolean;
   datosIniciales?: any;
 }
@@ -42,6 +48,8 @@ export default function ContenidoPasos({
   docenteMateriaId,
   manejarCambio,
   onDatosGenerados,
+  nombresFuncion,
+  setNombresFuncion,
   isReadOnly = false,
   datosIniciales
 }: ContenidoPasosProps) {
@@ -260,6 +268,8 @@ export default function ContenidoPasos({
           onDatosGenerados={onDatosGenerados}
           isReadOnly={isReadOnly}
           datosIniciales={datosIniciales}
+          nombresFuncion={nombresFuncion}
+          setNombresFuncion={setNombresFuncion}
         />
       );
 
@@ -418,6 +428,7 @@ export default function ContenidoPasos({
               manejarCambio={manejarCambio}
               respuestas={respuestas}
               isReadOnly={isReadOnly}
+              nombresFuncion={nombresFuncion}
             />
           </div>
         </Fragment>
@@ -436,6 +447,7 @@ export default function ContenidoPasos({
                 manejarCambio={manejarCambio}
                 respuestas={respuestas}
                 isReadOnly={isReadOnly}
+                nombresFuncion={nombresFuncion}
               />
             </div>
           )}

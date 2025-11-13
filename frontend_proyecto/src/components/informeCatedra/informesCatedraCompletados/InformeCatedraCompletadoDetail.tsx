@@ -34,6 +34,9 @@ interface InformeCompletadoDetalle {
   cantidadAlumnos: number;
   cantidadComisionesTeoricas: number;
   cantidadComisionesPracticas: number;
+  JTP: string | null;
+  aux_primera: string | null;
+  aux_segunda: string | null;
   materiaNombre?: string; 
   materiaCodigo?: string;
   sede?: string;
@@ -171,6 +174,9 @@ export default function InformeCatedraDetalle() {
       cantidadAlumnos: informe.cantidadAlumnos,
       cantidadComisionesTeoricas: informe.cantidadComisionesTeoricas,
       cantidadComisionesPracticas: informe.cantidadComisionesPracticas,
+      JTP: informe.JTP,
+      aux1: informe.aux_primera,
+      aux2: informe.aux_segunda,
       actividadCurricular: informe.materiaNombre, 
       codigoActividadCurricular: informe.materiaCodigo,
       sede: informe.sede,

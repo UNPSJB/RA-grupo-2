@@ -1,6 +1,6 @@
 import { useEffect, useState, Fragment } from "react";
 
-type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null; };
+type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null };
 interface Opcion { id: number; contenido: string; }
 interface Pregunta { id: number; enunciado: string; categoria_id: number; opciones?: Opcion[]; }
 interface Categoria { id: number; cod: string; texto: string; preguntas: Pregunta[]; }
@@ -9,12 +9,13 @@ interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   respuestas: Record<number, RespuestaValor>;
+  nombresFuncion?: { JTP: string; aux1: string; aux2: string };
   isReadOnly?: boolean;
 }
 
 const normalizarString = (texto: string): string => {
-  if (!texto) return ""; 
-  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+  if (!texto) return "";
+  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
 const ROLES = [
@@ -23,18 +24,23 @@ const ROLES = [
   { key: "auxiliar de segunda", texto: "Auxiliar de Segunda" },
 ];
 
-export default function Categoria4Informe({ categoria, manejarCambio, respuestas, isReadOnly = false }: Props) {
+export default function Categoria4Informe({
+  categoria,
+  manejarCambio,
+  respuestas,
+  nombresFuncion,
+  isReadOnly = false,
+}: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
 
   const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
   };
 
   useEffect(() => {
-    if (!categoria) return;
-    setPreguntas(categoria.preguntas);
+    if (categoria) setPreguntas(categoria.preguntas);
   }, [categoria]);
 
   const actualizarRespuesta = (
@@ -53,20 +59,28 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
     rolKey: string,
     tipo: "calificacion" | "justificacion"
   ): number => {
-    const searchTerm = tipo === "calificacion" ? "calificacion" : "justificacion"; 
+    const searchTerm = tipo === "calificacion" ? "calificacion" : "justificacion";
     const expectedEnunciado = normalizarString(`${searchTerm} - ${rolKey}`);
     const p = preguntas.find(
       (p) => normalizarString(p.enunciado) === expectedEnunciado
     );
     return p ? p.id : 0;
   };
-  
+
   const getOpcionTexto = (preguntaId: number): string => {
     const opcionId = respuestas[preguntaId]?.opcion_id;
     if (!opcionId) return "—";
-    const pregunta = preguntas.find(p => p.id === preguntaId);
-    const opcion = pregunta?.opciones?.find(o => o.id === opcionId);
+    const pregunta = preguntas.find((p) => p.id === preguntaId);
+    const opcion = pregunta?.opciones?.find((o) => o.id === opcionId);
     return opcion?.contenido || "—";
+  };
+
+  const getNombreFuncion = (rolKey: string): string => {
+    if (!nombresFuncion) return "";
+    if (rolKey === "jtp") return nombresFuncion.JTP || "";
+    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1 || "";
+    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2 || "";
+    return "";
   };
 
   return (
@@ -84,38 +98,28 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
             {ROLES.map((rol) => {
               const calificacionPId = findPreguntaId(rol.key, "calificacion");
               const justificacionPId = findPreguntaId(rol.key, "justificacion");
-              const nombrePId =
-                preguntas.find((p) => normalizarString(p.enunciado) === normalizarString(`Nombre - ${rol.texto}`))
-                  ?.id || 0;
 
               const preguntaCalificacion = preguntas.find(
                 (p) => p.id === calificacionPId
               );
               const opciones = preguntaCalificacion?.opciones || [];
 
+              const nombre = getNombreFuncion(rol.key);
+              const habilitado = !!nombre.trim();
+
               return (
-                <tr key={rol.key}>
-                  <td className="p-1">
-                    {isReadOnly ? (
-                      <p className="form-control-plaintext px-2">
-                        {respuestas[nombrePId]?.texto_respuesta || rol.texto}
-                      </p>
+                <tr key={rol.key} style={{ opacity: habilitado ? 1 : 0.6 }}>
+                  {/* Columna: Rol + nombre */}
+                  <td className="p-2">
+                    <strong>{rol.texto}</strong>
+                    {nombre ? (
+                      <span className="text-muted">{" - " + nombre}</span>
                     ) : (
-                      <textarea
-                        className="form-control border-0"
-                        rows={1}
-                        style={{ background: "transparent", resize: 'none', width: '100%'}}
-                        placeholder={`${rol.texto}`}
-                        value={respuestas[nombrePId]?.texto_respuesta || ""}
-                        onChange={(e) => {
-                          actualizarRespuesta(nombrePId, e.target.value, "abierta");
-                          autoExpand(e);
-                        }}
-                        onInput={autoExpand}
-                        disabled={!nombrePId}
-                      />
+                      <span className="text-muted">{" *complete el nombre en Datos Generales para calificar"}</span>
                     )}
                   </td>
+
+                  {/* Columna: calificación */}
                   <td>
                     {isReadOnly ? (
                       <p className="form-control-plaintext px-2">
@@ -124,9 +128,7 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
                     ) : (
                       <select
                         className="form-select border-0"
-                        style={{
-                          borderBottom: '1px solid #9ea5abff'
-                        }}
+                        style={{ borderBottom: "1px solid #9ea5abff" }}
                         value={respuestas[calificacionPId]?.opcion_id || ""}
                         onChange={(e) =>
                           actualizarRespuesta(
@@ -135,7 +137,7 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
                             "cerrada"
                           )
                         }
-                        disabled={!calificacionPId}
+                        disabled={!habilitado || !calificacionPId}
                       >
                         <option value="">Seleccionar</option>
                         {opciones.map((opt) => (
@@ -146,9 +148,14 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
                       </select>
                     )}
                   </td>
+
+                  {/* Columna: justificación */}
                   <td>
                     {isReadOnly ? (
-                      <p className="form-control-plaintext px-2" style={{ whiteSpace: 'pre-wrap' }}>
+                      <p
+                        className="form-control-plaintext px-2"
+                        style={{ whiteSpace: "pre-wrap" }}
+                      >
                         {respuestas[justificacionPId]?.texto_respuesta || "—"}
                       </p>
                     ) : (
@@ -165,8 +172,8 @@ export default function Categoria4Informe({ categoria, manejarCambio, respuestas
                           autoExpand(e);
                         }}
                         onInput={autoExpand}
-                        disabled={!justificacionPId}
-                        style={{ resize: "none"}}
+                        disabled={!habilitado || !justificacionPId}
+                        style={{ resize: "none" }}
                       />
                     )}
                   </td>

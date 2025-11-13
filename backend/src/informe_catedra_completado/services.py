@@ -85,6 +85,9 @@ def crear_informe_completado(db: Session, informe_data: schemas.InformeCatedraCo
         periodo=informe_data.periodo,
         cantidadComisionesTeoricas=informe_data.cantidadComisionesTeoricas,
         cantidadComisionesPracticas=informe_data.cantidadComisionesPracticas,
+        JTP=informe_data.JTP,
+        aux_primera=informe_data.aux_primera,
+        aux_segunda=informe_data.aux_segunda
     )
     db.add(informe_db)
     db.commit()  
@@ -157,12 +160,15 @@ def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
         "cantidadComisionesTeoricas": informe.cantidadComisionesTeoricas,
         "cantidadComisionesPracticas": informe.cantidadComisionesPracticas,
         "respuestas_informe": informe.respuestas_informe,
+        "JTP": informe.JTP,
+        "aux_primera": informe.aux_primera,
+        "aux_segunda": informe.aux_segunda,
         
         "materiaId": -1, 
         "materiaNombre": None,
         "materiaCodigo": None,
         "docenteResponsable": None,
-        "sede": "Trelew" 
+        "sede": "Trelew"  #CORREGIR CON SEDE DE VERDAD
     }
 
     if informe.docente_materia:
