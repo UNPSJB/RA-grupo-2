@@ -53,6 +53,10 @@ export default function CompletarInformeCatedra() {
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
   const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
   const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
+  const [JTP, SetJTP] = useState("");
+  const [aux1, SetAux1] = useState("");
+  const [aux2, SetAux2] = useState("");
+  
   
   const { docenteMateriaId, materiaId, materiaNombre, anio, periodo, informeBaseId = 3 } = location.state || {};
 
@@ -126,6 +130,9 @@ export default function CompletarInformeCatedra() {
     setCantidadInscriptos(datos.cantidadAlumnos);
     setCantidadComisionesTeoricas(datos.cantidadComisionesTeoricas);
     setCantidadComisionesPracticas(datos.cantidadComisionesPracticas);
+    SetJTP(datos.JTP);
+    SetAux1(datos.aux1);
+    SetAux2(datos.aux2);
   };
 
 
@@ -147,6 +154,9 @@ export default function CompletarInformeCatedra() {
       periodo: periodo,
       cantidadComisionesTeoricas,
       cantidadComisionesPracticas,
+      JTP: JTP.trim()? JTP: null,
+      aux_primera: aux1.trim()? aux1 : null,
+      aux_segunda: aux2.trim()? aux1 : null,
       respuestas: respuestasFormateadas,
     };
     try {
@@ -224,6 +234,8 @@ return (
                 docenteMateriaId={docenteMateriaId}
                 manejarCambio={manejarCambio}
                 onDatosGenerados={manejarDatosGenerados}
+                nombresFuncion={{ JTP, aux1, aux2 }}
+                setNombresFuncion={{ SetJTP, SetAux1, SetAux2 }}
               />
             </div>
           </div> 

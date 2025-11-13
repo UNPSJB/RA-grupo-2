@@ -1,4 +1,4 @@
-import { Fragment, useRef } from "react"; 
+import { Fragment} from "react"; 
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
 import Categoria3Informe from "./CAT3";
@@ -24,6 +24,12 @@ interface ContenidoPasosProps {
   docenteMateriaId: number;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   onDatosGenerados: (datos: any) => void;
+  nombresFuncion: { JTP: string | null; aux1: string | null; aux2: string | null };
+  setNombresFuncion?: {
+    SetJTP: React.Dispatch<React.SetStateAction<string>>;
+    SetAux1: React.Dispatch<React.SetStateAction<string>>;
+    SetAux2: React.Dispatch<React.SetStateAction<string>>;
+  };
   isReadOnly?: boolean;
   datosIniciales?: any;
 }
@@ -42,6 +48,8 @@ export default function ContenidoPasos({
   docenteMateriaId,
   manejarCambio,
   onDatosGenerados,
+  nombresFuncion,
+  setNombresFuncion,
   isReadOnly = false,
   datosIniciales
 }: ContenidoPasosProps) {
@@ -234,24 +242,6 @@ export default function ContenidoPasos({
     );
   };
 
-  const scrollTimeoutRef = useRef<number | null>(null);
-
-  const handleAccordionToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isReadOnly) return;
-    
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    const headerElement = event.currentTarget.closest('h2.accordion-header');
-    if (!headerElement) return;
-    scrollTimeoutRef.current = setTimeout(() => {
-      headerElement.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 360); 
-  };
-
   switch (currentStep) {
     case 1:
       return (
@@ -260,6 +250,8 @@ export default function ContenidoPasos({
           onDatosGenerados={onDatosGenerados}
           isReadOnly={isReadOnly}
           datosIniciales={datosIniciales}
+          nombresFuncion={nombresFuncion}
+          setNombresFuncion={setNombresFuncion}
         />
       );
 
@@ -309,7 +301,6 @@ export default function ContenidoPasos({
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2"
-                    onClick={handleAccordionToggle}
                     disabled={isReadOnly}
                   >
                     2. Porcentaje de Horas de Clases
@@ -331,7 +322,6 @@ export default function ContenidoPasos({
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2A"
-                    onClick={handleAccordionToggle}
                     disabled={isReadOnly}
                   >
                     2.A. Totalidad de Contenidos
@@ -354,7 +344,6 @@ export default function ContenidoPasos({
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2B"
-                    onClick={handleAccordionToggle}
                     disabled={isReadOnly}
                   >
                     2.B. Análisis de Encuestas
@@ -383,7 +372,6 @@ export default function ContenidoPasos({
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse2C"
-                    onClick={handleAccordionToggle}
                     disabled={isReadOnly}
                   >
                     2.C. Reflexión Docente
@@ -418,6 +406,7 @@ export default function ContenidoPasos({
               manejarCambio={manejarCambio}
               respuestas={respuestas}
               isReadOnly={isReadOnly}
+              nombresFuncion={nombresFuncion}
             />
           </div>
         </Fragment>
@@ -436,6 +425,7 @@ export default function ContenidoPasos({
                 manejarCambio={manejarCambio}
                 respuestas={respuestas}
                 isReadOnly={isReadOnly}
+                nombresFuncion={nombresFuncion}
               />
             </div>
           )}

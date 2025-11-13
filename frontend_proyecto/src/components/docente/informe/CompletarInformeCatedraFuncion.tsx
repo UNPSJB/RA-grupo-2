@@ -10,6 +10,9 @@ interface InformeActividad {
   cantidadAlumnos: number;
   cantidadComisionesTeoricas: number;
   cantidadComisionesPracticas: number;
+  JTP: string | null;
+  aux1: string | null;
+  aux2: string | null;
   periodo: string;
 }
 
@@ -18,14 +21,32 @@ interface Props {
   onDatosGenerados?: (datos: InformeActividad) => void;
   isReadOnly?: boolean;
   datosIniciales?: Partial<InformeActividad>;
+  nombresFuncion?: { JTP: string | null; aux1: string|null; aux2: string|null };
+  setNombresFuncion?: {
+    SetJTP: React.Dispatch<React.SetStateAction<string>>;
+    SetAux1: React.Dispatch<React.SetStateAction<string>>;
+    SetAux2: React.Dispatch<React.SetStateAction<string>>;
+  };
 }
 
-export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDatosGenerados, isReadOnly = false, datosIniciales }: Props) {
+export default function CompletarInformeCatedraFuncion({
+  docenteMateriaId,
+  onDatosGenerados,
+  isReadOnly = false,
+  datosIniciales,
+  nombresFuncion,
+  setNombresFuncion,
+}: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
-  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
+  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] =
+    useState(1);
+  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] =
+    useState(1);
+  const JTP = nombresFuncion?.JTP ?? "";
+  const aux1 = nombresFuncion?.aux1 ?? "";
+  const aux2 = nombresFuncion?.aux2 ?? "";
 
   useEffect(() => {
     if (isReadOnly) {
@@ -33,7 +54,7 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
         setData(datosIniciales as InformeActividad);
         setLoading(false);
       } else if (!datosIniciales) {
-         setLoading(false); 
+        setLoading(false);
       }
       return;
     }
@@ -43,7 +64,8 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
         const relacionRes = await fetch(
           `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
         );
-        if (!relacionRes.ok) throw new Error("Error al obtener la relación docente-materia");
+        if (!relacionRes.ok)
+          throw new Error("Error al obtener la relación docente-materia");
         const relacion = await relacionRes.json();
 
         const docenteId = relacion.docente_id;
@@ -81,6 +103,9 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
           cantidadAlumnos,
           cantidadComisionesTeoricas,
           cantidadComisionesPracticas,
+          JTP,
+          aux1,
+          aux2,
         };
 
         setData(datos);
@@ -93,19 +118,26 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
     };
 
     fetchData();
-  }, [docenteMateriaId, cantidadComisionesTeoricas, cantidadComisionesPracticas, isReadOnly, datosIniciales]);
+  }, [
+    docenteMateriaId,
+    cantidadComisionesTeoricas,
+    cantidadComisionesPracticas,
+    isReadOnly,
+    datosIniciales,
+    JTP,
+    aux1,
+    aux2,
+  ]);
 
   if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
   if (!data) {
-     return isReadOnly ? <p>Cargando...</p> : <p>No hay datos para mostrar.</p>;
+    return isReadOnly ? <p>Cargando...</p> : <p>No hay datos para mostrar.</p>;
   }
 
   return (
     <Fragment>
-      <h5 className="text-dark fw-bold mb-3">
-        Información de la Cátedra
-      </h5>
+      <h5 className="text-dark fw-bold mb-3">Información de la Cátedra</h5>
       <hr className="mb-4" />
       <div className="row g-3">
         <div className="col-md-4">
@@ -136,22 +168,100 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
           <p className="mb-1 text-muted small">Alumnos Inscriptos</p>
           <p>{data.cantidadAlumnos}</p>
         </div>
+        <div className="col-md-12">
+          {isReadOnly ? (
+            data.JTP?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">JTP</p>
+                <p>{data.JTP}</p>
+              </div>
+            )
+          ) : (
+            <>
+              <label htmlFor="JTP" className="form-label">
+                JTP
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="JTP"
+                min="0"
+                value={JTP}
+                onChange={(e) => {
+                  setNombresFuncion?.SetJTP(e.target.value);
+                }}
+              />
+            </>
+          )}
+        </div>
+        <div className="col-md-12">
+          {isReadOnly ? (
+            data.aux1?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">Auxiliar de Primera</p>
+                <p>{data.aux1}</p>
+              </div>
+            )
+          ) : (
+            <>
+              <label htmlFor="aux1" className="form-label">
+                Auxiliar de Primera
+              </label>
+
+              <input
+                type="text"
+                className="form-control"
+                id="aux1"
+                min="0"
+                value={aux1}
+                onChange={(e) => {
+                  setNombresFuncion?.SetAux1(e.target.value);
+                }}
+              />
+            </>
+          )}
+        </div>
+        <div className="col-md-12">
+          {isReadOnly ? (
+            data.aux2?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">Auxiliar de Segunda</p>
+                <p>{data.aux2}</p>
+              </div>
+            )
+          ) : (
+            <>
+              <label htmlFor="aux2" className="form-label">
+                Auxiliar de Segunda
+              </label>
+
+              <input
+                type="text"
+                className="form-control"
+                id="aux2"
+                min="0"
+                value={aux2}
+                onChange={(e) => {
+                  setNombresFuncion?.SetAux2(e.target.value);
+                }}
+              />
+            </>
+          )}
+        </div>
       </div>
-      
-      <hr className="my-4" /> 
-      
-      <h5 className="text-dark fw-bold mb-3">
-        Información de Comisiones
-      </h5>
+
+      <hr className="my-4" />
+
+      <h5 className="text-dark fw-bold mb-3">Información de Comisiones</h5>
       <div className="row g-3">
         <div className="col-md-6">
           <label htmlFor="comisionesTeoricas" className="form-label">
             Comisiones Teóricas
           </label>
-          
+
           {isReadOnly ? (
             <p className="form-control-plaintext ps-2 pt-0">
-              {data?.cantidadComisionesTeoricas ?? 'N/A'}
+              {data?.cantidadComisionesTeoricas ?? "N/A"}
             </p>
           ) : (
             <input
@@ -171,10 +281,10 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
           <label htmlFor="comisionesPracticas" className="form-label">
             Comisiones Prácticas
           </label>
-          
+
           {isReadOnly ? (
             <p className="form-control-plaintext ps-2 pt-0">
-              {data?.cantidadComisionesPracticas ?? 'N/A'}
+              {data?.cantidadComisionesPracticas ?? "N/A"}
             </p>
           ) : (
             <input
@@ -191,6 +301,6 @@ export default function CompletarInformeCatedraFuncion({ docenteMateriaId, onDat
           )}
         </div>
       </div>
-    </Fragment> 
+    </Fragment>
   );
 }
