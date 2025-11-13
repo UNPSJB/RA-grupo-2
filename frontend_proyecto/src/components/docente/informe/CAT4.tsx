@@ -9,7 +9,7 @@ interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
   respuestas: Record<number, RespuestaValor>;
-  nombresFuncion?: { JTP: string; aux1: string; aux2: string };
+  nombresFuncion?: { JTP: string | null; aux1: string | null; aux2: string | null };
   isReadOnly?: boolean;
 }
 

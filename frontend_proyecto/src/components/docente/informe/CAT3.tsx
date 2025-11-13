@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment, useRef } from "react";
+import { useEffect, useState, Fragment } from "react";
 
 type RespuestaValor = {
   opcion_id: number | null;
@@ -41,7 +41,6 @@ export default function Categoria3Informe({
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const roles = ["Profesor", "JTP", "Auxiliar de Primera", "Auxiliar de Segunda"];
   const actividades = ["Capacitación", "Investigación", "Extensión", "Gestión", "Observaciones"];
-  const scrollTimeoutRef = useRef<number | null>(null);
 
   const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
@@ -64,23 +63,6 @@ export default function Categoria3Informe({
       (p) => normalizarString(p.enunciado) === enunciadoBuscado
     );
     return p ? p.id : 0;
-  };
-
-  const handleAccordionToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isReadOnly) return;
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-
-    const headerElement = event.currentTarget.closest("h2.accordion-header");
-    if (!headerElement) return;
-
-    scrollTimeoutRef.current = window.setTimeout(() => {
-      headerElement.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 360);
   };
 
   const rolesFiltrados = isReadOnly
@@ -112,7 +94,6 @@ export default function Categoria3Informe({
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target={`#${collapseId}`}
-                onClick={handleAccordionToggle}
                 disabled={isReadOnly}
               >
                 {rol}
