@@ -12,6 +12,18 @@ import EquipamientoBibliografia from "./Pregunta1";
 import type {Pregunta, Respuesta} from "../../../types/types";
 import DesempenoAuxiliares from "./Pregunta4"; 
 import ObservacionesComentarios from "./Pregunta5"; 
+const TABS_MAP = new Map([
+    ["0", "Datos Generales"],
+    ["1", "1. Recursos"],
+    ["2", "2. Horas/Justificación"],
+    ["2.A", "2.A. Contenidos"],
+    ["2.B", "2.B. Encuestas"],
+    ["2.C", "2.C. Reflexión"],
+    ["3", "3. Actividades del Equipo"],
+    ["4", "4. Valoración"],
+    ["5", "5. Observaciones"],
+]);
+
 
 export default function CompletarInformeSintetico() {
     const location = useLocation();
@@ -65,12 +77,6 @@ export default function CompletarInformeSintetico() {
             .finally(() => setLoading(false));
     }, [informeBaseId]);
 
-    /*
-      const manejarCambio = (resp: Respuesta) => {
-          setRespuestas((prev) => ({ ...prev, resp }));
-          if (mensaje && mensaje.includes("complete")) setMensaje(null);
-      };
-      */
 
     const manejarCambio = (nuevasRespuestas: Respuesta[] | Respuesta) => {
         const respuestasArray = Array.isArray(nuevasRespuestas)
@@ -289,7 +295,7 @@ export default function CompletarInformeSintetico() {
                                         }}
                                         style={{ cursor: "pointer", fontWeight: 500 }}
                                     >
-                                        {p.cod}
+                                        {TABS_MAP.get(p.cod) || p.cod} 
                                     </a>
                                 </li>
                             ))}

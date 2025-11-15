@@ -186,7 +186,12 @@ export default function EncuestaBaseForm() {
                                 />
                             )}
                             <div className="d-flex justify-content-end mt-2">
-                                <button type="button" className="btn btn-primary" onClick={agregarPregunta} disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)} >
+                                <button 
+                                    type="button" 
+                                    className="btn btn-primary rounded-pill" 
+                                    onClick={agregarPregunta} 
+                                    disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)} 
+                                >
                                     Agregar Pregunta a la Lista
                                 </button>
                             </div>
@@ -199,14 +204,32 @@ export default function EncuestaBaseForm() {
                                             <strong className={`badge ${preg.tipo === 'cerrada' ? 'bg-primary' : 'bg-secondary'} me-2`}>{preg.tipo.toUpperCase()}</strong>
                                             <strong className="text-primary">[{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
-                                        <button type="button" className="btn btn-danger btn-sm" onClick={() => eliminarPregunta(i)} disabled={cargando}>Eliminar</button>
+                                        <button 
+                                            type="button" 
+                                                className="btn btn-danger btn-sm rounded-pill" 
+                                            onClick={() => eliminarPregunta(i)} 
+                                            disabled={cargando}
+                                        >
+                                            Eliminar
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
-                            <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>
-                            <button type="submit" className="btn btn-theme-primary" disabled={cargando}>
+                            <button 
+                                type="button" 
+                                className="btn btn-secondary rounded-pill" 
+                                onClick={() => navigate(ROUTES.HOME)} 
+                                disabled={cargando}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="btn btn-theme-primary rounded-pill"
+                                disabled={cargando}
+                            >
                                 {cargando ? "Guardando en cascada..." : "Guardar Encuesta Completa"}
                             </button>
                         </div>

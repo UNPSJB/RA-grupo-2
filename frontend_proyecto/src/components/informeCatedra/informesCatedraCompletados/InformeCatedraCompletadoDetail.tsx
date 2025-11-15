@@ -202,6 +202,9 @@ export default function InformeCatedraDetalle() {
     };
   }, [informe]);
 
+  const isLastStep = currentStep === steps.length;
+  const isFirstStep = currentStep === 1;
+
   if (loading) {
     return (
       <div className="container py-4">
@@ -300,19 +303,33 @@ export default function InformeCatedraDetalle() {
 
           <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
             <div className="d-flex justify-content-between">
-              <Link
-                to={ROUTES.INFORMES_CATEDRA}
-                className="btn btn-outline-secondary rounded-pill px-4"
-              >
-                Volver al listado
-              </Link>
-              <button
-                className="btn btn-theme-primary rounded-pill px-4"
-                onClick={() => goToStep(currentStep + 1)}
-                disabled={currentStep === steps.length}
-              >
-                Siguiente
-              </button>
+              {isFirstStep ? (
+                <div /> 
+              ) : (
+                <button
+                  className="btn btn-outline-secondary rounded-pill px-4"
+                  onClick={() => goToStep(currentStep - 1)}
+                >
+                  Anterior
+                </button>
+              )}
+              {isLastStep ? (
+                <Link
+                  to={ROUTES.INFORMES_CATEDRA}
+                  className="btn btn-primary rounded-pill px-4"
+                  style={{ backgroundColor: '#005ec2', borderColor: '#005ec2' }}
+                >
+                  Volver al listado
+                </Link>
+              ) : (
+                <button
+                  className="btn btn-primary rounded-pill px-4"
+                  onClick={() => goToStep(currentStep + 1)}
+                  style={{ backgroundColor: '#005ec2', borderColor: '#005ec2' }}
+                >
+                  Siguiente
+                </button>
+              )}
             </div>
           </div>
         </div>

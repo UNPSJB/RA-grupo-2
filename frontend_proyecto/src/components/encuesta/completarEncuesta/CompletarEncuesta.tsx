@@ -5,8 +5,6 @@ import { useNavigate, useLocation} from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 
-
-
 interface Categoria {
   id: number;
   cod: string;
@@ -28,6 +26,7 @@ export default function CompletarEncuesta() {
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const navigate = useNavigate();
   const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
+  const [currentStep, setCurrentStep] = useState(0); 
   
   const location = useLocation();
 
@@ -40,6 +39,7 @@ export default function CompletarEncuesta() {
           a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
         );
         setCategorias(dataOrdenada);
+        setCurrentStep(0);
       })
       .catch((err) => console.error("Error al obtener categorías:", err));
   }, [location.state]);
@@ -60,8 +60,6 @@ export default function CompletarEncuesta() {
   const enviarEncuesta = async () => {
     if (respuestasGlobales.length < totalPreguntas) {
       setMensaje("Debes responder todas las preguntas antes de enviar.");
-      console.log("Total preguntas:", totalPreguntas);
-      console.log("Respuestas dadas:", respuestasGlobales.length);
       return;
     }
 
@@ -102,7 +100,6 @@ export default function CompletarEncuesta() {
       if (!res.ok) throw new Error("Error al enviar encuesta");
       const data = await res.json();
 
-      console.log("Encuesta completada creada:", data);
       setMensaje("Encuesta enviada con éxito.");
       setMensajeExito("¡La encuesta fue completada con éxito!");
       setRespuestasGlobales([]);
@@ -128,50 +125,85 @@ export default function CompletarEncuesta() {
     );
   }
 
+  const categoriaActiva = categorias[currentStep];
 
   return (
     <div className="container py-4">
       <div className="card border-0 shadow-lg">
+        
+        <style>
+          {`
+            .nav-pills .nav-item .nav-link { 
+              border-radius: 0;
+              background-color: transparent !important; 
+              color: #6c757d; 
+              font-weight: 500;
+              transition: none; /
+            }
+            .nav-pills .nav-item .nav-link.active {
+              color: #007bff !important; 
+              border: 1px solid #dee2e6;
+              border-bottom: 2px solid #005ec2;; 
+              background-color: white !important;
+            }
+            .nav-pills .nav-item .nav-link:not(.active):hover {
+                background-color: #f8f9fa; 
+                color: #5a6268;
+            }
+          `}
+        </style>
+        
         <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0 text-center">Encuesta</h1>
         </div>
-        <div className="card-body">
+        
+        <div className="card-body p-0">
+          
           {categorias.length > 0 ? (
-            <div className="accordion accordion-flush" id="accordionEncuesta">
-              {categorias.map((categoria) => (
-                <div className="accordion-item" key={categoria.id}>
-                  <h2 className="accordion-header" id={`heading-${categoria.id}`}>
-                    <button
-                      className="accordion-button collapsed"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      data-bs-target={`#collapse-${categoria.id}`}
-                    >
-                      {`${categoria.cod}: ${categoria.texto}`}
-                    </button>
-                  </h2>
-                  <div
-                    id={`collapse-${categoria.id}`}
-                    className="accordion-collapse collapse"
-                    data-bs-parent="#accordionEncuesta"
-                  >
-                    <div className="accordion-body">
-                      <PreguntasCategoria
-                        categoria={categoria}
-                        onRespuesta={manejarCambioRespuestas}
-                        onTotalPreguntas={manejarTotalPreguntas}
-                      />
-                    </div>
-                  </div>
+            <>
+              <div className="bg-white border-bottom shadow-sm overflow-x-auto" style={{ whiteSpace: 'nowrap' }}>
+                <ul className="nav nav-pills d-inline-flex mb-0" id="pills-tab" role="tablist">
+                  {categorias.map((categoria, index) => (
+                    <li className="nav-item" role="presentation" key={categoria.id}>
+                      <a
+                        className={`nav-link rounded-0 ${currentStep === index ? 'active' : 'text-muted'}`}
+                        onClick={() => setCurrentStep(index)}
+                        style={{ 
+                            cursor: 'pointer',
+                            borderTop: '1px solid transparent', 
+                            borderLeft: '1px solid transparent',
+                            borderRight: '1px solid transparent',
+                        }}
+                        role="tab"
+                      >
+                        {`${categoria.cod}: ${categoria.texto}`} 
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="tab-content p-4" id="pills-tabContent">
+                <div 
+                  className="tab-pane fade show active" 
+                  role="tabpanel" 
+                  aria-labelledby={`pills-${categoriaActiva?.cod}-tab`}
+                >
+                  {categoriaActiva && (
+                    <PreguntasCategoria
+                      categoria={categoriaActiva}
+                      onRespuesta={manejarCambioRespuestas}
+                      onTotalPreguntas={manejarTotalPreguntas}
+                    />
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            </>
           ) : (
-            <div className="alert alert-info">Cargando categorías...</div>
+            <div className="alert alert-info m-4">Cargando categorías...</div>
           )}
 
-          <hr />
-          <div className="text-center mt-4">
+          <hr className="m-0" />
+          <div className="text-center mt-4 p-4">
             <button
               onClick={enviarEncuesta}
               className="btn btn-theme-primary rounded-pill px-4"

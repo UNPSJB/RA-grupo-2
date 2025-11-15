@@ -94,7 +94,7 @@ export default function ManejadorCategoria({
                     <div className="col-md-2 mb-2">
                         <button
                             type="button"
-                            className="btn btn-secondary w-100"
+                            className="btn btn-secondary w-100 rounded-pill" // APLICADO: rounded-pill
                             onClick={agregarCategoria}
                             disabled={cargando || !nuevaCategoriaCod.trim()}
                         >
@@ -111,7 +111,7 @@ export default function ManejadorCategoria({
                             <span><strong>{cat.cod}</strong>: {cat.texto}</span>
                             <button
                                 type="button"
-                                className="btn btn-theme-danger btn-sm" 
+                                className="btn btn-theme-danger btn-sm rounded-pill" 
                                 onClick={() => eliminarCategoria(cat.cod)}
                                 disabled={cargando}
                             >

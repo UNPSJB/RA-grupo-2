@@ -1,24 +1,20 @@
-// Campos.tsx (Modificado)
-
 const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 };
 
-// --- CampoTextArea ---
 export function CampoTextArea({
     label,
     value,
     onChange,
-    isReadOnly = false, // <-- Nuevo prop
+    isReadOnly = false,
 }: {
     label: string|null;
     value: string;
     onChange?: (v: string) => void;
-    isReadOnly?: boolean; // <-- Nuevo prop
+    isReadOnly?: boolean;
 }) {
-    // Si está en modo ReadOnly, mostramos como texto simple en lugar de un <textarea> editable
     if (isReadOnly) {
         return (
             <div className="col-12">
@@ -48,19 +44,17 @@ export function CampoTextArea({
     );
 }
 
-// --- CampoTextoNumero ---
 export function CampoTextoNumero({
     label,
     value,
     onChange,
-    isReadOnly = false, // <-- Nuevo prop
+    isReadOnly = false,
 }: {
     label: string;
     value: number;
     onChange: (v: number) => void;
-    isReadOnly?: boolean; // <-- Nuevo prop
+    isReadOnly?: boolean;
 }) {
-    // Si está en modo ReadOnly, mostramos como texto simple
     if (isReadOnly) {
         const displayValue = value === null || value === undefined || value === 0 ? '—' : value;
         return (
@@ -91,19 +85,17 @@ export function CampoTextoNumero({
     );
 }
 
-// --- CampoPorcentaje ---
 export function CampoPorcentaje({
     label,
     value,
     onChange,
-    isReadOnly = false, // <-- Nuevo prop
+    isReadOnly = false,
 }: {
     label: string;
     value: number | null;
     onChange: (v: number | null) => void;
-    isReadOnly?: boolean; // <-- Nuevo prop
+    isReadOnly?: boolean;
 }) {
-    // Si está en modo ReadOnly, mostramos como texto simple
     if (isReadOnly) {
         const displayValue = value === null || value === undefined || value === 0 ? '—' : `${value}%`;
         return (
@@ -116,7 +108,6 @@ export function CampoPorcentaje({
         );
     }
 
-    // Lógica de edición existente
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         if (val === "") {
@@ -150,16 +141,15 @@ export function CampoPorcentaje({
     );
 }
 
-// --- CampoTexto (ya tenía readOnly) ---
 export function CampoTexto({
     label,
     value,
-    readOnly = false, // Se renombra a isReadOnly para consistencia, o se mantiene para no romper otros archivos
+    readOnly = false,
     onChange,
 }: {
     label: string;
     value: string;
-    readOnly?: boolean; // Mantener 'readOnly' para consistencia con el uso en <input>
+    readOnly?: boolean;
     onChange?: (v: string) => void;
 }) {
     return (
@@ -169,33 +159,30 @@ export function CampoTexto({
                 type="text"
                 className="form-control"
                 value={value}
-                readOnly={readOnly} // Aquí usamos el prop readOnly directamente
+                readOnly={readOnly}
                 onChange={(e) => onChange?.(e.target.value)}
             />
         </div>
     );
 }
 
-// --- CampoCheckbox ---
 export function CampoCheckbox({
     checked,
     onChange,
-    isReadOnly = false, // <-- Nuevo prop
+    isReadOnly = false,
 }: {
     checked: boolean;
     onChange: (v: boolean) => void;
-    isReadOnly?: boolean; // <-- Nuevo prop
+    isReadOnly?: boolean;
 }) {
-    // Si está en modo ReadOnly, no se permite el evento onClick
     return (
         <td 
             className={`text-center ${!isReadOnly ? 'cursor-pointer' : ''}`} 
             style={{ 
-                cursor: !isReadOnly ? 'pointer' : 'default', // Cambiar cursor si es editable
+                cursor: !isReadOnly ? 'pointer' : 'default',
                 fontWeight: 'bold', 
                 fontSize: '1.2rem',
                 userSelect: 'none',
-                // Estilo visual si está deshabilitado
                 opacity: isReadOnly ? 0.6 : 1, 
             }}
             onClick={() => {

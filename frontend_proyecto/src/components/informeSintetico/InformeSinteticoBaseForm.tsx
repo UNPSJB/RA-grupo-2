@@ -250,7 +250,7 @@ export default function InformeSinteticoBaseForm() {
                             <div className="d-flex justify-content-end mt-2">
                                 <button 
                                     type="button" 
-                                    className="btn btn-theme-primary" 
+                                    className="btn btn-theme-primary rounded-pill" 
                                     onClick={agregarPregunta} 
                                     disabled={cargando || !nuevoCodPregunta.trim() || !nuevoTextoPregunta.trim()} 
                                 >
@@ -292,7 +292,7 @@ export default function InformeSinteticoBaseForm() {
                                                             </span>
                                                             <button 
                                                                 type="button" 
-                                                                className="btn btn-theme-danger btn-sm" 
+                                                                className="btn btn-theme-danger btn-sm rounded-pill" 
                                                                 onClick={() => eliminarPregunta(i)} 
                                                                 disabled={cargando}
                                                             >
@@ -309,8 +309,19 @@ export default function InformeSinteticoBaseForm() {
                             </DragDropContext>
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
-                            <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>
-                            <button type="submit" className="btn btn-theme-primary" disabled={cargando}>
+                            <button 
+                                type="button" 
+                                className="btn btn-secondary rounded-pill" 
+                                onClick={() => navigate(ROUTES.HOME)} 
+                                disabled={cargando}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="btn btn-theme-primary rounded-pill" 
+                                disabled={cargando}
+                            >
                                 {cargando ? "Guardando en cascada..." : "Guardar Informe Completo"}
                             </button>
                         </div>
