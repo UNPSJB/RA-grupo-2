@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from src.materias.schemas import Materia
 
 class RespuestaInformeSinteticoBase(BaseModel):
     pregunta_id: int
@@ -11,6 +12,6 @@ class RespuestaInformeSinteticoCreate(RespuestaInformeSinteticoBase):
 class RespuestaInformeSintetico(RespuestaInformeSinteticoBase):
     id: int
     informe_completado_id: int 
-
+    materia: Optional[Materia] = None 
     class Config:
         from_attributes = True

@@ -1,3 +1,4 @@
+// Campos.tsx (Modificado)
 
 const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
@@ -5,15 +6,30 @@ const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     textarea.style.height = textarea.scrollHeight + "px";
 };
 
+// --- CampoTextArea ---
 export function CampoTextArea({
     label,
     value,
     onChange,
+    isReadOnly = false, // <-- Nuevo prop
 }: {
     label: string|null;
     value: string;
     onChange?: (v: string) => void;
+    isReadOnly?: boolean; // <-- Nuevo prop
 }) {
+    // Si está en modo ReadOnly, mostramos como texto simple en lugar de un <textarea> editable
+    if (isReadOnly) {
+        return (
+            <div className="col-12">
+                {label && <label className="form-label fw-bold">{label}</label>}
+                <p className="form-control-plaintext border p-2 bg-light rounded" style={{ whiteSpace: 'pre-wrap' }}>
+                    {value || "— No hay información registrada —"}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-12">
             {label && <label className="form-label">{label}</label>}
@@ -32,15 +48,31 @@ export function CampoTextArea({
     );
 }
 
+// --- CampoTextoNumero ---
 export function CampoTextoNumero({
     label,
     value,
     onChange,
+    isReadOnly = false, // <-- Nuevo prop
 }: {
     label: string;
     value: number;
     onChange: (v: number) => void;
+    isReadOnly?: boolean; // <-- Nuevo prop
 }) {
+    // Si está en modo ReadOnly, mostramos como texto simple
+    if (isReadOnly) {
+        const displayValue = value === null || value === undefined || value === 0 ? '—' : value;
+        return (
+            <div className="col-md-4">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {displayValue}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-md-4">
             <label className="form-label">{label}</label>
@@ -59,16 +91,32 @@ export function CampoTextoNumero({
     );
 }
 
+// --- CampoPorcentaje ---
 export function CampoPorcentaje({
     label,
     value,
     onChange,
+    isReadOnly = false, // <-- Nuevo prop
 }: {
     label: string;
     value: number | null;
     onChange: (v: number | null) => void;
+    isReadOnly?: boolean; // <-- Nuevo prop
 }) {
-    
+    // Si está en modo ReadOnly, mostramos como texto simple
+    if (isReadOnly) {
+        const displayValue = value === null || value === undefined || value === 0 ? '—' : `${value}%`;
+        return (
+            <div className="col-md-6">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {displayValue}
+                </p>
+            </div>
+        );
+    }
+
+    // Lógica de edición existente
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         if (val === "") {
@@ -102,15 +150,16 @@ export function CampoPorcentaje({
     );
 }
 
+// --- CampoTexto (ya tenía readOnly) ---
 export function CampoTexto({
     label,
     value,
-    readOnly = false,
+    readOnly = false, // Se renombra a isReadOnly para consistencia, o se mantiene para no romper otros archivos
     onChange,
 }: {
     label: string;
     value: string;
-    readOnly?: boolean;
+    readOnly?: boolean; // Mantener 'readOnly' para consistencia con el uso en <input>
     onChange?: (v: string) => void;
 }) {
     return (
@@ -120,30 +169,40 @@ export function CampoTexto({
                 type="text"
                 className="form-control"
                 value={value}
-                readOnly={readOnly}
+                readOnly={readOnly} // Aquí usamos el prop readOnly directamente
                 onChange={(e) => onChange?.(e.target.value)}
             />
         </div>
     );
 }
 
+// --- CampoCheckbox ---
 export function CampoCheckbox({
     checked,
     onChange,
+    isReadOnly = false, // <-- Nuevo prop
 }: {
     checked: boolean;
     onChange: (v: boolean) => void;
+    isReadOnly?: boolean; // <-- Nuevo prop
 }) {
+    // Si está en modo ReadOnly, no se permite el evento onClick
     return (
         <td 
-            className="text-center" 
+            className={`text-center ${!isReadOnly ? 'cursor-pointer' : ''}`} 
             style={{ 
-                cursor: 'pointer', 
+                cursor: !isReadOnly ? 'pointer' : 'default', // Cambiar cursor si es editable
                 fontWeight: 'bold', 
                 fontSize: '1.2rem',
-                userSelect: 'none'
+                userSelect: 'none',
+                // Estilo visual si está deshabilitado
+                opacity: isReadOnly ? 0.6 : 1, 
             }}
-            onClick={() => onChange(!checked)}
+            onClick={() => {
+                if (!isReadOnly) {
+                    onChange(!checked);
+                }
+            }}
         >
             {checked ? 'X' : '-'}
         </td>

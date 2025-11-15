@@ -13,12 +13,19 @@ from src.asociaciones.models import Periodo
 from src.asociaciones.docente_materia.models import DocenteMateria
 from src.docentes.models import Docente
 from src.categorias.models import Categoria
+from src.respuesta_informe_sintetico.models import RespuestaInformeSintetico 
+
 def get_informes_completados(db: Session):
     return db.query(models.InformeSinteticoCompletado).all()
 
 def get_informe_completado(db: Session, informe_id: int):
-    return db.query(models.InformeSinteticoCompletado).filter(models.InformeSinteticoCompletado.id == informe_id).first()
-
+    return db.query(models.InformeSinteticoCompletado)\
+             .options(
+                 selectinload(models.InformeSinteticoCompletado.respuestas)
+                     .selectinload(RespuestaInformeSintetico.materia) 
+             )\
+             .filter(models.InformeSinteticoCompletado.id == informe_id)\
+             .first()
 def create_informe_completado(db: Session, informe_data: schemas.InformeSinteticoCompletadoCreate) -> models.InformeSinteticoCompletado:
     informe_dict = informe_data.model_dump(exclude={"respuestas"})
     respuestas_data = informe_data.respuestas

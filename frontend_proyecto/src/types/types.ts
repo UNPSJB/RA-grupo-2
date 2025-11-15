@@ -35,3 +35,26 @@ export interface Respuesta {
     materia_id?: number;
     texto_respuesta: string;
 }
+
+export interface RespuestaInformeSintetico {
+  id: number;
+  pregunta_id: number;
+  materia_id: number | null;
+  informe_completado_id: number;
+  texto_respuesta: string | null;
+  opcion_id: number | null;
+  materia?: Materia; 
+}
+
+
+export interface InformeCompletado {
+  id: number;
+  titulo: string;
+  anio: number;
+  periodo: string;
+  contenido: string;
+  informe_base_id: number;
+  carrera_id: number;
+  departamento_id: number; 
+  respuestas: RespuestaInformeSintetico[]; 
+}
