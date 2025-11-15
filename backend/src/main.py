@@ -28,6 +28,9 @@ from src.datosEstadisticos.router import router as datos_estadisticos_router
 from src.respuestasInforme.router import router as respuestas_informe_router
 from src.pregunta_informe_sintetico.router import router as preguntas_sintetico_router
 from src.respuesta_informe_sintetico.router import router as respuestas_informe_sintetico_router
+from src.filtros.router import router as filtros_router
+
+
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -72,3 +75,4 @@ app.include_router(datos_estadisticos_router)
 app.include_router(respuestas_informe_router)
 app.include_router(preguntas_sintetico_router)
 app.include_router(respuestas_informe_sintetico_router)
+app.include_router(filtros_router)
