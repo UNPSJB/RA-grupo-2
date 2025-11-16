@@ -17,8 +17,12 @@ class MateriaBase(BaseModel):
 
 
 class Materia(MateriaBase):
-       id: int
-
-       model_config = {"from_attributes": True}
+    id: int
+    departamento_id: int
+    model_config = {"from_attributes": True}
        
 
+class MateriasAsignarFormularios(BaseModel):
+    materia_ids: List[int]
+    encuesta_id: Optional[int] = None
+    informe_catedra_id: Optional[int] = None

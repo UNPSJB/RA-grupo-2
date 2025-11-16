@@ -24,3 +24,7 @@ def read_categorias_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
 @router.get("/{encuesta_id}/preguntas", response_model=list[pregunta_schemas.Pregunta])
 def read_preguntas_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.listar_preguntas_encuesta(db, encuesta_id)
+
+@router.get("/", response_model=list[schemas.Encuesta])
+def read_encuestas(db: Session = Depends(get_db)):
+    return services.listar_encuestas(db)
