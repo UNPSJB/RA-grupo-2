@@ -99,7 +99,8 @@ export default function GraficoBarrasEstadisticas({ datosApi }: Props) {
     },
     scales: {
       x: { 
-        stacked: true, 
+        stacked: true,
+        max:100, 
         title: { display: true, text: 'Porcentaje (%)' ,
           font: {
           size: 15, 
