@@ -258,6 +258,14 @@ def get_promedio_encuestas_BASICO( db: Session, departamento_id: int, anio: int,
                 for op in acumulados_locales.keys()
             ]
 
+            suma_porcentajes = sum(op.porcentaje for op in promedio_opciones)
+            if suma_porcentajes > 0:
+                for op_porcentaje in promedio_opciones:
+                    op_porcentaje.porcentaje = round(
+                        (op_porcentaje.porcentaje / suma_porcentajes) * 100,
+                        2
+                    )
+
         resultado.append(
             schemas.DatosEstadisticosCategoria(
                 categoria_cod=categoria.cod,
@@ -274,6 +282,15 @@ def get_promedio_encuestas_BASICO( db: Session, departamento_id: int, anio: int,
         )
         for op in acumulados_generales.keys()
     ]
+
+    suma_porcentajes_general = sum(op.porcentaje for op in promedio_general)
+    if suma_porcentajes_general > 0:
+        for op_porcentaje in promedio_general:
+            op_porcentaje.porcentaje = round(
+                (op_porcentaje.porcentaje / suma_porcentajes_general) * 100,
+                2
+            )
+
 
     return {
         "promedio_por_categoria": resultado,
@@ -363,6 +380,15 @@ def get_promedio_encuestas_SUPERIOR( db: Session, departamento_id: int, anio: in
                 for op in acumulados_locales.keys()
             ]
 
+            suma_porcentajes = sum(op.porcentaje for op in promedio_opciones)
+            if suma_porcentajes > 0:
+                for op_porcentaje in promedio_opciones:
+                    op_porcentaje.porcentaje = round(
+                        (op_porcentaje.porcentaje / suma_porcentajes) * 100,
+                        2
+                    )
+
+
         resultado.append(
             schemas.DatosEstadisticosCategoria(
                 categoria_cod=categoria.cod,
@@ -379,6 +405,14 @@ def get_promedio_encuestas_SUPERIOR( db: Session, departamento_id: int, anio: in
         )
         for op in acumulados_generales.keys()
     ]
+
+    suma_porcentajes_general = sum(op.porcentaje for op in promedio_general)
+    if suma_porcentajes_general > 0:
+        for op_porcentaje in promedio_general:
+            op_porcentaje.porcentaje = round(
+                (op_porcentaje.porcentaje / suma_porcentajes_general) * 100,
+                2
+            )
 
     return {
         "promedio_por_categoria": resultado,
