@@ -9,7 +9,7 @@
   --color-text-primary: #212529;      
 
   /* Colores de Componentes y Forms */
-  --color-component-bg: #F8F9FA;      
+  --color-component-bg: #FFFFFF;      
   --color-input-bg: #FFFFFF;          
   
   /* Dropdown */
@@ -37,6 +37,21 @@
   --color-logout: #E75858;       
   --color-logout-hover: #D13E3E;
   --color-logout-text: #FFFFFF; 
+
+  /* Paleta Semántica para Gráficos */
+  --color-grafico-verde: #2a9d8f;      
+  --color-grafico-cyan: #264653;       
+  --color-grafico-amarillo: #e9c46a;   
+  --color-grafico-rojo: #e76f51;       
+  --color-grafico-gris: #CED4DA;
+
+  /* Fondos Suaves para los Dashlets (Mini-Cards) */
+  --color-fondo-suave-verde: #eaf6f5;
+  --color-fondo-suave-azul: #e9eff0; /* Ajustado al nuevo azul/verde oscuro */
+  --color-fondo-suave-amarillo: #fdf8ee;
+  --color-fondo-suave-rojo: #fdefeb;
+
+
 }
 
 /* Definiciones de color para Modo Oscuro */
@@ -76,6 +91,17 @@
     --color-logout: #9e4646;         
     --color-logout-hover: #7d3838;
     --color-logout-text: #F8F9FA; 
+
+    --color-grafico-verde: #00A8E8;   
+    --color-grafico-cyan: #90E0EF;
+    --color-grafico-amarillo: #FFBF00;
+    --color-grafico-rojo: #FF5C5C;
+    --color-grafico-gris: #6C757D;
+
+    --color-fondo-suave-verde: #1a3821; 
+    --color-fondo-suave-azul: #1a2c42; 
+    --color-fondo-suave-amarillo: #3a3224;
+    --color-fondo-suave-rojo: #401e21;
   }
 }
 
@@ -402,4 +428,63 @@ textarea::placeholder {
 .no-bold th {
   font-weight: 500 !important;
   color: inherit; /* opcional, si querés mantener color por defecto */
+}
+
+/* --- Estilos para Dashlets --- */
+/* --- Dashlets Mejorados --- */
+.dashlet-mejorado {
+  background: linear-gradient(135deg, var(--color-component-bg) 0%, rgba(255,255,255,0.1) 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashlet-mejorado::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to bottom, currentColor, transparent);
+  opacity: 0.8;
+}
+
+.dashlet-mejorado:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dashlet-titulo {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px !important;
+  color: var(--color-text-primary) !important;
+  opacity: 0.9;
+}
+
+.dashlet-valor {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0 !important;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-unpsjb-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .dashlet-mejorado {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  .dashlet-mejorado:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+  }
 }

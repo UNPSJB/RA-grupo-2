@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select, func
 from src.informe_catedra_completado import schemas, models, exceptions
@@ -9,6 +9,8 @@ from src.asociaciones.models import Periodo
 from src.respuestasInforme import services as respuestas_services
 from src.respuestasInforme.models import RespuestaInforme
 from src.preguntas.models import Pregunta
+from src.encuestaCompletada.models import EncuestaCompletada
+from src.asociaciones.models import materia_carrera
 
 
 def obtener_informes_pendientes(db: Session, docente_id: int,anio: int,periodo: Periodo) -> List[dict]:
@@ -182,3 +184,94 @@ def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
             informe_dict["docenteResponsable"] = f"{docente.nombre} {docente.apellido}"
 
     return informe_dict
+
+
+def get_progreso_departamento( db: Session, departamento_id: int, anio: int,  periodo: Periodo,carrera_id: Optional[int] = None ):
+    stmt_base = (
+        select(DocenteMateria.id)
+        .join(Materia)
+        .where(
+            Materia.departamento_id == departamento_id,
+            DocenteMateria.anio == anio,
+            DocenteMateria.periodo == periodo
+        )
+    )
+
+    if carrera_id is not None:
+        stmt_base = stmt_base.join(
+            materia_carrera, Materia.id == materia_carrera.c.materia_id
+        ).where(materia_carrera.c.carrera_id == carrera_id)
+
+    docente_materia_ids = db.scalars(stmt_base).all()
+
+    if not docente_materia_ids:
+        return {"completados": 0, "pendientes": 0}
+
+    total_materias_esperadas = len(docente_materia_ids)
+
+    completados = db.scalar(
+        select(func.count(InformeCatedraCompletado.id))
+        .where(
+            InformeCatedraCompletado.docente_materia_id.in_(docente_materia_ids)
+        )
+        .where(InformeCatedraCompletado.anio == anio)
+        .where(InformeCatedraCompletado.periodo == periodo)
+    )
+    
+    completados_count = completados if completados else 0
+    pendientes = total_materias_esperadas - completados_count
+
+    return {"completados": completados_count, "pendientes": pendientes}
+
+
+def obtener_informes_pendientes_por_departamento( db: Session, departamento_id: int, anio: int, periodo: Periodo, carrera_id: Optional[int] = None ) -> List[dict]:
+    stmt = (
+        select(DocenteMateria)
+        .join(Materia)
+        .where(
+            Materia.departamento_id == departamento_id,
+            DocenteMateria.anio == anio,
+            DocenteMateria.periodo == periodo
+        )
+        .options(
+            joinedload(DocenteMateria.materia),
+            joinedload(DocenteMateria.docente)
+        )
+    )
+
+    if carrera_id is not None:
+        stmt = stmt.join(
+            materia_carrera,
+            Materia.id == materia_carrera.c.materia_id
+        )
+        
+        stmt = stmt.where(materia_carrera.c.carrera_id == carrera_id)
+
+    relaciones_depto = db.scalars(stmt).unique().all()
+
+    if not relaciones_depto:
+        return []
+
+    ids_relaciones = [r.id for r in relaciones_depto]
+    
+    informes_completados_ids = db.scalars(
+        select(InformeCatedraCompletado.docente_materia_id)
+        .where(InformeCatedraCompletado.docente_materia_id.in_(ids_relaciones))
+        .where(InformeCatedraCompletado.anio == anio)
+        .where(InformeCatedraCompletado.periodo == periodo)
+    ).all()
+    
+    set_completados = set(informes_completados_ids)
+    pendientes = []
+    for relacion in relaciones_depto:
+        if relacion.id not in set_completados:
+            docente_nombre = "No asignado"
+            if relacion.docente:
+                docente_nombre = f"{relacion.docente.nombre} {relacion.docente.apellido}"
+
+            pendientes.append({
+                "materia": relacion.materia.nombre,
+                "docente_responsable": docente_nombre
+            })
+            
+    return pendientes

@@ -21,7 +21,7 @@ const ROUTES = {
   COMPLETAR_INFORME_SINTETICO: "/departamento/carreras/completar-informe-sintetico",
   INFORMES_CATEDRA: "/departamento/informes-catedra",
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
-  
+  DASHBOARD_DPTO: "/departamento/dashboard",
 
   //SECRETARÍA ACADÉMICA
   INFORMES_SINTETICOS: "/secretaria/informes-sinteticos-completados",
@@ -29,7 +29,7 @@ const ROUTES = {
   INFORME_CATEDRA_BASE_NUEVO: "/secretaria/crear-informe-catedra-base",
   ENCUESTA_BASE_NUEVA: "/secretaria/crear-encuesta-base",
   INFORME_SINTETICO_BASE_NUEVO: "/secretaria/informe-sintetico/nuevo",
-  
+  ASIGNAR_MATERIA_INFORME: "/secretaria/asignar-materia-informe",
   INFORMACION_GENERAL_DEPARTAMENTO: "/secretaria/informacion-general-departamento",
 };
 

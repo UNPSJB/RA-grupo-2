@@ -129,7 +129,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
       <div className="mb-4">
         <h6 className="fw-bold mb-3">Obstáculos</h6>
         <div className="mb-3">
-          <label className="form-label mb-2 fw-bold">
+          <label className="form-label mb-3 fw-bold">
             Proceso enseñanza
           </label>
           {isReadOnly ? (
@@ -153,7 +153,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
           )}
         </div>
         <div>
-          <label className="form-label mb-2 fw-bold">
+          <label className="form-label mb-3 fw-bold">
             Proceso de aprendizaje
           </label>
           {isReadOnly ? (
