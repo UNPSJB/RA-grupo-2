@@ -46,7 +46,7 @@ export default function VistaEquipamientoBibliografia({
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">1. Equipamiento y Bibliografía</h5>
+            <h5 className="text-dark mb-3">Equipamiento y Bibliografía</h5>
             <p className="text-muted mb-4">{pregunta.enunciado}</p>
 
             {itemsAMostrar.length === 0 ? (

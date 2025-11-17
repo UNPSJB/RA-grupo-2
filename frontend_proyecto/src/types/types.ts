@@ -36,6 +36,11 @@ export interface Respuesta {
     texto_respuesta: string;
 }
 
+export interface Categoria {
+  id: number;
+  texto: string;
+  cod: string;
+}
 export interface RespuestaInformeSintetico {
   id: number;
   pregunta_id: number;

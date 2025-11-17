@@ -79,7 +79,8 @@ export default function VistaActividadesDocentes({
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">3. {pregunta.enunciado}</h5>
+            <h5 className="text-dark fw-bold mb-3">Actividades del equipo</h5>
+            <p className="text-muted mb-3">{pregunta.enunciado}</p>
 
             {itemsAMostrar.length === 0 ? (
                 <div className="alert alert-warning">

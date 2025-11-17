@@ -48,8 +48,7 @@ export default function VistaInformacionGeneral({
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
-
+            <h5 className="text-dark mb-3">Informacion general</h5>
             {itemsAMostrar.length === 0 ? (
                 <div className="alert alert-warning">
                     No hay información de materias disponible para esta pregunta.

@@ -159,7 +159,8 @@ export default function DesempenoAuxiliares({
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
+            <h5 className="text-dark fw-bold mb-3">Valoracion del desempeño de los auxiliares </h5>
+            <p className="text-muted mb-3">{pregunta.enunciado}</p>
             <div className="accordion" id="accordionDesempenoAuxiliares">
                 {itemsTabla.map((materiaItem, mIndex) => (
                     <div key={materiaItem.materia.id} className="accordion-item">

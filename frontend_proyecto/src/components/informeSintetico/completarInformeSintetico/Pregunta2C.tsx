@@ -93,7 +93,8 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
+            <h5 className="text-dark fw-bold mb-3">Reflexion sobre el espacio curricular</h5>
+            <p className="text-muted mb-3">{pregunta.enunciado}</p>
 
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
