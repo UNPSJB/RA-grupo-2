@@ -21,7 +21,7 @@ interface Props {
   onDatosGenerados?: (datos: InformeActividad) => void;
   isReadOnly?: boolean;
   datosIniciales?: Partial<InformeActividad>;
-  nombresFuncion?: { JTP: string | null; aux1: string|null; aux2: string|null };
+  nombresFuncion?: { JTP: string | null; aux1: string | null; aux2: string | null };
   setNombresFuncion?: {
     SetJTP: React.Dispatch<React.SetStateAction<string>>;
     SetAux1: React.Dispatch<React.SetStateAction<string>>;
@@ -109,7 +109,6 @@ export default function CompletarInformeCatedraFuncion({
         };
 
         setData(datos);
-        onDatosGenerados?.(datos);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -124,10 +123,19 @@ export default function CompletarInformeCatedraFuncion({
     cantidadComisionesPracticas,
     isReadOnly,
     datosIniciales,
-    JTP,
-    aux1,
-    aux2,
   ]);
+
+  useEffect(() => {
+    if (!data) return;
+    onDatosGenerados?.(data);
+  }, [
+    data?.cantidadComisionesTeoricas,
+    data?.cantidadComisionesPracticas,
+    data?.JTP,
+    data?.aux1,
+    data?.aux2
+  ]);
+
 
   if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
