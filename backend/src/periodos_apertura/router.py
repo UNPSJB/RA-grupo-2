@@ -1,0 +1,29 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from src.database import get_db
+from src.periodos_apertura import schemas, services
+from src.asociaciones.models import Periodo  
+
+router = APIRouter(prefix="/periodos_apertura", tags=["periodos_apertura"])
+
+# Rutas para periodos de apertura
+
+@router.post("/", response_model=schemas.PeriodoApertura)
+def create_periodo_apertura(apertura: schemas.PeriodoAperturaCreate, db: Session = Depends(get_db)):
+    return services.crear_periodo_apertura(db, apertura)
+
+@router.get("/", response_model= schemas.PeriodoApertura)
+def read_periodo_apertura(anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.leer_periodo_apertura(db, anio, periodo)
+
+@router.get("/fechas_encuesta", response_model= schemas.PeriodoEncuesta)
+def read_periodo_encuestas(anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.leer_fechas_encuesta(db, anio, periodo)
+
+@router.get("/fechas_informe_catedra", response_model= schemas.PeriodoInformeCatedra)
+def read_periodo_informe_catedra(anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.leer_fechas_informe_catedra(db, anio, periodo)
+
+@router.get("/fechas_informe_sintetico", response_model= schemas.PeriodoInformeSintetico)
+def read_periodo_informe_sintetico(anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.leer_fechas_informe_sintetico(db, anio, periodo)
