@@ -202,11 +202,34 @@ return (
           </div>
 
           <div className="card-body p-4 p-md-5">
+            <style>
+              {`
+                .nav-pills .nav-link,
+                .nav-pills .nav-link:visited,
+                .nav-pills .nav-link:focus,
+                .nav-pills .nav-link:active,
+                .nav-pills .nav-link:hover {
+                  color: black !important;
+                  background-color: transparent !important;
+                  opacity: 1 !important;
+                  box-shadow: none !important;
+                  outline: none !important;
+                }
+
+                .nav-pills .nav-link.active {
+                  color: white !important;
+                  background-color: var(--color-unpsjb-blue, #005ec2) !important;
+                  opacity: 1 !important;
+                  font-weight: 400 !important;
+                }
+              `}
+            </style>
+
             <ul className="nav nav-pills nav-fill mb-4">
               {steps.map(step => (
                 <li key={step.id} className="nav-item">
                   <a
-                    className={`nav-link ${currentStep === step.id ? 'active' : 'text-muted'}`}
+                    className={`nav-link ${currentStep === step.id ? 'active' : ''}`}
                     onClick={(e) => { e.preventDefault(); goToStep(step.id); }}
                     href="#"
                     style={{ cursor: 'pointer', fontWeight: 500 }}
@@ -216,17 +239,17 @@ return (
                 </li>
               ))}
             </ul>
-            <div 
-              className="step-content-container" 
-              style={{ 
-                height: '500px', 
+
+            <div
+              className="step-content-container"
+              style={{
+                height: '500px',
                 overflowY: 'auto',
-                paddingRight: '15px' 
+                paddingRight: '15px'
               }}
             >
               <ContenidoPasos
                 currentStep={currentStep}
-
                 categoriasConPreguntas={categoriasConPreguntas}
                 datosEstadisticos={datosEstadisticos}
                 cantidad={cantidad}
@@ -238,7 +261,8 @@ return (
                 setNombresFuncion={{ SetJTP, SetAux1, SetAux2 }}
               />
             </div>
-          </div> 
+          </div>
+
 
           <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
             <div className="d-flex justify-content-between">

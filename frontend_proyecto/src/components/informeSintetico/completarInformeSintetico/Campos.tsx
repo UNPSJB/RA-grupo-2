@@ -1,4 +1,3 @@
-
 const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = "auto";
@@ -9,11 +8,24 @@ export function CampoTextArea({
     label,
     value,
     onChange,
+    isReadOnly = false,
 }: {
     label: string|null;
     value: string;
     onChange?: (v: string) => void;
+    isReadOnly?: boolean;
 }) {
+    if (isReadOnly) {
+        return (
+            <div className="col-12">
+                {label && <label className="form-label fw-bold">{label}</label>}
+                <p className="form-control-plaintext border p-2 bg-light rounded" style={{ whiteSpace: 'pre-wrap' }}>
+                    {value || "— No hay información registrada —"}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-12">
             {label && <label className="form-label">{label}</label>}
@@ -36,11 +48,25 @@ export function CampoTextoNumero({
     label,
     value,
     onChange,
+    isReadOnly = false,
 }: {
     label: string;
     value: number;
     onChange: (v: number) => void;
+    isReadOnly?: boolean;
 }) {
+    if (isReadOnly) {
+        const displayValue = value === null || value === undefined || value === 0 ? '—' : value;
+        return (
+            <div className="col-md-4">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {displayValue}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-md-4">
             <label className="form-label">{label}</label>
@@ -63,12 +89,25 @@ export function CampoPorcentaje({
     label,
     value,
     onChange,
+    isReadOnly = false,
 }: {
     label: string;
     value: number | null;
     onChange: (v: number | null) => void;
+    isReadOnly?: boolean;
 }) {
-    
+    if (isReadOnly) {
+        const displayValue = value === null || value === undefined || value === 0 ? '—' : `${value}%`;
+        return (
+            <div className="col-md-6">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {displayValue}
+                </p>
+            </div>
+        );
+    }
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         if (val === "") {
@@ -130,20 +169,27 @@ export function CampoTexto({
 export function CampoCheckbox({
     checked,
     onChange,
+    isReadOnly = false,
 }: {
     checked: boolean;
     onChange: (v: boolean) => void;
+    isReadOnly?: boolean;
 }) {
     return (
         <td 
-            className="text-center" 
+            className={`text-center ${!isReadOnly ? 'cursor-pointer' : ''}`} 
             style={{ 
-                cursor: 'pointer', 
+                cursor: !isReadOnly ? 'pointer' : 'default',
                 fontWeight: 'bold', 
                 fontSize: '1.2rem',
-                userSelect: 'none'
+                userSelect: 'none',
+                opacity: isReadOnly ? 0.6 : 1, 
             }}
-            onClick={() => onChange(!checked)}
+            onClick={() => {
+                if (!isReadOnly) {
+                    onChange(!checked);
+                }
+            }}
         >
             {checked ? 'X' : '-'}
         </td>

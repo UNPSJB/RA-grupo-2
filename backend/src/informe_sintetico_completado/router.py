@@ -22,15 +22,15 @@ def get_informes_completados(db: Session = Depends(get_db)):
         return informes
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informes completados: {str(e)}")
-
-@router.get("/completados/{id}")
+    
+@router.get("/completados/{id}", response_model=schemas.InformeSinteticoCompletado)
 def get_informe_completado(id: int, db: Session = Depends(get_db)):
     try:
+        informe = services.get_informe_completado(db, id) 
         
-        informe = db.query(InformeSinteticoCompletado).filter(InformeSinteticoCompletado.id == id).first()
         if not informe:
             raise HTTPException(status_code=404, detail="Informe completado no encontrado")
-        return informe
+        return informe 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informe completado: {str(e)}")
 

@@ -143,13 +143,13 @@ export default function InformeCatedraBaseForm() {
     const inputAreaStyle = { 
         backgroundColor: 'var(--color-component-bg)',
         color: 'var(--color-text-primary)', 
-        borderColor: 'var(--color-text-primary)'
+        borderColor: 'var(--color-unpsjb-border)'
     };
     
     const inputFieldStyle = {
         backgroundColor: 'var(--color-input-bg)',
         color: 'var(--color-text-primary)',
-        borderColor: 'var(--color-text-primary)',
+        borderColor: 'var(--color-unpsjb-border)',
     };
 
     return (
@@ -233,7 +233,7 @@ export default function InformeCatedraBaseForm() {
                             <div className="d-flex justify-content-end mt-2">
                                 <button 
                                     type="button" 
-                                    className="btn btn-theme-primary" 
+                                    className="btn btn-theme-primary rounded-pill" 
                                     onClick={agregarPregunta} 
                                     disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)} 
                                 >
@@ -249,14 +249,32 @@ export default function InformeCatedraBaseForm() {
                                             <strong className={`badge ${preg.tipo === 'cerrada' ? 'bg-primary' : 'bg-secondary'} me-2`}>{preg.tipo.toUpperCase()}</strong>
                                             <strong style={{color: 'var(--color-text-primary)'}}> [{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
-                                        <button type="button" className="btn btn-theme-danger btn-sm" onClick={() => eliminarPregunta(i)} disabled={cargando}>Eliminar</button>
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-theme-danger btn-sm rounded-pill" 
+                                            onClick={() => eliminarPregunta(i)} 
+                                            disabled={cargando}
+                                        >
+                                            Eliminar
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
-                            <button type="button" className="btn btn-secondary" onClick={() => navigate(ROUTES.HOME)} disabled={cargando}>Cancelar</button>
-                            <button type="submit" className="btn btn-theme-primary" disabled={cargando}>
+                            <button 
+                                type="button" 
+                                className="btn btn-secondary rounded-pill" 
+                                onClick={() => navigate(ROUTES.HOME)} 
+                                disabled={cargando}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="btn btn-theme-primary rounded-pill" 
+                                disabled={cargando}
+                            >
                                 {cargando ? "Guardando en cascada..." : "Guardar Informe Completo"}
                             </button>
                         </div>
