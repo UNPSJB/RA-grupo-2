@@ -30,7 +30,7 @@ import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
 import CompletarInformeSintetico from "./components/informeSintetico/completarInformeSintetico/CompletarInformeSintetico";
 import AsignarFormularios from "./components/secretaria/asignarMateriaInforme";
-
+import DefinirFechas from "./components/secretaria/definirFechas/definirFechas"
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
@@ -84,6 +84,7 @@ function App() {
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
             <Route path={ROUTES.DASHBOARD_DPTO} element={<DashboardDepartamento />} />
+            <Route path={ROUTES.DEFINIR_FECHAS} element={<DefinirFechas/>}/>
           </Routes>
         </div>
       </main>
