@@ -114,7 +114,7 @@ export default function EquipamientoBibliografia({
                 </div>
             ) : itemsTabla.length === 0 ? (
                 <div className="alert alert-warning">
-                    No hay necesidades de equipamiento/bibliografía reportadas.
+                    No hay materias para esta selección.
                 </div>
             ) : (
                 <div className="accordion" id="accordionNecesidades">
