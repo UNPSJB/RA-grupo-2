@@ -16,3 +16,7 @@ def read_encuestas(alumno_id: int, db: Session = Depends(get_db)):
 @router.get("/materia/{materia_id}/cursantes", response_model=list[schemas.Alumno])
 def obtener_alumnos_por_materia_y_periodo(materia_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
     return services.obtener_alumnos_por_materia_y_periodo(db, materia_id, anio, periodo)
+
+@router.get("/{alumno_id}", response_model= schemas.Alumno)
+def read_alumno(alumno_id: int, db: Session = Depends(get_db)):
+    return services.leer_alumno(db, alumno_id)

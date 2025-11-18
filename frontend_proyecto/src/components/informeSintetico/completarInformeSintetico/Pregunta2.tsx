@@ -128,7 +128,7 @@ export default function Pregunta2({
                 </div>
             ) : itemsTabla.length === 0 ? (
                 <div className="alert alert-warning">
-                    No hay respuestas.
+                    No hay materias para esta selección.
                 </div>
             ) : (
                 <>

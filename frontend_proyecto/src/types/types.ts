@@ -63,3 +63,8 @@ export interface InformeCompletado {
   departamento_id: number; 
   respuestas: RespuestaInformeSintetico[]; 
 }
+export interface Alumno {
+  id: number
+  nombre: string
+  apellido: string
+}

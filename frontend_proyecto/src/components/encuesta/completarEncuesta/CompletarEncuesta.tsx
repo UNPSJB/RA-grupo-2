@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import type { Categoria } from "../../../types/types";
-
+import type {Materia} from "../../../types/types.ts";
 interface Respuesta {
   pregunta_id: number;
   opcion_id: number | null;
@@ -21,6 +21,8 @@ export default function CompletarEncuesta() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const [materia, setMateria] = useState<Materia>();
+
   const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
 
   const [loading, setLoading] = useState(true);
@@ -82,6 +84,14 @@ export default function CompletarEncuesta() {
   };
 
   useEffect(() => {
+    const {materiaId} = location.state
+    fetch(`http://127.0.0.1:8000/materias/${materiaId}`)
+    .then(res=>{
+      if (!res.ok) throw new Error("Error al obtener la materia");
+        return res.json();
+    })
+    .then(setMateria)
+    .catch(console.error);
     const { encuestaId = 1 } = location.state || {};
     setLoading(true);
     setError(null);

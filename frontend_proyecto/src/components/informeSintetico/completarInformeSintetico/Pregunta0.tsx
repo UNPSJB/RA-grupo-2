@@ -115,7 +115,7 @@ export default function InformacionGeneral({
                 </div>
             ) : materias.length === 0 ? (
                 <div className="alert alert-warning">
-                    No hay información disponible.
+                    No hay materias para esta selección.
                 </div>
             ) : (
                 <>

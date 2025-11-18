@@ -156,7 +156,7 @@ export default function CompletarInformeCatedra() {
       cantidadComisionesPracticas,
       JTP: JTP.trim()? JTP: null,
       aux_primera: aux1.trim()? aux1 : null,
-      aux_segunda: aux2.trim()? aux1 : null,
+      aux_segunda: aux2.trim()? aux2 : null,
       respuestas: respuestasFormateadas,
     };
     try {
