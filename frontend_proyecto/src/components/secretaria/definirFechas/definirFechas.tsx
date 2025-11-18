@@ -32,7 +32,7 @@ export default function DefinirFechas() {
                     setEstaDefinido(false)
                     return null;
                 }
-                if (!res.ok) throw new Error("Error al obtener el alumno");
+                if (!res.ok) throw new Error("Error al obtener el periodo de fechas");
                 return res.json();
             })
             .then(data => {
@@ -63,7 +63,14 @@ export default function DefinirFechas() {
 
     const handleGuardar = () => {
         setError("");
-        
+
+        const todasCompletas = Object.values(form).every(f => f !== "");
+        if (!todasCompletas) {
+            setError("Debes completar todas las fechas antes de guardar.");
+            return;
+        }
+
+
         if (!validarOrden()) {
             setError("Cada fecha debe ser posterior a la anterior.");
             return;
@@ -88,40 +95,74 @@ export default function DefinirFechas() {
             .catch(err => setError(err.message));
     };
 
-
-
     if (estaDefinido) {
         return (
-            <div>
-                <p>Año: {ANIO_ACTUAL}</p>
-                <p>Periodo: {PERIODO_ACTUAL}</p>
-                <p>Fecha inicio encuestas: {periodoApertura?.inicio_encuesta
-                    ? new Date(periodoApertura.inicio_encuesta).toLocaleDateString()
-                    : "—"
-                }</p>
-                <p>Fecha fin encuestas: {periodoApertura?.fin_encuesta
-                    ? new Date(periodoApertura.fin_encuesta).toLocaleDateString()
-                    : "—"
-                }</p>
-                <p>Fecha inicio informe cátedra: {periodoApertura?.inicio_informe_catedra
-                    ? new Date(periodoApertura.inicio_informe_catedra).toLocaleDateString()
-                    : "—"
-                }</p>
-                <p>Fecha fin informe cátedra: {periodoApertura?.fin_informe_catedra
-                    ? new Date(periodoApertura.fin_informe_catedra).toLocaleDateString()
-                    : "—"
-                }</p>
-                <p>Fecha inicio informe sintético: {periodoApertura?.inicio_informe_sintetico
-                    ? new Date(periodoApertura.inicio_informe_sintetico).toLocaleDateString()
-                    : "—"
-                }</p>
-                <p>Fecha fin informe sintético: {periodoApertura?.fin_informe_sintetico
-                    ? new Date(periodoApertura.fin_informe_sintetico).toLocaleDateString()
-                    : "—"
-                }</p>
+            <div className="container mt-4">
+                <div className="card shadow-sm">
+                    <div className="card-header bg-unpsjb-header text-white">
+                        <h4 className="mb-0">Periodos para completar encuestas e informes</h4>
+                    </div>
+
+                    <div className="card-body">
+                        <div className="row text-center fs-5">
+
+                            <div className="col">
+                                <h5 className="fw-bold mb-3">Encuestas</h5>
+                                <p>
+                                    <span className="fw-bold">Inicio:</span><br />
+                                    {periodoApertura?.inicio_encuesta
+                                        ? new Date(periodoApertura.inicio_encuesta).toLocaleDateString()
+                                        : "—"}
+                                </p>
+                                <p>
+                                    <span className="fw-bold">Fin:</span><br />
+                                    {periodoApertura?.fin_encuesta
+                                        ? new Date(periodoApertura.fin_encuesta).toLocaleDateString()
+                                        : "—"}
+                                </p>
+                            </div>
+
+                            <div className="col">
+                                <h5 className="fw-bold mb-3">Informe de Cátedra</h5>
+                                <p>
+                                    <span className="fw-bold">Inicio:</span><br />
+                                    {periodoApertura?.inicio_informe_catedra
+                                        ? new Date(periodoApertura.inicio_informe_catedra).toLocaleDateString()
+                                        : "—"}
+                                </p>
+                                <p>
+                                    <span className="fw-bold">Fin:</span><br />
+                                    {periodoApertura?.fin_informe_catedra
+                                        ? new Date(periodoApertura.fin_informe_catedra).toLocaleDateString()
+                                        : "—"}
+                                </p>
+                            </div>
+
+                            <div className="col">
+                                <h5 className="fw-bold mb-3">Informe Sintético</h5>
+                                <p>
+                                    <span className="fw-bold">Inicio:</span><br />
+                                    {periodoApertura?.inicio_informe_sintetico
+                                        ? new Date(periodoApertura.inicio_informe_sintetico).toLocaleDateString()
+                                        : "—"}
+                                </p>
+                                <p>
+                                    <span className="fw-bold">Fin:</span><br />
+                                    {periodoApertura?.fin_informe_sintetico
+                                        ? new Date(periodoApertura.fin_informe_sintetico).toLocaleDateString()
+                                        : "—"}
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
             </div>
-        )
+
+
+        );
     }
+
     else {
         return (
             <div className="container mt-4">
@@ -143,7 +184,7 @@ export default function DefinirFechas() {
                                     ["fin_informe_sintetico", "Fin informe sintético"],
                                 ].map(([campo, label]) => (
                                     <div className="mb-3" key={campo}>
-                                        <label className="form-label">{label}</label>
+                                        <label className="form-label fw-bold">{label}</label>
                                         <input
                                             type="date"
                                             className="form-control"
