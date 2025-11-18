@@ -77,16 +77,16 @@ export default function Categoria4Informe({
 
   const getNombreFuncion = (rolKey: string): string => {
     if (!nombresFuncion) return "";
-    if (rolKey === "jtp") return nombresFuncion.JTP? nombresFuncion.JTP : "";
-    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1? nombresFuncion.aux1 : "";
-    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2? nombresFuncion.aux2 : "";
+    if (rolKey === "jtp") return nombresFuncion.JTP ? nombresFuncion.JTP : "";
+    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1 ? nombresFuncion.aux1 : "";
+    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2 ? nombresFuncion.aux2 : "";
     return "";
   };
 
   const rolesVisibles = isReadOnly
-    ? ROLES.filter((rol) => getNombreFuncion(rol.key).trim()) // solo los que tienen nombre
+    ? ROLES.filter((rol) => getNombreFuncion(rol.key).trim())
     : ROLES;
- 
+
   return (
     <Fragment>
       <div className="table-responsive">

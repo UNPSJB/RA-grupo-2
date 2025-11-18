@@ -9,6 +9,7 @@ interface Pregunta {
   id: number;
   enunciado: string;
   categoria_id: number;
+  obligatoria: boolean;
 }
 
 interface Categoria {
@@ -39,8 +40,19 @@ export default function Categoria3Informe({
   isReadOnly = false,
 }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
-  const roles = ["Profesor", "JTP", "Auxiliar de Primera", "Auxiliar de Segunda"];
-  const actividades = ["Capacitación", "Investigación", "Extensión", "Gestión", "Observaciones"];
+  const roles = [
+    "Profesor",
+    "JTP",
+    "Auxiliar de Primera",
+    "Auxiliar de Segunda",
+  ];
+  const actividades = [
+    "Capacitación",
+    "Investigación",
+    "Extensión",
+    "Gestión",
+    "Observaciones",
+  ];
 
   const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
@@ -57,22 +69,22 @@ export default function Categoria3Informe({
     manejarCambio(preguntaId, { opcion_id: null, texto_respuesta: texto });
   };
 
-  const findPreguntaId = (rol: string, act: string): number => {
+  const findPregunta = (rol: string, act: string): Pregunta | undefined => {
     const enunciadoBuscado = normalizarString(`${act} - ${rol}`);
     const p = preguntas.find(
       (p) => normalizarString(p.enunciado) === enunciadoBuscado
     );
-    return p ? p.id : 0;
+    return p;
   };
 
   const rolesFiltrados = isReadOnly
     ? roles.filter((rol) => {
-      return actividades.some((act) => {
-        const pId = findPreguntaId(rol, act);
-        const respuesta = respuestas[pId]?.texto_respuesta?.trim();
-        return !!respuesta; 
-      });
-    })
+        return actividades.some((act) => {
+          const p = findPregunta(rol, act);
+          const respuesta = p ? respuestas[p.id]?.texto_respuesta?.trim() : "";
+          return !!respuesta;
+        });
+      })
     : roles;
 
   return (
@@ -83,8 +95,10 @@ export default function Categoria3Informe({
 
         let habilitado = true;
         if (rol === "JTP" && !nombresFuncion?.JTP?.trim()) habilitado = false;
-        if (rol === "Auxiliar de Primera" && !nombresFuncion?.aux1?.trim()) habilitado = false;
-        if (rol === "Auxiliar de Segunda" && !nombresFuncion?.aux2?.trim()) habilitado = false;
+        if (rol === "Auxiliar de Primera" && !nombresFuncion?.aux1?.trim())
+          habilitado = false;
+        if (rol === "Auxiliar de Segunda" && !nombresFuncion?.aux2?.trim())
+          habilitado = false;
 
         return (
           <div className="accordion-item" key={rol}>
@@ -107,16 +121,29 @@ export default function Categoria3Informe({
             >
               <div className="accordion-body">
                 {actividades.map((act) => {
-                  const pId = findPreguntaId(rol, act);
-                  const label = act === "Observaciones" ? "Observaciones y comentarios" : act;
+                  const p = findPregunta(rol, act);
+                  const pId = p ? p.id : 0;
+                  const label =
+                    act === "Observaciones"
+                      ? "Observaciones y comentarios"
+                      : act;
 
                   return (
                     <div key={`${rol}-${act}`} className="mb-3">
-                      <label htmlFor={`preg-${pId}`} className="form-label fw-bold">
+                      <label
+                        htmlFor={`preg-${pId}`}
+                        className="form-label fw-bold"
+                      >
                         {label}
+                        {p?.obligatoria && (
+                          <span className="text-danger ms-1">*</span>
+                        )}
                       </label>
                       {isReadOnly ? (
-                        <p className="form-control-plaintext" style={{ whiteSpace: "pre-wrap" }}>
+                        <p
+                          className="form-control-plaintext"
+                          style={{ whiteSpace: "pre-wrap" }}
+                        >
                           {respuestas[pId]?.texto_respuesta || "—"}
                         </p>
                       ) : (
@@ -137,6 +164,7 @@ export default function Categoria3Informe({
                               ? "Complete el nombre en Datos Generales para habilitar este campo"
                               : ""
                           }
+                          required={p?.obligatoria}
                         />
                       )}
                     </div>

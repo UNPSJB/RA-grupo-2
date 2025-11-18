@@ -1,4 +1,4 @@
-import { Fragment} from "react"; 
+import { Fragment } from "react";
 import Categoria2BInforme from "./CAT2B";
 import Categoria2CInforme from "./CAT2C";
 import Categoria3Informe from "./CAT3";
@@ -8,12 +8,38 @@ import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadistic
 import CompletarInformeCatedraFuncion from "./CompletarInformeCatedraFuncion";
 import RespuestasAbiertas from "./RespuestasAbiertas";
 
-interface Pregunta { id: number; enunciado: string; categoria_id: number; }
-interface CategoriaConPreguntas { id: number; cod: string; texto: string; preguntas: Pregunta[]; }
-interface OpcionPorcentaje { opcion_id: string; porcentaje: number; }
-interface DatosEstadisticosPregunta { id_pregunta: string; datos: OpcionPorcentaje[]; }
-interface DatosEstadisticosCategoria { categoria_cod: string; categoria_texto: string; promedio_categoria: OpcionPorcentaje[]; preguntas: DatosEstadisticosPregunta[]; }
-type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null; };
+interface Pregunta {
+  id: number;
+  enunciado: string;
+  categoria_id: number;
+  obligatoria: boolean;
+}
+
+interface CategoriaConPreguntas {
+  id: number;
+  cod: string;
+  texto: string;
+  preguntas: Pregunta[];
+}
+
+interface OpcionPorcentaje {
+  opcion_id: string;
+  porcentaje: number;
+}
+
+interface DatosEstadisticosPregunta {
+  id_pregunta: string;
+  datos: OpcionPorcentaje[];
+}
+
+interface DatosEstadisticosCategoria {
+  categoria_cod: string;
+  categoria_texto: string;
+  promedio_categoria: OpcionPorcentaje[];
+  preguntas: DatosEstadisticosPregunta[];
+}
+
+type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null };
 
 interface ContenidoPasosProps {
   currentStep: number;
@@ -51,25 +77,24 @@ export default function ContenidoPasos({
   nombresFuncion,
   setNombresFuncion,
   isReadOnly = false,
-  datosIniciales
+  datosIniciales,
 }: ContenidoPasosProps) {
-
-  const categoria1 = categoriasConPreguntas.find(cat => cat.cod === "1");
-  const categoria2 = categoriasConPreguntas.find(cat => cat.cod === "2");
-  const categoria2A = categoriasConPreguntas.find(cat => cat.cod === "2.A");
-  const categoria2B = categoriasConPreguntas.find(cat => cat.cod === "2.B");
-  const categoria2C = categoriasConPreguntas.find(cat => cat.cod === "2.C");
-  const categoria3 = categoriasConPreguntas.find(cat => cat.cod === "3");
-  const categoria4 = categoriasConPreguntas.find(cat => cat.cod === "4");
+  const categoria1 = categoriasConPreguntas.find((cat) => cat.cod === "1");
+  const categoria2 = categoriasConPreguntas.find((cat) => cat.cod === "2");
+  const categoria2A = categoriasConPreguntas.find((cat) => cat.cod === "2.A");
+  const categoria2B = categoriasConPreguntas.find((cat) => cat.cod === "2.B");
+  const categoria2C = categoriasConPreguntas.find((cat) => cat.cod === "2.C");
+  const categoria3 = categoriasConPreguntas.find((cat) => cat.cod === "3");
+  const categoria4 = categoriasConPreguntas.find((cat) => cat.cod === "4");
 
   const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
   };
 
   const handlePercentageChange = (
-    pregunta: Pregunta | undefined, 
+    pregunta: Pregunta | undefined,
     valor: string
   ) => {
     if (!pregunta) return;
@@ -84,15 +109,24 @@ export default function ContenidoPasos({
   };
 
   const renderCategoria2 = (categoria: CategoriaConPreguntas) => {
-    const pTeoricas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases teoricas"));
-    const pPracticas = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("clases practicas"));
-    const pJustificacion = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("justificacion"));
+    const pTeoricas = categoria.preguntas.find((p) =>
+      normalizarString(p.enunciado).includes("clases teoricas")
+    );
+    const pPracticas = categoria.preguntas.find((p) =>
+      normalizarString(p.enunciado).includes("clases practicas")
+    );
+    const pJustificacion = categoria.preguntas.find((p) =>
+      normalizarString(p.enunciado).includes("justificacion")
+    );
 
     return (
       <div className="row g-3">
         <div className="col-md-6">
           <label htmlFor={`preg-${pTeoricas?.id}`} className="form-label fw-bold">
             {pTeoricas?.enunciado || "Porcentaje Clases Teóricas"}
+            {pTeoricas?.obligatoria && (
+              <span className="text-danger ms-1">*</span>
+            )}
           </label>
           {isReadOnly ? (
             <p className="form-control-plaintext ps-1">
@@ -105,19 +139,28 @@ export default function ContenidoPasos({
                 className="form-control"
                 id={`preg-${pTeoricas?.id}`}
                 value={respuestas[pTeoricas?.id || 0]?.texto_respuesta || ""}
-                onChange={(e) => handlePercentageChange(pTeoricas, e.target.value)}
+                onChange={(e) =>
+                  handlePercentageChange(pTeoricas, e.target.value)
+                }
                 disabled={!pTeoricas}
                 min="0"
                 max="100"
                 aria-describedby="teoricas-addon"
+                required={pTeoricas?.obligatoria}
               />
             </div>
           )}
         </div>
 
         <div className="col-md-6">
-          <label htmlFor={`preg-${pPracticas?.id}`} className="form-label fw-bold">
+          <label
+            htmlFor={`preg-${pPracticas?.id}`}
+            className="form-label fw-bold"
+          >
             {pPracticas?.enunciado || "Porcentaje Clases Prácticas"}
+            {pPracticas?.obligatoria && (
+              <span className="text-danger ms-1">*</span>
+            )}
           </label>
           {isReadOnly ? (
             <p className="form-control-plaintext ps-1">
@@ -130,11 +173,14 @@ export default function ContenidoPasos({
                 className="form-control"
                 id={`preg-${pPracticas?.id}`}
                 value={respuestas[pPracticas?.id || 0]?.texto_respuesta || ""}
-                onChange={(e) => handlePercentageChange(pPracticas, e.target.value)}
+                onChange={(e) =>
+                  handlePercentageChange(pPracticas, e.target.value)
+                }
                 disabled={!pPracticas}
                 min="0"
                 max="100"
                 aria-describedby="practicas-addon"
+                required={pPracticas?.obligatoria}
               />
             </div>
           )}
@@ -142,11 +188,20 @@ export default function ContenidoPasos({
 
         {pJustificacion && (
           <div className="col-12 mt-3">
-            <label htmlFor={`preg-${pJustificacion.id}`} className="form-label fw-bold">
+            <label
+              htmlFor={`preg-${pJustificacion.id}`}
+              className="form-label fw-bold"
+            >
               {pJustificacion.enunciado}
+              {pJustificacion.obligatoria && (
+                <span className="text-danger ms-1">*</span>
+              )}
             </label>
             {isReadOnly ? (
-              <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+              <p
+                className="form-control-plaintext"
+                style={{ whiteSpace: "pre-wrap" }}
+              >
                 {respuestas[pJustificacion.id]?.texto_respuesta || "—"}
               </p>
             ) : (
@@ -154,19 +209,20 @@ export default function ContenidoPasos({
                 className="form-control"
                 id={`preg-${pJustificacion.id}`}
                 value={respuestas[pJustificacion.id]?.texto_respuesta || ""}
-                onChange={(e) =>{
+                onChange={(e) => {
                   manejarCambio(pJustificacion.id, {
                     opcion_id: null,
                     texto_respuesta: e.target.value,
                   });
                   autoExpand(e);
                 }}
-                onInput={autoExpand} 
+                onInput={autoExpand}
                 style={{
-                  resize: 'none',
-                  minHeight: '100px',
-                  overflow: 'hidden'
+                  resize: "none",
+                  minHeight: "100px",
+                  overflow: "hidden",
                 }}
+                required={pJustificacion.obligatoria}
               />
             )}
           </div>
@@ -176,15 +232,25 @@ export default function ContenidoPasos({
   };
 
   const renderCategoria2A = (categoria: CategoriaConPreguntas) => {
-    const pPorcentaje = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("cantidad de temas desarrollados"));
-    const pEstrategias = categoria.preguntas.find(p => normalizarString(p.enunciado).includes("estrategias"));
-  
+    const pPorcentaje = categoria.preguntas.find((p) =>
+      normalizarString(p.enunciado).includes("cantidad de temas desarrollados")
+    );
+    const pEstrategias = categoria.preguntas.find((p) =>
+      normalizarString(p.enunciado).includes("estrategias")
+    );
+
     return (
       <div className="row g-3">
         {pPorcentaje && (
-          <div className="col-md-4"> 
-            <label htmlFor={`preg-${pPorcentaje.id}`} className="form-label fw-bold">
+          <div className="col-md-4">
+            <label
+              htmlFor={`preg-${pPorcentaje.id}`}
+              className="form-label fw-bold"
+            >
               {pPorcentaje.enunciado}
+              {pPorcentaje.obligatoria && (
+                <span className="text-danger ms-1">*</span>
+              )}
             </label>
             {isReadOnly ? (
               <p className="form-control-plaintext ps-1">
@@ -197,10 +263,13 @@ export default function ContenidoPasos({
                   className="form-control"
                   id={`preg-${pPorcentaje.id}`}
                   value={respuestas[pPorcentaje.id || 0]?.texto_respuesta || ""}
-                  onChange={(e) => handlePercentageChange(pPorcentaje, e.target.value)}
+                  onChange={(e) =>
+                    handlePercentageChange(pPorcentaje, e.target.value)
+                  }
                   min="0"
-                  max="100" 
+                  max="100"
                   aria-describedby="porcentaje-addon"
+                  required={pPorcentaje.obligatoria}
                 />
               </div>
             )}
@@ -209,11 +278,20 @@ export default function ContenidoPasos({
 
         {pEstrategias && (
           <div className="col-12 mt-3">
-            <label htmlFor={`preg-${pEstrategias.id}`} className="form-label fw-bold">
+            <label
+              htmlFor={`preg-${pEstrategias.id}`}
+              className="form-label fw-bold"
+            >
               {pEstrategias.enunciado}
+              {pEstrategias.obligatoria && (
+                <span className="text-danger ms-1">*</span>
+              )}
             </label>
             {isReadOnly ? (
-              <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+              <p
+                className="form-control-plaintext"
+                style={{ whiteSpace: "pre-wrap" }}
+              >
                 {respuestas[pEstrategias.id]?.texto_respuesta || "—"}
               </p>
             ) : (
@@ -221,19 +299,20 @@ export default function ContenidoPasos({
                 className="form-control"
                 id={`preg-${pEstrategias.id}`}
                 value={respuestas[pEstrategias.id]?.texto_respuesta || ""}
-                onChange={(e) =>{
+                onChange={(e) => {
                   manejarCambio(pEstrategias.id, {
                     opcion_id: null,
                     texto_respuesta: e.target.value,
                   });
                   autoExpand(e);
                 }}
-                onInput={autoExpand} 
+                onInput={autoExpand}
                 style={{
-                  resize: 'none',
-                  minHeight: '100px',
-                  overflow: 'hidden'
+                  resize: "none",
+                  minHeight: "100px",
+                  overflow: "hidden",
                 }}
+                required={pEstrategias.obligatoria}
               />
             )}
           </div>
@@ -264,10 +343,7 @@ export default function ContenidoPasos({
           </p>
           <hr className="mb-4" />
 
-          <TablaDatosEstadisticos 
-            datos={datosEstadisticos}
-            cant={cantidad} 
-          />
+          <TablaDatosEstadisticos datos={datosEstadisticos} cant={cantidad} />
           <RespuestasAbiertas docenteMateriaId={docenteMateriaId} />
         </Fragment>
       );
@@ -275,7 +351,9 @@ export default function ContenidoPasos({
     case 3:
       return categoria1 ? (
         <Fragment>
-          <h5 className="text-dark fw-bold mb-3">1. Equipamiento y Bibliografía</h5>
+          <h5 className="text-dark fw-bold mb-3">
+            1. Equipamiento y Bibliografía
+          </h5>
           <p className="text-muted mb-4">{categoria1.texto}</p>
           <hr className="mb-4" />
           <CategoriaEquipamiento
@@ -296,38 +374,54 @@ export default function ContenidoPasos({
             {categoria2 && (
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2">
-                  <button 
-                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
-                    type="button" 
-                    data-bs-toggle="collapse" 
+                  <button
+                    className={`accordion-button ${
+                      isReadOnly ? "" : "collapsed"
+                    }`}
+                    type="button"
+                    data-bs-toggle="collapse"
                     data-bs-target="#collapse2"
                     disabled={isReadOnly}
                   >
                     2. Porcentaje de Horas de Clases
                   </button>
                 </h2>
-                <div id="collapse2" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
+                <div
+                  id="collapse2"
+                  className={`accordion-collapse collapse ${
+                    isReadOnly ? "show" : ""
+                  }`}
+                  data-bs-parent="#accordionPaso3"
+                >
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2.texto}</p>
                     {renderCategoria2(categoria2)}
                   </div>
                 </div>
               </div>
-            )}            
+            )}
             {categoria2A && (
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2A">
-                  <button 
-                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
-                    type="button" 
-                    data-bs-toggle="collapse" 
+                  <button
+                    className={`accordion-button ${
+                      isReadOnly ? "" : "collapsed"
+                    }`}
+                    type="button"
+                    data-bs-toggle="collapse"
                     data-bs-target="#collapse2A"
                     disabled={isReadOnly}
                   >
                     2.A. Totalidad de Contenidos
                   </button>
                 </h2>
-                <div id="collapse2A" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
+                <div
+                  id="collapse2A"
+                  className={`accordion-collapse collapse ${
+                    isReadOnly ? "show" : ""
+                  }`}
+                  data-bs-parent="#accordionPaso3"
+                >
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2A.texto}</p>
                     {renderCategoria2A(categoria2A)}
@@ -339,17 +433,25 @@ export default function ContenidoPasos({
             {categoria2B && (
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2B">
-                  <button 
-                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
-                    type="button" 
-                    data-bs-toggle="collapse" 
+                  <button
+                    className={`accordion-button ${
+                      isReadOnly ? "" : "collapsed"
+                    }`}
+                    type="button"
+                    data-bs-toggle="collapse"
                     data-bs-target="#collapse2B"
                     disabled={isReadOnly}
                   >
                     2.B. Análisis de Encuestas
                   </button>
                 </h2>
-                <div id="collapse2B" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
+                <div
+                  id="collapse2B"
+                  className={`accordion-collapse collapse ${
+                    isReadOnly ? "show" : ""
+                  }`}
+                  data-bs-parent="#accordionPaso3"
+                >
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2B.texto}</p>
                     <Categoria2BInforme
@@ -367,17 +469,25 @@ export default function ContenidoPasos({
             {categoria2C && (
               <div className="accordion-item">
                 <h2 className="accordion-header" id="heading2C">
-                  <button 
-                    className={`accordion-button ${isReadOnly ? "" : "collapsed"}`} 
-                    type="button" 
-                    data-bs-toggle="collapse" 
+                  <button
+                    className={`accordion-button ${
+                      isReadOnly ? "" : "collapsed"
+                    }`}
+                    type="button"
+                    data-bs-toggle="collapse"
                     data-bs-target="#collapse2C"
                     disabled={isReadOnly}
                   >
                     2.C. Reflexión Docente
                   </button>
                 </h2>
-                <div id="collapse2C" className={`accordion-collapse collapse ${isReadOnly ? 'show' : ''}`} data-bs-parent="#accordionPaso3">
+                <div
+                  id="collapse2C"
+                  className={`accordion-collapse collapse ${
+                    isReadOnly ? "show" : ""
+                  }`}
+                  data-bs-parent="#accordionPaso3"
+                >
                   <div className="accordion-body">
                     <p className="text-muted mb-3">{categoria2C.texto}</p>
                     <Categoria2CInforme
@@ -391,13 +501,15 @@ export default function ContenidoPasos({
               </div>
             )}
           </div>
-        </Fragment> 
+        </Fragment>
       );
 
     case 5:
       return categoria3 ? (
         <Fragment>
-          <h5 className="text-dark fw-bold mb-3">3. Actividades del Equipo Docente</h5>
+          <h5 className="text-dark fw-bold mb-3">
+            3. Actividades del Equipo Docente
+          </h5>
           <p className="text-muted mb-4">{categoria3.texto}</p>
           <hr className="mb-4" />
           <div className="accordion accordion-flush" id="accordionPaso4">
@@ -417,7 +529,9 @@ export default function ContenidoPasos({
         <Fragment>
           {categoria4 && (
             <div className="mb-4">
-              <h5 className="text-dark fw-bold mb-3">4. Valoración de Auxiliares</h5>
+              <h5 className="text-dark fw-bold mb-3">
+                4. Valoración de Auxiliares
+              </h5>
               <p className="text-muted mb-4">{categoria4.texto}</p>
               <hr className="mb-4" />
               <Categoria4Informe

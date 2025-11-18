@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 import { CampoTextArea, CampoPorcentaje } from "./Campos";
 
-
 interface TablaPregunta2Item {
     materia: Materia;
     porcentaje_teoricas: number | null;
@@ -17,6 +16,7 @@ interface Props {
     anio: number;
     periodo: string;
     manejarCambio?: (items: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void;
 }
 
 export default function Pregunta2({
@@ -25,166 +25,182 @@ export default function Pregunta2({
     pregunta,
     anio,
     periodo,
-    manejarCambio
+    manejarCambio,
+    notificarValidacion
 }: Props) {
-    const [itemsTabla, setItems] = useState<TablaPregunta2Item[]>([]); 
+    const [itemsTabla, setItems] = useState<TablaPregunta2Item[]>([]);
+    const [itemsOriginales, setItemsOriginales] = useState<TablaPregunta2Item[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!departamentoId) return;
-        if (!carreraId) return;
+        // Log de depuración para ver si el hook se ejecuta y con qué props
+        console.log("➡️ Iniciando useEffect con:", { 
+            departamentoId, 
+            carreraId, 
+            anio, 
+            periodo,
+            preguntaId: pregunta.id
+        }); 
+
+        if (!departamentoId || !carreraId) {
+            console.log("❌ Datos esenciales faltantes. Fetch cancelado.");
+            return;
+        }
 
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                setError(null);
-
                 const res = await fetch(
                     `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
                 );
 
-                if (!res.ok) {
-                    throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
-                }
                 const data = await res.json();
-                if (!Array.isArray(data)) {
-                    throw new Error("El formato de los datos recibidos no es válido.");
+                
+                // CAMBIO CLAVE: Muestro el JSON después de recibirlo y antes de validar el 'res.ok'
+                console.log("✅ JSON devuelto por la API (datos sin parsear):", data); 
+
+                // Si la respuesta HTTP no es exitosa, lanzo el error *después* de haber loggeado los datos
+                if (!res.ok) {
+                    throw new Error(`Error en la respuesta HTTP: ${res.status} ${res.statusText}`);
                 }
+                
+                const parseado: TablaPregunta2Item[] = data.map((itm: any) => ({
+                    materia: itm.materia,
+                    porcentaje_teoricas: parseFloat(itm.porcentaje_teoricas) || null,
+                    porcentaje_practicas: parseFloat(itm.porcentaje_practicas) || null,
+                    justificacion: itm.justificacion || "",
+                }));
 
-                const itemsIniciales: TablaPregunta2Item[] = data.map((itm) => {
-                    const teoricas = parseFloat(itm.porcentaje_teoricas || "");
-                    const practicas = parseFloat(itm.porcentaje_practicas || "");
+                setItems(parseado);
+                setItemsOriginales(JSON.parse(JSON.stringify(parseado)));
 
-                    return {
-                        materia: itm.materia,
-                        porcentaje_teoricas: isNaN(teoricas) ? null : teoricas,
-                        porcentaje_practicas: isNaN(practicas) ? null : practicas,
-                        justificacion: itm.justificacion || "",
-                    };
-                });
-
-                setItems(itemsIniciales);
-
-                const respuestasIniciales = data.map((itm) => ({
+                const respuestas = parseado.map((itm) => ({
                     pregunta_id: pregunta.id,
+                    materia_id: itm.materia.id,
                     texto_respuesta: JSON.stringify({
                         porcentaje_teoricas: itm.porcentaje_teoricas,
                         porcentaje_practicas: itm.porcentaje_practicas,
                         justificacion: itm.justificacion,
                     }),
-                    materia_id: itm.materia.id,
                 }));
-                manejarCambio?.(respuestasIniciales);
+                // Muestro el array de respuestas generado
+                console.log("✅ Respuestas generadas para manejarCambio:", respuestas); 
 
-            } catch (err) {
-                console.error("Error al obtener información:", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
-            } finally {
-                setIsLoading(false);
+                manejarCambio?.(respuestas);
+
+            } catch (err) { 
+                // Aquí capturamos errores de red (antes de la respuesta) o errores HTTP (lanzados arriba)
+                console.error("❌ Error en la carga/procesamiento de datos:", err); 
+            } finally { 
+                setIsLoading(false); 
             }
         };
 
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
+
+    useEffect(() => {
+        if (itemsTabla.length === 0) return;
+        
+        const hayError = itemsTabla.some((item, idx) => {
+            const orig = itemsOriginales[idx];
+            if (!orig) return false;
+        
+            const origTeoricas = orig.porcentaje_teoricas || 0;
+            const currTeoricas = item.porcentaje_teoricas || 0;
+            if (origTeoricas > 0 && currTeoricas === 0) return true;
+
+            const origPracticas = orig.porcentaje_practicas || 0;
+            const currPracticas = item.porcentaje_practicas || 0;
+            if (origPracticas > 0 && currPracticas === 0) return true;
+        
+            if (orig.justificacion !== "" && item.justificacion === "") return true;
+            
+            return false;
+        });
+        
+        notificarValidacion?.(!hayError);
+    }, [itemsTabla]);
+
     const handleChange = <K extends keyof TablaPregunta2Item>(
-        index: number,
-        field: K,
-        value: TablaPregunta2Item[K]
+        index: number, field: K, value: TablaPregunta2Item[K]
     ) => {
         const updated = [...itemsTabla];
         updated[index][field] = value;
         setItems(updated);
 
-        const respuestas: Respuesta[] = updated.map((itm) => ({
-            pregunta_id: pregunta.id, 
+        const m = updated[index];
+        const respuesta = {
+            pregunta_id: pregunta.id,
+            materia_id: m.materia.id,
             texto_respuesta: JSON.stringify({
-                porcentaje_teoricas: itm.porcentaje_teoricas,
-                porcentaje_practicas: itm.porcentaje_practicas,
-                justificacion: itm.justificacion,
+                porcentaje_teoricas: m.porcentaje_teoricas,
+                porcentaje_practicas: m.porcentaje_practicas,
+                justificacion: m.justificacion,
             }),
-            materia_id: itm.materia.id,
-        }));
-
-        manejarCambio?.(respuestas);
+        };
+        manejarCambio?.([respuesta]);
     };
 
+
+    const isError = (idx: number, field: keyof TablaPregunta2Item) => {
+        if (!itemsOriginales[idx]) return false;
+        const origVal = itemsOriginales[idx][field];
+        const currVal = itemsTabla[idx][field];
+
+        if (field === 'justificacion') {
+            return (origVal !== "" && currVal === "");
+        } else {
+            const o = (origVal as number) || 0;
+            const c = (currVal as number) || 0;
+            return o > 0 && c === 0;
+        }
+    };
 
     return (
         <div className="container mt-4">
             <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
-
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
-            ) : error ? (
-                <div className="alert alert-danger">
-                    <strong>Error:</strong> {error}
-                </div>
             ) : itemsTabla.length === 0 ? (
-                <div className="alert alert-warning">
-                    No hay respuestas.
-                </div>
+                <div className="alert alert-warning">No hay respuestas.</div>
             ) : (
-                <>
-                    <div className="accordion" id="accordionMateriasPregunta2">
-                        {itemsTabla.map((itm, index) => (
-                            <div className="accordion-item" key={index}>
-                                <h2 className="accordion-header" id={`headingP2_${index}`}>
-                                    <button
-                                        className="accordion-button collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapseP2_${index}`}
-                                        aria-expanded="false"
-                                        aria-controls={`collapseP2_${index}`}
-                                    >
-                                        {itm.materia.matricula} - {itm.materia.nombre}
-                                    </button>
-                                </h2>
-                                <div
-                                    id={`collapseP2_${index}`}
-                                    className="accordion-collapse collapse"
-                                    aria-labelledby={`headingP2_${index}`}
-                                    data-bs-parent="#accordionMateriasPregunta2"
-                                >
-                                    <div className="accordion-body">
-                                        <div className="row g-3">
-                                            
-                                            <CampoPorcentaje
-                                                label="Porcentaje Clases Teóricas (%)"
-                                                value={itm.porcentaje_teoricas}
-                                                onChange={(v) =>
-                                                    handleChange(index, "porcentaje_teoricas", v)
-                                                }
-                                            />
-
-                                            <CampoPorcentaje
-                                                label="Porcentaje Clases Prácticas (%)"
-                                                value={itm.porcentaje_practicas}
-                                                onChange={(v) =>
-                                                    handleChange(index, "porcentaje_practicas", v)
-                                                }
-                                            />
-
-                                            <CampoTextArea
-                                                label="Justificación"
-                                                value={itm.justificacion || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "justificacion", v)
-                                                }
-                                            />
-                                        </div>
+                <div className="accordion" id="accordionP2">
+                    {itemsTabla.map((itm, index) => (
+                        <div className="accordion-item" key={index}>
+                            <h2 className="accordion-header" id={`headingP2_${index}`}>
+                                <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target={`#collapseP2_${index}`}>
+                                    {itm.materia.matricula} - {itm.materia.nombre}
+                                </button>
+                            </h2>
+                            <div id={`collapseP2_${index}`} className="accordion-collapse collapse" data-bs-parent="#accordionP2">
+                                <div className="accordion-body">
+                                    <div className="row g-3">
+                                        <CampoPorcentaje 
+                                            label="Porcentaje Clases Teóricas (%)" 
+                                            value={itm.porcentaje_teoricas} 
+                                            onChange={(v) => handleChange(index, "porcentaje_teoricas", v)} 
+                                            error={isError(index, "porcentaje_teoricas")} 
+                                        />
+                                        <CampoPorcentaje 
+                                            label="Porcentaje Clases Prácticas (%)" 
+                                            value={itm.porcentaje_practicas} 
+                                            onChange={(v) => handleChange(index, "porcentaje_practicas", v)} 
+                                            error={isError(index, "porcentaje_practicas")} 
+                                        />
+                                        <CampoTextArea 
+                                            label="Justificación" 
+                                            value={itm.justificacion || ''} 
+                                            onChange={(v) => handleChange(index, "justificacion", v)} 
+                                            error={isError(index, "justificacion")} 
+                                        />
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </>
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
     );

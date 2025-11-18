@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
@@ -8,71 +8,57 @@ import ContenidosAlcanzados from "./Pregunta2A";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
 import ActividadesDocentes from "./Pregunta3";
-import EquipamientoBibliografia from "./Pregunta1"; 
-import type {Pregunta, Respuesta} from "../../../types/types";
-import DesempenoAuxiliares from "./Pregunta4"; 
-import ObservacionesComentarios from "./Pregunta5"; 
+import EquipamientoBibliografia from "./Pregunta1";
+import type { Pregunta, Respuesta } from "../../../types/types";
+import DesempenoAuxiliares from "./Pregunta4";
+import ObservacionesComentarios from "./Pregunta5";
 
 export default function CompletarInformeSintetico() {
     const location = useLocation();
     const navigate = useNavigate();
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [respuestas, setRespuestas] = useState<Respuesta[]>([]);
     const [enviando, setEnviando] = useState(false);
     const [mensaje, setMensaje] = useState<string | null>(null);
     const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
-    const [preguntaActiva, setPreguntaActiva] = useState<number | null>(null);
+    const [preguntaActivaId, setPreguntaActivaId] = useState<number | null>(null);
+    const [maxPasoAlcanzadoIndex, setMaxPasoAlcanzadoIndex] = useState(0);
+    const [pasoValido, setPasoValido] = useState(true);
 
     const {
         dpto = { id: 1, nombre: "dpto informatica" },
         carrera = { id: 1, nombre: "APU" },
         anio = 2025,
         periodo = "PRIMER_CUATRI",
-        informeBaseId = 1,
+        informeBaseId = 1
     } = location.state || {};
 
     useEffect(() => {
-        if(!dpto || !carrera){
-            setError("Se requiere un departamento y una carrera");
+        if (!dpto || !carrera || !informeBaseId) {
+            setError("Faltan datos requeridos.");
             setLoading(false);
             return;
         }
-        if (!informeBaseId) {
-            setError("ID de informe base no encontrado.");
-            setLoading(false);
-            return;
-        }
-        fetch(
-            `http://127.0.0.1:8000/informes_sinteticos_base/${informeBaseId}/preguntas`
-        )
+
+        fetch(`http://127.0.0.1:8000/informes_sinteticos_base/${informeBaseId}/preguntas`)
             .then((res) => {
-                if (!res.ok)
-                    throw new Error("No se pudo cargar la estructura del informe.");
+                if (!res.ok) throw new Error("Error cargando estructura.");
                 return res.json();
             })
             .then((data: Pregunta[]) => {
                 const ordenadas = data.sort((a, b) => a.orden - b.orden);
                 setPreguntas(ordenadas);
-                if (ordenadas.length > 0 && preguntaActiva === null) {
-                    setPreguntaActiva(ordenadas[0].id);
+                if (ordenadas.length > 0 && preguntaActivaId === null) {
+                    setPreguntaActivaId(ordenadas[0].id);
                 }
             })
-            .catch((err) => {
-                console.error("Error fetching preguntas del informe:", err);
-                setError(err.message);
-            })
+            .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
     }, [informeBaseId]);
 
-    /*
-      const manejarCambio = (resp: Respuesta) => {
-          setRespuestas((prev) => ({ ...prev, resp }));
-          if (mensaje && mensaje.includes("complete")) setMensaje(null);
-      };
-      */
-
-    const manejarCambio = (nuevasRespuestas: Respuesta[] | Respuesta) => {
+    const manejarCambio = useCallback((nuevasRespuestas: Respuesta[] | Respuesta) => {
         const respuestasArray = Array.isArray(nuevasRespuestas)
             ? nuevasRespuestas
             : [nuevasRespuestas];
@@ -81,19 +67,56 @@ export default function CompletarInformeSintetico() {
             const actualizadas = prev.filter(
                 (r) =>
                     !respuestasArray.some(
-                        (n) =>
-                            n.pregunta_id === r.pregunta_id && n.materia_id === r.materia_id
+                        (n) => n.pregunta_id === r.pregunta_id && n.materia_id === r.materia_id
                     )
             );
             return [...actualizadas, ...respuestasArray];
         });
+    }, []);
 
-        if (mensaje && mensaje.includes("complete")) setMensaje(null);
+    const notificarValidacion = useCallback((esValido: boolean) => {
+        setPasoValido(esValido);
+        if (esValido) setMensaje(null);
+    }, []);
+
+    const getIndexActual = () => preguntas.findIndex((p) => p.id === preguntaActivaId);
+
+    const progresoActual = useMemo(() => {
+        if (preguntas.length === 0) return 0;
+        const pasoActual = maxPasoAlcanzadoIndex + 1;
+        return Math.round((pasoActual / preguntas.length) * 100);
+    }, [maxPasoAlcanzadoIndex, preguntas.length]);
+
+    const itemsTotales = preguntas.length;
+    const itemsCompletados = Math.min(Math.max(maxPasoAlcanzadoIndex + 1, 0), itemsTotales);
+
+    const irAlPaso = (indexDestino: number) => {
+        setMensaje(null);
+        if (indexDestino < 0 || indexDestino >= preguntas.length) return;
+
+        if (indexDestino > getIndexActual() && !pasoValido) {
+            setMensaje("Debe completar todos los campos en rojo antes de avanzar.");
+            return;
+        }
+
+        setPreguntaActivaId(preguntas[indexDestino].id);
+
+        if (indexDestino > maxPasoAlcanzadoIndex) {
+            setMaxPasoAlcanzadoIndex(indexDestino);
+        }
+
+        setPasoValido(true);
     };
 
     const enviarInforme = async () => {
         setEnviando(true);
         setMensaje(null);
+
+        if (!pasoValido) {
+            setMensaje("Hay errores en el formulario actual.");
+            setEnviando(false);
+            return;
+        }
 
         const datosParaBackend = {
             titulo: `Informe ${carrera.nombre} ${anio}`,
@@ -102,7 +125,7 @@ export default function CompletarInformeSintetico() {
             periodo: periodo,
             informe_base_id: informeBaseId,
             carrera_id: carrera.id,
-            respuestas: respuestas,
+            respuestas: respuestas
         };
 
         try {
@@ -111,183 +134,140 @@ export default function CompletarInformeSintetico() {
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(datosParaBackend),
+                    body: JSON.stringify(datosParaBackend)
                 }
             );
-            if (!res.ok) {
-                const errorData = await res
-                    .json()
-                    .catch(() => ({ detail: "Error desconocido al enviar." }));
-                throw new Error(errorData.detail || "Error al enviar el informe");
-            }
+            if (!res.ok) throw new Error("Error al enviar.");
             setMensaje("¡Informe enviado con éxito!");
-            setTimeout(() => {
-                navigate(ROUTES.CARRERAS_DPTO(dpto.id));
-            }, 2000);
-        } catch (err: Error | unknown) {
-            console.error("Error enviando informe:", err);
+            setTimeout(() => navigate(ROUTES.CARRERAS_DPTO(dpto.id)), 2000);
+        } catch (err) {
             setMensaje(`Error: ${(err as Error).message}`);
         } finally {
             setEnviando(false);
         }
     };
 
-    if (!dpto?.nombre || !carrera?.nombre) {
-        return (
-            <div className="alert alert-danger">
-                Error: No se encontró la información necesaria.
-            </div>
-        );
-    }
-    if (loading) {
-        return (
-            <div className="d-flex justify-content-center">
-                <div className="spinner-border text-primary" role="status"></div>
-            </div>
-        );
-    }
-    if (error) {
-        return <div className="alert alert-danger">{error}</div>;
-    }
-
     const renderPregunta = (pregunta: Pregunta) => {
-         if (pregunta.cod=="1") { 
+        const propsComunes = {
+            departamentoId: dpto.id,
+            carreraId: carrera.id,
+            pregunta,
+            anio,
+            periodo,
+            manejarCambio,
+            notificarValidacion
+        };
+        const propsViejas = {
+            id_dpto: dpto.id,
+            id_carrera: carrera.id,
+            pregunta,
+            anio,
+            periodo,
+            manejarCambio,
+            notificarValidacion
+        };
+
+        switch (pregunta.cod) {
+            case "0":
+                return <InformacionGeneral {...propsViejas} />;
+            case "1":
+                return <EquipamientoBibliografia {...propsComunes} />;
+            case "2":
+                return <Pregunta2 {...propsComunes} />;
+            case "2.A":
+                return <ContenidosAlcanzados {...propsViejas} />;
+            case "2.B":
+                return <Pregunta2B {...propsComunes} />;
+            case "2.C":
+                return <Pregunta2C {...propsComunes} />;
+            case "3":
+                return <ActividadesDocentes {...propsViejas} />;
+            case "4":
+                return <DesempenoAuxiliares {...propsComunes} />;
+            case "5":
+                return (
+                    <ObservacionesComentarios
+                        pregunta={pregunta}
+                        manejarCambio={manejarCambio}
+                    />
+                );
+            default:
+                return <div className="alert alert-secondary">Sin componente.</div>;
+        }
+    };
+
+    const indexActual = getIndexActual();
+
+    if (loading)
         return (
-            <EquipamientoBibliografia 
-                departamentoId={dpto.id}
-                carreraId={carrera.id}
-                pregunta={pregunta}
-                anio={anio}
-                periodo={periodo}
-                manejarCambio={manejarCambio}
-            />
-        );
-    }
-        if (pregunta.cod=="2.B") {
-            return (
-                <Pregunta2B
-                    departamentoId={dpto.id}
-                    carreraId={carrera.id}
-                    pregunta={pregunta}
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-
-        if (pregunta.cod=="2.C") {
-            return (
-                <Pregunta2C
-                    departamentoId={dpto.id}
-                    carreraId={carrera.id}
-                    pregunta={pregunta}
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-
-        if (pregunta.cod=="0") {
-            return (
-                <InformacionGeneral
-                    id_dpto={dpto.id}
-                    id_carrera={carrera.id}
-                    pregunta={pregunta}
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-        if (pregunta.cod=="2.A") {
-            return (
-                <ContenidosAlcanzados
-                    id_dpto={dpto.id}
-                    id_carrera={carrera.id}
-                    pregunta={pregunta} 
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-
-        if (pregunta.cod=="2") {
-            return (
-                <Pregunta2
-                    departamentoId={dpto.id}
-                    carreraId={carrera.id}
-                    pregunta={pregunta}
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-        if (pregunta.cod=="3") {
-            return (
-                <ActividadesDocentes
-                    id_dpto={dpto.id}
-                    id_carrera={carrera.id}
-                    pregunta={pregunta} 
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-        if (pregunta.cod=="4") { 
-            return (
-                <DesempenoAuxiliares
-                    departamentoId={dpto.id}
-                    carreraId={carrera.id}
-                    pregunta={pregunta}
-                    anio={anio}
-                    periodo={periodo}
-                    manejarCambio={manejarCambio}
-                />
-            );
-        }
-        if (pregunta.cod=="5") { 
-            return (
-                <ObservacionesComentarios
-                    pregunta={pregunta}
-                    manejarCambio={manejarCambio} 
-                />
-            );
-        }
-        return (
-            <div className="alert alert-secondary">
-                Pregunta "{pregunta.enunciado}" sin componente asignado.
+            <div className="text-center p-5">
+                <div className="spinner-border text-primary"></div>
             </div>
         );
-    };
+
+    if (error) return <div className="alert alert-danger">{error}</div>;
 
     return (
         <div className="bg-light">
             <div className="container-lg py-4">
                 <div className="card shadow-sm border-0 rounded-3">
                     <div className="card-header bg-unpsjb-header">
-                        <h1 className="h4 mb-0 text-center">
-                            Informe Sintético – {carrera.nombre}
+                        <h1 className="h5 m-0 text-white text-center">
+                            Informe Sintético: {carrera.nombre}
                         </h1>
                     </div>
 
-                    <div className="card-body p-4 p-md-5">
-                        <ul className="nav nav-pills nav-fill mb-4">
-                            {preguntas.map((p) => (
+                    <div className="card-body p-4">
+
+                        <div className="text-center text-muted small mb-1">
+                            Progreso Total: {itemsCompletados} de {itemsTotales} ({progresoActual}%)
+                        </div>
+
+                        <div className="d-flex align-items-center mb-4">
+                            <div
+                                className="progress flex-grow-1"
+                                style={{
+                                    height: "6px",
+                                    borderRadius: "4px",
+                                    backgroundColor: "#e5e5e5",
+                                    overflow: "hidden"
+                                }}
+                            >
+                                <div
+                                    className={`progress-bar ${
+                                        !pasoValido ? "bg-danger" : progresoActual === 100 ? "bg-success" : "bg-primary"
+                                    }`}
+                                    role="progressbar"
+                                    style={{
+                                        width: `${progresoActual}%`,
+                                        transition: "width 0.5s ease"
+                                    }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <ul className="nav nav-pills nav-fill mb-4 border-bottom pb-3">
+                            {preguntas.map((p, idx) => (
                                 <li key={p.id} className="nav-item">
                                     <a
-                                        className={`nav-link ${preguntaActiva === p.id ? "active" : "text-muted"
-                                            }`}
+                                        className={`nav-link ${
+                                            preguntaActivaId === p.id
+                                                ? "active"
+                                                : idx <= maxPasoAlcanzadoIndex
+                                                ? "text-muted"
+                                                : "disabled"
+                                        }`}
                                         href="#"
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            setPreguntaActiva(p.id);
+                                            irAlPaso(idx);
                                         }}
-                                        style={{ cursor: "pointer", fontWeight: 500 }}
+                                        style={{
+                                            cursor:
+                                                idx <= maxPasoAlcanzadoIndex
+                                                    ? "pointer"
+                                                    : "not-allowed"
+                                        }}
                                     >
                                         {p.cod}
                                     </a>
@@ -295,46 +275,56 @@ export default function CompletarInformeSintetico() {
                             ))}
                         </ul>
 
-                        <div
-                            className="step-content-container"
-                            style={{
-                                overflowY: "auto",
-                                paddingRight: "15px",
-                            }}
-                        >
+                        <div className="step-content-container p-2" style={{ minHeight: "350px" }}>
                             {preguntas.map((p) => (
                                 <div
                                     key={p.id}
-                                    style={{ display: preguntaActiva === p.id ? "block" : "none" }}
+                                    style={{
+                                        display: preguntaActivaId === p.id ? "block" : "none"
+                                    }}
                                 >
                                     {renderPregunta(p)}
                                 </div>
                             ))}
                         </div>
-
                     </div>
 
-                    <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
-                        <div className="d-flex justify-content-between">
+                    <div className="card-footer bg-white p-4 d-flex justify-content-between">
+                        <button
+                            onClick={() => irAlPaso(indexActual - 1)}
+                            className="btn btn-theme-primary rounded-pill px-4"
+                            disabled={indexActual === 0}
+                        >
+                            Anterior
+                        </button>
+
+                        {indexActual < preguntas.length - 1 ? (
+                            <button
+                                onClick={() => irAlPaso(indexActual + 1)}
+                                className="btn btn-theme-primary rounded-pill px-4"
+                            >
+                                Siguiente
+                            </button>
+                        ) : (
                             <button
                                 onClick={enviarInforme}
-                                className="btn btn-success rounded-pill px-4 shadow-sm ms-auto"
+                                className="btn btn-success rounded-pill px-4 shadow"
                                 disabled={enviando}
                             >
                                 {enviando ? "Enviando..." : "Enviar Informe"}
                             </button>
-                        </div>
-
-                        {mensaje && (
-                            <div
-                                className={`mt-4 alert ${mensaje.includes("éxito") ? "alert-success" : "alert-danger"
-                                    }`}
-                            >
-                                {mensaje}
-                            </div>
                         )}
-
                     </div>
+
+                    {mensaje && (
+                        <div
+                            className={`alert mt-3 mx-4 ${
+                                mensaje.includes("éxito") ? "alert-success" : "alert-danger"
+                            }`}
+                        >
+                            {mensaje}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,21 +1,22 @@
 import { useEffect, useState, Fragment } from "react";
 
-type RespuestaValor = { 
-  opcion_id: number | null; 
-  texto_respuesta: string | null; 
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
 };
 
-interface Pregunta { 
-  id: number; 
-  enunciado: string; 
-  categoria_id: number; 
+interface Pregunta {
+  id: number;
+  enunciado: string;
+  categoria_id: number;
+  obligatoria: boolean;
 }
 
-interface Categoria { 
-  id: number; 
-  cod: string; 
-  texto: string; 
-  preguntas: Pregunta[]; 
+interface Categoria {
+  id: number;
+  cod: string;
+  texto: string;
+  preguntas: Pregunta[];
 }
 
 interface Props {
@@ -25,7 +26,12 @@ interface Props {
   isReadOnly?: boolean;
 }
 
-export default function Categoria2CInforme({ categoria, manejarCambio, respuestas, isReadOnly = false}: Props) {
+export default function Categoria2CInforme({
+  categoria,
+  manejarCambio,
+  respuestas,
+  isReadOnly = false,
+}: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [reflexion, setReflexion] = useState<Pregunta | null>(null);
 
@@ -64,7 +70,9 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
   };
 
   const getPregunta = (texto: string) =>
-    preguntas.find((p) => p.enunciado.toLowerCase().includes(texto.toLowerCase()));
+    preguntas.find((p) =>
+      p.enunciado.toLowerCase().includes(texto.toLowerCase())
+    );
 
   const pEnsPos = getPregunta("Aspectos positivos: Proceso Enseñanza");
   const pAprPos = getPregunta("Aspectos positivos: Proceso de aprendizaje");
@@ -79,9 +87,13 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
         <div className="mb-3">
           <label className="form-label mb-2 fw-bold">
             Proceso enseñanza
+            {pEnsPos?.obligatoria && <span className="text-danger ms-1">*</span>}
           </label>
           {isReadOnly ? (
-            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+            <p
+              className="form-control-plaintext"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
               {respuestas[pEnsPos?.id || 0]?.texto_respuesta?.trim() || "—"}
             </p>
           ) : (
@@ -97,15 +109,20 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
               onInput={autoExpand}
               disabled={!pEnsPos}
               style={{ resize: "none", minHeight: "80px" }}
+              required={pEnsPos?.obligatoria}
             />
           )}
         </div>
         <div>
           <label className="form-label mb-2 fw-bold">
             Proceso de aprendizaje
+            {pAprPos?.obligatoria && <span className="text-danger ms-1">*</span>}
           </label>
           {isReadOnly ? (
-            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+            <p
+              className="form-control-plaintext"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
               {respuestas[pAprPos?.id || 0]?.texto_respuesta?.trim() || "—"}
             </p>
           ) : (
@@ -121,6 +138,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
               onInput={autoExpand}
               disabled={!pAprPos}
               style={{ resize: "none", minHeight: "80px" }}
+              required={pAprPos?.obligatoria}
             />
           )}
         </div>
@@ -131,9 +149,13 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
         <div className="mb-3">
           <label className="form-label mb-2 fw-bold">
             Proceso enseñanza
+            {pEnsObs?.obligatoria && <span className="text-danger ms-1">*</span>}
           </label>
           {isReadOnly ? (
-            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+            <p
+              className="form-control-plaintext"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
               {respuestas[pEnsObs?.id || 0]?.texto_respuesta?.trim() || "—"}
             </p>
           ) : (
@@ -149,15 +171,20 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
               onInput={autoExpand}
               disabled={!pEnsObs}
               style={{ resize: "none", minHeight: "80px" }}
+              required={pEnsObs?.obligatoria}
             />
           )}
         </div>
         <div>
           <label className="form-label mb-2 fw-bold">
             Proceso de aprendizaje
+            {pAprObs?.obligatoria && <span className="text-danger ms-1">*</span>}
           </label>
           {isReadOnly ? (
-            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+            <p
+              className="form-control-plaintext"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
               {respuestas[pAprObs?.id || 0]?.texto_respuesta?.trim() || "—"}
             </p>
           ) : (
@@ -173,15 +200,24 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
               onInput={autoExpand}
               disabled={!pAprObs}
               style={{ resize: "none", minHeight: "80px" }}
+              required={pAprObs?.obligatoria}
             />
           )}
         </div>
       </div>
 
       <div className="mb-4">
-        <h6 className="fw-bold mb-3">Estrategias a implementar</h6>
+        <h6 className="fw-bold mb-3">
+          Estrategias a implementar
+          {pEstrategias?.obligatoria && (
+            <span className="text-danger ms-1">*</span>
+          )}
+        </h6>
         {isReadOnly ? (
-          <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+          <p
+            className="form-control-plaintext"
+            style={{ whiteSpace: "pre-wrap" }}
+          >
             {respuestas[pEstrategias?.id || 0]?.texto_respuesta?.trim() || "—"}
           </p>
         ) : (
@@ -191,21 +227,31 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
             rows={3}
             value={respuestas[pEstrategias?.id || 0]?.texto_respuesta || ""}
             onChange={(e) => {
-              pEstrategias && actualizarRespuestaTexto(pEstrategias.id, e.target.value);
+              pEstrategias &&
+                actualizarRespuestaTexto(pEstrategias.id, e.target.value);
               autoExpand(e);
             }}
             onInput={autoExpand}
             disabled={!pEstrategias}
             style={{ resize: "none", minHeight: "80px" }}
+            required={pEstrategias?.obligatoria}
           />
         )}
       </div>
 
       {reflexion && (
         <div className="mb-4">
-          <h6 className="fw-bold mb-3">{reflexion.enunciado}</h6>
+          <h6 className="fw-bold mb-3">
+            {reflexion.enunciado}
+            {reflexion.obligatoria && (
+              <span className="text-danger ms-1">*</span>
+            )}
+          </h6>
           {isReadOnly ? (
-            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+            <p
+              className="form-control-plaintext"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
               {respuestas[reflexion.id]?.texto_respuesta?.trim() || "—"}
             </p>
           ) : (
@@ -220,6 +266,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
               }}
               onInput={autoExpand}
               style={{ resize: "none", minHeight: "100px" }}
+              required={reflexion.obligatoria}
             />
           )}
         </div>

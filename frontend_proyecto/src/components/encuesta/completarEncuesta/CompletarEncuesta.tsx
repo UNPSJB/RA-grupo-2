@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // <--- BIEN (Importa useCallback)
 import PreguntasCategoria from "./Categoria";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
-import { useNavigate, useLocation} from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
-
-
 
 interface Categoria {
   id: number;
@@ -16,9 +14,17 @@ interface Categoria {
 interface Respuesta {
   pregunta_id: number;
   opcion_id: number | null;
-  texto_respuesta?: string | null; 
+  texto_respuesta?: string | null;
 }
 
+interface Pregunta {
+  id: number;
+  enunciado: string;
+  categoria_id: number;
+  encuesta_id: number;
+  tipo: "cerrada" | "abierta";
+  obligatoria: boolean;
+}
 
 export default function CompletarEncuesta() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -27,8 +33,7 @@ export default function CompletarEncuesta() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
-  
+  const [allPreguntas, setAllPreguntas] = useState<Pregunta[]>([]);
   const location = useLocation();
 
   useEffect(() => {
@@ -44,39 +49,62 @@ export default function CompletarEncuesta() {
       .catch((err) => console.error("Error al obtener categorías:", err));
   }, [location.state]);
 
-  const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number | null, texto?: string) => {
-    setRespuestasGlobales((prev) => {
-      const existentes = prev.filter((r) => r.pregunta_id !== pregunta_id);
-      return [...existentes, { pregunta_id, opcion_id, texto_respuesta: texto?? null }];
+  // --- BIEN (Usa useCallback para estabilizar la función) ---
+  const manejarCambioRespuestas = useCallback(
+    (pregunta_id: number, opcion_id: number | null, texto?: string) => {
+      setRespuestasGlobales((prev) => {
+        const existentes = prev.filter((r) => r.pregunta_id !== pregunta_id);
+        return [
+          ...existentes,
+          { pregunta_id, opcion_id, texto_respuesta: texto ?? null },
+        ];
+      });
+    },
+    [] 
+  );
+
+  // --- BIEN (Usa useCallback para estabilizar la función) ---
+  const handlePreguntasCargadas = useCallback((nuevasPreguntas: Pregunta[]) => {
+    setAllPreguntas((prev) => {
+      const preguntasMap = new Map(prev.map((p) => [p.id, p]));
+      nuevasPreguntas.forEach((p) => preguntasMap.set(p.id, p));
+      return Array.from(preguntasMap.values());
     });
-  };
-
-  const manejarTotalPreguntas = (categoriaId: number, cantidad: number) => {
-    setPreguntasPorCategoria((prev) => ({ ...prev, [categoriaId]: cantidad }));
-  };
-
-  const totalPreguntas = Object.values(preguntasPorCategoria).reduce((a, b) => a + b, 0);
+  }, []); 
 
   const enviarEncuesta = async () => {
-    if (respuestasGlobales.length < totalPreguntas) {
-      setMensaje("Debes responder todas las preguntas antes de enviar.");
-      console.log("Total preguntas:", totalPreguntas);
-      console.log("Respuestas dadas:", respuestasGlobales.length);
+    const preguntasObligatorias = allPreguntas.filter((p) => p.obligatoria);
+    const idRespuestasDadas = new Set(
+      respuestasGlobales
+        .filter(
+          (r) =>
+            r.opcion_id !== null ||
+            (r.texto_respuesta && r.texto_respuesta.trim() !== "")
+        )
+        .map((r) => r.pregunta_id)
+    );
+
+    const primeraFaltante = preguntasObligatorias.find(
+      (p) => !idRespuestasDadas.has(p.id)
+    );
+
+    if (primeraFaltante) {
+      setMensaje(
+        `Debes responder todas las preguntas obligatorias. Falta: "${primeraFaltante.enunciado}"`
+      );
+      console.log("Faltante:", primeraFaltante.enunciado);
       return;
     }
 
     setEnviando(true);
     setMensaje(null);
 
-    const{
-      alumnoId,
-      encuestaId,
-      materiaId
-    } = location.state || {};
+    const { alumnoId, encuestaId, materiaId } = location.state || {};
 
-    if(!alumnoId || !encuestaId || !materiaId){
+    if (!alumnoId || !encuestaId || !materiaId) {
       console.error("Faltan parámetros:", location.state);
       setMensaje("Error: No se pudieron cargar los datos de la encuesta");
+      setEnviando(false); 
       return;
     }
 
@@ -99,8 +127,11 @@ export default function CompletarEncuesta() {
         }
       );
 
-      if (!res.ok) throw new Error("Error al enviar encuesta");
-      const data = await res.json();
+      const data = await res.json(); 
+
+      if (!res.ok) { 
+        throw new Error(data.detail || "Error desconocido desde el backend");
+      }
 
       console.log("Encuesta completada creada:", data);
       setMensaje("Encuesta enviada con éxito.");
@@ -108,26 +139,31 @@ export default function CompletarEncuesta() {
       setRespuestasGlobales([]);
     } catch (err) {
       console.error(err);
-      setMensaje("Error al enviar la encuesta.");
+      setMensaje(err instanceof Error ? err.message : "Error al enviar la encuesta.");
     } finally {
       setEnviando(false);
     }
   };
 
-  function cerrarPagina(){
+  function cerrarPagina() {
     setMensajeExito(null);
     navigate(ROUTES.ENCUESTAS_DISPONIBLES);
   }
 
-  if (mensajeExito) {
-    return (
-      <MensajeExito
-        mensaje={mensajeExito}
-        onClose={cerrarPagina}
-      />
-    );
-  }
+  const respuestasValidas = respuestasGlobales.filter(
+    (r) =>
+      r.opcion_id !== null ||
+      (r.texto_respuesta && r.texto_respuesta.trim() !== "")
+  ).length;
 
+  const totalPreguntas = allPreguntas.length;
+
+  const porcentaje =
+    totalPreguntas > 0 ? (respuestasValidas / totalPreguntas) * 100 : 0;
+
+  if (mensajeExito) {
+    return <MensajeExito mensaje={mensajeExito} onClose={cerrarPagina} />;
+  }
 
   return (
     <div className="container py-4">
@@ -135,12 +171,40 @@ export default function CompletarEncuesta() {
         <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0 text-center">Encuesta</h1>
         </div>
+
+        {totalPreguntas > 0 && (
+          <div className="sticky-top bg-light border-bottom p-2">
+            <h6 className="text-center text-muted small mb-1">
+              Progreso: {respuestasValidas} de {totalPreguntas} (
+              {porcentaje.toFixed(0)}%)
+            </h6>
+            <div
+              className="progress"
+              style={{ height: "20px" }}
+              role="progressbar"
+              aria-valuenow={porcentaje}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="progress-bar fw-bold"
+                style={{ width: `${porcentaje}%` }}
+              >
+                {porcentaje.toFixed(0)}%
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="card-body">
           {categorias.length > 0 ? (
             <div className="accordion accordion-flush" id="accordionEncuesta">
               {categorias.map((categoria) => (
                 <div className="accordion-item" key={categoria.id}>
-                  <h2 className="accordion-header" id={`heading-${categoria.id}`}>
+                  <h2
+                    className="accordion-header"
+                    id={`heading-${categoria.id}`}
+                  >
                     <button
                       className="accordion-button collapsed"
                       type="button"
@@ -159,7 +223,7 @@ export default function CompletarEncuesta() {
                       <PreguntasCategoria
                         categoria={categoria}
                         onRespuesta={manejarCambioRespuestas}
-                        onTotalPreguntas={manejarTotalPreguntas}
+                        onPreguntasCargadas={handlePreguntasCargadas}
                       />
                     </div>
                   </div>
@@ -179,7 +243,15 @@ export default function CompletarEncuesta() {
             >
               {enviando ? "Enviando..." : "Enviar Encuesta"}
             </button>
-            {mensaje && <div className="mt-3 alert alert-info">{mensaje}</div>}
+            {mensaje && (
+              <div
+                className={`mt-3 alert ${
+                  mensaje.includes("éxito") ? "alert-success" : "alert-danger"
+                }`}
+              >
+                {mensaje}
+              </div>
+            )}
           </div>
         </div>
       </div>

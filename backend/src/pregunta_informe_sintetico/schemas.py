@@ -13,6 +13,7 @@ class PreguntaInformeSinteticoCreate(PreguntaInformeSinteticoBase):
 class PreguntaInformeSintetico(PreguntaInformeSinteticoBase):
     id: int
     informe_base_id: int
-
+    obligatoria: bool
+    
     class Config:
         from_attributes = True

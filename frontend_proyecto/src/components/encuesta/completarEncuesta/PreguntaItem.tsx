@@ -3,6 +3,7 @@ import DropdownOpciones from "./DropdownOpciones";
 interface Pregunta {
   id: number;
   enunciado: string;
+  obligatoria: boolean;
 }
 
 interface Opcion {
@@ -18,6 +19,7 @@ interface Props {
   seleccionada: number | null;
   texto: string;
   esAbierta: boolean;
+  obligatoria: boolean;
   dropdownAbierto: boolean;
   onToggle: () => void;
   onSeleccionar: (opcionId: number) => void;
@@ -31,6 +33,7 @@ export default function PreguntaItem({
   seleccionada,
   texto,
   esAbierta,
+  obligatoria,
   dropdownAbierto,
   onToggle,
   onSeleccionar,
@@ -44,7 +47,10 @@ export default function PreguntaItem({
         <div className="card-body d-flex flex-column">
           <div className="mb-2">
             <span className="text-muted me-2">{index + 1}.</span>
-            <span>{pregunta.enunciado}</span>
+            <span>
+              {pregunta.enunciado}
+              {obligatoria && <span className="text-danger ms-1">*</span>}
+            </span>
           </div>
 
           {esAbierta ? (
@@ -54,6 +60,7 @@ export default function PreguntaItem({
               placeholder="Escriba su respuesta..."
               value={texto}
               onChange={(e) => onChangeTexto(e.target.value)}
+              required={obligatoria}
             />
           ) : (
             <DropdownOpciones
@@ -61,7 +68,11 @@ export default function PreguntaItem({
               abierta={dropdownAbierto}
               onToggle={onToggle}
               onSeleccionar={onSeleccionar}
-              textoBoton={opcionSeleccionada ? opcionSeleccionada.contenido : "Seleccionar"}
+              textoBoton={
+                opcionSeleccionada
+                  ? opcionSeleccionada.contenido
+                  : "Seleccionar"
+              }
               seleccionada={seleccionada}
             />
           )}

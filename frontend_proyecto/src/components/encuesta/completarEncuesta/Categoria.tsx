@@ -12,7 +12,8 @@ interface Pregunta {
   enunciado: string;
   categoria_id: number;
   encuesta_id: number;
-  tipo: "cerrada" | "abierta"; // nuevo campo
+  tipo: "cerrada" | "abierta";
+  obligatoria: boolean;
 }
 
 interface Opcion {
@@ -23,11 +24,15 @@ interface Opcion {
 
 interface Props {
   categoria: Categoria;
-  onRespuesta: (pregunta_id: number, opcion_id: number | null,texto?:string) => void;
-  onTotalPreguntas?: (id: number, cantidad: number) => void; 
+  onRespuesta: (pregunta_id: number, opcion_id: number | null, texto?: string) => void;
+  onPreguntasCargadas: (preguntas: Pregunta[]) => void;
 }
 
-export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreguntas }: Props) {
+export default function PreguntasCategoria({
+  categoria,
+  onRespuesta,
+  onPreguntasCargadas,
+}: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
   const [respuestas, setRespuestas] = useState<Record<number, { opcion_id: number | null; texto?: string }>>({});
@@ -41,24 +46,21 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreg
         const inicial: Record<number, { opcion_id: number | null; texto?: string }> = {};
         data.forEach((p) => (inicial[p.id] = { opcion_id: null, texto: "" }));
         setRespuestas(inicial);
-        onTotalPreguntas?.(categoria.id, data.length);
+        onPreguntasCargadas(data);
       })
-      .catch((err) =>
-        console.error("Error al obtener preguntas de la categoría:", err)
-      );
-  }, [categoria.id]);
+      .catch((err) => console.error(err));
+  }, [categoria.id, onPreguntasCargadas]);
 
-const cargarOpciones = (preguntaId: number) => {
-  if (opciones[preguntaId]) return;
+  const cargarOpciones = (preguntaId: number) => {
+    if (opciones[preguntaId]) return;
 
-  fetch(`http://localhost:8000/preguntas/${preguntaId}/opciones`)
-    .then((res) => res.json())
-    .then((data : Opcion[]) => {
-      const lista = data;
-      setOpciones((prev) => ({ ...prev, [preguntaId]: lista }));
-    })
-    .catch((err) => console.error("Error al cargar opciones:", err));
-};
+    fetch(`http://localhost:8000/preguntas/${preguntaId}/opciones`)
+      .then((res) => res.json())
+      .then((data: Opcion[]) => {
+        setOpciones((prev) => ({ ...prev, [preguntaId]: data }));
+      })
+      .catch((err) => console.error(err));
+  };
 
   const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
     setRespuestas((prev) => {
@@ -95,6 +97,7 @@ const cargarOpciones = (preguntaId: number) => {
             seleccionada={respuestas[p.id]?.opcion_id || null}
             texto={respuestas[p.id]?.texto || ""}
             esAbierta={p.tipo === "abierta"}
+            obligatoria={p.obligatoria}
             dropdownAbierto={dropdownAbierto === p.id}
             onToggle={async () => {
               if (dropdownAbierto === p.id) setDropdownAbierto(null);

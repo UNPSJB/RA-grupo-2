@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
+import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 import { CampoTextArea, CampoCheckbox } from "./Campos";
 
 const CALIFICACIONES = [
@@ -9,8 +9,6 @@ const CALIFICACIONES = [
     { code: 'R', label: 'R' },
     { code: 'I', label: 'I' },
 ];
-
-interface Pregunta { id: number; enunciado: string; }
 
 interface DesempenoAuxiliarDetalle {
     espacio_curricular: string;
@@ -28,12 +26,6 @@ interface TablaDesempenoAuxiliar {
     auxiliares: DesempenoAuxiliarDetalle[];
 }
 
-interface Respuesta {
-    pregunta_id: number;
-    texto_respuesta: string;
-    materia_id: number;
-}
-
 interface Props {
     departamentoId: number;
     carreraId: number;
@@ -41,6 +33,7 @@ interface Props {
     anio: number;
     periodo: string;
     manejarCambio?: (items: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void;
 }
 
 const boolsToCode = (detalle: DesempenoAuxiliarDetalle): string => {
@@ -53,14 +46,15 @@ const boolsToCode = (detalle: DesempenoAuxiliarDetalle): string => {
 };
 
 export default function DesempenoAuxiliares({
-    departamentoId, carreraId, pregunta, anio, periodo, manejarCambio
+    departamentoId, carreraId, pregunta, anio, periodo, manejarCambio, notificarValidacion
 }: Props) {
     const [itemsTabla, setItems] = useState<TablaDesempenoAuxiliar[]>([]);
+    const [itemsOriginales, setItemsOriginales] = useState<TablaDesempenoAuxiliar[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!departamentoId || !carreraId || !anio || !periodo) return;
+        if (!departamentoId || !carreraId || !anio || !periodo) return; 
 
         const fetchData = async () => {
             try {
@@ -72,18 +66,28 @@ export default function DesempenoAuxiliares({
                 );
 
                 if (!res.ok) {
-                    const errData = await res.json().catch(() => ({ detail: res.statusText }));
-                    throw new Error(`Error HTTP ${res.status}: ${errData.detail || res.statusText}`);
+                    const errorDetalle = await res.json().catch(() => ({ detail: res.statusText }));
+                    throw new Error(`Error HTTP ${res.status}: ${errorDetalle.detail || res.statusText}`);
                 }
+
                 const data: TablaDesempenoAuxiliar[] = await res.json();
 
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                setItems(data);
+                const datosParseados = data.map(materia => ({
+                    ...materia,
+                    auxiliares: materia.auxiliares.map(aux => ({
+                        ...aux,
+                        justificacion: aux.justificacion || '',
+                    }))
+                }));
+                
+                setItems(datosParseados);
+                setItemsOriginales(JSON.parse(JSON.stringify(datosParseados)));
 
-                const respuestasIniciales = data.map(materiaItem => ({
+                const respuestasIniciales = datosParseados.map(materiaItem => ({
                     pregunta_id: pregunta.id,
                     materia_id: materiaItem.materia.id,
                     texto_respuesta: JSON.stringify(
@@ -99,9 +103,9 @@ export default function DesempenoAuxiliares({
             } catch (err) {
                 console.error("Error al obtener desempeño de auxiliares:", err);
                 if (err instanceof Error) {
-                    setError(err.message);
+                    setError(`Error en la carga: ${err.message}`);
                 } else {
-                    setError("Error desconocido");
+                    setError("Error desconocido en la carga de datos.");
                 }
             } finally {
                 setIsLoading(false);
@@ -111,6 +115,30 @@ export default function DesempenoAuxiliares({
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
+    // LÓGICA DE VALIDACIÓN (Si trae texto, no puede quedar vacío)
+    useEffect(() => {
+        if (itemsTabla.length === 0) return;
+
+        const hayError = itemsTabla.some((materiaActual, mIdx) => {
+            const materiaOriginal = itemsOriginales[mIdx];
+            if (!materiaOriginal) return false;
+
+            return materiaActual.auxiliares.some((auxActual, aIdx) => {
+                const auxOriginal = materiaOriginal.auxiliares[aIdx];
+                if (!auxOriginal) return false;
+
+                const vOrig = auxOriginal.justificacion || '';
+                const vCurr = auxActual.justificacion || '';
+
+                const esRequerido = vOrig.trim().length > 0;
+                return esRequerido && vCurr.trim().length === 0;
+            });
+        });
+
+        notificarValidacion?.(!hayError);
+    }, [itemsTabla, itemsOriginales, notificarValidacion]);
+
+    // MANEJO DE CAMBIOS
     const handleChange = (
         materiaIndex: number,
         auxIndex: number,
@@ -118,49 +146,75 @@ export default function DesempenoAuxiliares({
         value: string | boolean
     ) => {
         const updatedItems = [...itemsTabla];
-        const aux = updatedItems[materiaIndex].auxiliares[auxIndex];
+        const materia = { ...updatedItems[materiaIndex] };
+        const auxiliares = [...materia.auxiliares];
+        const aux = { ...auxiliares[auxIndex] };
 
         if (typeof value === 'boolean' && field.startsWith('calificacion_')) {
             CALIFICACIONES.forEach(c => {
                 const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
-                (aux[califKey] as boolean) = false;
+                (aux[califKey] as any) = false;
             });
 
             if (value === true) {
-                (aux[field] as boolean) = true;
+                (aux[field] as any) = true;
             }
-
-        } else if (typeof value === 'string' && field === 'justificacion') {
-            (aux[field] as string) = value;
-        } else if (typeof value === 'string' && field === 'nombre_apellido') {
-            (aux[field] as string) = value;
+        } else {
+            (aux[field] as any) = value; 
         }
+
+        auxiliares[auxIndex] = aux;
+        materia.auxiliares = auxiliares;
+        updatedItems[materiaIndex] = materia;
 
         setItems(updatedItems);
 
-        const respuestas = updatedItems.map(materiaItem => ({
+        const respuesta: Respuesta = {
             pregunta_id: pregunta.id,
-            materia_id: materiaItem.materia.id,
+            materia_id: materia.materia.id,
             texto_respuesta: JSON.stringify(
-                materiaItem.auxiliares.map(aux => ({
-                    nombre: aux.nombre_apellido,
-                    calificacion: boolsToCode(aux),
-                    justificacion: aux.justificacion,
+                materia.auxiliares.map(a => ({
+                    nombre: a.nombre_apellido,
+                    calificacion: boolsToCode(a),
+                    justificacion: a.justificacion,
                 }))
             )
-        }));
+        };
 
-        manejarCambio?.(respuestas);
+        manejarCambio?.([respuesta]);
     };
 
-    if (isLoading) return <div className="text-center text-secondary">Cargando desempeño de auxiliares...</div>;
+    // MARCA DE ERROR VISUAL
+    const isError = (
+        materiaIndex: number,
+        auxIndex: number,
+        field: 'justificacion'
+    ): boolean => {
+        const materiaOriginal = itemsOriginales[materiaIndex];
+        const materiaActual = itemsTabla[materiaIndex];
+
+        if (!materiaOriginal || !materiaActual) return false;
+
+        const auxOriginal = materiaOriginal.auxiliares[auxIndex];
+        const auxActual = materiaActual.auxiliares[auxIndex];
+
+        if (!auxOriginal || !auxActual) return false;
+
+        const vOrig = auxOriginal[field] || '';
+        const vCurr = auxActual[field] || '';
+
+        const esRequerido = vOrig.trim().length > 0;
+        return esRequerido && vCurr.trim().length === 0;
+    };
+
+    if (isLoading) return <div className="text-center text-secondary">Cargando...</div>;
     if (error) return <div className="alert alert-danger"><strong>Error:</strong> {error}</div>;
-    if (itemsTabla.length === 0) return <div className="alert alert-warning">No hay auxiliares reportados para estas materias.</div>;
+    if (itemsTabla.length === 0) return <div className="alert alert-warning">No hay auxiliares.</div>;
 
     return (
         <div className="container mt-4">
             <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
-            <div className="accordion" id="accordionDesempenoAuxiliares">
+            <div className="accordion" id="accordionAux">
                 {itemsTabla.map((materiaItem, mIndex) => (
                     <div key={materiaItem.materia.id} className="accordion-item">
 
@@ -170,8 +224,6 @@ export default function DesempenoAuxiliares({
                                 type="button"
                                 data-bs-toggle="collapse"
                                 data-bs-target={`#collapseAux${mIndex}`}
-                                aria-expanded="false"
-                                aria-controls={`collapseAux${mIndex}`}
                             >
                                 Espacio Curricular: {materiaItem.materia.nombre} ({materiaItem.materia.matricula})
                             </button>
@@ -180,23 +232,20 @@ export default function DesempenoAuxiliares({
                         <div
                             id={`collapseAux${mIndex}`}
                             className="accordion-collapse collapse"
-                            aria-labelledby={`headingAux${mIndex}`}
-                            data-bs-parent="#accordionDesempenoAuxiliares"
+                            data-bs-parent="#accordionAux"
                         >
                             <div className="accordion-body p-0">
                                 <div className="table-responsive">
                                     <table className="table table-bordered table-hover table-sm align-middle mb-0">
-                                        <thead className="table-light text-center no-bold">
+                                        <thead className="table-light text-center">
                                             <tr>
-                                                <th style={{ width: '20%' }}>Nombre y Apellido JTP/Auxiliar</th>
-                                                <th colSpan={5}>Calificación desempeño auxiliares</th>
-                                                <th style={{ width: '40%' }}>Justificación de la calificación</th>
+                                                <th style={{ width: '20%' }}>Auxiliar</th>
+                                                <th colSpan={5}>Calificación</th>
+                                                <th style={{ width: '40%' }}>Justificación</th>
                                             </tr>
                                             <tr>
                                                 <th></th>
-                                                {CALIFICACIONES.map(c => (
-                                                    <th key={c.code} style={{ width: '5%' }}>{c.label}</th>
-                                                ))}
+                                                {CALIFICACIONES.map(c => <th key={c.code} style={{width:'5%'}}>{c.label}</th>)}
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -204,9 +253,7 @@ export default function DesempenoAuxiliares({
                                         <tbody>
                                             {materiaItem.auxiliares.map((aux, aIndex) => (
                                                 <tr key={aux.nombre_apellido}>
-                                                    <td>
-                                                        {aux.nombre_apellido}
-                                                    </td>
+                                                    <td>{aux.nombre_apellido}</td>
                                                     {CALIFICACIONES.map(c => {
                                                         const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
                                                         return (
@@ -222,21 +269,15 @@ export default function DesempenoAuxiliares({
                                                             label={null}
                                                             value={aux.justificacion}
                                                             onChange={(v) => handleChange(mIndex, aIndex, 'justificacion', v)}
+                                                            error={isError(mIndex, aIndex, 'justificacion')}
                                                         />
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {materiaItem.auxiliares.length === 0 && (
-                                                <tr>
-                                                    <td colSpan={7} className="text-center text-muted">
-                                                        No se encontraron auxiliares para esta materia.
-                                                    </td>
-                                                </tr>
-                                            )}
+                                            {materiaItem.auxiliares.length === 0 && <tr><td colSpan={7} className="text-center">Sin auxiliares.</td></tr>}
                                         </tbody>
                                     </table>
                                 </div>
-
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, ForeignKey, Table, Column
+from sqlalchemy import Integer, String, ForeignKey, Table, Column, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
 from typing import Optional, List
@@ -19,6 +19,9 @@ class Pregunta(ModeloBase):
     )
 
     tipo: Mapped[str] = mapped_column(String, nullable=False)
+    
+    obligatoria: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    
     opciones: Mapped[Optional[List["src.opciones.models.Opcion"]]] = relationship(
         "src.opciones.models.Opcion",
         secondary=pregunta_opcion,

@@ -1,38 +1,39 @@
 import { useEffect, useState, Fragment } from "react";
 
-type RespuestaValor = { 
-  opcion_id: number | null; 
-  texto_respuesta: string | null; 
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
 };
 
-interface Pregunta { 
-  id: number; 
-  enunciado: string; 
-  categoria_id?: number; 
+interface Pregunta {
+  id: number;
+  enunciado: string;
+  categoria_id?: number;
+  obligatoria: boolean;
 }
 
-interface Categoria { 
-  id: number; 
-  cod: string; 
-  texto: string; 
-  preguntas: Pregunta[]; 
+interface Categoria {
+  id: number;
+  cod: string;
+  texto: string;
+  preguntas: Pregunta[];
 }
 
-interface OpcionPorcentaje { 
-  opcion_id: string; 
-  porcentaje: number; 
+interface OpcionPorcentaje {
+  opcion_id: string;
+  porcentaje: number;
 }
 
-interface DatosEstadisticosPregunta { 
-  id_pregunta: string; 
-  datos: OpcionPorcentaje[]; 
+interface DatosEstadisticosPregunta {
+  id_pregunta: string;
+  datos: OpcionPorcentaje[];
 }
 
-interface DatosEstadisticosCategoria { 
-  categoria_cod: string; 
-  categoria_texto: string; 
-  promedio_categoria: OpcionPorcentaje[]; 
-  preguntas: DatosEstadisticosPregunta[]; 
+interface DatosEstadisticosCategoria {
+  categoria_cod: string;
+  categoria_texto: string;
+  promedio_categoria: OpcionPorcentaje[];
+  preguntas: DatosEstadisticosPregunta[];
 }
 
 interface Props {
@@ -43,7 +44,13 @@ interface Props {
   isReadOnly?: boolean;
 }
 
-export default function Categoria2BInforme({ categoria, manejarCambio, estadisticas, respuestas, isReadOnly = false}: Props) {
+export default function Categoria2BInforme({
+  categoria,
+  manejarCambio,
+  estadisticas,
+  respuestas,
+  isReadOnly = false,
+}: Props) {
   const [observacion, setObservacion] = useState<Pregunta | null>(null);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
 
@@ -66,10 +73,18 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
   }, [categoria]);
 
   useEffect(() => {
-    if (isReadOnly || !estadisticas || estadisticas.length === 0 || preguntas.length === 0) return;
-    
+    if (
+      isReadOnly ||
+      !estadisticas ||
+      estadisticas.length === 0 ||
+      preguntas.length === 0
+    )
+      return;
+
     preguntas.forEach((p) => {
-      const catEst = estadisticas.find((e) => p.enunciado.includes(`${e.categoria_cod}:`));
+      const catEst = estadisticas.find((e) =>
+        p.enunciado.includes(`${e.categoria_cod}:`)
+      );
       if (catEst) {
         const valor = catEst.promedio_categoria
           .map((op) => `${op.opcion_id}: ${op.porcentaje.toFixed(2)}%`)
@@ -104,13 +119,17 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
           <tbody>
             {preguntas.map((p) => (
               <tr key={p.id}>
-                <td>{p.enunciado}</td>
+                <td>
+                  {p.enunciado}
+                  {p.obligatoria && <span className="text-danger ms-1">*</span>}
+                </td>
                 <td>
                   <input
                     type="text"
                     className="form-control"
                     value={respuestas[p.id]?.texto_respuesta || ""}
                     readOnly={true}
+                    required={p.obligatoria}
                   />
                 </td>
               </tr>
@@ -121,10 +140,18 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
 
       {observacion && (
         <div className="mt-4">
-          <label className="form-label fw-bold">{observacion.enunciado}</label>
-          
+          <label className="form-label fw-bold">
+            {observacion.enunciado}
+            {observacion.obligatoria && (
+              <span className="text-danger ms-1">*</span>
+            )}
+          </label>
+
           {isReadOnly ? (
-            <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
+            <p
+              className="form-control-plaintext"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
               {respuestas[observacion.id]?.texto_respuesta || "—"}
             </p>
           ) : (
@@ -138,6 +165,7 @@ export default function Categoria2BInforme({ categoria, manejarCambio, estadisti
               }}
               onInput={autoExpand}
               style={{ resize: "none" }}
+              required={observacion.obligatoria}
             ></textarea>
           )}
         </div>

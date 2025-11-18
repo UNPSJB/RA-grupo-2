@@ -18,6 +18,7 @@ interface InformacionGeneralProps {
     periodo: string;
     pregunta: Pregunta;
     manejarCambio?: (respuestas: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void; 
 }
 
 export default function InformacionGeneral({
@@ -27,8 +28,10 @@ export default function InformacionGeneral({
     periodo,
     pregunta,
     manejarCambio,
+    notificarValidacion
 }: InformacionGeneralProps) {
     const [materias, setMaterias] = useState<MateriaInfo[]>([]);
+    const [materiasOriginales, setMateriasOriginales] = useState<MateriaInfo[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -54,9 +57,17 @@ export default function InformacionGeneral({
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                setMaterias(data);
+                const datosLimpios = data.map(d => ({
+                    ...d,
+                    cantidad_alumnos: d.cantidad_alumnos || 0,
+                    cantidad_comisiones_teoricas: d.cantidad_comisiones_teoricas || 0,
+                    cantidad_comisiones_practicas: d.cantidad_comisiones_practicas || 0
+                }));
 
-                const respuestasIniciales: Respuesta[] = data.map((m) => ({
+                setMaterias(datosLimpios);
+                setMateriasOriginales(JSON.parse(JSON.stringify(datosLimpios))); 
+
+                const respuestasIniciales: Respuesta[] = datosLimpios.map((m) => ({
                     pregunta_id: pregunta.id,
                     materia_id: m.materia.id,
                     texto_respuesta: JSON.stringify({
@@ -69,11 +80,8 @@ export default function InformacionGeneral({
 
             } catch (err) {
                 console.error("Error al obtener información general:", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
+                if (err instanceof Error) setError(err.message);
+                else setError("Error desconocido");
             } finally {
                 setIsLoading(false);
             }
@@ -81,6 +89,22 @@ export default function InformacionGeneral({
 
         fetchData();
     }, [id_dpto, id_carrera, anio, periodo, pregunta.id]);
+
+    useEffect(() => {
+        if (materias.length === 0) return;
+
+        const hayError = materias.some((materia, idx) => {
+            const orig = materiasOriginales[idx];
+            if (!orig) return false;
+            if (orig.cantidad_alumnos > 0 && materia.cantidad_alumnos === 0) return true;
+            if (orig.cantidad_comisiones_teoricas > 0 && materia.cantidad_comisiones_teoricas === 0) return true;
+            if (orig.cantidad_comisiones_practicas > 0 && materia.cantidad_comisiones_practicas === 0) return true;
+
+            return false;
+        });
+
+        notificarValidacion?.(!hayError);
+    }, [materias]);
 
 
     const handleChange = <K extends keyof MateriaInfo>(
@@ -102,6 +126,13 @@ export default function InformacionGeneral({
             })
         }));
         manejarCambio?.(respuestas);
+    };
+
+    const isError = (idx: number, field: keyof MateriaInfo) => {
+        if (!materiasOriginales[idx]) return false;
+        const orig = materiasOriginales[idx][field] as number;
+        const curr = materias[idx][field] as number;
+        return orig > 0 && curr === 0;
     };
 
     return (
@@ -147,6 +178,7 @@ export default function InformacionGeneral({
                                                 label="Cantidad de alumnos"
                                                 value={materia.cantidad_alumnos}
                                                 onChange={(v) => handleChange(index, "cantidad_alumnos", v)}
+                                                error={isError(index, "cantidad_alumnos")}
                                             />
                                             <CampoTextoNumero
                                                 label="Comisiones Teóricas"
@@ -154,6 +186,7 @@ export default function InformacionGeneral({
                                                 onChange={(v) =>
                                                     handleChange(index, "cantidad_comisiones_teoricas", v)
                                                 }
+                                                error={isError(index, "cantidad_comisiones_teoricas")}
                                             />
                                             <CampoTextoNumero
                                                 label="Comisiones Prácticas"
@@ -161,6 +194,7 @@ export default function InformacionGeneral({
                                                 onChange={(v) =>
                                                     handleChange(index, "cantidad_comisiones_practicas", v)
                                                 }
+                                                error={isError(index, "cantidad_comisiones_practicas")}
                                             />
                                         </div>
                                     </div>

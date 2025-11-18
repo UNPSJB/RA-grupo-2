@@ -28,6 +28,7 @@ export interface Pregunta {
     cod: string;
     orden: number;
     enunciado: string;
+    obligatoria: boolean;
 }
 
 export interface Respuesta {

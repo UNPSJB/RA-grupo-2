@@ -6,8 +6,10 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 interface PreguntaTemp { 
     cod: string;
     enunciado: string; 
-    orden: number; 
+    orden: number;
+    obligatoria: boolean; 
 }
+
 const reorder = (list: PreguntaTemp[], startIndex: number, endIndex: number): PreguntaTemp[] => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -17,6 +19,7 @@ const reorder = (list: PreguntaTemp[], startIndex: number, endIndex: number): Pr
         orden: index + 1,
     }));
 };
+
 const getListItemStyle = (isDragging: boolean, dragItemStyle: React.CSSProperties, draggableStyle: React.CSSProperties | undefined) => ({
     ...dragItemStyle,
     ...draggableStyle,
@@ -24,10 +27,8 @@ const getListItemStyle = (isDragging: boolean, dragItemStyle: React.CSSPropertie
         ? 'rgba(0, 123, 255, 0.2)' 
         : dragItemStyle.backgroundColor,
     width: isDragging ? '100%' : 'auto', 
-    
     boxShadow: isDragging ? '0 4px 8px rgba(0, 0, 0, 0.2)' : 'none',
 });
-
 
 export default function InformeSinteticoBaseForm() {
     const navigate = useNavigate();
@@ -37,6 +38,7 @@ export default function InformeSinteticoBaseForm() {
     const [preguntas, setPreguntas] = useState<PreguntaTemp[]>([]);
     const [nuevoTextoPregunta, setNuevoTextoPregunta] = useState("");
     const [nuevoCodPregunta, setNuevoCodPregunta] = useState("");
+    const [esObligatoria, setEsObligatoria] = useState(false);
 
     const agregarPregunta = () => {
         if (!nuevoTextoPregunta.trim() || !nuevoCodPregunta.trim()) {
@@ -47,12 +49,14 @@ export default function InformeSinteticoBaseForm() {
         const nuevaPregunta: PreguntaTemp = {
             cod: nuevoCodPregunta,
             enunciado: nuevoTextoPregunta, 
-            orden: preguntas.length + 1, 
+            orden: preguntas.length + 1,
+            obligatoria: esObligatoria, 
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
         setNuevoTextoPregunta("");
         setNuevoCodPregunta("");
+        setEsObligatoria(false);
     };
 
     const eliminarPregunta = (index: number) => {
@@ -122,7 +126,8 @@ export default function InformeSinteticoBaseForm() {
                         cod: preg.cod,
                         enunciado: preg.enunciado, 
                         orden: preg.orden, 
-                        tipo_respuesta: 'texto', 
+                        tipo_respuesta: 'texto',
+                        obligatoria: preg.obligatoria, 
                     }),
                 });
 
@@ -146,14 +151,13 @@ export default function InformeSinteticoBaseForm() {
 
         } catch (error) {
             console.error("Error en la cascada de creación:", error);
-            
             const messageToShow = error instanceof Error ? error.message : "Error desconocido y no capturado.";
-            
             alert(`Fallo en la creación del informe. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
         }
     };
+
     const cardStyle = { 
         backgroundColor: 'var(--color-component-bg)',
         border: '1px solid var(--color-unpsjb-border)', 
@@ -229,13 +233,13 @@ export default function InformeSinteticoBaseForm() {
                                     <label className="form-label fw-bold">Codigo</label>
                                     <textarea 
                                         className="form-control" 
-                                        rows={2} 
+                                        rows={1} 
                                         value={nuevoCodPregunta} 
                                         onChange={(e) => setNuevoCodPregunta(e.target.value)} 
                                         disabled={cargando}
                                         style={inputFieldStyle}
                                     />
-                                    <label className="form-label fw-bold">Enunciado</label>
+                                    <label className="form-label fw-bold mt-2">Enunciado</label>
                                     <textarea 
                                         className="form-control" 
                                         rows={2} 
@@ -245,6 +249,20 @@ export default function InformeSinteticoBaseForm() {
                                         style={inputFieldStyle}
                                     />
                                 </div>
+                            </div>
+
+                            <div className="mb-3 form-check">
+                                <input 
+                                    type="checkbox" 
+                                    className="form-check-input" 
+                                    id="checkObligatoria"
+                                    checked={esObligatoria}
+                                    onChange={(e) => setEsObligatoria(e.target.checked)}
+                                    disabled={cargando}
+                                />
+                                <label className="form-check-label" htmlFor="checkObligatoria" style={{color: 'var(--color-text-primary)'}}>
+                                    ¿Es obligatorio que se responda?
+                                </label>
                             </div>
                             
                             <div className="d-flex justify-content-end mt-2">
@@ -268,7 +286,7 @@ export default function InformeSinteticoBaseForm() {
                                             ref={provided.innerRef}
                                             style={{
                                                 minHeight: '100px', 
-                                                height: `${preguntas.length * 60}px`, 
+                                                height: `${preguntas.length * 80}px`, 
                                                 backgroundColor: snapshot.isDraggingOver ? placeholderStyle.backgroundColor : dragItemStyle.backgroundColor,
                                             }} 
                                         >
@@ -288,7 +306,8 @@ export default function InformeSinteticoBaseForm() {
                                                         >
                                                             <span>
                                                                 <strong className={`badge bg-secondary me-2`}> Orden: {preg.orden}</strong>
-                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.cod}-{preg.enunciado}
+                                                                {preg.obligatoria && <span className="badge bg-danger me-2">OBLIGATORIA</span>}
+                                                                <strong style={{color: 'var(--color-text-primary)'}}> </strong> {preg.cod} - {preg.enunciado}
                                                             </span>
                                                             <button 
                                                                 type="button" 

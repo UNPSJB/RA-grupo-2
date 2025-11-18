@@ -21,12 +21,13 @@ interface Props {
   onDatosGenerados?: (datos: InformeActividad) => void;
   isReadOnly?: boolean;
   datosIniciales?: Partial<InformeActividad>;
-  nombresFuncion?: { JTP: string | null; aux1: string|null; aux2: string|null };
+  nombresFuncion?: { JTP: string | null; aux1: string | null; aux2: string | null };
   setNombresFuncion?: {
     SetJTP: React.Dispatch<React.SetStateAction<string>>;
     SetAux1: React.Dispatch<React.SetStateAction<string>>;
     SetAux2: React.Dispatch<React.SetStateAction<string>>;
   };
+  onValidationChange?: (isValid: boolean) => void; 
 }
 
 export default function CompletarInformeCatedraFuncion({
@@ -36,17 +37,31 @@ export default function CompletarInformeCatedraFuncion({
   datosIniciales,
   nombresFuncion,
   setNombresFuncion,
+  onValidationChange
 }: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
+  const [dataOriginal, setDataOriginal] = useState<InformeActividad | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] =
-    useState(1);
-  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] =
-    useState(1);
+  
+  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
+  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
+  
   const JTP = nombresFuncion?.JTP ?? "";
   const aux1 = nombresFuncion?.aux1 ?? "";
   const aux2 = nombresFuncion?.aux2 ?? "";
+
+  const handleNumericChange = (
+    value: string, 
+    setter: React.Dispatch<React.SetStateAction<number>>
+  ) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      setter(numValue);
+    } else if (value === "") {
+      setter(0);
+    }
+  };
 
   useEffect(() => {
     if (isReadOnly) {
@@ -93,6 +108,9 @@ export default function CompletarInformeCatedraFuncion({
 
         const cantidadAlumnos = alumnos.length;
 
+        const comTeoricasInicial = cantidadComisionesTeoricas; 
+        const comPracticasInicial = cantidadComisionesPracticas;
+
         const datos: InformeActividad = {
           sede: "Trelew",
           cicloLectivo: anio,
@@ -101,14 +119,16 @@ export default function CompletarInformeCatedraFuncion({
           codigoActividadCurricular: materia.matricula,
           docenteResponsable: `${docente.nombre} ${docente.apellido}`,
           cantidadAlumnos,
-          cantidadComisionesTeoricas,
-          cantidadComisionesPracticas,
+          cantidadComisionesTeoricas: comTeoricasInicial,
+          cantidadComisionesPracticas: comPracticasInicial,
           JTP,
           aux1,
           aux2,
         };
 
         setData(datos);
+        setDataOriginal(JSON.parse(JSON.stringify(datos))); 
+        
         onDatosGenerados?.(datos);
       } catch (err: any) {
         setError(err.message);
@@ -118,16 +138,40 @@ export default function CompletarInformeCatedraFuncion({
     };
 
     fetchData();
-  }, [
-    docenteMateriaId,
-    cantidadComisionesTeoricas,
-    cantidadComisionesPracticas,
-    isReadOnly,
-    datosIniciales,
-    JTP,
-    aux1,
-    aux2,
-  ]);
+  }, [docenteMateriaId, isReadOnly]);
+
+  useEffect(() => {
+      if(!data) return;
+      const nuevosDatos = {
+          ...data,
+          cantidadComisionesTeoricas,
+          cantidadComisionesPracticas,
+          JTP, aux1, aux2
+      };
+      setData(nuevosDatos);
+      onDatosGenerados?.(nuevosDatos);
+  }, [cantidadComisionesTeoricas, cantidadComisionesPracticas, JTP, aux1, aux2]);
+
+  useEffect(() => {
+      if (!dataOriginal) return;
+      
+      const errorTeoricas = dataOriginal.cantidadComisionesTeoricas > 0 && cantidadComisionesTeoricas === 0;
+      const errorPracticas = dataOriginal.cantidadComisionesPracticas > 0 && cantidadComisionesPracticas === 0;
+      
+      const esValido = !(errorTeoricas || errorPracticas);
+      onValidationChange?.(esValido);
+
+  }, [cantidadComisionesTeoricas, cantidadComisionesPracticas, dataOriginal]);
+
+  const isErrorTeoricas = () => {
+      if (!dataOriginal) return false;
+      return dataOriginal.cantidadComisionesTeoricas > 0 && cantidadComisionesTeoricas === 0;
+  };
+
+  const isErrorPracticas = () => {
+      if (!dataOriginal) return false;
+      return dataOriginal.cantidadComisionesPracticas > 0 && cantidadComisionesPracticas === 0;
+  };
 
   if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
@@ -168,6 +212,7 @@ export default function CompletarInformeCatedraFuncion({
           <p className="mb-1 text-muted small">Alumnos Inscriptos</p>
           <p>{data.cantidadAlumnos}</p>
         </div>
+
         <div className="col-md-12">
           {isReadOnly ? (
             data.JTP?.trim() && (
@@ -178,19 +223,8 @@ export default function CompletarInformeCatedraFuncion({
             )
           ) : (
             <>
-              <label htmlFor="JTP" className="form-label">
-                JTP
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="JTP"
-                min="0"
-                value={JTP}
-                onChange={(e) => {
-                  setNombresFuncion?.SetJTP(e.target.value);
-                }}
-              />
+              <label htmlFor="JTP" className="form-label">JTP</label>
+              <input type="text" className="form-control" id="JTP" value={JTP} onChange={(e) => setNombresFuncion?.SetJTP(e.target.value)} />
             </>
           )}
         </div>
@@ -204,20 +238,8 @@ export default function CompletarInformeCatedraFuncion({
             )
           ) : (
             <>
-              <label htmlFor="aux1" className="form-label">
-                Auxiliar de Primera
-              </label>
-
-              <input
-                type="text"
-                className="form-control"
-                id="aux1"
-                min="0"
-                value={aux1}
-                onChange={(e) => {
-                  setNombresFuncion?.SetAux1(e.target.value);
-                }}
-              />
+              <label htmlFor="aux1" className="form-label">Auxiliar de Primera</label>
+              <input type="text" className="form-control" id="aux1" value={aux1} onChange={(e) => setNombresFuncion?.SetAux1(e.target.value)} />
             </>
           )}
         </div>
@@ -231,20 +253,8 @@ export default function CompletarInformeCatedraFuncion({
             )
           ) : (
             <>
-              <label htmlFor="aux2" className="form-label">
-                Auxiliar de Segunda
-              </label>
-
-              <input
-                type="text"
-                className="form-control"
-                id="aux2"
-                min="0"
-                value={aux2}
-                onChange={(e) => {
-                  setNombresFuncion?.SetAux2(e.target.value);
-                }}
-              />
+              <label htmlFor="aux2" className="form-label">Auxiliar de Segunda</label>
+              <input type="text" className="form-control" id="aux2" value={aux2} onChange={(e) => setNombresFuncion?.SetAux2(e.target.value)} />
             </>
           )}
         </div>
@@ -264,17 +274,17 @@ export default function CompletarInformeCatedraFuncion({
               {data?.cantidadComisionesTeoricas ?? "N/A"}
             </p>
           ) : (
-            <input
-              type="number"
-              className="form-control"
-              id="comisionesTeoricas"
-              min="0"
-              value={cantidadComisionesTeoricas}
-              onChange={(e) => {
-                const value = parseInt(e.target.value) || 0;
-                setCantidadComisionesTeoricas(value);
-              }}
-            />
+            <>
+                <input
+                  type="number"
+                  className={`form-control ${isErrorTeoricas() ? "is-invalid" : ""}`}
+                  id="comisionesTeoricas"
+                  min="0"
+                  value={cantidadComisionesTeoricas}
+                  onChange={(e) => handleNumericChange(e.target.value, setCantidadComisionesTeoricas)}
+                />
+                {isErrorTeoricas() && <div className="invalid-feedback">Valor invalido.</div>}
+            </>
           )}
         </div>
         <div className="col-md-6">
@@ -287,17 +297,17 @@ export default function CompletarInformeCatedraFuncion({
               {data?.cantidadComisionesPracticas ?? "N/A"}
             </p>
           ) : (
-            <input
-              type="number"
-              className="form-control"
-              id="comisionesPracticas"
-              min="0"
-              value={cantidadComisionesPracticas}
-              onChange={(e) => {
-                const value = parseInt(e.target.value) || 0;
-                setCantidadComisionesPracticas(value);
-              }}
-            />
+            <>
+                <input
+                  type="number"
+                  className={`form-control ${isErrorPracticas() ? "is-invalid" : ""}`}
+                  id="comisionesPracticas"
+                  min="0"
+                  value={cantidadComisionesPracticas}
+                  onChange={(e) => handleNumericChange(e.target.value, setCantidadComisionesPracticas)}
+                />
+                {isErrorPracticas() && <div className="invalid-feedback">Valor invalido.</div>}
+            </>
           )}
         </div>
       </div>
