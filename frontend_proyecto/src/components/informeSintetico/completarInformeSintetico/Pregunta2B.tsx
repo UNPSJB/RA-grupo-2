@@ -70,7 +70,6 @@ export default function Pregunta2B({ departamentoId, carreraId, pregunta, anio, 
         if (!itemsOriginales[idx]) return false;
         const orig = itemsOriginales[idx][field];
         const curr = itemsTabla[idx][field];
-        // Solo es error si es string
         if (typeof orig === 'string' && typeof curr === 'string') {
              return (orig !== "" && curr === "");
         }

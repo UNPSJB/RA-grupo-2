@@ -33,7 +33,6 @@ export default function Pregunta2({
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        // Log de depuración para ver si el hook se ejecuta y con qué props
         console.log("➡️ Iniciando useEffect con:", { 
             departamentoId, 
             carreraId, 
@@ -55,12 +54,7 @@ export default function Pregunta2({
                 );
 
                 const data = await res.json();
-                
-                // CAMBIO CLAVE: Muestro el JSON después de recibirlo y antes de validar el 'res.ok'
-                console.log("✅ JSON devuelto por la API (datos sin parsear):", data); 
-
-                // Si la respuesta HTTP no es exitosa, lanzo el error *después* de haber loggeado los datos
-                if (!res.ok) {
+               if (!res.ok) {
                     throw new Error(`Error en la respuesta HTTP: ${res.status} ${res.statusText}`);
                 }
                 
@@ -83,14 +77,11 @@ export default function Pregunta2({
                         justificacion: itm.justificacion,
                     }),
                 }));
-                // Muestro el array de respuestas generado
-                console.log("✅ Respuestas generadas para manejarCambio:", respuestas); 
 
                 manejarCambio?.(respuestas);
 
             } catch (err) { 
-                // Aquí capturamos errores de red (antes de la respuesta) o errores HTTP (lanzados arriba)
-                console.error("❌ Error en la carga/procesamiento de datos:", err); 
+                console.error("Error en la carga de datos:", err); 
             } finally { 
                 setIsLoading(false); 
             }

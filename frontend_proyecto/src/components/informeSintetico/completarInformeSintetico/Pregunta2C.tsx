@@ -44,7 +44,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
-    // VALIDACIÓN
+
     useEffect(() => {
         if (itemsTabla.length === 0) return;
         const hayError = itemsTabla.some((item, idx) => {
@@ -55,7 +55,6 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
             return keys.some(key => {
                 const vOrig = orig[key];
                 const vCurr = curr[key];
-                // Error si antes había texto y ahora está vacío (null o "")
                 return (vOrig !== null && vOrig !== "") && (vCurr === null || vCurr === "");
             });
         });

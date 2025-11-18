@@ -115,7 +115,7 @@ export default function DesempenoAuxiliares({
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
-    // LÓGICA DE VALIDACIÓN (Si trae texto, no puede quedar vacío)
+
     useEffect(() => {
         if (itemsTabla.length === 0) return;
 
@@ -138,7 +138,6 @@ export default function DesempenoAuxiliares({
         notificarValidacion?.(!hayError);
     }, [itemsTabla, itemsOriginales, notificarValidacion]);
 
-    // MANEJO DE CAMBIOS
     const handleChange = (
         materiaIndex: number,
         auxIndex: number,
@@ -184,7 +183,6 @@ export default function DesempenoAuxiliares({
         manejarCambio?.([respuesta]);
     };
 
-    // MARCA DE ERROR VISUAL
     const isError = (
         materiaIndex: number,
         auxIndex: number,

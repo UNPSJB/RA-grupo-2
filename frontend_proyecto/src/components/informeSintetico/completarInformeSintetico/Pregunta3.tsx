@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 import { CampoCheckbox, CampoTextArea } from "./Campos";
 
