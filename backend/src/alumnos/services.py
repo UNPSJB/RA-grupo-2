@@ -27,6 +27,7 @@ def listar_encuestas_disponibles(db: Session, alumno_id: int):
         .where(EncuestaCompletada.anio==ANIO_ACTUAL)
         .where(EncuestaCompletada.periodo==PERIODO_ACTUAL)
         .where(EncuestaCompletada.encuesta_id == Encuesta.id)
+        .where(EncuestaCompletada.materia_id == Materia.id)
     )
     stmt = (
         select(Materia.nombre, Encuesta.nombre, Materia.id, Materia.encuesta_id)

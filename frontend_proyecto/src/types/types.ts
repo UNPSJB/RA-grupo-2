@@ -35,3 +35,9 @@ export interface Respuesta {
     materia_id?: number;
     texto_respuesta: string;
 }
+
+export interface Alumno {
+  id: number
+  nombre: string
+  apellido: string
+}

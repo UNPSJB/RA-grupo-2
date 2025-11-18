@@ -103,7 +103,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
                 </div>
             ) : itemsTabla.length === 0 ? (
                 <div className="alert alert-warning">
-                    No hay respuestas.
+                    No hay materias para esta selección.
                 </div>
             ) : (
                 <>

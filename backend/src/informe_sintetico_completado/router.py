@@ -65,8 +65,6 @@ def obtener_informacion_general(
 ):
     try:
         elementos = services.obtener_informacion_general(db, id_dpto, id_carrera, anio, periodo)
-        if not elementos:
-            raise HTTPException(status_code=404, detail="No se encontraron informes completados para los filtros dados.")
         return elementos
     except HTTPException:
         raise
@@ -97,8 +95,6 @@ def get_preguntas_2C(
 ):
     try:
         elementos = services.get_elementos_pregunta2C(db, id_dpto, id_carrera, anio, periodo)
-        if not elementos:
-            raise HTTPException(status_code=404, detail="No se encontraron respuestas de cátedra para la sección 2.C con esos filtros.")
         return elementos
     except HTTPException:
         raise

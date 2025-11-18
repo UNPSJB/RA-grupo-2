@@ -4,6 +4,7 @@ import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation} from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
+import type {Materia} from "../../../types/types.ts";
 
 
 
@@ -26,12 +27,21 @@ export default function CompletarEncuesta() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const [materia, setMateria] = useState<Materia>();
   const navigate = useNavigate();
   const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
   
   const location = useLocation();
 
   useEffect(() => {
+    const {materiaId} = location.state
+    fetch(`http://127.0.0.1:8000/materias/${materiaId}`)
+    .then(res=>{
+      if (!res.ok) throw new Error("Error al obtener la materia");
+        return res.json();
+    })
+    .then(setMateria)
+    .catch(console.error);
     const { encuestaId = 1 } = location.state || {};
     fetch(`http://localhost:8000/encuestas/${encuestaId}/categorias`)
       .then((res) => res.json())
@@ -133,7 +143,7 @@ export default function CompletarEncuesta() {
     <div className="container py-4">
       <div className="card border-0 shadow-lg">
         <div className="card-header bg-unpsjb-header">
-          <h1 className="h4 mb-0 text-center">Encuesta</h1>
+          <h1 className="h4 mb-0 text-center">Encuesta {materia?.nombre}</h1>
         </div>
         <div className="card-body">
           {categorias.length > 0 ? (

@@ -155,7 +155,7 @@ export default function DesempenoAuxiliares({
 
     if (isLoading) return <div className="text-center text-secondary">Cargando desempeño de auxiliares...</div>;
     if (error) return <div className="alert alert-danger"><strong>Error:</strong> {error}</div>;
-    if (itemsTabla.length === 0) return <div className="alert alert-warning">No hay auxiliares reportados para estas materias.</div>;
+    if (itemsTabla.length === 0) return <div className="alert alert-warning">No hay materias para esta selección.</div>;
 
     return (
         <div className="container mt-4">
