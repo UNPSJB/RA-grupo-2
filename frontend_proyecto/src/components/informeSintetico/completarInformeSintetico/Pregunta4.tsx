@@ -207,11 +207,7 @@ export default function DesempenoAuxiliares({
 
     if (isLoading) return <div className="text-center text-secondary">Cargando...</div>;
     if (error) return <div className="alert alert-danger"><strong>Error:</strong> {error}</div>;
-<<<<<<< .mine
     if (itemsTabla.length === 0) return <div className="alert alert-warning">No hay auxiliares.</div>;
-=======
-    if (itemsTabla.length === 0) return <div className="alert alert-warning">No hay materias para esta selección.</div>;
->>>>>>> .theirs
 
     return (
         <div className="container mt-4">

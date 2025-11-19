@@ -1,41 +1,29 @@
-<<<<<<< .mine
 import React from "react";
 
-=======
-
-
->>>>>>> .theirs
 const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 };
 
-interface CommonProps { label: string | null; error?: boolean; }
+interface CommonProps { 
+    label: string | null; 
+    error?: boolean; 
+    isReadOnly?: boolean; 
+}
+
+interface CampoTextAreaProps extends CommonProps {
+    value: string;
+    onChange?: (v: string) => void;
+}
 
 export function CampoTextArea({ 
     label,
-<<<<<<< .mine
     value, 
     onChange, 
-    error }: CommonProps & { value: string; onChange?: (v: string) => void; }) {
-
-
-
-
-
-
-=======
-    value,
-    onChange,
-    isReadOnly = false,
-}: {
-    label: string|null;
-    value: string;
-    onChange?: (v: string) => void;
-    isReadOnly?: boolean;
-}) {
->>>>>>> .theirs
+    error,
+    isReadOnly = false
+}: CampoTextAreaProps) {
     if (isReadOnly) {
         return (
             <div className="col-12">
@@ -63,31 +51,18 @@ export function CampoTextArea({
     );
 }
 
-<<<<<<< .mine
-export function CampoTextoNumero({ label, value, onChange, error }: CommonProps & { value: number; onChange: (v: number) => void; }) {
-
-
-
-
-
-
-
-
-
-
-=======
-export function CampoTextoNumero({
-    label,
-    value,
-    onChange,
-    isReadOnly = false,
-}: {
-    label: string;
+interface CampoTextoNumeroProps extends CommonProps {
     value: number;
     onChange: (v: number) => void;
-    isReadOnly?: boolean;
-}) {
->>>>>>> .theirs
+}
+
+export function CampoTextoNumero({ 
+    label, 
+    value, 
+    onChange, 
+    error,
+    isReadOnly = false 
+}: CampoTextoNumeroProps) {
     if (isReadOnly) {
         const displayValue = value === null || value === undefined || value === 0 ? '—' : value;
         return (
@@ -110,49 +85,32 @@ export function CampoTextoNumero({
                 value={value}
                 onChange={(e) => onChange(Number(e.target.value))}
             />
-             {error && <div className="invalid-feedback">Requerido.</div>}
+            {error && <div className="invalid-feedback">Requerido.</div>}
         </div>
     );
 }
 
-<<<<<<< .mine
-export function CampoPorcentaje({ label, value, onChange, error }: CommonProps & { value: number | null; onChange: (v: number | null) => void; }) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
-export function CampoPorcentaje({
-    label,
-    value,
-    onChange,
-    isReadOnly = false,
-}: {
-    label: string;
+interface CampoPorcentajeProps extends CommonProps {
     value: number | null;
     onChange: (v: number | null) => void;
-    isReadOnly?: boolean;
-}) {
+}
+
+export function CampoPorcentaje({ 
+    label, 
+    value, 
+    onChange, 
+    error,
+    isReadOnly = false
+}: CampoPorcentajeProps) {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (val === "") { onChange(null); return; }
+        const num = Number(val);
+        onChange(num > 100 ? 100 : num < 0 ? 0 : num);
+    };
+
     if (isReadOnly) {
-        const displayValue = value === null || value === undefined || value === 0 ? '—' : `${value}%`;
+        const displayValue = value === null || value === undefined ? '—' : `${value}%`;
         return (
             <div className="col-md-6">
                 <label className="form-label fw-bold">{label}</label>
@@ -163,13 +121,6 @@ export function CampoPorcentaje({
         );
     }
 
->>>>>>> .theirs
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        if (val === "") { onChange(null); return; }
-        const num = Number(val);
-        onChange(num > 100 ? 100 : num < 0 ? 0 : num);
-    };
     return (
         <div className="col-md-6">
             <label className="form-label">{label}</label>
@@ -181,12 +132,39 @@ export function CampoPorcentaje({
                 onChange={handleChange}
                 placeholder="Ej: 80"
             />
-             {error && <div className="invalid-feedback">Requerido.</div>}
+            {error && <div className="invalid-feedback">Requerido.</div>}
         </div>
     );
 }
 
-export function CampoTexto({ label, value, readOnly = false, onChange, error }: CommonProps & { value: string; readOnly?: boolean; onChange?: (v: string) => void; }) {
+interface CampoTextoProps extends CommonProps {
+    value: string;
+    readOnly?: boolean;
+    onChange?: (v: string) => void;
+}
+
+export function CampoTexto({ 
+    label, 
+    value, 
+    readOnly = false, 
+    onChange, 
+    error,
+    isReadOnly: inheritedReadOnly = false
+}: CampoTextoProps) {
+    
+    const effectiveReadOnly = inheritedReadOnly || readOnly;
+
+    if (effectiveReadOnly) {
+        return (
+            <div className="col-md-6">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {value || '—'}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-md-6">
             <label className="form-label">{label}</label>
@@ -194,70 +172,42 @@ export function CampoTexto({ label, value, readOnly = false, onChange, error }: 
                 type="text"
                 className={`form-control ${error ? "is-invalid" : ""}`}
                 value={value || ""}
-                readOnly={readOnly}
+                readOnly={effectiveReadOnly}
                 onChange={(e) => onChange?.(e.target.value)}
             />
-             {error && <div className="invalid-feedback">Requerido.</div>}
+            {error && <div className="invalid-feedback">Requerido.</div>}
         </div>
     );
 }
 
-<<<<<<< .mine
-export function CampoCheckbox({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void; }) {
+// --- CAMPO CHECKBOX CORREGIDO PARA ACEPTAR Y USAR isReadOnly ---
+interface CampoCheckboxProps { 
+    checked: boolean; 
+    onChange?: (v: boolean) => void;
+    isReadOnly?: boolean; 
+}
 
+export function CampoCheckbox({ checked, onChange, isReadOnly = false }: CampoCheckboxProps) {
+    
+    const handleClick = () => {
+        // Solo ejecuta onChange si NO está en modo solo lectura
+        if (!isReadOnly && onChange) {
+            onChange(!checked);
+        }
+    };
 
-
-
-
-
-
-
-=======
-export function CampoCheckbox({
-    checked,
-    onChange,
-    isReadOnly = false,
-}: {
-    checked: boolean;
-    onChange: (v: boolean) => void;
-    isReadOnly?: boolean;
-}) {
->>>>>>> .theirs
     return (
-<<<<<<< .mine
-        <td className="text-center" style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.2rem', userSelect: 'none' }} onClick={() => onChange(!checked)}>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
         <td 
-            className={`text-center ${!isReadOnly ? 'cursor-pointer' : ''}`} 
+            className="text-center" 
             style={{ 
-                cursor: !isReadOnly ? 'pointer' : 'default',
+                cursor: isReadOnly ? 'default' : 'pointer', // Cambia el cursor
                 fontWeight: 'bold', 
-                fontSize: '1.2rem',
-                userSelect: 'none',
-                opacity: isReadOnly ? 0.6 : 1, 
-            }}
-            onClick={() => {
-                if (!isReadOnly) {
-                    onChange(!checked);
-                }
-            }}
+                fontSize: '1.2rem', 
+                userSelect: 'none' 
+            }} 
+            onClick={handleClick}
         >
->>>>>>> .theirs
-            {checked ? 'X' : '-'}
+            {checked ? 'X' : '—'}
         </td>
     );
 }

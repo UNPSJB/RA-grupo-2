@@ -87,35 +87,8 @@ export default function EquipamientoBibliografia({ departamentoId, carreraId, pr
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark fw-bold mb-3">Equipamiento y Bibliografía</h5>
-            <p className="text-muted mb-3">{pregunta.enunciado}</p>
-<<<<<<< .mine
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
             {isLoading ? <div>Cargando...</div> : (
-
-
-
-
-
-
-
-
-
-
-
-=======
-
-            {isLoading ? (
-                <div className="text-center text-secondary">Cargando datos...</div>
-            ) : error ? (
-                <div className="alert alert-danger">
-                    <strong>Error:</strong> {error}
-                </div>
-            ) : itemsTabla.length === 0 ? (
-                <div className="alert alert-warning">
-                    No hay materias para esta selección.
-                </div>
-            ) : (
->>>>>>> .theirs
                 <div className="accordion" id="accordionNecesidades">
                     {itemsTabla.map((itm, index) => (
                         <div className="accordion-item" key={index}>

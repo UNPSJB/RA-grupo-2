@@ -127,15 +127,9 @@ export default function CompletarInformeCatedraFuncion({
         };
 
         setData(datos);
-<<<<<<< .mine
         setDataOriginal(JSON.parse(JSON.stringify(datos))); 
         
         onDatosGenerados?.(datos);
-=======
-
-
-
->>>>>>> .theirs
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -144,25 +138,8 @@ export default function CompletarInformeCatedraFuncion({
     };
 
     fetchData();
-<<<<<<< .mine
   }, [docenteMateriaId, isReadOnly]);
 
-
-
-
-
-
-=======
-  }, [
-    docenteMateriaId,
-    cantidadComisionesTeoricas,
-    cantidadComisionesPracticas,
-    isReadOnly,
-    datosIniciales,
-  ]);
->>>>>>> .theirs
-
-<<<<<<< .mine
   useEffect(() => {
       if(!data) return;
       const nuevosDatos = {
@@ -196,41 +173,6 @@ export default function CompletarInformeCatedraFuncion({
       return dataOriginal.cantidadComisionesPracticas > 0 && cantidadComisionesPracticas === 0;
   };
 
-=======
-  useEffect(() => {
-    if (!data) return;
-    onDatosGenerados?.(data);
-  }, [
-    data?.cantidadComisionesTeoricas,
-    data?.cantidadComisionesPracticas,
-    data?.JTP,
-    data?.aux1,
-    data?.aux2
-  ]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
   if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
   if (!data) {

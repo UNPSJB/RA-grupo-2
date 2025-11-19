@@ -44,7 +44,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
 
-
+    // VALIDACIÓN
     useEffect(() => {
         if (itemsTabla.length === 0) return;
         const hayError = itemsTabla.some((item, idx) => {
@@ -55,6 +55,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
             return keys.some(key => {
                 const vOrig = orig[key];
                 const vCurr = curr[key];
+                // Error si antes había texto y ahora está vacío (null o "")
                 return (vOrig !== null && vOrig !== "") && (vCurr === null || vCurr === "");
             });
         });
@@ -84,9 +85,7 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark fw-bold mb-3">Reflexion sobre el espacio curricular</h5>
-            <p className="text-muted mb-3">{pregunta.enunciado}</p>
-<<<<<<< .mine
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
             {isLoading ? <div>Cargando...</div> : (
                 <div className="accordion" id="accordion2C">
                     {itemsTabla.map((itm, index) => (
@@ -104,135 +103,6 @@ export default function Pregunta2C({departamentoId, carreraId, pregunta, anio, p
                                         <CampoTextArea label="Obstáculos: Enseñanza" value={itm.respuestas.obstaculos_ensenanza || ''} onChange={(v) => handleChange(index, "obstaculos_ensenanza", v)} error={isError(index, "obstaculos_ensenanza")} />
                                         <CampoTextArea label="Obstáculos: Aprendizaje" value={itm.respuestas.obstaculos_aprendizaje || ''} onChange={(v) => handleChange(index, "obstaculos_aprendizaje", v)} error={isError(index, "obstaculos_aprendizaje")} />
                                         <CampoTextArea label="Estrategias" value={itm.respuestas.estrategias || ''} onChange={(v) => handleChange(index, "estrategias", v)} error={isError(index, "estrategias")} />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
-
-            {isLoading ? (
-                <div className="text-center text-secondary">Cargando datos...</div>
-            ) : error ? (
-                <div className="alert alert-danger">
-                    <strong>Error:</strong> {error}
-                </div>
-            ) : itemsTabla.length === 0 ? (
-                <div className="alert alert-warning">
-                    No hay materias para esta selección.
-                </div>
-            ) : (
-                <>
-                    <div className="accordion" id="accordionMateriasPregunta2C">
-                        {itemsTabla.map((itm, index) => (
-                            <div className="accordion-item" key={itm.materia.id}>
-                                <h2 className="accordion-header" id={`headingP2C_${index}`}>
-                                    <button
-                                        className="accordion-button collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapseP2C_${index}`}
-                                        aria-expanded="false"
-                                        aria-controls={`collapseP2C_${index}`}
-                                    >
-                                        {itm.materia.matricula} - {itm.materia.nombre}
-                                    </button>
-                                </h2>
-                                <div
-                                    id={`collapseP2C_${index}`}
-                                    className="accordion-collapse collapse"
-                                    aria-labelledby={`headingP2C_${index}`}
-                                    data-bs-parent="#accordionMateriasPregunta2C"
-                                >
-                                    <div className="accordion-body">
-                                        <div className="row g-3">
-                                            <CampoTextArea
-                                                label="Aspectos positivos: Proceso Enseñanza"
-                                                value={itm.respuestas.aspectos_positivos_ensenanza || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "aspectos_positivos_ensenanza", v)
-                                                }
-                                            />
-                                            <CampoTextArea
-                                                label="Aspectos positivos: Proceso de aprendizaje"
-                                                value={itm.respuestas.aspectos_positivos_aprendizaje || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "aspectos_positivos_aprendizaje", v)
-                                                }
-                                            />
-                                            <CampoTextArea
-                                                label="Obstáculos: Proceso Enseñanza"
-                                                value={itm.respuestas.obstaculos_ensenanza || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "obstaculos_ensenanza", v)
-                                                }
-                                            />
-                                            <CampoTextArea
-                                                label="Obstáculos: Proceso de aprendizaje"
-                                                value={itm.respuestas.obstaculos_aprendizaje || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "obstaculos_aprendizaje", v)
-                                                }
-                                            />
-                                            <CampoTextArea
-                                                label="Estrategias a implementar"
-                                                value={itm.respuestas.estrategias || ''}
-                                                onChange={(v) =>
-                                                    handleChange(index, "estrategias", v)
-                                                }
-                                            />            
-                                        </div>
->>>>>>> .theirs
                                     </div>
                                 </div>
                             </div>
