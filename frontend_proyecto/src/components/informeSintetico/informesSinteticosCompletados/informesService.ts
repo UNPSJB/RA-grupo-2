@@ -1,7 +1,13 @@
 const BASE_URL = "http://localhost:8000/informes_sinteticos_completados"; 
 const BASE_URL_PREGUNTAS = "http://localhost:8000/preguntas_sintetico"; 
-export async function fetchInformes() {
-  const res = await fetch(`${BASE_URL}/completados/`);
+export async function fetchInformes(id_dpto?: number) { 
+  let url = `${BASE_URL}/completados/`;
+  
+  if (id_dpto) {
+    url += `?id_dpto=${id_dpto}`; 
+  }
+
+  const res = await fetch(url);
   if (!res.ok) {
     console.error(`Error al obtener lista de informes: ${res.status} ${res.statusText}`);
     return []; 
@@ -9,7 +15,6 @@ export async function fetchInformes() {
   const data = await res.json();
   return Array.isArray(data) ? data : []; 
 }
-
 export async function fetchInforme(id: string) {
   const res = await fetch(`${BASE_URL}/completados/${id}`);
   if (!res.ok) {

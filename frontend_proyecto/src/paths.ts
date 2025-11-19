@@ -22,10 +22,12 @@ const ROUTES = {
   INFORMES_CATEDRA: "/departamento/informes-catedra",
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
   DASHBOARD_DPTO: "/departamento/dashboard",
-
+  INFORMES_SINTETICOS_COMPLETADOS: "/departamento/informes-sinteticos-completados",
+  INFORME_SINTETICO_DETALLE: (id: number | string = ":id") => `/departamento/informes-sinteticos-completados/${id}`,
+  
   //SECRETARÍA ACADÉMICA
   INFORMES_SINTETICOS: "/secretaria/informes-sinteticos-completados",
-  INFORME_SINTETICO_DETALLE: (id: number | string = ":id") => `/secretaria/informes-sinteticos/${id}`,
+  INFORME_SINTETICO_DETALLE_SECRETARIA: (id: number | string = ":id") => `/secretaria/informes-sinteticos/${id}`, 
   INFORME_CATEDRA_BASE_NUEVO: "/secretaria/crear-informe-catedra-base",
   ENCUESTA_BASE_NUEVA: "/secretaria/crear-encuesta-base",
   INFORME_SINTETICO_BASE_NUEVO: "/secretaria/informe-sintetico/nuevo",
