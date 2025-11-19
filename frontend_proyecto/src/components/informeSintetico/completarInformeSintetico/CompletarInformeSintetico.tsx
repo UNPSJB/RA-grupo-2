@@ -1,4 +1,8 @@
+<<<<<<< .mine
 import { useState, useEffect, useCallback, useMemo } from "react";
+=======
+import { useState, useEffect, useMemo, useRef } from "react";
+>>>>>>> .theirs
 import { useLocation, useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
@@ -13,6 +17,12 @@ import type { Pregunta, Respuesta } from "../../../types/types";
 import DesempenoAuxiliares from "./Pregunta4";
 import ObservacionesComentarios from "./Pregunta5";
 
+const TABS_MAP = new Map([
+    ["0", "Datos Generales"], ["1", "1. Recursos"], ["2", "2. Horas/Justificación"], 
+    ["2.A", "2.A. Contenidos"], ["2.B", "2.B. Encuestas"], ["2.C", "2.C. Reflexión"], 
+    ["3", "3. Actividades del Equipo"], ["4", "4. Valoración"], ["5", "5. Observaciones"],
+]);
+
 export default function CompletarInformeSintetico() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -23,10 +33,23 @@ export default function CompletarInformeSintetico() {
     const [enviando, setEnviando] = useState(false);
     const [mensaje, setMensaje] = useState<string | null>(null);
     const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
+<<<<<<< .mine
     const [preguntaActivaId, setPreguntaActivaId] = useState<number | null>(null);
     const [maxPasoAlcanzadoIndex, setMaxPasoAlcanzadoIndex] = useState(0);
     const [pasoValido, setPasoValido] = useState(true);
 
+
+
+
+=======
+    const [preguntaActivaId, setPreguntaActivaId] = useState<number | null>(null);
+    
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    
+>>>>>>> .theirs
     const {
         dpto = { id: 1, nombre: "dpto informatica" },
         carrera = { id: 1, nombre: "APU" },
@@ -35,30 +58,120 @@ export default function CompletarInformeSintetico() {
         informeBaseId = 1
     } = location.state || {};
 
+    const currentStep = useMemo(() => {
+        if (preguntaActivaId === null) return 0;
+        const index = preguntas.findIndex(p => p.id === preguntaActivaId);
+        return index === -1 ? 0 : index;
+    }, [preguntaActivaId, preguntas]);
+
+    const totalSteps = preguntas.length;
+    const isLastStep = currentStep === totalSteps - 1;
+    const isFirstStep = currentStep === 0;
+
+    const goToStep = (index: number) => {
+        if (preguntas[index]) {
+            setPreguntaActivaId(preguntas[index].id);
+        }
+    };
+    const nextStep = () => {
+        goToStep(currentStep + 1);
+    };
+    const prevStep = () => {
+        goToStep(currentStep - 1);
+    };
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (scrollRef.current) {
+            setIsDragging(true);
+            e.preventDefault(); 
+            setStartX(e.pageX - scrollRef.current.offsetLeft);
+            setScrollLeft(scrollRef.current.scrollLeft);
+        }
+    };
+    const handleMouseUp = () => setIsDragging(false);
+    const handleMouseLeave = () => setIsDragging(false);
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !scrollRef.current) return;
+        const x = e.pageX - scrollRef.current.offsetLeft;
+        const walk = (x - startX) * 1.5; 
+        scrollRef.current.scrollLeft = scrollLeft - walk;
+    };
+
     useEffect(() => {
+<<<<<<< .mine
         if (!dpto || !carrera || !informeBaseId) {
             setError("Faltan datos requeridos.");
+=======
+        if(!dpto || !carrera || !informeBaseId){
+            setError("Se requiere información de contexto.");
+>>>>>>> .theirs
             setLoading(false);
             return;
         }
+<<<<<<< .mine
 
         fetch(`http://127.0.0.1:8000/informes_sinteticos_base/${informeBaseId}/preguntas`)
+
+=======
+        fetch(
+            `http://127.0.0.1:8000/informes_sinteticos_base/${informeBaseId}/preguntas`
+        )
+>>>>>>> .theirs
             .then((res) => {
+<<<<<<< .mine
                 if (!res.ok) throw new Error("Error cargando estructura.");
+=======
+                if (!res.ok) throw new Error("No se pudo cargar la estructura del informe.");
+>>>>>>> .theirs
                 return res.json();
             })
             .then((data: Pregunta[]) => {
                 const ordenadas = data.sort((a, b) => a.orden - b.orden);
                 setPreguntas(ordenadas);
+<<<<<<< .mine
                 if (ordenadas.length > 0 && preguntaActivaId === null) {
                     setPreguntaActivaId(ordenadas[0].id);
+=======
+                if (ordenadas.length > 0) {
+                    setPreguntaActivaId(ordenadas[0].id);
+>>>>>>> .theirs
                 }
             })
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false));
     }, [informeBaseId]);
 
+<<<<<<< .mine
     const manejarCambio = useCallback((nuevasRespuestas: Respuesta[] | Respuesta) => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+    useEffect(() => {
+        if (scrollRef.current) {
+            const activeElement = scrollRef.current.querySelector('.nav-item a.active');
+            if (activeElement instanceof HTMLElement) {
+                activeElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center'
+                });
+            }
+        }
+    }, [currentStep, preguntas]); 
+
+    const manejarCambio = (nuevasRespuestas: Respuesta[] | Respuesta) => {
+>>>>>>> .theirs
         const respuestasArray = Array.isArray(nuevasRespuestas)
             ? nuevasRespuestas
             : [nuevasRespuestas];
@@ -111,7 +224,6 @@ export default function CompletarInformeSintetico() {
     const enviarInforme = async () => {
         setEnviando(true);
         setMensaje(null);
-
         if (!pasoValido) {
             setMensaje("Hay errores en el formulario actual.");
             setEnviando(false);
@@ -217,6 +329,7 @@ export default function CompletarInformeSintetico() {
                         </h1>
                     </div>
 
+<<<<<<< .mine
                     <div className="card-body p-4">
 
                         <div className="text-center text-muted small mb-1">
@@ -274,14 +387,151 @@ export default function CompletarInformeSintetico() {
                                 </li>
                             ))}
                         </ul>
+=======
+                    <div className="card-body p-4 p-md-5">
+                        <style>
+                          {`
+                            .horizontal-scroll-hidden::-webkit-scrollbar { display: none; }
+                            .horizontal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+                            .is-dragging { cursor: grabbing !important; }
+                            .nav-pills .nav-item { 
+                                flex-shrink: 0; 
+                            }
+                            .nav-pills .nav-item .nav-link { 
+                                background-color: transparent !important; 
+                                color: #212529 !important; 
+                                font-weight: 500;
+                                border: none;
+                                padding: 0.5rem 2rem; 
+                                margin-right: 0px; 
+                                opacity: 1; 
+                                white-space: nowrap; 
+                                border-radius: 0; 
+                            }
+                            .nav-pills .nav-item .nav-link.active {
+                                background-color: var(--color-unpsjb-blue) !important; 
+                                color: white !important; 
+                                border: none;
+                                opacity: 1;
+                                border-radius: 5px !important; 
+                            }
+                            .nav-pills .nav-item .nav-link:not(.active):hover {
+                                color: black !important; 
+                            }
+                            .nav-pills-scrollable { display: flex; flex-wrap: nowrap; width: fit-content; }
+                          `}
+                        </style>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+
+<<<<<<< .mine
                         <div className="step-content-container p-2" style={{ minHeight: "350px" }}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+                        <div 
+                            ref={scrollRef} 
+                            className={`horizontal-scroll-hidden mb-4 ${isDragging ? 'is-dragging' : ''}`}
+                            style={{ overflowX: 'auto'}}
+                            onMouseDown={handleMouseDown}
+                            onMouseLeave={handleMouseLeave}
+                            onMouseUp={handleMouseUp}
+                            onMouseMove={handleMouseMove}
+                        >
+                            <ul className="nav nav-pills mb-0 nav-pills-scrollable" id="pills-tab" role="tablist">
+                                {preguntas.map((p) => (
+                                    <li key={p.id} className="nav-item">
+                                        <a
+                                            className={`nav-link ${p.id === preguntaActivaId ? "active" : "text-muted"}`}
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setPreguntaActivaId(p.id);
+                                            }}
+                                            style={{ cursor: "pointer", fontWeight: 500 }}
+                                        >
+                                            {TABS_MAP.get(p.cod) || p.cod} 
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div
+                            className="step-content-container"
+                            style={{
+                                overflowY: "auto",
+                                paddingRight: "15px",
+                            }}
+                        >
+>>>>>>> .theirs
                             {preguntas.map((p) => (
                                 <div
                                     key={p.id}
+<<<<<<< .mine
                                     style={{
                                         display: preguntaActivaId === p.id ? "block" : "none"
                                     }}
+=======
+                                    style={{ display: p.id === preguntaActivaId ? "block" : "none" }}
+
+
+>>>>>>> .theirs
                                 >
                                     {renderPregunta(p)}
                                 </div>
@@ -299,6 +549,7 @@ export default function CompletarInformeSintetico() {
                         </button>
 
                         {indexActual < preguntas.length - 1 ? (
+<<<<<<< .mine
                             <button
                                 onClick={() => irAlPaso(indexActual + 1)}
                                 className="btn btn-theme-primary rounded-pill px-4"
@@ -313,9 +564,71 @@ export default function CompletarInformeSintetico() {
                             >
                                 {enviando ? "Enviando..." : "Enviar Informe"}
                             </button>
+
+
+
+
+
+
+
+
+
+
+
+=======
+                            {!isFirstStep && (
+                                <button
+                                    onClick={prevStep}
+                                    className="btn btn-outline-secondary rounded-pill px-4"
+                                >
+                                    Anterior
+                                </button>
+                            )}
+                            {isFirstStep && <div />}
+                            {isLastStep ? (
+                                <button
+                                    onClick={enviarInforme}
+                                    className="btn btn-success rounded-pill px-4 shadow-sm"
+                                    disabled={enviando}
+                                >
+                                    {enviando ? "Enviando..." : "Enviar Informe"}
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={nextStep}
+                                    className="btn btn-primary rounded-pill px-4"
+                                >
+                                    Siguiente
+                                </button>
+                            )}
+>>>>>>> .theirs
+<<<<<<< .mine
+
+
+
+
+
+
+
+
+=======
+                        </div>
+
+                        {mensaje && (
+                            <div
+                                className={`mt-4 alert ${mensaje.includes("éxito") ? "alert-success" : "alert-danger"}`}
+                            >
+                                {mensaje}
+                            </div>
+>>>>>>> .theirs
                         )}
+<<<<<<< .mine
                     </div>
 
+=======
+
+
+>>>>>>> .theirs
                     {mensaje && (
                         <div
                             className={`alert mt-3 mx-4 ${

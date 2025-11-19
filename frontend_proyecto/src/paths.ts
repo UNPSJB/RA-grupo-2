@@ -21,7 +21,7 @@ const ROUTES = {
   COMPLETAR_INFORME_SINTETICO: "/departamento/carreras/completar-informe-sintetico",
   INFORMES_CATEDRA: "/departamento/informes-catedra",
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
-  
+  DASHBOARD_DPTO: "/departamento/dashboard",
 
   //SECRETARÍA ACADÉMICA
   INFORMES_SINTETICOS: "/secretaria/informes-sinteticos-completados",

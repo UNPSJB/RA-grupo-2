@@ -89,7 +89,8 @@ export default function ContenidosAlcanzados({ id_dpto, id_carrera, anio, period
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
+            <h5 className="text-dark fw-bold mb-3">Contenidos de la materia</h5>
+            <p className="text-muted mb-3">{pregunta.enunciado}</p>
             {isLoading ? <div>Cargando...</div> : (
                 <div className="accordion" id="accordionContenidos">
                     {items.map((item, index) => (

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { PERIODO_ACTUAL } from "../../../constants";
+import { PERIODO_ACTUAL, DOCENTE_ID } from "../../../constants";
 import type { Docente } from "../../../types/types";
 import ROUTES from "../../../paths";
 
@@ -14,7 +14,7 @@ interface InformeCatedraCompletado {
 export default function InformeCatedraCompletadoDocente() {
   const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
   const [docente, setDocente] = useState<Docente>();
-  const docenteId = 2; // hardcoedado 
+  const docenteId = DOCENTE_ID; // hardcoedado 
 
   useEffect(() => {
 

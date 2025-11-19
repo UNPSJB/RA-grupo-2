@@ -147,7 +147,7 @@ export default function Categoria2CInforme({
       <div className="mb-4">
         <h6 className="fw-bold mb-3">Obstáculos</h6>
         <div className="mb-3">
-          <label className="form-label mb-2 fw-bold">
+          <label className="form-label mb-3 fw-bold">
             Proceso enseñanza
             {pEnsObs?.obligatoria && <span className="text-danger ms-1">*</span>}
           </label>
@@ -176,7 +176,7 @@ export default function Categoria2CInforme({
           )}
         </div>
         <div>
-          <label className="form-label mb-2 fw-bold">
+          <label className="form-label mb-3 fw-bold">
             Proceso de aprendizaje
             {pAprObs?.obligatoria && <span className="text-danger ms-1">*</span>}
           </label>

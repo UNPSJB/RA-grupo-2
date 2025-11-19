@@ -427,6 +427,29 @@ export default function CompletarInformeCatedra() {
           </div>
 
           <div className="card-body p-4 p-md-5">
+            <style>
+              {`
+                .nav-pills .nav-link,
+                .nav-pills .nav-link:visited,
+                .nav-pills .nav-link:focus,
+                .nav-pills .nav-link:active,
+                .nav-pills .nav-link:hover {
+                  color: black !important;
+                  background-color: transparent !important;
+                  opacity: 1 !important;
+                  box-shadow: none !important;
+                  outline: none !important;
+                }
+
+                .nav-pills .nav-link.active {
+                  color: white !important;
+                  background-color: var(--color-unpsjb-blue, #005ec2) !important;
+                  opacity: 1 !important;
+                  font-weight: 400 !important;
+                }
+              `}
+            </style>
+
             <ul className="nav nav-pills nav-fill mb-4">
               {steps.map((step) => {
                 const isDesbloqueado = step.id <= maxPasoAlcanzado;

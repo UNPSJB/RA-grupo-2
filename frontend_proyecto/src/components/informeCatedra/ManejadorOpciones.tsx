@@ -103,7 +103,7 @@ export default function ManejadorOpciones({
                 />
                 <button
                     type="button"
-                    className="btn btn-theme-success" 
+                    className="btn btn-theme-success rounded-pill" 
                     onClick={handleCrearNuevaOpcion}
                     disabled={cargando || !nuevaOpcionContenido.trim()}
                 >

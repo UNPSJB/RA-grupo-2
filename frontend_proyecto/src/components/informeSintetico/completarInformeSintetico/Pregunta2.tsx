@@ -151,11 +151,14 @@ export default function Pregunta2({
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
+            <h5 className="text-dark fw-bold mb-3">Horas de clases</h5>
+            <p className="text-muted mb-3">{pregunta.enunciado}</p>
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
             ) : itemsTabla.length === 0 ? (
                 <div className="alert alert-warning">No hay respuestas.</div>
+
+
             ) : (
                 <div className="accordion" id="accordionP2">
                     {itemsTabla.map((itm, index) => (

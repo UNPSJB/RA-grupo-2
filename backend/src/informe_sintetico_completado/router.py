@@ -22,15 +22,15 @@ def get_informes_completados(db: Session = Depends(get_db)):
         return informes
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informes completados: {str(e)}")
-
-@router.get("/completados/{id}")
+    
+@router.get("/completados/{id}", response_model=schemas.InformeSinteticoCompletado)
 def get_informe_completado(id: int, db: Session = Depends(get_db)):
     try:
+        informe = services.get_informe_completado(db, id) 
         
-        informe = db.query(InformeSinteticoCompletado).filter(InformeSinteticoCompletado.id == id).first()
         if not informe:
             raise HTTPException(status_code=404, detail="Informe completado no encontrado")
-        return informe
+        return informe 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informe completado: {str(e)}")
 
@@ -65,8 +65,6 @@ def obtener_informacion_general(
 ):
     try:
         elementos = services.obtener_informacion_general(db, id_dpto, id_carrera, anio, periodo)
-        if not elementos:
-            raise HTTPException(status_code=404, detail="No se encontraron informes completados para los filtros dados.")
         return elementos
     except HTTPException:
         raise
@@ -97,8 +95,6 @@ def get_preguntas_2C(
 ):
     try:
         elementos = services.get_elementos_pregunta2C(db, id_dpto, id_carrera, anio, periodo)
-        if not elementos:
-            raise HTTPException(status_code=404, detail="No se encontraron respuestas de cátedra para la sección 2.C con esos filtros.")
         return elementos
     except HTTPException:
         raise

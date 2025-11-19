@@ -10,6 +10,7 @@ class RespuestaInformeSintetico(ModeloBase):
     pregunta_id = Column(Integer, ForeignKey("preguntas_informe_sintetico.id"), nullable=False)
     informe_completado_id = Column(Integer, ForeignKey("informe_sintetico_completado.id"), nullable=False)
     materia_id: Mapped[int] = mapped_column(ForeignKey("materias.id"), nullable=True)
+    materia: Mapped["Materia"] = relationship() # <-- ¡AÑADE ESTA LÍNEA!
     pregunta: Mapped["PreguntaInformeSintetico"] = relationship(
         "PreguntaInformeSintetico", 
         back_populates="respuestas"

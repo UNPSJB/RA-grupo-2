@@ -2,12 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "../../docente/informe/ContenidoPasos";
+import type { Categoria } from "../../../types/types";
 
-interface Categoria {
-  id: number;
-  texto: string;
-  cod: string;
-}
 
 interface Pregunta {
   id: number;
@@ -103,9 +99,7 @@ export default function InformeCatedraDetalle() {
 
     const fetchInforme = async () => {
       try {
-        const res = await fetch(
-          `http://127.0.0.1:8000/informe-catedra-completado/${id}`
-        );
+        const res = await fetch(`http://127.0.0.1:8000/informe-catedra-completado/${id}`);
         if (!res.ok) throw new Error("Error al obtener el informe");
         const dataInforme: InformeCompletadoDetalle = await res.json();
 
@@ -115,10 +109,7 @@ export default function InformeCatedraDetalle() {
           const resBase = await fetch(
             `http://127.0.0.1:8000/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`
           );
-          if (!resBase.ok)
-            throw new Error(
-              "No se pudo cargar la estructura base del informe."
-            );
+          if (!resBase.ok) throw new Error("No se pudo cargar la estructura base del informe.");
 
           const dataBase: CategoriaConPreguntas[] = await resBase.json();
           const dataOrdenada = [...dataBase].sort((a, b) =>
@@ -147,21 +138,14 @@ export default function InformeCatedraDetalle() {
               );
               setDatosEstadisticos(dataOrdenada);
             }
-          })
-          .catch((error) =>
-            console.error("Error fetching datos estadísticos:", error)
-          );
+          });
 
         fetch(
           `http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
         )
           .then((res) => res.json())
-          .then((data) => setCantidad(data))
-          .catch((error) =>
-            console.error("Error fetching cantidad encuestas:", error)
-          );
+          .then((data) => setCantidad(data));
       } catch (err: any) {
-        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -174,7 +158,6 @@ export default function InformeCatedraDetalle() {
   const respuestasFormateadas = useMemo((): Record<number, RespuestaValor> => {
     if (!informe) return {};
     const mapaRespuestas: Record<number, RespuestaValor> = {};
-
     for (const r of informe.respuestas_informe) {
       mapaRespuestas[r.pregunta.id] = {
         opcion_id: r.opcion_id,
@@ -202,6 +185,9 @@ export default function InformeCatedraDetalle() {
     };
   }, [informe]);
 
+  const isLastStep = currentStep === steps.length;
+  const isFirstStep = currentStep === 1;
+
   if (loading) {
     return (
       <div className="container py-4">
@@ -213,6 +199,7 @@ export default function InformeCatedraDetalle() {
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="container py-4">
@@ -226,6 +213,7 @@ export default function InformeCatedraDetalle() {
       </div>
     );
   }
+
   if (!informe) {
     return (
       <div className="container py-4">
@@ -244,25 +232,42 @@ export default function InformeCatedraDetalle() {
       <div className="container-lg py-4">
         <div className="card shadow-sm border-0 rounded-3">
           <div className="card-header bg-unpsjb-header">
-            <h1 className="h4 mb-0 text-center">
-              {informe.titulo || "Informe de Cátedra"}
-            </h1>
+            <h1 className="h4 mb-0 text-center">{informe.titulo || "Informe de Cátedra"}</h1>
           </div>
 
           <div className="card-body p-4 p-md-5">
+            <style>
+              {`
+                .nav-pills .nav-link,
+                .nav-pills .nav-link:visited,
+                .nav-pills .nav-link:focus,
+                .nav-pills .nav-link:active,
+                .nav-pills .nav-link:hover {
+                  color: black !important;
+                  background-color: transparent !important;
+                  opacity: 1 !important;
+                  box-shadow: none !important;
+                  outline: none !important;
+                }
+                .nav-pills .nav-link.active {
+                  color: white !important;
+                  background-color: var(--color-unpsjb-blue, #005ec2) !important;
+                  opacity: 1 !important;
+                  font-weight: 400 !important;
+                }
+              `}
+            </style>
+
             <ul className="nav nav-pills nav-fill mb-4">
               {steps.map((step) => (
                 <li key={step.id} className="nav-item">
                   <a
-                    className={`nav-link ${
-                      currentStep === step.id ? "active" : "text-muted"
-                    }`}
+                    className={`nav-link ${currentStep === step.id ? "active" : ""}`}
                     onClick={(e) => {
                       e.preventDefault();
                       goToStep(step.id);
                     }}
                     href="#"
-                    style={{ cursor: "pointer", fontWeight: 500 }}
                   >
                     {step.name}
                   </a>
@@ -300,19 +305,33 @@ export default function InformeCatedraDetalle() {
 
           <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
             <div className="d-flex justify-content-between">
-              <Link
-                to={ROUTES.INFORMES_CATEDRA}
-                className="btn btn-outline-secondary rounded-pill px-4"
-              >
-                Volver al listado
-              </Link>
-              <button
-                className="btn btn-theme-primary rounded-pill px-4"
-                onClick={() => goToStep(currentStep + 1)}
-                disabled={currentStep === steps.length}
-              >
-                Siguiente
-              </button>
+              {isFirstStep ? (
+                <div />
+              ) : (
+                <button
+                  className="btn btn-outline-secondary rounded-pill px-4"
+                  onClick={() => goToStep(currentStep - 1)}
+                >
+                  Anterior
+                </button>
+              )}
+              {isLastStep ? (
+                <Link
+                  to={ROUTES.INFORMES_CATEDRA}
+                  className="btn btn-primary rounded-pill px-4"
+                  style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
+                >
+                  Volver al listado
+                </Link>
+              ) : (
+                <button
+                  className="btn btn-primary rounded-pill px-4"
+                  onClick={() => goToStep(currentStep + 1)}
+                  style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
+                >
+                  Siguiente
+                </button>
+              )}
             </div>
           </div>
         </div>

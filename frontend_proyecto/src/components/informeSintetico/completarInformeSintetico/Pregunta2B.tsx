@@ -78,6 +78,7 @@ export default function Pregunta2B({ departamentoId, carreraId, pregunta, anio, 
 
     return (
         <div className="container mt-4">
+<<<<<<< .mine
             <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
             {isLoading ? <div>Cargando...</div> : (
                 <div className="accordion" id="accordion2B">
@@ -98,6 +99,160 @@ export default function Pregunta2B({ departamentoId, carreraId, pregunta, anio, 
                                         <CampoTexto label="Categoria ET" value={itm.encuesta_ET} onChange={(v) => handleChange(index, "encuesta_ET", v)} error={isError(index, "encuesta_ET")} />
                                         <CampoTexto label="Categoria EP" value={itm.encuesta_EP} onChange={(v) => handleChange(index, "encuesta_EP", v)} error={isError(index, "encuesta_EP")} />
                                         <CampoTextArea label="Juicio de valor" value={itm.juicio_valor} onChange={(v) => handleChange(index, "juicio_valor", v)} error={isError(index, "juicio_valor")} />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+            <h5 className="text-dark fw-bold mb-3">Valoracion encuestas</h5>
+            <p className="text-muted mb-3">{pregunta.enunciado}</p>
+            {isLoading ? (
+                <div className="text-center text-secondary">Cargando datos...</div>
+            ) : error ? (
+                <div className="alert alert-danger">
+                    <strong>Error:</strong> {error}
+                </div>
+            ) : itemsTabla.length === 0 ? (
+                <div className="alert alert-warning">
+                    No hay materias para esta selección.
+                </div>
+            ) : (
+                <>
+                    <div className="accordion" id="accordionMateriasPregunta2B">
+                        {itemsTabla.map((itm, index) => (
+                            <div className="accordion-item" key={index}>
+                                <h2 className="accordion-header" id={`heading${index}`}>
+                                    <button
+                                        className="accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target={`#collapse${index}`}
+                                        aria-expanded="false"
+                                        aria-controls={`collapse${index}`}
+                                    >
+                                        {itm.materia.matricula} - {itm.materia.nombre}
+                                    </button>
+                                </h2>
+                                <div
+                                    id={`collapse${index}`}
+                                    className="accordion-collapse collapse"
+                                    aria-labelledby={`heading${index}`}
+                                    data-bs-parent="#accordionMateriasPregunta2B"
+                                >
+                                    <div className="accordion-body">
+                                        <div className="row g-3">
+                                            <label className="form-label">Encuestas a Alumnos:</label>
+                                            <CampoTexto
+                                                label="Categoria B"
+                                                value={itm.encuesta_B}
+                                                onChange={(v) =>
+                                                    handleChange(index, "encuesta_B", v)
+                                                }
+                                            />
+
+                                            <CampoTexto
+                                                label="Categoria C"
+                                                value={itm.encuesta_C}
+                                                onChange={(v) =>
+                                                    handleChange(index, "encuesta_C", v)
+                                                }
+                                            />
+
+                                            <CampoTexto
+                                                label="Categoria D"
+                                                value={itm.encuesta_D}
+                                                onChange={(v) =>
+                                                    handleChange(index, "encuesta_D", v)
+                                                }
+                                            />
+
+                                            <CampoTexto
+                                                label="Categoria ET"
+                                                value={itm.encuesta_ET}
+                                                onChange={(v) =>
+                                                    handleChange(index, "encuesta_ET", v)
+                                                }
+                                            />
+
+                                            <CampoTexto
+                                                label="Categoria EP"
+                                                value={itm.encuesta_EP}
+                                                onChange={(v) =>
+                                                    handleChange(index, "encuesta_EP", v)
+                                                }
+                                            />
+
+                                            <CampoTextArea
+                                                label="Juicio de valor"
+                                                value={itm.juicio_valor}
+                                                onChange={(v) =>
+                                                    handleChange(index, "juicio_valor", v)
+                                                }
+                                            />
+                                        </div>
+>>>>>>> .theirs
                                     </div>
                                 </div>
                             </div>

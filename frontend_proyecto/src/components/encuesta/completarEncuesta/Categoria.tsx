@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import PreguntaItem from "./PreguntaItem";
+import type { Categoria } from "../../../types/types";
 
-interface Categoria {
-  id: number;
-  cod: string;
-  texto: string;
-}
 
 interface Pregunta {
   id: number;

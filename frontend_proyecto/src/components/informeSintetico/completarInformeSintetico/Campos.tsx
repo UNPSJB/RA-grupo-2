@@ -1,5 +1,10 @@
+<<<<<<< .mine
 import React from "react";
 
+=======
+
+
+>>>>>>> .theirs
 const autoExpand = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = "auto";
@@ -10,9 +15,38 @@ interface CommonProps { label: string | null; error?: boolean; }
 
 export function CampoTextArea({ 
     label,
+<<<<<<< .mine
     value, 
     onChange, 
     error }: CommonProps & { value: string; onChange?: (v: string) => void; }) {
+
+
+
+
+
+
+=======
+    value,
+    onChange,
+    isReadOnly = false,
+}: {
+    label: string|null;
+    value: string;
+    onChange?: (v: string) => void;
+    isReadOnly?: boolean;
+}) {
+>>>>>>> .theirs
+    if (isReadOnly) {
+        return (
+            <div className="col-12">
+                {label && <label className="form-label fw-bold">{label}</label>}
+                <p className="form-control-plaintext border p-2 bg-light rounded" style={{ whiteSpace: 'pre-wrap' }}>
+                    {value || "— No hay información registrada —"}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-12">
             {label && <label className="form-label">{label}</label>}
@@ -29,7 +63,43 @@ export function CampoTextArea({
     );
 }
 
+<<<<<<< .mine
 export function CampoTextoNumero({ label, value, onChange, error }: CommonProps & { value: number; onChange: (v: number) => void; }) {
+
+
+
+
+
+
+
+
+
+
+=======
+export function CampoTextoNumero({
+    label,
+    value,
+    onChange,
+    isReadOnly = false,
+}: {
+    label: string;
+    value: number;
+    onChange: (v: number) => void;
+    isReadOnly?: boolean;
+}) {
+>>>>>>> .theirs
+    if (isReadOnly) {
+        const displayValue = value === null || value === undefined || value === 0 ? '—' : value;
+        return (
+            <div className="col-md-4">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {displayValue}
+                </p>
+            </div>
+        );
+    }
+    
     return (
         <div className="col-md-4">
             <label className="form-label">{label}</label>
@@ -45,7 +115,55 @@ export function CampoTextoNumero({ label, value, onChange, error }: CommonProps 
     );
 }
 
+<<<<<<< .mine
 export function CampoPorcentaje({ label, value, onChange, error }: CommonProps & { value: number | null; onChange: (v: number | null) => void; }) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+export function CampoPorcentaje({
+    label,
+    value,
+    onChange,
+    isReadOnly = false,
+}: {
+    label: string;
+    value: number | null;
+    onChange: (v: number | null) => void;
+    isReadOnly?: boolean;
+}) {
+    if (isReadOnly) {
+        const displayValue = value === null || value === undefined || value === 0 ? '—' : `${value}%`;
+        return (
+            <div className="col-md-6">
+                <label className="form-label fw-bold">{label}</label>
+                <p className="form-control-plaintext ps-1 border-bottom">
+                    {displayValue}
+                </p>
+            </div>
+        );
+    }
+
+>>>>>>> .theirs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         if (val === "") { onChange(null); return; }
@@ -84,9 +202,61 @@ export function CampoTexto({ label, value, readOnly = false, onChange, error }: 
     );
 }
 
+<<<<<<< .mine
 export function CampoCheckbox({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void; }) {
+
+
+
+
+
+
+
+
+=======
+export function CampoCheckbox({
+    checked,
+    onChange,
+    isReadOnly = false,
+}: {
+    checked: boolean;
+    onChange: (v: boolean) => void;
+    isReadOnly?: boolean;
+}) {
+>>>>>>> .theirs
     return (
+<<<<<<< .mine
         <td className="text-center" style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.2rem', userSelect: 'none' }} onClick={() => onChange(!checked)}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+        <td 
+            className={`text-center ${!isReadOnly ? 'cursor-pointer' : ''}`} 
+            style={{ 
+                cursor: !isReadOnly ? 'pointer' : 'default',
+                fontWeight: 'bold', 
+                fontSize: '1.2rem',
+                userSelect: 'none',
+                opacity: isReadOnly ? 0.6 : 1, 
+            }}
+            onClick={() => {
+                if (!isReadOnly) {
+                    onChange(!checked);
+                }
+            }}
+        >
+>>>>>>> .theirs
             {checked ? 'X' : '-'}
         </td>
     );

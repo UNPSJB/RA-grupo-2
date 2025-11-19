@@ -34,3 +34,7 @@ def obtener_informe_catedra_completado(informe_id: int, db: Session = Depends(ge
 @router.get("/departamento/{departamento_id}", response_model=List[schemas.InformeCatedraCompletado])
 def obtener_informes_por_departamento(departamento_id: int, db: Session = Depends(get_db)):
     return services.obtener_informes_por_departamento(db, departamento_id)
+
+@router.get("/departamento/{departamento_id}/progreso", response_model=dict)
+def get_progreso_departamento_route(departamento_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.get_progreso_departamento(db, departamento_id, anio, periodo)

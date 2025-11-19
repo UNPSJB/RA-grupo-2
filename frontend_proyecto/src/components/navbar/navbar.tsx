@@ -32,8 +32,8 @@ export default function Navbar() {
 
   return (
     <nav 
-      className="navbar navbar-expand-lg shadow-sm" 
-      style={navbarStyle} 
+      className="navbar navbar-expand-lg shadow-sm fixed-top" 
+      style={{...navbarStyle, zIndex: 1040}} 
     >
       <div className="container-fluid">
         <Link 
