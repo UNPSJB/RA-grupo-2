@@ -17,12 +17,10 @@ def create_informe_completado(
         raise HTTPException(status_code=500, detail=f"Error al crear informe completado: {str(e)}")
 @router.get("/completados/", response_model=List[schemas.InformeSinteticoCompletado])
 def get_informes_completados(
-    # ⬅️ CAMBIO: Lo hacemos opcional y con valor por defecto None
     id_dpto: Optional[int] = Query(None, description="ID del departamento para filtrar los informes"), 
     db: Session = Depends(get_db)
 ):
     try:
-        # Pasa el parámetro opcional al servicio
         informes = services.get_informes_completados(db, id_dpto) 
         return informes
     except Exception as e:

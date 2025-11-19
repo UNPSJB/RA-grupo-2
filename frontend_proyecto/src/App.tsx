@@ -66,7 +66,7 @@ function App() {
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
             <Route path={ROUTES.DASHBOARD_DPTO} element={<DashboardDepartamento />} />
-            <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS} element={<ListaInformeSintetico />} />
+            <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
           </Routes>
         </div>
       </main>

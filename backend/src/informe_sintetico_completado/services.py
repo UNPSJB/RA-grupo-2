@@ -20,12 +20,9 @@ def get_informes_completados(db: Session, id_dpto: Optional[int] = None):
     query = db.query(models.InformeSinteticoCompletado)\
              .options(selectinload(models.InformeSinteticoCompletado.carrera))
     
-    # ⬅️ Lógica de filtrado condicional
     if id_dpto is not None:
          query = query.join(Carrera)\
                       .filter(Carrera.departamento_id == id_dpto)
-
-    # Si id_dpto es None, devuelve todos (comportamiento original de Secretaría)
     return query.all()
 
 def get_informe_completado(db: Session, informe_id: int):

@@ -119,7 +119,7 @@ export default function Navbar() {
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="departamentoDropdown" style={dropdownMenuStyle}>
                 <li><Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO(1)}>Informes Sinteticos Pendientes</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA}>Informes de Cátedra Completados</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_SINTETICOS_COMPLETADOS}>Informes Sinteticos Completados</Link></li>
+                <li><Link className="dropdown-item" to={ROUTES.INFORMES_SINTETICOS_COMPLETADOS(1)}>Informes Sinteticos Completados</Link></li>
               </ul>
             </li>
             <li className="nav-item dropdown">
