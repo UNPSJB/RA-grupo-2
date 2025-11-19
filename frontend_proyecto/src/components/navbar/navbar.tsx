@@ -98,11 +98,6 @@ export default function Navbar() {
               </a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="docenteDropdown" style={dropdownMenuStyle}>
                 <li>
-                  <Link className="dropdown-item" to={ROUTES.MATERIAS_ASIGNADAS(1)}>
-                    Materias dadas
-                  </Link>
-                </li>
-                <li>
                   <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>
                     Informes de Cátedra Pendientes
                   </Link>
@@ -127,9 +122,9 @@ export default function Navbar() {
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="secretariaDropdown" style={dropdownMenuStyle}>
                 <li><Link className="dropdown-item" to={ROUTES.INFORMES_SINTETICOS}>Informes Sintéticos</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.INFORME_CATEDRA_BASE_NUEVO}>Crear Informe de Cátedra</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORME_SINTETICO_BASE_NUEVO}>Crear Informe Sintético Base</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.ENCUESTA_BASE_NUEVA}>Crear Encuesta Base</Link></li>
                 <li><Link className="dropdown-item" to={ROUTES.ASIGNAR_MATERIA_INFORME}>Asignar Formularios a Materias</Link></li>
+                <li><Link className="dropdown-item" to={ROUTES.DEFINIR_FECHAS}>Definir fechas de apertura y cierre</Link></li>
               </ul>
             </li>        
           </ul>

@@ -3,7 +3,7 @@ const ROUTES = {
 
   //ALUMNOS
   ENCUESTAS_DISPONIBLES: "/alumnos/encuestas-disponibles",
-  COMPLETAR_ENCUESTA: "/alumnos/encuestas_disponibles/completar",
+  COMPLETAR_ENCUESTA: "/alumnos/encuestas-disponibles/completar",
   ENCUESTAS_COMPLETADAS: "/alumnos/encuestas-completadas",
   ENCUESTA_COMPLETADA_DETALLE: (id: number | string = ":id") => `/alumnos/encuestas-completadas/${id}`,
 
@@ -33,6 +33,7 @@ const ROUTES = {
   INFORME_SINTETICO_BASE_NUEVO: "/secretaria/informe-sintetico/nuevo",
   ASIGNAR_MATERIA_INFORME: "/secretaria/asignar-materia-informe",
   INFORMACION_GENERAL_DEPARTAMENTO: "/secretaria/informacion-general-departamento",
+  DEFINIR_FECHAS: "/secretaria/definir-fechas"
 };
 
 export default ROUTES;
