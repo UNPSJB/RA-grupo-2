@@ -1,12 +1,15 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from src.datosEstadisticos.schemas import DatosEstadisticosCategoria, OpcionPorcentaje
+from src.sedes.schemas import Sede as SedeSchema
 
 class DepartamentoBase(BaseModel):
     nombre: str
+    sede_id: int
 
 class Departamento(DepartamentoBase):
     id: int
+    sede: Optional[SedeSchema] = None
 
     model_config = {"from_attributes": True}
 
