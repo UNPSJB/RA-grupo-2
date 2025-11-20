@@ -8,7 +8,7 @@ export default function DetalleCarrera(){
     return (
         <div className="container py-4">
             <div className="card">
-                <div className="card-header bg-primary text-white">
+                <div className="card-header bg-unpsjb-header">
                     <h1 className="h4 mb-0">Completar Informe Sintético</h1>
                 </div>
                 <div className="card-body">

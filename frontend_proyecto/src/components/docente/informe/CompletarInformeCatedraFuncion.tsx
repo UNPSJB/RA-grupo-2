@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface InformeActividad {
@@ -10,32 +10,62 @@ interface InformeActividad {
   cantidadAlumnos: number;
   cantidadComisionesTeoricas: number;
   cantidadComisionesPracticas: number;
+  JTP: string | null;
+  aux1: string | null;
+  aux2: string | null;
   periodo: string;
 }
 
 interface Props {
   docenteMateriaId: number;
   onDatosGenerados?: (datos: InformeActividad) => void;
+  isReadOnly?: boolean;
+  datosIniciales?: Partial<InformeActividad>;
+  nombresFuncion?: { JTP: string | null; aux1: string | null; aux2: string | null };
+  setNombresFuncion?: {
+    SetJTP: React.Dispatch<React.SetStateAction<string>>;
+    SetAux1: React.Dispatch<React.SetStateAction<string>>;
+    SetAux2: React.Dispatch<React.SetStateAction<string>>;
+  };
 }
 
-export default function InformeCatedraCompletadoFuncion({
+export default function CompletarInformeCatedraFuncion({
   docenteMateriaId,
   onDatosGenerados,
+  isReadOnly = false,
+  datosIniciales,
+  nombresFuncion,
+  setNombresFuncion,
 }: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(1);
-  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(1);
+  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] =
+    useState(1);
+  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] =
+    useState(1);
+  const JTP = nombresFuncion?.JTP ?? "";
+  const aux1 = nombresFuncion?.aux1 ?? "";
+  const aux2 = nombresFuncion?.aux2 ?? "";
 
   useEffect(() => {
+    if (isReadOnly) {
+      if (datosIniciales && datosIniciales.actividadCurricular) {
+        setData(datosIniciales as InformeActividad);
+        setLoading(false);
+      } else if (!datosIniciales) {
+        setLoading(false);
+      }
+      return;
+    }
+
     const fetchData = async () => {
       try {
-        // 🔹 Obtener docente_id y materia_id desde la relación intermedia
         const relacionRes = await fetch(
           `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
         );
-        if (!relacionRes.ok) throw new Error("Error al obtener la relación docente-materia");
+        if (!relacionRes.ok)
+          throw new Error("Error al obtener la relación docente-materia");
         const relacion = await relacionRes.json();
 
         const docenteId = relacion.docente_id;
@@ -43,21 +73,18 @@ export default function InformeCatedraCompletadoFuncion({
         const anio = relacion.anio ?? ANIO_ACTUAL;
         const periodo = relacion.periodo ?? PERIODO_ACTUAL;
 
-        // 🔹 Obtener la materia
         const materiaRes = await fetch(
           `http://127.0.0.1:8000/materias/${materiaIdRelacion}`
         );
         if (!materiaRes.ok) throw new Error("Error al obtener la materia");
         const materia = await materiaRes.json();
 
-        // 🔹 Obtener el docente
         const docenteRes = await fetch(
           `http://127.0.0.1:8000/docentes/${docenteId}`
         );
         if (!docenteRes.ok) throw new Error("Error al obtener el docente");
         const docente = await docenteRes.json();
 
-        // 🔹 Obtener alumnos según materia, año y periodo
         const alumnosRes = await fetch(
           `http://127.0.0.1:8000/alumnos/materia/${materiaIdRelacion}/cursantes?anio=${anio}&periodo=${periodo}`
         );
@@ -66,9 +93,8 @@ export default function InformeCatedraCompletadoFuncion({
 
         const cantidadAlumnos = alumnos.length;
 
-        // 🔹 Generar el informe
         const datos: InformeActividad = {
-          sede: "Trelew",
+          sede: materia.departamento?.sede?.nombre || "Sin asignar.",
           cicloLectivo: anio,
           periodo: periodo,
           actividadCurricular: materia.nombre,
@@ -77,10 +103,12 @@ export default function InformeCatedraCompletadoFuncion({
           cantidadAlumnos,
           cantidadComisionesTeoricas,
           cantidadComisionesPracticas,
+          JTP,
+          aux1,
+          aux2,
         };
 
         setData(datos);
-        onDatosGenerados?.(datos);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -89,72 +117,198 @@ export default function InformeCatedraCompletadoFuncion({
     };
 
     fetchData();
-  }, [docenteMateriaId, cantidadComisionesTeoricas, cantidadComisionesPracticas]);
+  }, [
+    docenteMateriaId,
+    cantidadComisionesTeoricas,
+    cantidadComisionesPracticas,
+    isReadOnly,
+    datosIniciales,
+  ]);
 
-  if (loading) return <p>Cargando informe...</p>;
+  useEffect(() => {
+    if (!data) return;
+    onDatosGenerados?.(data);
+  }, [
+    data?.cantidadComisionesTeoricas,
+    data?.cantidadComisionesPracticas,
+    data?.JTP,
+    data?.aux1,
+    data?.aux2
+  ]);
+
+
+  if (loading) return <p>Cargando información de la cátedra...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
-  if (!data) return <p>No hay datos para mostrar.</p>;
+  if (!data) {
+    return isReadOnly ? <p>Cargando...</p> : <p>No hay datos para mostrar.</p>;
+  }
 
-return (
-  <div className="card border-light shadow-sm">
-    <div className="card-body p-0">
-      <table className="table table-borderless m-0">
-        <tbody>
-          {[
-            { label: "Sede", value: data.sede },
-            { label: "Ciclo Lectivo", value: data.cicloLectivo },
-            { label: "Período", value: data.periodo },
-            { label: "Actividad Curricular", value: data.actividadCurricular },
-            { label: "Código", value: data.codigoActividadCurricular },
-            { label: "Docente Responsable", value: data.docenteResponsable },
-            { label: "Alumnos inscriptos", value: data.cantidadAlumnos },
-          ].map((item, index) => (
-            <tr key={index}>
-              <td className="fw-bold" style={{ width: '35%', padding: '12px 16px' }}>
-                {item.label}
-              </td>
-              <td style={{ padding: '12px 16px' }}>{item.value}</td>
-            </tr>
-          ))}
-          
-          <tr>
-            <td className="fw-bold" style={{ padding: '12px 16px' }}>Comisiones teóricas</td>
-            <td style={{ padding: '12px 16px' }}>
+  return (
+    <Fragment>
+      <h5 className="text-dark fw-bold mb-3">Información de la Cátedra</h5>
+      <hr className="mb-4" />
+      <div className="row g-3">
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Materia</p>
+          <p>{data.actividadCurricular}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Código</p>
+          <p>{data.codigoActividadCurricular}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Sede</p>
+          <p>{data.sede}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Docente Responsable</p>
+          <p>{data.docenteResponsable}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Ciclo Lectivo</p>
+          <p>{data.cicloLectivo}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Período</p>
+          <p>{data.periodo}</p>
+        </div>
+        <div className="col-md-4">
+          <p className="mb-1 text-muted small">Alumnos Inscriptos</p>
+          <p>{data.cantidadAlumnos}</p>
+        </div>
+        <div className="col-md-12">
+          {isReadOnly ? (
+            data.JTP?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">JTP</p>
+                <p>{data.JTP}</p>
+              </div>
+            )
+          ) : (
+            <>
+              <label htmlFor="JTP" className="form-label">
+                JTP
+              </label>
               <input
                 type="text"
-                className="form-control form-control-sm"
-                value={cantidadComisionesTeoricas}
+                className="form-control"
+                id="JTP"
+                min="0"
+                value={JTP}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*$/.test(value)) {
-                    setCantidadComisionesTeoricas(value === "" ? 0 : Number(value));
-                  }
+                  setNombresFuncion?.SetJTP(e.target.value);
                 }}
-                style={{ maxWidth: '120px' }}
               />
-            </td>
-          </tr>
-          
-          <tr>
-            <td className="fw-bold" style={{ padding: '12px 16px' }}>Comisiones prácticas</td>
-            <td style={{ padding: '12px 16px' }}>
+            </>
+          )}
+        </div>
+        <div className="col-md-12">
+          {isReadOnly ? (
+            data.aux1?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">Auxiliar de Primera</p>
+                <p>{data.aux1}</p>
+              </div>
+            )
+          ) : (
+            <>
+              <label htmlFor="aux1" className="form-label">
+                Auxiliar de Primera
+              </label>
+
               <input
                 type="text"
-                className="form-control form-control-sm"
-                value={cantidadComisionesPracticas}
+                className="form-control"
+                id="aux1"
+                min="0"
+                value={aux1}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*$/.test(value)) {
-                    setCantidadComisionesPracticas(value === "" ? 0 : Number(value));
-                  }
+                  setNombresFuncion?.SetAux1(e.target.value);
                 }}
-                style={{ maxWidth: '120px' }}
               />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+            </>
+          )}
+        </div>
+        <div className="col-md-12">
+          {isReadOnly ? (
+            data.aux2?.trim() && (
+              <div className="col-md-4">
+                <p className="mb-1 text-muted small">Auxiliar de Segunda</p>
+                <p>{data.aux2}</p>
+              </div>
+            )
+          ) : (
+            <>
+              <label htmlFor="aux2" className="form-label">
+                Auxiliar de Segunda
+              </label>
+
+              <input
+                type="text"
+                className="form-control"
+                id="aux2"
+                min="0"
+                value={aux2}
+                onChange={(e) => {
+                  setNombresFuncion?.SetAux2(e.target.value);
+                }}
+              />
+            </>
+          )}
+        </div>
+      </div>
+
+      <hr className="my-4" />
+
+      <h5 className="text-dark fw-bold mb-3">Información de Comisiones</h5>
+      <div className="row g-3">
+        <div className="col-md-6">
+          <label htmlFor="comisionesTeoricas" className="form-label">
+            Comisiones Teóricas
+          </label>
+
+          {isReadOnly ? (
+            <p className="form-control-plaintext ps-2 pt-0">
+              {data?.cantidadComisionesTeoricas ?? "N/A"}
+            </p>
+          ) : (
+            <input
+              type="number"
+              className="form-control"
+              id="comisionesTeoricas"
+              min="0"
+              value={cantidadComisionesTeoricas}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                setCantidadComisionesTeoricas(value);
+              }}
+            />
+          )}
+        </div>
+        <div className="col-md-6">
+          <label htmlFor="comisionesPracticas" className="form-label">
+            Comisiones Prácticas
+          </label>
+
+          {isReadOnly ? (
+            <p className="form-control-plaintext ps-2 pt-0">
+              {data?.cantidadComisionesPracticas ?? "N/A"}
+            </p>
+          ) : (
+            <input
+              type="number"
+              className="form-control"
+              id="comisionesPracticas"
+              min="0"
+              value={cantidadComisionesPracticas}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                setCantidadComisionesPracticas(value);
+              }}
+            />
+          )}
+        </div>
+      </div>
+    </Fragment>
+  );
 }

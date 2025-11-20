@@ -1,0 +1,4 @@
+.no-bold th {
+  font-weight: 400 !important;
+  color: inherit; /* opcional, si querés mantener color por defecto */
+}

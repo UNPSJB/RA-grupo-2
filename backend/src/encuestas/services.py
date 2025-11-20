@@ -39,3 +39,6 @@ def listar_preguntas_cerradas_encuesta(db: Session, encuesta_id: int) -> List[pr
                 respuestas.append(pregunta)
 
     return respuestas
+
+def listar_encuestas(db: Session) -> List[schemas.Encuesta]:
+    return db.scalars(select(Encuesta)).all()

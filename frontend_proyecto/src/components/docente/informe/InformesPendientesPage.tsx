@@ -4,6 +4,7 @@ import { DOCENTE_ID } from "../../../constants";
 import { ANIO_ACTUAL } from "../../../constants";
 import { PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
+import { EsPeriodoInformeCatedra } from "../../secretaria/definirFechas/EstamosEnPeriodo"
 
 type InformePendiente = {
   materia_id: number;
@@ -17,6 +18,7 @@ export default function InformesPendientesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const periodoInforme = EsPeriodoInformeCatedra();
 
   useEffect(() => {
     fetch(
@@ -68,10 +70,24 @@ export default function InformesPendientesPage() {
     );
   }
 
+  if (!periodoInforme) {
+    return (
+      <div className="container py-4">
+          <div className="card shadow-sm my-3">
+            <div className="card-body text-center">
+              <h5 className="mb-0 text-muted">
+                El periodo para completar los informes no está abierto
+              </h5>
+            </div>
+          </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container py-4">
       <div className="card shadow">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
             Informes Pendientes ({PERIODO_ACTUAL} {ANIO_ACTUAL})
           </h1>
@@ -95,7 +111,7 @@ export default function InformesPendientesPage() {
                       </div>
                       <button
                         onClick={() => handleCompletar(informe)}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-theme-primary rounded-pill px-4"
                       >
                         Completar Informe
                       </button>

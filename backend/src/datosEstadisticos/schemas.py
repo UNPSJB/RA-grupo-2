@@ -14,3 +14,13 @@ class DatosEstadisticosCategoria(BaseModel):
     categoria_texto: str
     promedio_categoria: List[OpcionPorcentaje]
     preguntas: List[DatosEstadisticosPregunta]
+
+class DatosAbiertosPregunta(BaseModel):
+    id_pregunta: int
+    enunciado: str
+    respuestas: List[str]
+
+class DatosAbiertosCategoria(BaseModel):
+    categoria_cod: str
+    categoria_texto: str
+    preguntas: List[DatosAbiertosPregunta]

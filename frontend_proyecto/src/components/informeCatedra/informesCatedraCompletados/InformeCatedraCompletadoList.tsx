@@ -30,7 +30,7 @@ export default function InformeCatedraList() {
   return (
     <div className="container py-4">
       <div className="card">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
             <strong>Departamento de</strong> {departamento?.nombre}
           </h1>
@@ -48,12 +48,12 @@ export default function InformeCatedraList() {
                       <div>
                         <span className="text-muted me-3">{i + 1}.</span>
                         <span className="fw-bold">
-                          {inf.titulo} – {inf.anio} ({mostrarPeriodo(inf.periodo)})
+                          {inf.titulo} – ({mostrarPeriodo(inf.periodo)})
                         </span>
                       </div>
                       <Link
                         to={ROUTES.INFORME_CATEDRA_DETALLE(inf.id)}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-theme-primary rounded-pill px-4"
                       >
                         Ver Detalle
                       </Link>

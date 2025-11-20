@@ -11,6 +11,10 @@ router = APIRouter(prefix="/informe-catedra-completado", tags=["informes-catedra
 def listar_informes_pendientes(docente_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
     return services.obtener_informes_pendientes(db, docente_id, anio, periodo)
 
+@router.get("/docente/{docente_id}/completados", response_model=List[schemas.InformeCatedraCompletado])
+def listar_informes_completados(docente_id: int, db: Session = Depends(get_db)):
+    return services.obtener_informes_completados(db, docente_id)
+
 @router.get("/existe")
 def verificar_informe_catedra_completado(docente_materia_id: int, db: Session = Depends(get_db)):
     existe = services.verificar_informe_existente(db, docente_materia_id)
@@ -23,11 +27,14 @@ def crear_informe_catedra_completado(
 ):
     return services.crear_informe_completado(db, informe)
 
-@router.get("/{informe_id}", response_model=schemas.InformeCatedraCompletado)
+@router.get("/{informe_id}", response_model=schemas.InformeCatedraCompletadoDetalle)
 def obtener_informe_catedra_completado(informe_id: int, db: Session = Depends(get_db)):
-    return services.obtener_informe_completado(db, informe_id)
-
+    return services.obtener_informe_completado_detalle(db, informe_id)
 
 @router.get("/departamento/{departamento_id}", response_model=List[schemas.InformeCatedraCompletado])
 def obtener_informes_por_departamento(departamento_id: int, db: Session = Depends(get_db)):
     return services.obtener_informes_por_departamento(db, departamento_id)
+
+@router.get("/departamento/{departamento_id}/progreso", response_model=dict)
+def get_progreso_departamento_route(departamento_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.get_progreso_departamento(db, departamento_id, anio, periodo)

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_serializer
-from typing import List
-from typing import Optional, List
+from typing import List, Optional
+from src.departamentos.schemas import Departamento as DepartamentoSchema
+
 class MateriaBase(BaseModel):
     nombre: str
     matricula: str
@@ -17,8 +18,14 @@ class MateriaBase(BaseModel):
 
 
 class Materia(MateriaBase):
-       id: int
+    id: int
+    departamento_id: int
+    departamento: Optional[DepartamentoSchema] = None
 
-       model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True}
        
 
+class MateriasAsignarFormularios(BaseModel):
+    materia_ids: List[int]
+    encuesta_id: Optional[int] = None
+    informe_catedra_id: Optional[int] = None

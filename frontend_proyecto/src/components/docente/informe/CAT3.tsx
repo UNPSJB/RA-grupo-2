@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 
 type RespuestaValor = {
   opcion_id: number | null;
@@ -21,128 +21,132 @@ interface Categoria {
 interface Props {
   categoria: Categoria;
   manejarCambio: (preguntaId: number, valor: RespuestaValor) => void;
-  autoExpand: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  respuestas: Record<number, RespuestaValor>;
+  nombresFuncion: { JTP: string | null; aux1: string | null; aux2: string | null };
+  isReadOnly?: boolean;
 }
 
-export default function Categoria3Informe({ categoria, manejarCambio, autoExpand }: Props) {
-  const [respuestas, setRespuestas] = useState<Record<number, string>>({});
-  const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
-  const [rolDesplegado, setRolDesplegado] = useState<string | null>(null);
+const normalizarString = (texto: string): string => {
+  if (!texto) return "";
+  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
 
+export default function Categoria3Informe({
+  categoria,
+  manejarCambio,
+  respuestas,
+  nombresFuncion,
+  isReadOnly = false,
+}: Props) {
+  const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const roles = ["Profesor", "JTP", "Auxiliar de Primera", "Auxiliar de Segunda"];
-  const actividades = [
-    "Capacitación",
-    "Investigación",
-    "Extensión",
-    "Gestión",
-    "Observaciones",
-  ];
+  const actividades = ["Capacitación", "Investigación", "Extensión", "Gestión", "Observaciones"];
+
+  const autoExpand = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+  };
 
   useEffect(() => {
     if (!categoria) return;
-
     setPreguntas(categoria.preguntas);
-
-    const inicial: Record<number, string> = {};
-    categoria.preguntas.forEach((p) => {
-      inicial[p.id] = "";
-    });
-    setRespuestas(inicial);
-    
   }, [categoria]);
 
   const actualizarRespuesta = (preguntaId: number, texto: string) => {
-    setRespuestas((prev) => ({
-      ...prev,
-      [preguntaId]: texto,
-    }));
-    
-    manejarCambio(preguntaId, {
-      opcion_id: null,
-      texto_respuesta: texto,
-    });
+    manejarCambio(preguntaId, { opcion_id: null, texto_respuesta: texto });
   };
 
   const findPreguntaId = (rol: string, act: string): number => {
-    const enunciadoBuscado = `${act} - ${rol}`;
+    const enunciadoBuscado = normalizarString(`${act} - ${rol}`);
     const p = preguntas.find(
-      (p) => p.enunciado === enunciadoBuscado
+      (p) => normalizarString(p.enunciado) === enunciadoBuscado
     );
     return p ? p.id : 0;
   };
 
-  const toggleDesplegar = (rol: string) => {
-    setRolDesplegado(rolDesplegado === rol ? null : rol);
-  };
+  const rolesFiltrados = isReadOnly
+    ? roles.filter((rol) => {
+      return actividades.some((act) => {
+        const pId = findPreguntaId(rol, act);
+        const respuesta = respuestas[pId]?.texto_respuesta?.trim();
+        return !!respuesta; 
+      });
+    })
+    : roles;
 
   return (
-    <div className="card-body p-0">
-      {roles.map((rol) => {
-        const nombrePreguntaId = 
-          preguntas.find(p => p.enunciado === `Nombre - ${rol}`)?.id || 0;
-        
-        const estaDesplegado = rolDesplegado === rol;
+    <Fragment>
+      {rolesFiltrados.map((rol, index) => {
+        const collapseId = `collapse-rol-${index}`;
+        const headingId = `heading-rol-${index}`;
+
+        let habilitado = true;
+        if (rol === "JTP" && !nombresFuncion?.JTP?.trim()) habilitado = false;
+        if (rol === "Auxiliar de Primera" && !nombresFuncion?.aux1?.trim()) habilitado = false;
+        if (rol === "Auxiliar de Segunda" && !nombresFuncion?.aux2?.trim()) habilitado = false;
 
         return (
-          <div key={rol} className="mb-3 border rounded">
-            <div 
-              className="p-3 bg-light d-flex justify-content-between align-items-center cursor-pointer"
-              onClick={() => toggleDesplegar(rol)}
-              style={{ cursor: 'pointer' }}
-            >
-              <h6 className="fw-bold mb-0">{rol}</h6>
-              <span className="fs-5">
-                {estaDesplegado ? '−' : '+'}
-              </span>
-            </div>
+          <div className="accordion-item" key={rol}>
+            <h2 className="accordion-header" id={headingId}>
+              <button
+                className={`accordion-button ${isReadOnly ? "" : "collapsed"}`}
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target={`#${collapseId}`}
+                disabled={isReadOnly}
+              >
+                {rol}
+              </button>
+            </h2>
 
-            {estaDesplegado && (
-              <div className="p-3">
-                <div className="mb-3">
-                  <label htmlFor={`preg-nombre-${nombrePreguntaId}`} className="form-label">
-                    Nombre del {rol}
-                  </label>
-                  <input
-                    type="text"
-                    id={`preg-nombre-${nombrePreguntaId}`}
-                    className="form-control"
-                    value={respuestas[nombrePreguntaId] || ""}
-                    onChange={(e) => 
-                      actualizarRespuesta(nombrePreguntaId, e.target.value)
-                    }
-                    disabled={!nombrePreguntaId}
-                  />
-                </div>
-                
+            <div
+              id={collapseId}
+              className={`accordion-collapse collapse ${isReadOnly ? "show" : ""}`}
+              data-bs-parent="#accordionPaso4"
+            >
+              <div className="accordion-body">
                 {actividades.map((act) => {
                   const pId = findPreguntaId(rol, act);
                   const label = act === "Observaciones" ? "Observaciones y comentarios" : act;
-                  
+
                   return (
                     <div key={`${rol}-${act}`} className="mb-3">
-                      <label htmlFor={`preg-${pId}`} className="form-label">
+                      <label htmlFor={`preg-${pId}`} className="form-label fw-bold">
                         {label}
                       </label>
-                      <textarea
-                        id={`preg-${pId}`}
-                        className="form-control"
-                        rows={3}
-                        value={respuestas[pId] || ""}
-                        onChange={(e) => {
-                          actualizarRespuesta(pId, e.target.value)
-                          autoExpand(e);
-                        }}
-                        onInput={autoExpand}
-                        style={{ resize: 'none'}}
-                      />
+                      {isReadOnly ? (
+                        <p className="form-control-plaintext" style={{ whiteSpace: "pre-wrap" }}>
+                          {respuestas[pId]?.texto_respuesta || "—"}
+                        </p>
+                      ) : (
+                        <textarea
+                          id={`preg-${pId}`}
+                          className="form-control"
+                          rows={3}
+                          value={respuestas[pId]?.texto_respuesta || ""}
+                          onChange={(e) => {
+                            actualizarRespuesta(pId, e.target.value);
+                            autoExpand(e);
+                          }}
+                          onInput={autoExpand}
+                          style={{ resize: "none" }}
+                          disabled={!pId || (!habilitado && rol !== "Profesor")}
+                          placeholder={
+                            !habilitado && rol !== "Profesor"
+                              ? "Complete el nombre en Datos Generales para habilitar este campo"
+                              : ""
+                          }
+                        />
+                      )}
                     </div>
                   );
                 })}
               </div>
-            )}
+            </div>
           </div>
         );
       })}
-    </div>
+    </Fragment>
   );
 }

@@ -115,7 +115,7 @@ export default function EncuestaCompletadaDetalle() {
   return (
     <div className="container py-4">
       <div className="card">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
             Materia: {materia ? materia.nombre : "Desconocida"}
           </h1>

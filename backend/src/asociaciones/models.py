@@ -5,7 +5,6 @@ from enum import auto, StrEnum
 class Periodo(StrEnum):
     PRIMER_CUATRI = "PRIMER_CUATRI"
     SEGUNDO_CUATRI = "SEGUNDO_CUATRI"
-    ANUAL = "ANUAL"
 
 
 alumno_materia = Table(
@@ -24,4 +23,12 @@ pregunta_opcion = Table(
     ModeloBase.metadata,
     Column("pregunta_id", ForeignKey("preguntas.id"), primary_key=True),
     Column("opcion_id", ForeignKey("opciones.id"), primary_key=True)
+)
+
+materia_carrera = Table(
+    "materia_carrera",
+    ModeloBase.metadata,
+    Column("id", Integer, primary_key=True, index=True),
+    Column("materia_id", ForeignKey("materias.id")),
+    Column("carrera_id", ForeignKey("carreras.id"))
 )

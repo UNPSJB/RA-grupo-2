@@ -19,6 +19,9 @@ class InformeCatedraCompletado(ModeloBase):
    periodo: Mapped[Periodo] = mapped_column(Enum(Periodo), nullable=True)
    cantidadComisionesTeoricas: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
    cantidadComisionesPracticas: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+   JTP: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+   aux_primera: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+   aux_segunda: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
    docente_materia: Mapped["DocenteMateria"] = relationship("DocenteMateria")
    informe_catedra_base: Mapped["InformeCatedra"] = relationship(

@@ -1,0 +1,34 @@
+from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import select
+from src.informe_sintetico_base import models, schemas, exceptions
+from typing import List
+from src.pregunta_informe_sintetico import schemas as pregunta_schemas
+
+def crear_informe_sintetico_base(db: Session, informe: schemas.InformeSinteticoBaseCreate) -> models.InformeSinteticoBase:
+    db_informe = models.InformeSinteticoBase(**informe.model_dump())
+    db.add(db_informe)
+    db.commit()
+    db.refresh(db_informe)
+    return db_informe
+
+def get_informe_sintetico_base(db: Session, informe_id: int) -> schemas.InformeSinteticoBase:
+    informe = db.scalar(select(models.InformeSinteticoBase).where(models.InformeSinteticoBase.id == informe_id)
+                        .options(
+                            selectinload(models.InformeSinteticoBase.preguntas)
+                        ))
+    if informe is None:
+        raise exceptions.InformeSinteticoBaseNoEncontrado()
+    return informe
+
+def get_informes_sinteticos_base(db: Session) -> List[schemas.InformeSinteticoBase]:
+    stmt = (
+        select(models.InformeSinteticoBase)
+        .options(
+            selectinload(models.InformeSinteticoBase.preguntas)
+        )
+    )
+    return db.scalars(stmt).all()
+
+def get_preguntas_informe_sintetico_base(db: Session, informe_id: int) -> List[pregunta_schemas.PreguntaInformeSintetico]:
+    informe = get_informe_sintetico_base(db, informe_id)
+    return informe.preguntas
