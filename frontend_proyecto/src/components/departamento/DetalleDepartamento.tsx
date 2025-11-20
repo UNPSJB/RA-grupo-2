@@ -39,9 +39,12 @@ function DetalleDepartamento() {
 
   return (
     <div className="container py-4">
-      <div className="card">
-        <div className="card-header bg-unpsjb-header">
-          <h1 className="h4 mb-0">Departamento de {departamento.nombre}</h1>
+      <div className="card shadow-sm border-0">
+        <div className="card-header bg-unpsjb-header text-white py-3">
+          <h1 className="h4 mb-0">
+            Departamento de {departamento.nombre}
+            {departamento.sede && ` - Sede ${departamento.sede.nombre}`}
+          </h1>
         </div>
         <div className="card-body">
           <h2 className="h5 mb-3">Informes sinteticos pendientes:</h2>

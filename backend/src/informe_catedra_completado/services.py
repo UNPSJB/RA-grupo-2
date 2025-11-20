@@ -11,6 +11,7 @@ from src.respuestasInforme.models import RespuestaInforme
 from src.preguntas.models import Pregunta
 from src.encuestaCompletada.models import EncuestaCompletada
 from src.asociaciones.models import materia_carrera
+from src.departamentos.models import Departamento
 
 
 def obtener_informes_pendientes(db: Session, docente_id: int,anio: int,periodo: Periodo) -> List[dict]:
@@ -140,7 +141,9 @@ def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
             selectinload(models.InformeCatedraCompletado.respuestas_informe)
             .selectinload(RespuestaInforme.pregunta),
             joinedload(models.InformeCatedraCompletado.docente_materia) 
-                .joinedload(DocenteMateria.materia),
+                .joinedload(DocenteMateria.materia)
+                .joinedload(Materia.departamento)
+                .joinedload(Departamento.sede),
             joinedload(models.InformeCatedraCompletado.docente_materia)
                 .joinedload(DocenteMateria.docente)
         )
@@ -170,7 +173,7 @@ def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
         "materiaNombre": None,
         "materiaCodigo": None,
         "docenteResponsable": None,
-        "sede": "Trelew"  #CORREGIR CON SEDE DE VERDAD
+        "sede": "Sin asignar"  
     }
 
     if informe.docente_materia:
@@ -178,6 +181,13 @@ def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
             informe_dict["materiaId"] = informe.docente_materia.materia.id
             informe_dict["materiaNombre"] = informe.docente_materia.materia.nombre
             informe_dict["materiaCodigo"] = informe.docente_materia.materia.matricula
+
+            try:
+                materia = informe.docente_materia.materia
+                if materia.departamento and materia.departamento.sede:
+                    informe_dict["sede"] = materia.departamento.sede.nombre
+            except AttributeError:
+                pass
         
         if informe.docente_materia.docente:
             docente = informe.docente_materia.docente

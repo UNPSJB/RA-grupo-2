@@ -1,7 +1,14 @@
+export interface Sede {
+  id: number;
+  nombre: string;
+}
+
 export interface Departamento {
   id: number;
   nombre: string;
   carreras: Carrera[];
+  sede_id?: number;
+  sede?: Sede;
 }
 
 export interface Carrera {
@@ -14,6 +21,7 @@ export interface Materia {
   id: number;
   nombre: string;
   matricula: string;
+  departamento?: Departamento
 }
 
 export interface Docente {
