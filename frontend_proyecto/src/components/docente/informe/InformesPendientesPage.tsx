@@ -5,6 +5,7 @@ import { ANIO_ACTUAL } from "../../../constants";
 import { PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import { EsPeriodoInformeCatedra } from "../../secretaria/definirFechas/EstamosEnPeriodo"
+import PopupPeriodoCerrado from "../../secretaria/definirFechas/PopUpPeriodo"
 
 type InformePendiente = {
   materia_id: number;
@@ -71,17 +72,7 @@ export default function InformesPendientesPage() {
   }
 
   if (!periodoInforme) {
-    return (
-      <div className="container py-4">
-          <div className="card shadow-sm my-3">
-            <div className="card-body text-center">
-              <h5 className="mb-0 text-muted">
-                El periodo para completar los informes no está abierto
-              </h5>
-            </div>
-          </div>
-      </div>
-    )
+    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"}/>;
   }
 
   return (

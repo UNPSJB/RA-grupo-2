@@ -3,6 +3,7 @@ import EncuestasDisponibles from "./EncuestasDisponibles";
 import type { Alumno } from "../../types/types.ts"
 import { ALUMNO_ID } from "../../constants.ts"
 import { EsPeriodoEncuesta } from "../secretaria/definirFechas/EstamosEnPeriodo"
+import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
 
 type EncuestaDisponible = {
   materia: string;
@@ -35,19 +36,9 @@ export default function EncuestasPage() {
       });
   }, [alumnoId]);
 
-  if (!periodoEncuesta) {
-    return (
-      <div className="container py-4">
-          <div className="card shadow-sm my-3">
-            <div className="card-body text-center">
-              <h5 className="mb-0 text-muted">
-                El periodo para contestar las encuestas no está abierto
-              </h5>
-            </div>
-          </div>
-      </div>
-    )
-  }
+if (!periodoEncuesta) {
+  return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"}/>;
+}
 
   return (
     <div className="container py-4">
