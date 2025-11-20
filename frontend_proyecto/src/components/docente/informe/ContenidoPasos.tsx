@@ -58,6 +58,7 @@ interface ContenidoPasosProps {
   };
   isReadOnly?: boolean;
   datosIniciales?: any;
+  onValidationChange?: (valido: boolean) => void;
 }
 
 const normalizarString = (texto: string): string => {
@@ -78,6 +79,7 @@ export default function ContenidoPasos({
   setNombresFuncion,
   isReadOnly = false,
   datosIniciales,
+  onValidationChange
 }: ContenidoPasosProps) {
   const categoria1 = categoriasConPreguntas.find((cat) => cat.cod === "1");
   const categoria2 = categoriasConPreguntas.find((cat) => cat.cod === "2");
@@ -331,6 +333,7 @@ export default function ContenidoPasos({
           datosIniciales={datosIniciales}
           nombresFuncion={nombresFuncion}
           setNombresFuncion={setNombresFuncion}
+          onValidationChange={onValidationChange}
         />
       );
 

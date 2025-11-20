@@ -137,7 +137,8 @@ export default function InformacionGeneral({
 
     return (
         <div className="container mt-4">
-            <h5 className="text-dark fw-bold mb-3">Informacion General</h5>
+            <h5 className="text-dark mb-3">{pregunta.enunciado}</h5>
+
             {isLoading ? (
                 <div className="text-center text-secondary">Cargando datos...</div>
             ) : error ? (
@@ -146,7 +147,7 @@ export default function InformacionGeneral({
                 </div>
             ) : materias.length === 0 ? (
                 <div className="alert alert-warning">
-                    No hay materias para esta selección.
+                    No hay información disponible.
                 </div>
             ) : (
                 <>
