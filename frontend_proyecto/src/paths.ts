@@ -1,5 +1,7 @@
 const ROUTES = {
   HOME: "/",
+  //LOGIN
+  LOGIN: "/login",
 
   //ALUMNOS
   ENCUESTAS_DISPONIBLES: "/alumnos/encuestas-disponibles",
