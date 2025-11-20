@@ -94,7 +94,7 @@ export default function CompletarInformeCatedraFuncion({
         const cantidadAlumnos = alumnos.length;
 
         const datos: InformeActividad = {
-          sede: "Trelew",
+          sede: materia.departamento?.sede?.nombre || "Sin asignar.",
           cicloLectivo: anio,
           periodo: periodo,
           actividadCurricular: materia.nombre,
