@@ -19,12 +19,13 @@ import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBa
 import InformeCatedraCompletadoDocente from "./components/docente/informesCompletados/mostrarInformesCompletados";
 import DashboardDepartamento from "./components/departamento/DashboardDpto"
 //import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
+import LoginPage from "./components/login/LoginPage";
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
 import CompletarInformeSintetico from "./components/informeSintetico/completarInformeSintetico/CompletarInformeSintetico";
 import AsignarFormularios from "./components/secretaria/asignarMateriaInforme";
-import DefinirFechas from "./components/secretaria/definirFechas/definirFechas"
+
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
@@ -33,11 +34,14 @@ import ROUTES from "./paths";
 import ListaInformeSintetico from "./components/departamento/informeSintetico/ListaInformeSintetico";
 
 function App() {
+  const isLogin = window.location.pathname === "/login";
+
   return (
     <div className="d-flex flex-column min-vh-100">
       
-      <Navbar />
-      <main className="flex-grow-1" style={{ paddingTop: '101px' }}>
+      {!isLogin && <Navbar />}
+
+      <main className="flex-grow-1" style={{ paddingTop: isLogin ? '0px' : '101px' }}>
         
         <div className="container-fluid px-2">
           <Routes>
@@ -58,7 +62,6 @@ function App() {
             <Route path={ROUTES.INFORME_CATEDRA_DETALLE()} element={<InformeCatedraDetail />} />
             <Route path={ROUTES.INFORME_CATEDRA_BASE_NUEVO} element={<InformeCatedraBaseForm />} />
             <Route path={ROUTES.INFORMES_CATEDRA_PENDIENTES} element={<InformesPendientesPage />} />
-            
             <Route path={ROUTES.INFORME_CATEDRA_COMPLETADO_DETALLE()} element={<InformeCatedraDetail />} />
             <Route path={ROUTES.INFORMES_CATEDRA_COMPLETADOS} element={<InformeCatedraCompletadoDocente />} />
             <Route path={ROUTES.ASIGNAR_MATERIA_INFORME} element={<AsignarFormularios />} />
@@ -66,13 +69,14 @@ function App() {
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
             <Route path={ROUTES.DASHBOARD_DPTO} element={<DashboardDepartamento />} />
-            <Route path={ROUTES.DEFINIR_FECHAS} element={<DefinirFechas/>}/>
             <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+
           </Routes>
         </div>
       </main>
-      
-      <Footer />
+
+      {!isLogin && <Footer />}
     </div>
   );
 }
