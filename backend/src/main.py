@@ -29,7 +29,9 @@ from src.respuestasInforme.router import router as respuestas_informe_router
 from src.pregunta_informe_sintetico.router import router as preguntas_sintetico_router
 from src.respuesta_informe_sintetico.router import router as respuestas_informe_sintetico_router
 from src.filtros.router import router as filtros_router
+from src.periodos_apertura.router import router as periodos_apertura_router
 from src.sedes.router import router as sedes_router
+
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -75,4 +77,5 @@ app.include_router(respuestas_informe_router)
 app.include_router(preguntas_sintetico_router)
 app.include_router(respuestas_informe_sintetico_router)
 app.include_router(filtros_router)
+app.include_router(periodos_apertura_router)
 app.include_router(sedes_router)

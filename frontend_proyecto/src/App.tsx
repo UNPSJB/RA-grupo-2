@@ -24,12 +24,13 @@ import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
 import CompletarInformeSintetico from "./components/informeSintetico/completarInformeSintetico/CompletarInformeSintetico";
 import AsignarFormularios from "./components/secretaria/asignarMateriaInforme";
-
+import DefinirFechas from "./components/secretaria/definirFechas/definirFechas"
 import EncuestaBaseForm from "./components/encuesta/crearEncuestaForm";
 import DetalleMateria from "./components/materia/DetalleMateria";
 import Footer from "./components/footer/footer";
 
 import ROUTES from "./paths";
+import ListaInformeSintetico from "./components/departamento/informeSintetico/ListaInformeSintetico";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path={ROUTES.DETALLE_MATERIA()} element={<DetalleMateria />} />
             <Route path={ROUTES.INFORMES_SINTETICOS} element={<InformeSinteticoList />} />
             <Route path={ROUTES.INFORME_SINTETICO_DETALLE()} element={<InformeSinteticoDetail />} />
+            <Route path={ROUTES.INFORME_SINTETICO_DETALLE_SECRETARIA()} element={<InformeSinteticoDetail />} />
             <Route path={ROUTES.COMPLETAR_ENCUESTA} element={<CompletarEncuesta />} />
             <Route path={ROUTES.ENCUESTAS_COMPLETADAS} element={<EncuestasCompletadasPage />} />
             <Route path={ROUTES.ENCUESTA_COMPLETADA_DETALLE()} element={<EncuestaCompletadaDetalle />} />
@@ -64,6 +66,8 @@ function App() {
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
             <Route path={ROUTES.DASHBOARD_DPTO} element={<DashboardDepartamento />} />
+            <Route path={ROUTES.DEFINIR_FECHAS} element={<DefinirFechas/>}/>
+            <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
           </Routes>
         </div>
       </main>

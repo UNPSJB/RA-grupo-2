@@ -33,7 +33,7 @@ export function mostrarPeriodo(periodo: string) {
 }
 
 function InformeSinteticoDetail() {
-    const { id } = useParams<{ id: string }>();
+    const { id, id_dpto } = useParams<{ id: string, id_dpto: string }>();
     const [informe, setInforme] = useState<InformeCompletado | null>(null); 
     const [preguntasBase, setPreguntasBase] = useState<Pregunta[]>([]);
     const [loading, setLoading] = useState(true);
@@ -115,7 +115,12 @@ function InformeSinteticoDetail() {
             {loading ? <p>Cargando...</p> : <div className="alert alert-danger">{error || "Informe no encontrado."}</div>}
         </div>
     );
-
+    const returnPath = (() => {
+    if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
+        return ROUTES.INFORMES_SINTETICOS_COMPLETADOS(id_dpto);
+    }
+    return ROUTES.INFORMES_SINTETICOS;
+})();
     return (
         <div className="bg-light"> 
             <div className="container-lg py-4">
@@ -226,13 +231,13 @@ function InformeSinteticoDetail() {
                             )}
                             
                             {isLastStep ? (
-                                <Link
-                                    to={ROUTES.INFORMES_SINTETICOS}
-                                    className="btn btn-primary rounded-pill px-4" 
-                                >
-                                    Volver al listado
-                                </Link>
-                            ) : (
+                                    <Link
+                                        to={returnPath} 
+                                        className="btn btn-primary rounded-pill px-4" 
+                                    >
+                                        Volver al listado
+                                    </Link>
+                                ) : (
                                 <button
                                     className="btn btn-primary rounded-pill px-4"
                                     onClick={() => setCurrentStep(currentStep + 1)}

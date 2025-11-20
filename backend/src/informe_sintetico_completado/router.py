@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.informe_sintetico_completado.models import InformeSinteticoCompletado
 from src.informe_sintetico_completado import schemas, services
-from typing import List
+from typing import List, Optional
 router = APIRouter(prefix="/informes_sinteticos_completados", tags=["informes_sinteticos_completados"])
 
 @router.post("/completados/", response_model=schemas.InformeSinteticoCompletado, status_code=status.HTTP_201_CREATED)
@@ -15,10 +15,13 @@ def create_informe_completado(
         return services.create_informe_completado(db, informe)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al crear informe completado: {str(e)}")
-@router.get("/completados/")
-def get_informes_completados(db: Session = Depends(get_db)):
+@router.get("/completados/", response_model=List[schemas.InformeSinteticoCompletado])
+def get_informes_completados(
+    id_dpto: Optional[int] = Query(None, description="ID del departamento para filtrar los informes"), 
+    db: Session = Depends(get_db)
+):
     try:
-        informes = db.query(InformeSinteticoCompletado).all()
+        informes = services.get_informes_completados(db, id_dpto) 
         return informes
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informes completados: {str(e)}")

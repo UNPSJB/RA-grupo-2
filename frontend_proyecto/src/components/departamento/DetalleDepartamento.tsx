@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import ListaCarreras from "../carrera/ListarCarreras";
 import type { Departamento, Carrera } from "../../types/types";
 import { useParams } from "react-router-dom";
+import { EsPeriodoInformeSintetico } from "../secretaria/definirFechas/EstamosEnPeriodo"
 
 function DetalleDepartamento() {
   const { id_dpto } = useParams<{ id_dpto: string }>();
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
   const [carreras, setCarreras] = useState<Carrera[]>([]);
+  const periodoInforme = EsPeriodoInformeSintetico();
 
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/departamentos/${id_dpto}`)
@@ -28,6 +30,20 @@ function DetalleDepartamento() {
         <div className="alert alert-warning">Cargando departamento..</div>
       </div>
     );
+  }
+
+  if (!periodoInforme) {
+    return (
+      <div className="container py-4">
+        <div className="card shadow-sm my-3">
+          <div className="card-body text-center">
+            <h5 className="mb-0 text-muted">
+              El periodo para completar los informes no está abierto
+            </h5>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
