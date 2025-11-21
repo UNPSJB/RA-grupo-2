@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import EncuestasPage from "./components/encuesta/EncuestasPage";
 import DocentePage from "./components/docente/docentesPage";
 import Navbar from "./components/navbar/navbar";
@@ -32,10 +32,11 @@ import Footer from "./components/footer/footer";
 
 import ROUTES from "./paths";
 import ListaInformeSintetico from "./components/departamento/informeSintetico/ListaInformeSintetico";
+import DefinirFechas from "./components/secretaria/definirFechas/definirFechas";
 
 function App() {
-  const isLogin = window.location.pathname === "/login";
-
+  const location = useLocation(); // <<--- Usar el hook
+  const isLogin = location.pathname === ROUTES.LOGIN; // Usar location.pathname
   return (
     <div className="d-flex flex-column min-vh-100">
       
@@ -69,6 +70,8 @@ function App() {
             <Route path={ROUTES.ENCUESTA_BASE_NUEVA} element={<EncuestaBaseForm />} />
             <Route path={ROUTES.INFORME_SINTETICO_BASE_NUEVO} element={<InformeSinteticoBaseForm />} />
             <Route path={ROUTES.DASHBOARD_DPTO} element={<DashboardDepartamento />} />
+            <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
+            <Route path={ROUTES.DEFINIR_FECHAS} element={<DefinirFechas/>}/>
             <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
