@@ -115,27 +115,24 @@ function prettyFormatRespuesta(texto: string): string[] {
 
     // 2.C) ASPECTOS POSITIVOS / OBSTÁCULOS / ESTRATEGIAS
     if (obj.aspectos_positivos_ensenanza !== undefined) {
-        lines.push("Aspectos positivos (enseñanza):");
-        obj.aspectos_positivos_ensenanza.split("\n").forEach((l) => lines.push("• " + l));
 
-        lines.push("");
-        lines.push("Aspectos positivos (aprendizaje):");
-        obj.aspectos_positivos_aprendizaje.split("\n").forEach((l) => lines.push("• " + l));
+        const pushList = (titulo: string, texto: string) => {
+            lines.push(titulo);
+            texto.split("\n").forEach((l) => {
+                if (l.trim()) lines.push("• " + l.trim()); // <-- evita puntitos vacíos
+            });
+            lines.push("");
+        };
 
-        lines.push("");
-        lines.push("Obstáculos (enseñanza):");
-        obj.obstaculos_ensenanza.split("\n").forEach((l) => lines.push("• " + l));
-
-        lines.push("");
-        lines.push("Obstáculos (aprendizaje):");
-        obj.obstaculos_aprendizaje.split("\n").forEach((l) => lines.push("• " + l));
-
-        lines.push("");
-        lines.push("Estrategias a implementar:");
-        obj.estrategias.split("\n").forEach((l) => lines.push("• " + l));
+        pushList("Aspectos positivos (enseñanza):", obj.aspectos_positivos_ensenanza);
+        pushList("Aspectos positivos (aprendizaje):", obj.aspectos_positivos_aprendizaje);
+        pushList("Obstáculos (enseñanza):", obj.obstaculos_ensenanza);
+        pushList("Obstáculos (aprendizaje):", obj.obstaculos_aprendizaje);
+        pushList("Estrategias a implementar:", obj.estrategias);
 
         return lines;
     }
+
 
     // 4) VALORACIÓN DE AUXILIARES
     if (Array.isArray(obj) && obj.length > 0 && obj[0].calificacion !== undefined) {
@@ -155,26 +152,40 @@ function prettyFormatRespuesta(texto: string): string[] {
 
     // 3) ACTIVIDADES DOCENTES
     if (Array.isArray(obj) && obj.length > 0 && obj[0].actividades !== undefined) {
-        return obj.flatMap((doc: any) => {
-            const act = doc.actividades || {};
 
+        const listaFiltrada = obj.filter((doc: any) => {
+            const act = doc.actividades || {};
+            return (
+                act.capacitacion?.trim() ||
+                act.investigacion?.trim() ||
+                act.extension?.trim() ||
+                act.gestion?.trim() ||
+                act.observaciones?.trim()
+            );
+        });
+
+        // Si nadie tiene actividades → mensaje especial
+        if (listaFiltrada.length === 0) {
+            return ["Ningún miembro del equipo de cátedra realizó actividades"];
+        }
+
+        return listaFiltrada.flatMap((doc: any) => {
+            const act = doc.actividades || {};
             const out: string[] = [];
 
             out.push(`${doc.nombre_docente} — ${doc.rol_docente}`);
 
-            out.push(`  Capacitación: ${act.capacitacion ?? "—"}`);
-            out.push(`  Investigación: ${act.investigacion ?? "—"}`);
-            out.push(`  Extensión: ${act.extension ?? "—"}`);
-            out.push(`  Gestión: ${act.gestion ?? "—"}`);
-
-            if (act.observaciones) {
-                out.push(`  Observaciones: ${act.observaciones}`);
-            }
+            if (act.capacitacion?.trim()) out.push(`Capacitación: ${act.capacitacion}`);
+            if (act.investigacion?.trim()) out.push(`Investigación: ${act.investigacion}`);
+            if (act.extension?.trim()) out.push(`Extensión: ${act.extension}`);
+            if (act.gestion?.trim()) out.push(`Gestión: ${act.gestion}`);
+            if (act.observaciones?.trim()) out.push(`Observaciones: ${act.observaciones}`);
 
             out.push("");
             return out;
         });
     }
+
 
     // 5) OBSERVACIONES FINALES (sección 5)
     if (obj.observaciones_comentarios !== undefined) {
