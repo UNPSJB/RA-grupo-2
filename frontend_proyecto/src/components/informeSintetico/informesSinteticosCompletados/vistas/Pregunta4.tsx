@@ -82,7 +82,7 @@ export default function VistaDesempenoAuxiliares({
                             
                             <h2 className="accordion-header" id={`headingVP4_${mIndex}`}>
                                 <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapseVP4_${mIndex}`}
@@ -95,9 +95,8 @@ export default function VistaDesempenoAuxiliares({
 
                             <div
                                 id={`collapseVP4_${mIndex}`}
-                                className="accordion-collapse collapse"
+                                className="accordion-collapse collapse show"
                                 aria-labelledby={`headingVP4_${mIndex}`}
-                                data-bs-parent="#accordionVistaP4"
                             >
                                 <div className="accordion-body p-0">
                                     <div className="table-responsive">

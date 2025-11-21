@@ -59,7 +59,7 @@ export default function VistaInformacionGeneral({
                         <div className="accordion-item" key={item.materia.id}>
                             <h2 className="accordion-header" id={`headingVP0${index}`}>
                                 <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapseVP0${index}`}
@@ -71,9 +71,8 @@ export default function VistaInformacionGeneral({
                             </h2>
                             <div
                                 id={`collapseVP0${index}`}
-                                className="accordion-collapse collapse"
+                                className="accordion-collapse collapse show"
                                 aria-labelledby={`headingVP0${index}`}
-                                data-bs-parent="#accordionVistaP0"
                             >
                                 <div className="accordion-body">
                                     <div className="row g-3">
