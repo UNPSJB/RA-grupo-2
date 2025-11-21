@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchInforme, fetchPreguntasBase } from "./informesService";
-import type { InformeCompletado, Pregunta } from "../../../types/types";
+import type { InformeCompletado, Pregunta, Carrera, Departamento } from "../../../types/types";
 import ContenidoInformeSintetico from "./ContenidoPasosSinteticos";
 import ROUTES from "../../../paths";
 import { pdf } from "@react-pdf/renderer";
@@ -37,15 +37,21 @@ export function mostrarPeriodo(periodo: string) {
 }
 
 function InformeSinteticoDetail() {
+    const [carrera, setCarrera] = useState<Carrera | null>(null);
+    const [departamento, setDepartamento] = useState<Departamento | null>(null);
+
     const handleDownloadPDF = async () => {
-        if (!informe) return;
+        if (!informe|| !carrera || !departamento) return;
 
         const blob = await pdf(
             <InformeSinteticoPDF
-                titulo={informe.titulo}
+                informe={informe}
                 preguntas={preguntasOrdenadas}
                 respuestas={informe.respuestas}
+                carrera={carrera}
+                dpto={departamento}
             />
+
         ).toBlob();
 
         saveAs(blob, `Informe_${informe.titulo}.pdf`);
@@ -100,9 +106,23 @@ function InformeSinteticoDetail() {
             try {
                 const dataInforme: InformeCompletado = await fetchInforme(id);
                 setInforme(dataInforme);
+
                 const dataPreguntas: Pregunta[] = await fetchPreguntasBase(dataInforme.informe_base_id);
                 setPreguntasBase(dataPreguntas);
                 if (dataPreguntas.length > 0) setCurrentStep(0);
+
+                const resCarrera = await fetch(`http://127.0.0.1:8000/carreras/${dataInforme.carrera_id}`);
+                if (resCarrera.ok) {
+                    const dataCarrera = await resCarrera.json();
+                    setCarrera(dataCarrera);
+
+                    const resDpto = await fetch(`http://127.0.0.1:8000/departamentos/${dataCarrera.departamento_id}`);
+                    if (resDpto.ok) {
+                        const dataDpto = await resDpto.json();
+                        setDepartamento(dataDpto);
+                    }
+                }
+
             } catch (err: any) {
                 console.error(err);
                 setError(err.message || "Error al cargar los datos del informe.");
@@ -110,8 +130,11 @@ function InformeSinteticoDetail() {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, [id]);
+
+
 
     useEffect(() => {
         if (scrollRef.current) {

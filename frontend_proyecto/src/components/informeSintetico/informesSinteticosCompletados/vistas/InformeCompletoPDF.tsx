@@ -4,8 +4,9 @@ import {
     Text,
     View,
     StyleSheet,
+    Image
 } from "@react-pdf/renderer";
-import type { Pregunta, RespuestaInformeSintetico } from "../../../../types/types";
+import type { Pregunta, RespuestaInformeSintetico, InformeCompletado, Carrera, Departamento } from "../../../../types/types";
 
 
 const styles = StyleSheet.create({
@@ -41,6 +42,43 @@ const styles = StyleSheet.create({
         borderBottomColor: "#ccc",
         borderBottomStyle: "solid",
     },
+    coverTitle: {
+        fontSize: 20,
+        textAlign: "center",
+        fontWeight: "bold",
+        marginBottom: 20,
+    },
+    coverSubtitle: {
+        fontSize: 14,
+        textAlign: "center",
+        marginBottom: 10,
+    },
+    coverBlock: {
+        marginTop: 15,
+        marginBottom: 5,
+        fontSize: 12,
+    },
+    coverText: {
+        fontSize: 12,
+        marginBottom: 8,
+    },
+    logo: {
+        width: 90,
+        height: 90,
+        marginBottom: 10,
+        alignSelf: "center",
+    },
+    headerTitle: {
+        fontSize: 14,
+        textAlign: "center",
+        fontWeight: "bold",
+        marginBottom: 2,
+    },
+    headerSub: {
+        fontSize: 12,
+        textAlign: "center",
+        marginBottom: 15,
+    }
 });
 
 
@@ -201,21 +239,81 @@ function prettyFormatRespuesta(texto: string): string[] {
     return lines;
 }
 
-
+function getPeriodo(p: string) {
+    switch (p) {
+        case "PRIMER_CUATRI": return "Primer Cuatrimestre"
+        case "SEGUNDO_CUATRI": return "Segundo Cuatrimestre"
+    }
+}
 
 export default function InformeSinteticoPDF({
-    titulo,
+    informe,
+    carrera,
+    dpto,
     preguntas,
     respuestas,
 }: {
-    titulo: string;
+    informe: InformeCompletado;
+    carrera: Carrera;
+    dpto: Departamento;
     preguntas: Pregunta[];
     respuestas: RespuestaInformeSintetico[];
 }) {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
-                <Text style={styles.title}>{titulo}</Text>
+                <Image
+                    style={styles.logo}
+                    src="/unpsjb-logo.png"
+                />
+
+                <Text style={styles.headerTitle}>
+                    Universidad Nacional de la Patagonia San Juan Bosco
+                </Text>
+                <Text style={styles.headerSub}>
+                    Facultad de Ingeniería
+                </Text>
+
+                <Text style={styles.coverTitle}>Informe Sintético</Text>
+                <Text style={styles.coverSubtitle}>
+                    Síntesis de los Informes Anuales de Actividades Curriculares
+                </Text>
+
+                <View style={styles.coverBlock}>
+                    <Text style={styles.coverText}>
+                        <Text style={{ fontWeight: "bold" }}>Ciclo Lectivo y/o cuatrimestre evaluado: </Text>
+                        {getPeriodo(informe.periodo)} {informe.anio}
+                    </Text>
+
+                    <Text style={styles.coverText}>
+                        <Text style={{ fontWeight: "bold" }}>
+                            Comisión Asesora de Carrera o Departamental correspondiente a:{' '}
+                        </Text>
+                        {dpto?.nombre || "—"}
+                    </Text>
+
+                    <Text style={styles.coverText}>
+                        <Text style={{ fontWeight: "bold" }}>Sede: </Text>
+                        {dpto?.sede?.nombre || "—"}
+                    </Text>
+
+                    <Text style={styles.coverText}>
+                        <Text style={{ fontWeight: "bold" }}>Carrera: </Text>
+                        {carrera?.nombre || "—"}
+                    </Text>
+                </View>
+
+                <View style={{ marginTop: 20 }}>
+                    <Text style={styles.coverText}>
+                        El Informe anual Sintético muestra en forma resumida el detalle de las
+                        actividades curriculares. Tiene como propósito ofrecer información de las
+                        actividades curriculares dependientes de cada departamento, Delegación de
+                        Facultad o Secretaría Académica, que permita analizar la evolución de cada
+                        espacio curricular dentro de cada dependencia y por sede de Facultad con el fin
+                        de realizar un seguimiento y acompañamiento de las propuestas de mejora
+                        realizadas por cada equipo docente.
+                    </Text>
+                </View>
 
                 {preguntas.map((p) => {
                     const respuestasDeLaPregunta = respuestas.filter(
@@ -223,7 +321,7 @@ export default function InformeSinteticoPDF({
                     );
 
                     return (
-                        <View key={p.id}>
+                        <View key={p.id} break>
                             <Text style={styles.sectionTitle}>
                                 {p.cod} - {p.enunciado}
                             </Text>
@@ -244,6 +342,7 @@ export default function InformeSinteticoPDF({
 
                                     return (
                                         <View key={r.id}>
+                                            <View style={styles.separator} />
                                             {r.materia ? (
                                                 <Text style={styles.pregunta}>
                                                     {r.materia.matricula} - {r.materia.nombre}
@@ -253,9 +352,6 @@ export default function InformeSinteticoPDF({
                                             {prettyFormatRespuesta(texto).map((line, idx) => (
                                                 <Text key={idx} style={styles.respuesta}>{line}</Text>
                                             ))}
-
-
-                                            <View style={styles.separator} />
                                         </View>
                                     );
                                 })

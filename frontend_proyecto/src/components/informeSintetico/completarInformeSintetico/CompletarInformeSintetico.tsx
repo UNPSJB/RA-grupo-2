@@ -19,6 +19,13 @@ const TABS_MAP = new Map([
     ["3", "3. Actividades del Equipo"], ["4", "4. Valoración"], ["5", "5. Observaciones"],
 ]);
 
+function escribirPeriodo(p: string){
+    switch(p){
+        case "PRIMER_CUATRI": return "Primer Cuatrimestre";
+        case "SEGUNDO_CUATRI": return "Segundo Cuatrimestre";
+    }
+}
+
 export default function CompletarInformeSintetico() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -146,7 +153,7 @@ export default function CompletarInformeSintetico() {
         setMensaje(null);
         const datosParaBackend = {
             titulo: `Informe ${carrera.nombre} ${anio}`,
-            contenido: `De ${dpto.nombre} (${periodo})`,
+            contenido: `Departamento: ${dpto.nombre}. ${anio}, ${escribirPeriodo(periodo)}`,
             anio: ANIO_ACTUAL,
             periodo: periodo,
             informe_base_id: informeBaseId,
