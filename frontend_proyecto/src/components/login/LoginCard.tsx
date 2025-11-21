@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import ROUTES from '../../paths';
 
 interface LoginCardProps {
   isDarkMode: boolean;
 }
 
 const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Iniciando sesión...");
   };
 
   const togglePassword = () => {
@@ -122,7 +124,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
               </div>
 
               <div className="d-grid">
-                <button type="submit" className="btn btn-primary py-2 fw-bold shadow-sm border-0" style={{ background: isDarkMode ? '#3b82f6' : '#2563eb' }}>
+                <button type="submit" className="btn btn-primary py-2 fw-bold shadow-sm border-0" onClick={() => navigate(ROUTES.HOME)} style={{ background: isDarkMode ? '#3b82f6' : '#2563eb' }}>
                   Ingresar al Sistema
                 </button>
               </div>

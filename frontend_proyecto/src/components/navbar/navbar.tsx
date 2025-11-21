@@ -162,7 +162,7 @@ export default function Navbar() {
             
             <ul className="dropdown-menu custom-dropdown user-dropdown-menu" aria-labelledby="userDropdown" style={userDropdownMenuStyle}>
               <li>
-                  Cerrar Sesión
+                  <Link className="dropdown-item" to={ROUTES.LOGIN}>Cerrar Sesión</Link>
               </li>
             </ul>
           </li>
