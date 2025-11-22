@@ -1,5 +1,5 @@
 const ROUTES = {
-  HOME: "/",
+  HOME: "/menu",
   //LOGIN
   LOGIN: "/login",
 

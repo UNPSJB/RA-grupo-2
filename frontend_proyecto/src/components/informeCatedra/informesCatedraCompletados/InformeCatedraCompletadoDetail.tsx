@@ -3,7 +3,8 @@ import { useEffect, useState, useMemo } from "react";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "../../docente/informe/ContenidoPasos";
 import type { Categoria } from "../../../types/types";
-
+// instancia de axios 
+import api from "../../../services/api";
 
 interface Pregunta {
   id: number;
@@ -99,19 +100,17 @@ export default function InformeCatedraDetalle() {
 
     const fetchInforme = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/informe-catedra-completado/${id}`);
-        if (!res.ok) throw new Error("Error al obtener el informe");
-        const dataInforme: InformeCompletadoDetalle = await res.json();
+        const res = await api.get(`/informe-catedra-completado/${id}`);
+        const dataInforme: InformeCompletadoDetalle = res.data;
 
         setInforme(dataInforme);
-
         if (dataInforme.informe_catedra_base_id) {
-          const resBase = await fetch(
-            `http://127.0.0.1:8000/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`
+          const resBase = await api.get(
+            `/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`
           );
-          if (!resBase.ok) throw new Error("No se pudo cargar la estructura base del informe.");
-
-          const dataBase: CategoriaConPreguntas[] = await resBase.json();
+          
+          const dataBase: CategoriaConPreguntas[] = resBase.data;
+          
           const dataOrdenada = [...dataBase].sort((a, b) =>
             a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
           );
@@ -122,31 +121,32 @@ export default function InformeCatedraDetalle() {
 
           setGruposBase(dataOrdenada);
         }
-
         const { materiaId, anio, periodo } = dataInforme;
 
-        fetch(
-          `http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            if (data && data.length > 0) {
-              const dataOrdenada = [...data].sort((a, b) =>
-                a.categoria_cod.localeCompare(b.categoria_cod, "es", {
-                  sensitivity: "base",
-                })
-              );
-              setDatosEstadisticos(dataOrdenada);
-            }
-          });
+        const paramsEstadistica = {
+          id_materia: materiaId,
+          anio: anio,
+          periodo: periodo
+        };
+        const resEstadisticas = await api.get('/datos_estadisticos/', { params: paramsEstadistica });
+        const dataStats = resEstadisticas.data;
 
-        fetch(
-          `http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
-        )
-          .then((res) => res.json())
-          .then((data) => setCantidad(data));
+        if (dataStats && dataStats.length > 0) {
+           const dataOrdenada = [...dataStats].sort((a: any, b: any) =>
+             a.categoria_cod.localeCompare(b.categoria_cod, "es", {
+               sensitivity: "base",
+             })
+           );
+           setDatosEstadisticos(dataOrdenada);
+        }
+
+        const resCantidad = await api.get('/datos_estadisticos/cantidad_encuestas_completadas', { params: paramsEstadistica });
+        setCantidad(resCantidad.data);
+
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error cargando detalles:", err);
+        const mensaje = err.response?.data?.detail || err.message || "Error desconocido al obtener el informe.";
+        setError(mensaje);
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+//instancia api
+import api from "../../../services/api";
 import { CampoTextArea, CampoPorcentaje } from "./Campos";
 
 
@@ -39,20 +41,24 @@ export default function Pregunta2({
             try {
                 setIsLoading(true);
                 setError(null);
-
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/tabla_pregunta_2/", 
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
+                const data = res.data;
 
-                if (!res.ok) {
-                    throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
-                }
-                const data = await res.json();
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                const itemsIniciales: TablaPregunta2Item[] = data.map((itm) => {
+                const itemsIniciales: TablaPregunta2Item[] = data.map((itm: any) => {
                     const teoricas = parseFloat(itm.porcentaje_teoricas || "");
                     const practicas = parseFloat(itm.porcentaje_practicas || "");
 
@@ -66,7 +72,7 @@ export default function Pregunta2({
 
                 setItems(itemsIniciales);
 
-                const respuestasIniciales = data.map((itm) => ({
+                const respuestasIniciales = data.map((itm: any) => ({
                     pregunta_id: pregunta.id,
                     texto_respuesta: JSON.stringify({
                         porcentaje_teoricas: itm.porcentaje_teoricas,
@@ -77,13 +83,10 @@ export default function Pregunta2({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Error al obtener información:", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }

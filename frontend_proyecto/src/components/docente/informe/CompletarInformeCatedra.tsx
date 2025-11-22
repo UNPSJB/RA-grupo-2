@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+// instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "./ContenidoPasos";
@@ -82,41 +84,50 @@ export default function CompletarInformeCatedra() {
     setCurrentStep(stepId);
   };
 
- 
   useEffect(() => {
     if (!informeBaseId) {
       setError("ID de informe base no encontrado.");
       setLoading(false);
       return;
     }
-    fetch(`http://127.0.0.1:8000/informes_catedra/${informeBaseId}/categorias_con_preguntas`)
-      .then((res) => { if (!res.ok) throw new Error("No se pudo cargar la estructura del informe."); return res.json(); })
-      .then((data: CategoriaConPreguntas[]) => {
+    
+    api.get(`/informes_catedra/${informeBaseId}/categorias_con_preguntas`)
+      .then((res) => {
+        const data: CategoriaConPreguntas[] = res.data;
         const dataOrdenada = [...data].sort((a, b) => a.cod.localeCompare(b.cod, "es", { sensitivity: "base" }));
         setCategoriasConPreguntas(dataOrdenada);
       })
-      .catch((err) => { console.error("Error fetching estructura informe:", err); setError(err.message); })
+      .catch((err) => { 
+        console.error("Error fetching estructura informe:", err); 
+        setError(err.response?.data?.detail || err.message); 
+      })
       .finally(() => setLoading(false));
   }, [informeBaseId]);
 
   useEffect(() => {
     setDatosEstadisticos([]);
-    fetch(`http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
-      .then((res) => { if (!res.ok) throw new Error("Error al obtener los datos"); return res.json(); })
-      .then((data) => {
-        if (data.length != 0) {
-          const dataOrdenada = [...data].sort((a, b) => a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" }));
+    const params = { id_materia: materiaId, anio, periodo };
+
+    api.get('/datos_estadisticos/', { params })
+      .then((res) => {
+        const data = res.data;
+        if (data.length !== 0) {
+          const dataOrdenada = [...data].sort((a: any, b: any) => a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" }));
           setDatosEstadisticos(dataOrdenada);
         }
       })
-      .catch((error) => { console.error(error); setMensaje("Error al obtener los datos estadísticos."); })
+      .catch((error) => { 
+        console.error(error); 
+        setMensaje("Error al obtener los datos estadísticos."); 
+      })
       .finally(() => setLoading(false));
   }, [materiaId, anio, periodo]);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
-      .then((res) => { if (!res.ok) throw new Error("Error al obtener la cantidad de encuestas"); return res.json(); })
-      .then((data) => { setCantidad(data); })
+    const params = { id_materia: materiaId, anio, periodo };
+    
+    api.get('/datos_estadisticos/cantidad_encuestas_completadas', { params })
+      .then((res) => { setCantidad(res.data); })
       .catch((error) => { console.error(error); });
   }, [anio, materiaId, periodo]);
 
@@ -139,11 +150,13 @@ export default function CompletarInformeCatedra() {
   const enviarInforme = async () => {
     setEnviando(true);
     setMensaje(null);
+    
     const respuestasFormateadas = Object.entries(respuestas).map(([preguntaIdStr, respuestaObj]) => ({
       pregunta_id: parseInt(preguntaIdStr, 10),
       opcion_id: respuestaObj.opcion_id,
       texto_respuesta: respuestaObj.texto_respuesta,
     }));
+
     const datosParaBackend = {
       docente_materia_id: docenteMateriaId,
       informe_catedra_base_id: informeBaseId,
@@ -159,25 +172,28 @@ export default function CompletarInformeCatedra() {
       aux_segunda: aux2.trim()? aux2 : null,
       respuestas: respuestasFormateadas,
     };
+
     try {
-      const res = await fetch("http://127.0.0.1:8000/informe-catedra-completado/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datosParaBackend),
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ detail: "Error desconocido al enviar." }));
-        throw new Error(errorData.detail || "Error al enviar el informe");
-      }
-      const data = await res.json();
+      const res = await api.post("/informe-catedra-completado/", datosParaBackend);
+      const data = res.data;
       try {
-        const response = await fetch(`http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`, { method: "POST" });
-        if (response.ok) { setMensaje("Datos estadísticos generados y guardados correctamente."); } else { setMensaje("Error al guardar los datos estadísticos."); }
-      } catch (error) { console.error(error); setMensaje("Error al guardar datos estadisticos."); }
+        await api.post(`/datos_estadisticos/guardar_datos/${data.id}`);
+        setMensaje("Datos estadísticos generados y guardados correctamente.");
+      } catch (error) { 
+        console.error(error); 
+        setMensaje("Informe guardado, pero hubo un error al guardar datos estadisticos."); 
+      }
+
       setMensaje("¡Informe enviado con éxito!");
       setTimeout(() => { navigate(ROUTES.INFORMES_CATEDRA_PENDIENTES); }, 2000);
-    } catch (err: Error | unknown) { console.error("Error enviando informe:", err); setMensaje(`Error: ${(err as Error).message}`);
-    } finally { setEnviando(false); }
+
+    } catch (err: any) { 
+      console.error("Error enviando informe:", err); 
+      const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+      setMensaje(`Error: ${errorMsg}`);
+    } finally { 
+      setEnviando(false); 
+    }
   };
 
 

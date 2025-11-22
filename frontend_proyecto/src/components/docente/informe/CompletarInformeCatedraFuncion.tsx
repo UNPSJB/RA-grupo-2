@@ -1,4 +1,6 @@
 import { useEffect, useState, Fragment } from "react";
+//instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface InformeActividad {
@@ -61,35 +63,20 @@ export default function CompletarInformeCatedraFuncion({
 
     const fetchData = async () => {
       try {
-        const relacionRes = await fetch(
-          `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
-        );
-        if (!relacionRes.ok)
-          throw new Error("Error al obtener la relación docente-materia");
-        const relacion = await relacionRes.json();
-
+        const relacionRes = await api.get(`/docentes/materia_relacion/${docenteMateriaId}`);
+        const relacion = relacionRes.data;
         const docenteId = relacion.docente_id;
         const materiaIdRelacion = relacion.materia_id;
         const anio = relacion.anio ?? ANIO_ACTUAL;
         const periodo = relacion.periodo ?? PERIODO_ACTUAL;
-
-        const materiaRes = await fetch(
-          `http://127.0.0.1:8000/materias/${materiaIdRelacion}`
-        );
-        if (!materiaRes.ok) throw new Error("Error al obtener la materia");
-        const materia = await materiaRes.json();
-
-        const docenteRes = await fetch(
-          `http://127.0.0.1:8000/docentes/${docenteId}`
-        );
-        if (!docenteRes.ok) throw new Error("Error al obtener el docente");
-        const docente = await docenteRes.json();
-
-        const alumnosRes = await fetch(
-          `http://127.0.0.1:8000/alumnos/materia/${materiaIdRelacion}/cursantes?anio=${anio}&periodo=${periodo}`
-        );
-        if (!alumnosRes.ok) throw new Error("Error al obtener alumnos");
-        const alumnos = await alumnosRes.json();
+        const materiaRes = await api.get(`/materias/${materiaIdRelacion}`);
+        const materia = materiaRes.data;
+        const docenteRes = await api.get(`/docentes/${docenteId}`);
+        const docente = docenteRes.data;
+        const alumnosRes = await api.get(`/alumnos/materia/${materiaIdRelacion}/cursantes`, {
+            params: { anio, periodo }
+        });
+        const alumnos = alumnosRes.data;
 
         const cantidadAlumnos = alumnos.length;
 
@@ -110,7 +97,9 @@ export default function CompletarInformeCatedraFuncion({
 
         setData(datos);
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error cargando datos de cátedra:", err);
+        const msg = err.response?.data?.detail || err.message || "Error desconocido.";
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -127,13 +116,22 @@ export default function CompletarInformeCatedraFuncion({
 
   useEffect(() => {
     if (!data) return;
-    onDatosGenerados?.(data);
+    const dataActualizada = {
+        ...data,
+        cantidadComisionesTeoricas,
+        cantidadComisionesPracticas,
+        JTP,
+        aux1,
+        aux2
+    };
+    onDatosGenerados?.(dataActualizada);
   }, [
-    data?.cantidadComisionesTeoricas,
-    data?.cantidadComisionesPracticas,
-    data?.JTP,
-    data?.aux1,
-    data?.aux2
+    cantidadComisionesTeoricas,
+    cantidadComisionesPracticas,
+    JTP,
+    aux1,
+    aux2,
+    data?.actividadCurricular 
   ]);
 
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+// instancia api
+import api from "../../../services/api"; 
 import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
 import type { Departamento } from "../../../types/types";
 import ROUTES from "../../../paths";
@@ -17,14 +19,14 @@ export default function InformeCatedraList() {
   const departamentoId = 1; 
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/departamentos/${departamentoId}`)
-      .then(res => res.json())
-      .then(setDepartamento)
-      .catch(console.error);
-    fetch(`http://127.0.0.1:8000/informe-catedra-completado/departamento/${departamentoId}`)
-      .then(res => res.json())
-      .then(setInformes)
-      .catch(console.error);
+    api.get(`/departamentos/${departamentoId}`)
+      .then(res => setDepartamento(res.data)) 
+      .catch(err => console.error("Error cargando departamento:", err));
+
+    api.get(`/informe-catedra-completado/departamento/${departamentoId}`)
+      .then(res => setInformes(res.data))
+      .catch(err => console.error("Error cargando informes:", err));
+      
   }, [departamentoId]);
 
   return (

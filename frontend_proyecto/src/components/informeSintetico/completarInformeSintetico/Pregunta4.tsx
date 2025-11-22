@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Materia } from "../../../types/types";
+//instancia api
+import api from "../../../services/api";
 import { CampoTextArea, CampoCheckbox } from "./Campos";
 
 const CALIFICACIONES = [
@@ -66,16 +68,18 @@ export default function DesempenoAuxiliares({
             try {
                 setIsLoading(true);
                 setError(null);
-
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/desempeno_auxiliares/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/desempeno_auxiliares/",
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({ detail: res.statusText }));
-                    throw new Error(`Error HTTP ${res.status}: ${errData.detail || res.statusText}`);
-                }
-                const data: TablaDesempenoAuxiliar[] = await res.json();
+                const data: TablaDesempenoAuxiliar[] = res.data;
 
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
@@ -96,13 +100,10 @@ export default function DesempenoAuxiliares({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Error al obtener desempeño de auxiliares:", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }

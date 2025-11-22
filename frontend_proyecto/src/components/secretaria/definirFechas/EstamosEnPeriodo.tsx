@@ -1,4 +1,6 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
+// instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 function parseFechaLocal(fecha: string) {
@@ -9,23 +11,28 @@ export function EsPeriodoEncuesta() {
     const [esPeriodo, setEsPeriodo] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/periodos_apertura/?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`)
-            .then(res => {
-                if (res.status === 404) return null;
-                if (!res.ok) throw new Error("Error al obtener el periodo de fechas");
-                return res.json();
-            })
-            .then(data => {
-                if (data) {
+        api.get('/periodos_apertura/', {
+            params: {
+                anio: ANIO_ACTUAL,
+                periodo: PERIODO_ACTUAL
+            }
+        })
+        .then(res => {
+            const data = res.data;
+            if (data) {
+                const hoy = new Date();
+                const inicio = parseFechaLocal(data.inicio_encuesta);
+                const fin = parseFechaLocal(data.fin_encuesta);
 
-                    const hoy = new Date();
-                    const inicio = parseFechaLocal(data.inicio_encuesta);
-                    const fin = parseFechaLocal(data.fin_encuesta);
-
-                    setEsPeriodo(hoy >= inicio && hoy <= fin);
-                }
-            })
-            .catch(console.error);
+                setEsPeriodo(hoy >= inicio && hoy <= fin);
+            }
+        })
+        .catch(err => {
+            if (err.response && err.response.status === 404) {
+                return;
+            }
+            console.error("Error verificando periodo encuesta:", err);
+        });
     }, []); 
 
     return esPeriodo;
@@ -35,23 +42,28 @@ export function EsPeriodoInformeCatedra() {
     const [esPeriodo, setEsPeriodo] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/periodos_apertura/?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`)
-            .then(res => {
-                if (res.status === 404) return null;
-                if (!res.ok) throw new Error("Error al obtener el periodo de fechas");
-                return res.json();
-            })
-            .then(data => {
-                if (data) {
+        api.get('/periodos_apertura/', {
+            params: {
+                anio: ANIO_ACTUAL,
+                periodo: PERIODO_ACTUAL
+            }
+        })
+        .then(res => {
+            const data = res.data;
+            if (data) {
+                const hoy = new Date();
+                const inicio = parseFechaLocal(data.inicio_informe_catedra);
+                const fin = parseFechaLocal(data.fin_informe_catedra);
 
-                    const hoy = new Date();
-                    const inicio = parseFechaLocal(data.inicio_informe_catedra);
-                    const fin = parseFechaLocal(data.fin_informe_catedra);
-
-                    setEsPeriodo(hoy >= inicio && hoy <= fin);
-                }
-            })
-            .catch(console.error);
+                setEsPeriodo(hoy >= inicio && hoy <= fin);
+            }
+        })
+        .catch(err => {
+            if (err.response && err.response.status === 404) {
+                return;
+            }
+            console.error("Error verificando periodo informe cátedra:", err);
+        });
     }, []); 
 
     return esPeriodo;
@@ -62,23 +74,28 @@ export function EsPeriodoInformeSintetico() {
     const [esPeriodo, setEsPeriodo] = useState<boolean>(false);
 
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/periodos_apertura/?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`)
-            .then(res => {
-                if (res.status === 404) return null;
-                if (!res.ok) throw new Error("Error al obtener el periodo de fechas");
-                return res.json();
-            })
-            .then(data => {
-                if (data) {
+        api.get('/periodos_apertura/', {
+            params: {
+                anio: ANIO_ACTUAL,
+                periodo: PERIODO_ACTUAL
+            }
+        })
+        .then(res => {
+            const data = res.data;
+            if (data) {
+                const hoy = new Date();
+                const inicio = parseFechaLocal(data.inicio_informe_sintetico);
+                const fin = parseFechaLocal(data.fin_informe_sintetico);
 
-                    const hoy = new Date();
-                    const inicio = parseFechaLocal(data.inicio_informe_sintetico);
-                    const fin = parseFechaLocal(data.fin_informe_sintetico);
-
-                    setEsPeriodo(hoy >= inicio && hoy <= fin);
-                }
-            })
-            .catch(console.error);
+                setEsPeriodo(hoy >= inicio && hoy <= fin);
+            }
+        })
+        .catch(err => {
+            if (err.response && err.response.status === 404) {
+                return;
+            }
+            console.error("Error verificando periodo informe sintético:", err);
+        });
     }, []); 
 
     return esPeriodo;

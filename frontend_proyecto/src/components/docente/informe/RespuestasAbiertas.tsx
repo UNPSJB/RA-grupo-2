@@ -1,4 +1,6 @@
 import { useEffect, useState, Fragment } from "react";
+//instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface DatosAbiertosPregunta {
@@ -34,29 +36,27 @@ export default function RespuestasAbiertas({ docenteMateriaId }: Props) {
       setLoading(true);
       setError(null);
       try {
-        const relacionRes = await fetch(
-          `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
-        );
-        if (!relacionRes.ok)
-          throw new Error("Error al obtener la relación docente-materia");
-
-        const relacion: RelacionDocenteMateria = await relacionRes.json();
+        const relacionRes = await api.get(`/docentes/materia_relacion/${docenteMateriaId}`);
+        const relacion: RelacionDocenteMateria = relacionRes.data;
+        
         const materiaId = relacion.materia_id;
         const anio = relacion.anio ?? ANIO_ACTUAL;
         const periodo = relacion.periodo ?? PERIODO_ACTUAL;
+        const respuestasRes = await api.get('/datos_estadisticos/respuestas_abiertas', {
+          params: {
+            id_materia: materiaId,
+            anio: anio,
+            periodo: periodo
+          }
+        });
 
-        const respuestasRes = await fetch(
-          `http://127.0.0.1:8000/datos_estadisticos/respuestas_abiertas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
-        );
-        if (!respuestasRes.ok)
-          throw new Error("Error al obtener respuestas abiertas");
-
-        const data: DatosAbiertosCategoria[] = await respuestasRes.json();
+        const data: DatosAbiertosCategoria[] = respuestasRes.data;
         setCategorias(data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Ocurrió un error inesperado"
-        );
+
+      } catch (err: any) {
+        console.error("Error cargando respuestas abiertas:", err);
+        const mensaje = err.response?.data?.detail || err.message || "Ocurrió un error inesperado";
+        setError(mensaje);
       } finally {
         setLoading(false);
       }

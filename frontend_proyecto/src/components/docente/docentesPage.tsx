@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+//instancia api
+import api from "../../services/api";
 //import { useParams } from "react-router-dom";
 import DetalleDocente from "./docentes";
 import type { Docente } from "../../types/types";
@@ -12,14 +14,15 @@ export default function DocentePage() {
 
   useEffect(() => {
     if (!docenteId) return;
-
-    fetch(`http://127.0.0.1:8000/docentes/${docenteId}/materias`)
+    api.get(`/docentes/${docenteId}/materias`)
       .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener el docente");
-        return res.json();
+        setDocente(res.data);
       })
-      .then((data) => setDocente(data))
-      .catch((err) => setError(err.message))
+      .catch((err) => {
+        console.error("Error al obtener el docente:", err);
+        const errorMsg = err.response?.data?.detail || err.message || "Error al obtener el docente";
+        setError(errorMsg);
+      })
       .finally(() => setLoading(false));
   }, [docenteId]);
 
@@ -45,5 +48,6 @@ export default function DocentePage() {
       </div>
     );
   }
+  
   return <DetalleDocente docente={docente} />;
 }

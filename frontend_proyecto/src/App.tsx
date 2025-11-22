@@ -46,6 +46,7 @@ function App() {
         
         <div className="container-fluid px-2">
           <Routes>
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route path={ROUTES.HOME} element={<Menu />} />
             <Route path={ROUTES.CARRERAS_DPTO()} element={<DetalleDepartamento />} />
             <Route path={ROUTES.CARRERA()} element={<DetalleCarrera />} />
@@ -73,7 +74,7 @@ function App() {
             <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
             <Route path={ROUTES.DEFINIR_FECHAS} element={<DefinirFechas/>}/>
             <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
-            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+
 
           </Routes>
         </div>

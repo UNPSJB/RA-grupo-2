@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+//instancia api
+import api from "../../../services/api";
 import { CampoTextArea, CampoTexto } from "./Campos";
 
 interface Tabla2BItem {
@@ -37,29 +39,31 @@ export default function Pregunta2B({
     useEffect(() => {
         if (!departamentoId) return;
         if (!carreraId) return;
-        console.log(pregunta)
-
+        console.log(pregunta) 
         const fetchData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
-
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2B/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/tabla_pregunta_2B/",
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
-
-                if (!res.ok) {
-                    throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
-                }
-
-                const data = await res.json();
+                const data = res.data;
 
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
                 setItems(data);
-                const respuestasIniciales = data.map((itm) => ({
+                
+                const respuestasIniciales = data.map((itm: Tabla2BItem) => ({
                     pregunta_id: pregunta.id,
                     texto_respuesta: JSON.stringify({
                         encuesta_B: itm.encuesta_B,
@@ -73,13 +77,10 @@ export default function Pregunta2B({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Error al obtener información:", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }
@@ -87,8 +88,6 @@ export default function Pregunta2B({
 
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
-
-    // Actualizo el estado local y notifica al padre
     const handleChange = <K extends keyof Tabla2BItem>(
         index: number,
         field: K,
@@ -213,4 +212,3 @@ export default function Pregunta2B({
         </div>
     );
 }
-

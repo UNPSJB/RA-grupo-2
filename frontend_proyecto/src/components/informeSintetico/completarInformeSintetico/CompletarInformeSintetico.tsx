@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+// instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import Pregunta2B from "./Pregunta2B";
@@ -81,21 +83,16 @@ export default function CompletarInformeSintetico() {
         const walk = (x - startX) * 1.5; 
         scrollRef.current.scrollLeft = scrollLeft - walk;
     };
-
     useEffect(() => {
         if(!dpto || !carrera || !informeBaseId){
             setError("Se requiere información de contexto.");
             setLoading(false);
             return;
         }
-        fetch(
-            `http://127.0.0.1:8000/informes_sinteticos_base/${informeBaseId}/preguntas`
-        )
+        api.get(`/informes_sinteticos_base/${informeBaseId}/preguntas`)
             .then((res) => {
-                if (!res.ok) throw new Error("No se pudo cargar la estructura del informe.");
-                return res.json();
-            })
-            .then((data: Pregunta[]) => {
+                const data: Pregunta[] = res.data;
+                
                 const ordenadas = data.sort((a, b) => a.orden - b.orden);
                 setPreguntas(ordenadas);
                 if (ordenadas.length > 0) {
@@ -104,7 +101,8 @@ export default function CompletarInformeSintetico() {
             })
             .catch((err) => {
                 console.error("Error fetching preguntas del informe:", err);
-                setError(err.message);
+                const msg = err.response?.data?.detail || err.message || "Error al cargar preguntas";
+                setError(msg);
             })
             .finally(() => setLoading(false));
     }, [informeBaseId]);
@@ -140,7 +138,6 @@ export default function CompletarInformeSintetico() {
 
         if (mensaje && mensaje.includes("complete")) setMensaje(null);
     };
-
     const enviarInforme = async () => {
         setEnviando(true);
         setMensaje(null);
@@ -155,27 +152,20 @@ export default function CompletarInformeSintetico() {
         };
 
         try {
-            const res = await fetch(
-                "http://127.0.0.1:8000/informes_sinteticos_completados/completados/",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(datosParaBackend),
-                }
+            await api.post(
+                "/informes_sinteticos_completados/completados/",
+                datosParaBackend
             );
-            if (!res.ok) {
-                const errorData = await res
-                    .json()
-                    .catch(() => ({ detail: "Error desconocido al enviar." }));
-                throw new Error(errorData.detail || "Error al enviar el informe");
-            }
+
             setMensaje("¡Informe enviado con éxito!");
             setTimeout(() => {
                 navigate(ROUTES.CARRERAS_DPTO(dpto.id));
             }, 2000);
-        } catch (err: Error | unknown) {
+
+        } catch (err: any) {
             console.error("Error enviando informe:", err);
-            setMensaje(`Error: ${(err as Error).message}`);
+            const errorMsg = err.response?.data?.detail || err.message || "Error desconocido al enviar.";
+            setMensaje(`Error: ${errorMsg}`);
         } finally {
             setEnviando(false);
         }
