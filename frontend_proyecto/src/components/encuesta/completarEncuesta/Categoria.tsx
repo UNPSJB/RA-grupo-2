@@ -28,7 +28,9 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreg
   const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
   const [respuestas, setRespuestas] = useState<Record<number, { opcion_id: number | null; texto?: string }>>({});
   const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
+  const [categoriaNotificada, setCategoriaNotificada] = useState(false);
 
+  // Cargar preguntas
   useEffect(() => {
     api.get<Pregunta[]>(`/categorias/${categoria.id}/preguntas`)
       .then((res) => {
@@ -37,12 +39,22 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreg
         const inicial: Record<number, { opcion_id: number | null; texto?: string }> = {};
         data.forEach((p) => (inicial[p.id] = { opcion_id: null, texto: "" }));
         setRespuestas(inicial);
-        onTotalPreguntas?.(categoria.id, data.length);
       })
       .catch((err) =>
         console.error("Error al obtener preguntas de la categoría:", err)
       );
-  }, [categoria.id, onTotalPreguntas]); 
+  }, [categoria.id]);
+
+  // Notificar cantidad de preguntas en un efecto separado
+  useEffect(() => {
+    if (preguntas.length > 0 && !categoriaNotificada && onTotalPreguntas) {
+      // Usar setTimeout para sacarlo del ciclo de render actual
+      setTimeout(() => {
+        onTotalPreguntas(categoria.id, preguntas.length);
+        setCategoriaNotificada(true);
+      }, 0);
+    }
+  }, [preguntas, categoria.id, categoriaNotificada, onTotalPreguntas]);
 
   const cargarOpciones = (preguntaId: number) => {
     if (opciones[preguntaId]) return;

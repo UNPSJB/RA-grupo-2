@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import PreguntasCategoria from "./Categoria";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -110,16 +110,16 @@ export default function CompletarEncuesta() {
       .finally(() => setLoading(false));
   }, [location.state]);
 
-  const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number | null, texto?: string) => {
+  const manejarCambioRespuestas = useCallback((pregunta_id: number, opcion_id: number | null, texto?: string) => {
     setRespuestasGlobales((prev) => {
       const existentes = prev.filter((r) => r.pregunta_id !== pregunta_id);
       return [...existentes, { pregunta_id, opcion_id, texto_respuesta: texto ?? null }];
     });
-  };
+  }, []);
 
-  const manejarTotalPreguntas = (categoriaId: number, cantidad: number) => {
+  const manejarTotalPreguntas = useCallback((categoriaId: number, cantidad: number) => {
     setPreguntasPorCategoria((prev) => ({ ...prev, [categoriaId]: cantidad }));
-  };
+  }, []);
 
   const totalPreguntas = Object.values(preguntasPorCategoria).reduce((a, b) => a + b, 0);
 
