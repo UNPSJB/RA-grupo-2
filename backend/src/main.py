@@ -31,6 +31,8 @@ from src.respuesta_informe_sintetico.router import router as respuestas_informe_
 from src.filtros.router import router as filtros_router
 from src.periodos_apertura.router import router as periodos_apertura_router
 from src.sedes.router import router as sedes_router
+from src.auth.router import router as auth_router
+from src.users.router import router as users_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -79,3 +81,5 @@ app.include_router(respuestas_informe_sintetico_router)
 app.include_router(filtros_router)
 app.include_router(periodos_apertura_router)
 app.include_router(sedes_router)
+app.include_router(auth_router)
+app.include_router(users_router)
