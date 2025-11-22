@@ -129,24 +129,45 @@ export default function InformeCatedraPDF({
 
                 <Text style={styles.titleCenter}>Informe de Cátedra</Text>
 
-                <View style={{ marginTop: 20 }}>
+                <View style={{ marginTop: 25 }}>
                     <Text style={styles.respuesta}>
-                        <Text style={{ fontWeight: "bold" }}>Año:</Text> {informe.anio}
+                        <Text style={{ fontWeight: "bold" }}>Sede:</Text>{" "}
+                        {informe.sede ?? "—"}
                     </Text>
+
                     <Text style={styles.respuesta}>
-                        <Text style={{ fontWeight: "bold" }}>Periodo:</Text> {mostrarPeriodo(informe.periodo)}
+                        <Text style={{ fontWeight: "bold" }}>Ciclo Lectivo:</Text>{" "}
+                        {informe.anio} - {mostrarPeriodo(informe.periodo)}
                     </Text>
+
                     <Text style={styles.respuesta}>
                         <Text style={{ fontWeight: "bold" }}>Actividad Curricular:</Text>{" "}
-                        {informe.materiaCodigo} – {informe.materiaNombre}
+                        {informe.materiaNombre ?? "—"}
                     </Text>
+
+                    <Text style={styles.respuesta}>
+                        <Text style={{ fontWeight: "bold" }}>Código de la actividad curricular:</Text>{" "}
+                        {informe.materiaCodigo ?? "—"}
+                    </Text>
+
                     <Text style={styles.respuesta}>
                         <Text style={{ fontWeight: "bold" }}>Docente Responsable:</Text>{" "}
                         {informe.docenteResponsable ?? "—"}
                     </Text>
+
                     <Text style={styles.respuesta}>
-                        <Text style={{ fontWeight: "bold" }}>Sede:</Text>{" "}
-                        {informe.sede ?? "—"}
+                        <Text style={{ fontWeight: "bold" }}>Cantidad de alumnos inscriptos:</Text>{" "}
+                        {informe.cantidadAlumnos ?? "—"}
+                    </Text>
+
+                    <Text style={styles.respuesta}>
+                        <Text style={{ fontWeight: "bold" }}>Cantidad de comisiones clases teóricas:</Text>{" "}
+                        {informe.cantidadComisionesTeoricas ?? "—"}
+                    </Text>
+
+                    <Text style={styles.respuesta}>
+                        <Text style={{ fontWeight: "bold" }}>Cantidad de comisiones clases prácticas:</Text>{" "}
+                        {informe.cantidadComisionesPracticas ?? "—"}
                     </Text>
                 </View>
             </Page>
