@@ -6,6 +6,7 @@ from src import Opcion
 class PreguntaBase(BaseModel):
     enunciado: str
     tipo: Optional[str] = None  # nuevo campo
+    obligatoria: Optional[bool] = False  
     
 class PreguntaCerradaCreate(PreguntaBase):
     categoria_id: int
@@ -23,6 +24,7 @@ class Pregunta(PreguntaBase):
     id: int
     enunciado: str
     categoria_id: int
+    obligatoria: bool
 
     model_config = {"from_attributes": True}
 

@@ -22,7 +22,6 @@ export default function DropdownOpciones({
   seleccionada,
 }: Props) {
   return (
-    
     <div className="dropdown">
       <button
         className="btn btn-theme-primary btn-sm dropdown-toggle"
