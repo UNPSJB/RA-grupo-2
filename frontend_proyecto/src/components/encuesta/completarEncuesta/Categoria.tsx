@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import PreguntaItem from "./PreguntaItem";
 import type { Categoria } from "../../../types/types";
-
+import api from "../../../services/api";
 
 interface Pregunta {
   id: number;
   enunciado: string;
   categoria_id: number;
   encuesta_id: number;
-  tipo: "cerrada" | "abierta"; // nuevo campo
+  tipo: "cerrada" | "abierta";
 }
 
 interface Opcion {
@@ -19,8 +19,8 @@ interface Opcion {
 
 interface Props {
   categoria: Categoria;
-  onRespuesta: (pregunta_id: number, opcion_id: number | null,texto?:string) => void;
-  onTotalPreguntas?: (id: number, cantidad: number) => void; 
+  onRespuesta: (pregunta_id: number, opcion_id: number | null, texto?: string) => void;
+  onTotalPreguntas?: (id: number, cantidad: number) => void;
 }
 
 export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreguntas }: Props) {
@@ -30,9 +30,9 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreg
   const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/categorias/${categoria.id}/preguntas`)
-      .then((res) => res.json())
-      .then((data: Pregunta[]) => {
+    api.get<Pregunta[]>(`/categorias/${categoria.id}/preguntas`)
+      .then((res) => {
+        const data = res.data; 
         setPreguntas(data);
         const inicial: Record<number, { opcion_id: number | null; texto?: string }> = {};
         data.forEach((p) => (inicial[p.id] = { opcion_id: null, texto: "" }));
@@ -42,26 +42,23 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreg
       .catch((err) =>
         console.error("Error al obtener preguntas de la categoría:", err)
       );
-  }, [categoria.id]);
+  }, [categoria.id, onTotalPreguntas]); 
 
-const cargarOpciones = (preguntaId: number) => {
-  if (opciones[preguntaId]) return;
-
-  fetch(`http://localhost:8000/preguntas/${preguntaId}/opciones`)
-    .then((res) => res.json())
-    .then((data : Opcion[]) => {
-      const lista = data;
-      setOpciones((prev) => ({ ...prev, [preguntaId]: lista }));
-    })
-    .catch((err) => console.error("Error al cargar opciones:", err));
-};
+  const cargarOpciones = (preguntaId: number) => {
+    if (opciones[preguntaId]) return;
+    api.get<Opcion[]>(`/preguntas/${preguntaId}/opciones`)
+      .then((res) => {
+        const data = res.data; 
+        setOpciones((prev) => ({ ...prev, [preguntaId]: data }));
+      })
+      .catch((err) => console.error("Error al cargar opciones:", err));
+  };
 
   const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
     setRespuestas((prev) => {
       const nuevaRespuesta = { ...prev[preguntaId], opcion_id: opcionId };
-      const updated = { ...prev, [preguntaId]: nuevaRespuesta };
       onRespuesta(preguntaId, opcionId, nuevaRespuesta.texto);
-      return updated;
+      return { ...prev, [preguntaId]: nuevaRespuesta };
     });
     setDropdownAbierto(null);
   };
@@ -69,9 +66,8 @@ const cargarOpciones = (preguntaId: number) => {
   const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
     setRespuestas((prev) => {
       const nuevaRespuesta = { ...prev[preguntaId], texto };
-      const updated = { ...prev, [preguntaId]: nuevaRespuesta };
       onRespuesta(preguntaId, nuevaRespuesta.opcion_id, texto);
-      return updated;
+      return { ...prev, [preguntaId]: nuevaRespuesta };
     });
   };
 

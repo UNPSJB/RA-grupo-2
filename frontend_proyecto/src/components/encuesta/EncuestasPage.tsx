@@ -4,6 +4,7 @@ import type { Alumno } from "../../types/types.ts"
 import { ALUMNO_ID } from "../../constants.ts"
 import { EsPeriodoEncuesta } from "../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
+import api from "../../services/api";
 
 type EncuestaDisponible = {
   materia: string;
@@ -19,17 +20,17 @@ export default function EncuestasPage() {
   const periodoEncuesta = EsPeriodoEncuesta();
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}`)
+    api.get(`/alumnos/${alumnoId}`)
       .then(res => {
-        if (!res.ok) throw new Error("Error al obtener el alumno");
-        return res.json();
+        setAlumno(res.data);
       })
-      .then(setAlumno)
       .catch(console.error);
 
-    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}/encuestas_disponibles`)
-      .then((res) => res.json())
-      .then((data: EncuestaDisponible[]) => setEncuestas(data))
+    api.get(`/alumnos/${alumnoId}/encuestas_disponibles`)
+      .then((res) => {
+        const data: EncuestaDisponible[] = res.data;
+        setEncuestas(data);
+      })
       .catch((err) => {
         console.error("Error al obtener encuestas:", err);
         setEncuestas([]);
@@ -56,5 +57,4 @@ if (!periodoEncuesta) {
       </div>
     </div>
   );
-
 }

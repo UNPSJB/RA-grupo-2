@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { fetchInformes } from "../../informeSintetico/informesSinteticosCompletados/informesService"; 
 import ROUTES from "../../../paths"; 
 import type { Departamento } from "../../../types/types";
+import api from "../../../services/api";
 
 interface Informe {
   id: number;
@@ -22,9 +23,8 @@ function ListaInformeSintetico() {
     const departamentoId = id_dpto ? parseInt(id_dpto) : null; 
     
     if (departamentoId) {
-        fetch(`http://127.0.0.1:8000/departamentos/${departamentoId}`)
-          .then((res) => res.json())
-          .then((data) => setDepartamento(data))
+        api.get(`/departamentos/${departamentoId}`)
+          .then((res) => setDepartamento(res.data))
           .catch((err) => console.error("Error cargando departamento:", err));
         fetchInformes(departamentoId) 
           .then(setInformes)

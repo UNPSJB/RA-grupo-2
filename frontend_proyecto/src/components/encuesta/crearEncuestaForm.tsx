@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CategoriaManager from "../informeCatedra/ManejadorCategoria"
 import OpcionesManager from "../informeCatedra/ManejadorOpciones";
 import ROUTES from "../../paths";
+import api from "../../services/api";
 
 interface CategoriaTemp { cod: string; texto: string; }
 interface PreguntaTemp { enunciado: string; categoria_cod: string; tipo: 'abierta' | 'cerrada'; opcion_ids: number[]; }
@@ -23,9 +24,11 @@ export default function EncuestaBaseForm() {
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
     
     useEffect(() => {
-        fetch("http://localhost:8000/opciones")
-            .then((res) => res.json())
-            .then((data) => setOpcionesCatalogo(Array.isArray(data) ? data : []))
+        api.get("/opciones")
+            .then((res) => {
+                const data = res.data;
+                setOpcionesCatalogo(Array.isArray(data) ? data : []);
+            })
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
 
@@ -66,64 +69,39 @@ export default function EncuestaBaseForm() {
         setCargando(true);
 
         try {
-            const resEncuesta = await fetch("http://localhost:8000/encuestas/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nombre }),
-            });
-            if (!resEncuesta.ok) { 
-                const errorData = await resEncuesta.json();
-                throw new Error(errorData.detail || "Error al crear encuesta."); 
-            }
-            const { id: encuestaId } = await resEncuesta.json();
+            const resEncuesta = await api.post("/encuestas/", { nombre });
+            const { id: encuestaId } = resEncuesta.data;
             const categoriasCreadas = [];
             
             for (const categoriaTemp of categorias) {
-                const resCat = await fetch("http://localhost:8000/categorias/paraEncuesta/", { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        cod: categoriaTemp.cod,
-                        texto: categoriaTemp.texto || "",
-                        encuesta_id: encuestaId,
-                    }),
+                const resCat = await api.post("/categorias/paraEncuesta/", {
+                    cod: categoriaTemp.cod,
+                    texto: categoriaTemp.texto || "",
+                    encuesta_id: encuestaId,
                 });
-                if (!resCat.ok) { 
-                    const errorData = await resCat.json();
-                    throw new Error(errorData.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`); 
-                }
-                const categoriaCreada = await resCat.json();
+                const categoriaCreada = resCat.data;
                 categoriasCreadas.push(categoriaCreada);
             }
 
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
                 if (!categoria) continue; 
-                const endpoint = preg.tipo === 'cerrada' ? "http://localhost:8000/preguntas/cerrada" : "http://localhost:8000/preguntas/abierta";   
+                const endpoint = preg.tipo === 'cerrada' ? "/preguntas/cerrada" : "/preguntas/abierta";   
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
                     tipo: preg.tipo, 
                     ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }), 
                 };
-                const resPreg = await fetch(endpoint, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload),
-                });
-
-                if (!resPreg.ok) { 
-                     const errorData = await resPreg.json();
-                     throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
-                }
+                await api.post(endpoint, payload);
             }
 
             alert("Encuesta creado con éxito.");
             navigate(ROUTES.HOME);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error en la cascada de creación:", error);
-            const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
+            const messageToShow = error.response?.data?.detail || error.message || "Error desconocido al procesar la solicitud.";
             alert(`Fallo en la creación del encuesta. Error: ${messageToShow}`);
         } finally {
             setCargando(false);

@@ -5,6 +5,7 @@ import ProgresoDona from './dashboard/ProgresoDona';
 import TablaPendientes from './dashboard/TablaPendientes';
 import EstadisticasTabs from './dashboard/EstadisticasTabs';
 import { getResolvedColor } from '../../utils/colors';
+import api from '../../services/api';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 ChartJS.defaults.color = getResolvedColor('--color-text-primary');
@@ -59,13 +60,13 @@ export default function DashboardDepartamento() {
     const cargarFiltros = async () => {
       try {
         const [resAnios, resPeriodos, resCarreras] = await Promise.all([
-          fetch(`http://localhost:8000/filtros/anios`),
-          fetch(`http://localhost:8000/filtros/periodos`),
-          fetch(`http://localhost:8000/departamentos/${DEPARTAMENTO_ID}/carreras`)
+          api.get(`/filtros/anios`),
+          api.get(`/filtros/periodos`),
+          api.get(`/departamentos/${DEPARTAMENTO_ID}/carreras`)
         ]);
-        const anios: number[] = await resAnios.json();
-        const periodos: string[] = await resPeriodos.json();
-        const carreras: Carrera[] = await resCarreras.json();
+        const anios: number[] = resAnios.data;
+        const periodos: string[] = resPeriodos.data;
+        const carreras: Carrera[] = resCarreras.data;
         setAniosList(anios);
         setPeriodosList(periodos);
         setCarrerasList(carreras);
@@ -85,17 +86,16 @@ export default function DashboardDepartamento() {
     const cargarDatosDelDashboard = async () => {
       setIsLoadingData(true);
       try {
-        const params = new URLSearchParams({ anio: String(anio), periodo: periodo });
-        if (carreraId) {
-          params.append('carrera_id', String(carreraId));
-        }
-        const response = await fetch(
-          `http://localhost:8000/departamentos/${DEPARTAMENTO_ID}/dashboard-completo?${params}`
+        const params = {
+          anio: String(anio),
+          periodo: periodo,
+          ...(carreraId && { carrera_id: String(carreraId) })
+        };
+        const response = await api.get(
+          `/departamentos/${DEPARTAMENTO_ID}/dashboard-completo`,
+          { params }
         );
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${await response.text()}`);
-        }
-        const data = await response.json();
+        const data = response.data;
         setProgresoData(data.progreso);
         setEstadisticasBasico(data.estadisticas_basico);
         setEstadisticasSuperior(data.estadisticas_superior);

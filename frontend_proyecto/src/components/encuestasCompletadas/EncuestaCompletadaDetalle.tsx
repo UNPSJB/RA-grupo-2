@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ROUTES from "../../paths";
+import api from "../../services/api";
 
 interface Opcion {
   id: number;
@@ -51,46 +52,39 @@ export default function EncuestaCompletadaDetalle() {
   useEffect(() => {
     if (!id) return;
 
-    fetch(`http://127.0.0.1:8000/encuesta-completada/${id}`)
+    api.get(`/encuesta-completada/${id}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener la encuesta completada");
-        return res.json();
-      })
-      .then(async (data: EncuestaCompletada) => {
+        const data: EncuestaCompletada = res.data;
         setEncuesta(data);
 
-        fetch(`http://127.0.0.1:8000/materias/${data.materia_id}`)
-          .then((res) => res.json())
-          .then((m: Materia) => setMateria(m))
+        api.get(`/materias/${data.materia_id}`)
+          .then((res) => {
+            const m: Materia = res.data;
+            setMateria(m);
+          })
           .catch(() => setMateria(null));
 
         const preguntasTemp: Record<number, Pregunta> = {};
         const opcionesTemp: Record<number, Opcion[]> = {};
 
-        await Promise.all(
+        Promise.all(
           data.respuestas.map(async (r) => {
-            const pRes = await fetch(
-              `http://127.0.0.1:8000/preguntas/${r.pregunta_id}`
-            );
-            if (pRes.ok) {
-              const pregunta: Pregunta = await pRes.json();
-              preguntasTemp[r.pregunta_id] = pregunta;
+            const pRes = await api.get(`/preguntas/${r.pregunta_id}`);
+            const pregunta: Pregunta = pRes.data;
+            preguntasTemp[r.pregunta_id] = pregunta;
 
-              if (pregunta.tipo === "cerrada") {
-                const oRes = await fetch(
-                  `http://127.0.0.1:8000/preguntas/${pregunta.id}/opciones`
-                );
-                if (oRes.ok) {
-                  const ops: Opcion[] = await oRes.json();
-                  opcionesTemp[pregunta.id] = ops;
-                }
-              }
+            if (pregunta.tipo === "cerrada") {
+              const oRes = await api.get(`/preguntas/${pregunta.id}/opciones`);
+              const ops: Opcion[] = oRes.data;
+              opcionesTemp[pregunta.id] = ops;
             }
           })
-        );
-
-        setPreguntas(preguntasTemp);
-        setOpciones(opcionesTemp);
+        )
+          .then(() => {
+            setPreguntas(preguntasTemp);
+            setOpciones(opcionesTemp);
+          })
+          .catch((err) => console.error("Error cargando preguntas/opciones:", err));
       })
       .catch((err) => {
         console.error(err);

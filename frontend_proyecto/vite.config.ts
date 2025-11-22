@@ -1,21 +1,23 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
+    port: 5173,
+    // Esto configura el proxy para conectar front y back en local
     proxy: {
-      // Capturamos cualquier solicitud que empiece con "/api"
       '/api': {
-        target: 'http://localhost:8000', // Tu backend FastAPI
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
-        // IMPORTANTE: Esto borra "/api" antes de llegar al backend.
-        // El frontend pide: /api/opciones
-        // El backend recibe: /opciones
         rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
+        // Esto permite que la cookie se guarde en localhost:5173
+        cookieDomainRewrite: {
+          "localhost:8000": "localhost",
+          "localhost": "localhost",
+        }
+      }
+    }
+  }
 })

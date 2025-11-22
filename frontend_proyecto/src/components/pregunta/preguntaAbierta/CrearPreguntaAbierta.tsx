@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import MensajeExito from "../preguntaCerrada/MensajeExito";
 import CategoriaSelector from "../preguntaCerrada/CategoriaSelector";
+import api from "../../../services/api";
 
 interface Categoria {
   id: number;
@@ -15,9 +16,11 @@ export default function CrearPreguntaAbierta() {
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/encuestas/1/categorias") //hardcodeado encuesta 1
-      .then((res) => res.json())
-      .then((data) => setCategorias(Array.isArray(data) ? data : []))
+    api.get("/encuestas/1/categorias") //hardcodeado encuesta 1
+      .then((res) => {
+        const data = res.data;
+        setCategorias(Array.isArray(data) ? data : []);
+      })
       .catch((err) => console.error("Error cargando categorias:", err));
   }, []);
 
@@ -29,18 +32,10 @@ export default function CrearPreguntaAbierta() {
       return;
     }
 
-    fetch("http://127.0.0.1:8000/preguntas/abierta", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        categoria_id: Number(categoriaSeleccionada),
-        enunciado,
-      }),
+    api.post("/preguntas/abierta", {
+      categoria_id: Number(categoriaSeleccionada),
+      enunciado,
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al crear la pregunta abierta");
-        return res.json();
-      })
       .then(() => {
         setMensajeExito("¡La pregunta abierta fue creada con éxito!");
         setEnunciado("");
@@ -48,6 +43,7 @@ export default function CrearPreguntaAbierta() {
       })
       .catch((err) => console.error("Error:", err));
   };
+
   return (
     <div className = "container py-4">
       <div className ="card shadow">
