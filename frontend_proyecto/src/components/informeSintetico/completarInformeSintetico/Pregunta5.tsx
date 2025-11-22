@@ -37,7 +37,7 @@ export default function ObservacionesComentarios({
 
 
     useEffect(() => {
-        const esValido = contenido.trim() !== "";
+        const esValido = contenido.trim() != "";
         notificarValidacion?.(esValido);
     }, [contenido, notificarValidacion]);
 

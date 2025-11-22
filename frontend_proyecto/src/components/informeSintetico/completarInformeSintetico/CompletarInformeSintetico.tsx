@@ -8,19 +8,19 @@ import ContenidosAlcanzados from "./Pregunta2A";
 import Pregunta2C from "./Pregunta2C";
 import Pregunta2 from "./Pregunta2";
 import ActividadesDocentes from "./Pregunta3";
-import EquipamientoBibliografia from "./Pregunta1"; 
-import type {Pregunta, Respuesta} from "../../../types/types";
-import DesempenoAuxiliares from "./Pregunta4"; 
-import ObservacionesComentarios from "./Pregunta5"; 
+import EquipamientoBibliografia from "./Pregunta1";
+import type { Pregunta, Respuesta } from "../../../types/types";
+import DesempenoAuxiliares from "./Pregunta4";
+import ObservacionesComentarios from "./Pregunta5";
 
 const TABS_MAP = new Map([
-    ["0", "Datos Generales"], ["1", "1. Recursos"], ["2", "2. Horas/Justificación"], 
-    ["2.A", "2.A. Contenidos"], ["2.B", "2.B. Encuestas"], ["2.C", "2.C. Reflexión"], 
+    ["0", "Datos Generales"], ["1", "1. Recursos"], ["2", "2. Horas/Justificación"],
+    ["2.A", "2.A. Contenidos"], ["2.B", "2.B. Encuestas"], ["2.C", "2.C. Reflexión"],
     ["3", "3. Actividades del Equipo"], ["4", "4. Valoración"], ["5", "5. Observaciones"],
 ]);
 
-function escribirPeriodo(p: string){
-    switch(p){
+function escribirPeriodo(p: string) {
+    switch (p) {
         case "PRIMER_CUATRI": return "Primer Cuatrimestre";
         case "SEGUNDO_CUATRI": return "Segundo Cuatrimestre";
     }
@@ -29,7 +29,7 @@ function escribirPeriodo(p: string){
 export default function CompletarInformeSintetico() {
     const location = useLocation();
     const navigate = useNavigate();
-    
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [respuestas, setRespuestas] = useState<Respuesta[]>([]);
@@ -37,15 +37,15 @@ export default function CompletarInformeSintetico() {
     const [mensaje, setMensaje] = useState<string | null>(null);
     const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
     const [preguntaActivaId, setPreguntaActivaId] = useState<number | null>(null);
-    
+
     const [maxPasoAlcanzadoIndex, setMaxPasoAlcanzadoIndex] = useState(0);
     const [pasoValido, setPasoValido] = useState(true);
-    
+
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    
+
     const {
         dpto = { id: 1, nombre: "dpto informatica" },
         carrera = { id: 1, nombre: "APU" },
@@ -71,7 +71,7 @@ export default function CompletarInformeSintetico() {
     }, [maxPasoAlcanzadoIndex, totalSteps]);
 
     useEffect(() => {
-        if(!dpto || !carrera || !informeBaseId){
+        if (!dpto || !carrera || !informeBaseId) {
             setError("Se requiere información de contexto.");
             setLoading(false);
             return;
@@ -102,7 +102,7 @@ export default function CompletarInformeSintetico() {
                 activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         }
-    }, [currentStepIndex, preguntas]); 
+    }, [currentStepIndex, preguntas]);
 
     const manejarCambio = useCallback((nuevasRespuestas: Respuesta[] | Respuesta) => {
         const respuestasArray = Array.isArray(nuevasRespuestas) ? nuevasRespuestas : [nuevasRespuestas];
@@ -131,7 +131,7 @@ export default function CompletarInformeSintetico() {
                 setMaxPasoAlcanzadoIndex(indexDestino);
             }
         }
-        setPasoValido(true); 
+        setPasoValido(true);
         setPreguntaActivaId(preguntas[indexDestino].id);
     };
 
@@ -158,6 +158,15 @@ export default function CompletarInformeSintetico() {
             respuestas: respuestas,
         };
 
+        const pregunta5 = preguntas.find(p => p.cod === "5");
+        const respuesta5 = respuestas.find(r => r.pregunta_id === pregunta5?.id);
+
+        if (!respuesta5 || !JSON.parse(respuesta5.texto_respuesta).observaciones_comentarios?.trim()) {
+            setMensaje("Debe completar las observaciones antes de enviar el informe.");
+            setEnviando(false);
+            return;
+        }
+
         try {
             const res = await fetch(
                 "http://127.0.0.1:8000/informes_sinteticos_completados/completados/",
@@ -168,7 +177,7 @@ export default function CompletarInformeSintetico() {
                 }
             );
             if (!res.ok) throw new Error("Error al enviar el informe");
-            
+
             setMensaje("¡Informe enviado con éxito!");
             setTimeout(() => {
                 navigate(ROUTES.CARRERAS_DPTO(dpto.id));
@@ -180,7 +189,7 @@ export default function CompletarInformeSintetico() {
         }
     };
 
-    const handleMouseDown = (e: React.MouseEvent) => { if (scrollRef.current) { setIsDragging(true); e.preventDefault(); setStartX(e.pageX - scrollRef.current.offsetLeft); setScrollLeft(scrollRef.current.scrollLeft); }};
+    const handleMouseDown = (e: React.MouseEvent) => { if (scrollRef.current) { setIsDragging(true); e.preventDefault(); setStartX(e.pageX - scrollRef.current.offsetLeft); setScrollLeft(scrollRef.current.scrollLeft); } };
     const handleMouseUp = () => setIsDragging(false);
     const handleMouseLeave = () => setIsDragging(false);
     const handleMouseMove = (e: React.MouseEvent) => { if (!isDragging || !scrollRef.current) return; const x = e.pageX - scrollRef.current.offsetLeft; const walk = (x - startX) * 1.5; scrollRef.current.scrollLeft = scrollLeft - walk; };
@@ -241,14 +250,14 @@ export default function CompletarInformeSintetico() {
 
                         <style>{`.horizontal-scroll-hidden::-webkit-scrollbar { display: none; } .horizontal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; } .is-dragging { cursor: grabbing !important; } .nav-pills .nav-item { flex-shrink: 0; } .nav-pills .nav-item .nav-link { background-color: transparent !important; color: #212529 !important; font-weight: 500; border: none; padding: 0.5rem 2rem; margin-right: 0px; opacity: 1; white-space: nowrap; border-radius: 0; } .nav-pills .nav-item .nav-link.active { background-color: var(--color-unpsjb-blue) !important; color: white !important; border: none; opacity: 1; border-radius: 5px !important; } .nav-pills .nav-item .nav-link.disabled-tab { color: #adb5bd !important; cursor: pointer !important; } .nav-pills .nav-item .nav-link:not(.active):not(.disabled-tab):hover { color: black !important; } .nav-pills-scrollable { display: flex; flex-wrap: nowrap; width: fit-content; }`}</style>
 
-                        <div ref={scrollRef} className={`horizontal-scroll-hidden mb-4 ${isDragging ? 'is-dragging' : ''}`} style={{ overflowX: 'auto'}} onMouseDown={handleMouseDown} onMouseLeave={handleMouseLeave} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
+                        <div ref={scrollRef} className={`horizontal-scroll-hidden mb-4 ${isDragging ? 'is-dragging' : ''}`} style={{ overflowX: 'auto' }} onMouseDown={handleMouseDown} onMouseLeave={handleMouseLeave} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
                             <ul className="nav nav-pills mb-0 nav-pills-scrollable">
                                 {preguntas.map((p, idx) => {
                                     const isLocked = idx > maxPasoAlcanzadoIndex;
                                     return (
                                         <li key={p.id} className="nav-item">
                                             <a className={`nav-link ${p.id === preguntaActivaId ? "active" : ""} ${isLocked ? "disabled-tab" : ""}`} href="#" onClick={(e) => { e.preventDefault(); irAlPaso(idx); }}>
-                                                {TABS_MAP.get(p.cod) || p.cod} 
+                                                {TABS_MAP.get(p.cod) || p.cod}
                                             </a>
                                         </li>
                                     );
@@ -268,7 +277,7 @@ export default function CompletarInformeSintetico() {
                     <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
                         <div className="d-flex justify-content-between">
                             {!isFirstStep && <button onClick={prevStep} className="btn btn-outline-secondary rounded-pill px-4">Anterior</button>}
-                            {isFirstStep && <div />} 
+                            {isFirstStep && <div />}
                             {isLastStep ? (
                                 <button onClick={enviarInforme} className="btn btn-success rounded-pill px-4 shadow-sm" disabled={enviando}>{enviando ? "Enviando..." : "Enviar Informe"}</button>
                             ) : (
