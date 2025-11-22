@@ -9,8 +9,11 @@ import {
 
 import type {
     CategoriaConPreguntas,
-    InformeCompletadoDetalle
+    InformeCompletadoDetalle,
+    Opcion
 } from "./InformeCatedraCompletadoDetail";
+
+import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
 
 const styles = StyleSheet.create({
     page: {
@@ -59,36 +62,63 @@ const styles = StyleSheet.create({
     },
 });
 
-
 function formatRespuesta(texto: string | null): string[] {
-    if (!texto) return ["—"];
-
+    if (!texto) return [];
     return texto
         .split("\n")
         .map(t => t.trim())
-        .filter(t => t !== "")
+        .filter(t => t !== "" && t !== "—")
         .map(t => "• " + t);
 }
-
 
 export default function InformeCatedraPDF({
     informe,
     categorias,
+    opciones
 }: {
     informe: InformeCompletadoDetalle;
     categorias: CategoriaConPreguntas[];
+    opciones: Opcion[];
 }) {
 
     const respuestas = informe.respuestas_informe;
 
-    const getRespuestaDe = (preguntaId: number) => {
-        const r = respuestas.find(x => x.pregunta.id === preguntaId);
-        return r?.texto_respuesta ?? null;
+    const getResp = (pid: number) => {
+        const r = respuestas.find(x => x.pregunta.id === pid);
+        if (!r) return { texto: null, opcion: null };
+        return { texto: r.texto_respuesta, opcion: r.opcion_id };
+    };
+
+    const normalizarEnunciadoCat1 = (e: string) => {
+        const low = e.toLowerCase();
+        if (low.includes("equip")) return "Equipamiento";
+        if (low.includes("bibli")) return "Bibliografía";
+        return e;
+    };
+
+    const agruparCategoria3 = (preguntas: any[]) => {
+        const grupos: Record<string, any[]> = {};
+
+        preguntas.forEach(p => {
+            const partes = p.enunciado.split(" - ");
+            const etiqueta = partes[0]?.trim();
+            const rol = partes[1]?.trim();
+            if (!rol) return;
+
+            if (!grupos[rol]) grupos[rol] = [];
+
+            const r = getResp(p.id);
+            grupos[rol].push({
+                etiqueta,
+                respuesta: r.texto
+            });
+        });
+
+        return grupos;
     };
 
     return (
         <Document>
-
             <Page size="A4" style={styles.page}>
                 <Image src="/unpsjb-logo.png" style={styles.logo} />
 
@@ -104,7 +134,7 @@ export default function InformeCatedraPDF({
                         <Text style={{ fontWeight: "bold" }}>Año:</Text> {informe.anio}
                     </Text>
                     <Text style={styles.respuesta}>
-                        <Text style={{ fontWeight: "bold" }}>Periodo:</Text> {informe.periodo}
+                        <Text style={{ fontWeight: "bold" }}>Periodo:</Text> {mostrarPeriodo(informe.periodo)}
                     </Text>
                     <Text style={styles.respuesta}>
                         <Text style={{ fontWeight: "bold" }}>Actividad Curricular:</Text>{" "}
@@ -121,34 +151,84 @@ export default function InformeCatedraPDF({
                 </View>
             </Page>
 
-
             {categorias.map((cat) => (
                 <Page key={cat.id} size="A4" style={styles.page}>
-
                     <Text style={styles.sectionTitle}>
                         {cat.cod} — {cat.texto}
                     </Text>
 
-                    {cat.preguntas.map((pregunta) => {
-                        const texto = getRespuestaDe(pregunta.id);
-                        const lineas = formatRespuesta(texto);
+                    {cat.cod === "3" ? (
+                        (() => {
+                            const grupos = agruparCategoria3(cat.preguntas);
 
-                        return (
-                            <View key={pregunta.id}>
-                                <Text style={styles.pregunta}>
-                                    {pregunta.enunciado}
-                                </Text>
+                            return Object.entries(grupos).map(([rol, items]) => {
+                                const itemsConContenido = items.filter(i =>
+                                    i.respuesta && i.respuesta.trim() !== "—"
+                                );
 
-                                {lineas.map((l, i) => (
-                                    <Text key={i} style={styles.respuesta}>
-                                        {l}
-                                    </Text>
-                                ))}
+                                if (itemsConContenido.length === 0) return null;
 
-                                <View style={styles.separator} />
-                            </View>
-                        );
-                    })}
+                                return (
+                                    <View key={rol}>
+                                        <View style={styles.separator} />
+                                        {itemsConContenido.map((item, idx) => {
+                                            const lineas = formatRespuesta(item.respuesta);
+
+                                            return (
+                                                <View key={idx}>
+                                                    <Text style={styles.pregunta}>
+                                                        {item.etiqueta} - {rol}
+                                                    </Text>
+                                                    {lineas.map((l, i) => (
+                                                        <Text key={i} style={styles.respuesta}>
+                                                            {l}
+                                                        </Text>
+                                                    ))}
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                );
+                            });
+                        })()
+                    ) : (
+
+                        cat.preguntas.map((pregunta) => {
+                            let enunciado = pregunta.enunciado;
+
+                            if (cat.cod === "1") {
+                                enunciado = normalizarEnunciadoCat1(enunciado);
+                            }
+
+                            const { texto, opcion } = getResp(pregunta.id);
+
+                            let contenidoFinal: string[] = [];
+
+                            if (opcion !== null) {
+                                const opt = opciones.find(o => o.id === opcion);
+                                if (opt) {
+                                    contenidoFinal = ["• " + opt.contenido];
+                                }
+                            } else {
+                                contenidoFinal = formatRespuesta(texto);
+                            }
+
+                            return (
+                                <View key={pregunta.id}>
+                                    <View style={styles.separator} />
+                                    <Text style={styles.pregunta}>{enunciado}</Text>
+
+                                    {contenidoFinal.length > 0 ? (
+                                        contenidoFinal.map((l, i) => (
+                                            <Text key={i} style={styles.respuesta}>{l}</Text>
+                                        ))
+                                    ) : (
+                                        <Text style={styles.respuesta}>—</Text>
+                                    )}
+                                </View>
+                            );
+                        })
+                    )}
                 </Page>
             ))}
         </Document>

@@ -16,6 +16,11 @@ interface Pregunta {
   categoria: Categoria;
 }
 
+export interface Opcion {
+  id: number;
+  contenido: string;
+}
+
 export interface RespuestaConPregunta {
   id: number;
   texto_respuesta: string | null;
@@ -78,6 +83,7 @@ export default function InformeCatedraDetalle() {
       <InformeCatedraPDF
         informe={informe}
         categorias={gruposBase}
+        opciones={opciones}
       />
     ).toBlob();
 
@@ -92,6 +98,7 @@ export default function InformeCatedraDetalle() {
   const [datosEstadisticos, setDatosEstadisticos] = useState<any[]>([]);
   const [cantidad, setCantidad] = useState<number>(0);
   const [gruposBase, setGruposBase] = useState<CategoriaConPreguntas[]>([]);
+  const [opciones, SetOpciones] = useState<Opcion[]>([]);
 
   const steps = [
     { id: 1, name: "Datos Generales" },
@@ -153,6 +160,16 @@ export default function InformeCatedraDetalle() {
                 })
               );
               setDatosEstadisticos(dataOrdenada);
+            }
+          });
+
+        fetch(
+          `http://127.0.0.1:8000/opciones`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data) {
+              SetOpciones(data);
             }
           });
 
@@ -250,11 +267,11 @@ export default function InformeCatedraDetalle() {
           <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">{informe.titulo || "Informe de Cátedra"}</h1>
           </div>
-          <button onClick={handlePDF} className="btn btn-success rounded-pill px-4">
-            Exportar PDF
-          </button>
-
-
+          <div className="text-center mt-3 mb-2">
+            <button onClick={handlePDF} className="btn btn-success rounded-pill px-4">
+              Exportar PDF
+            </button>
+          </div>
           <div className="card-body p-4 p-md-5">
             <style>
               {`
