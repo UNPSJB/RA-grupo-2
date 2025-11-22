@@ -3,6 +3,9 @@ import { useEffect, useState, useMemo } from "react";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "../../docente/informe/ContenidoPasos";
 import type { Categoria } from "../../../types/types";
+import { pdf } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import InformeCatedraPDF from "./InformeCatedraPDF";
 
 
 interface Pregunta {
@@ -13,14 +16,14 @@ interface Pregunta {
   categoria: Categoria;
 }
 
-interface RespuestaConPregunta {
+export interface RespuestaConPregunta {
   id: number;
   texto_respuesta: string | null;
   opcion_id: number | null;
   pregunta: Pregunta;
 }
 
-interface InformeCompletadoDetalle {
+export interface InformeCompletadoDetalle {
   id: number;
   titulo: string | null;
   contenido: string | null;
@@ -42,7 +45,7 @@ interface InformeCompletadoDetalle {
   informe_catedra_base_id: number;
 }
 
-interface CategoriaConPreguntas {
+export interface CategoriaConPreguntas {
   id: number;
   cod: string;
   texto: string;
@@ -68,6 +71,19 @@ export function mostrarPeriodo(periodo: string) {
 }
 
 export default function InformeCatedraDetalle() {
+  const handlePDF = async () => {
+    if (!informe) return;
+
+    const blob = await pdf(
+      <InformeCatedraPDF
+        informe={informe}
+        categorias={gruposBase}
+      />
+    ).toBlob();
+
+    saveAs(blob, `InformeCatedra_${informe.materiaCodigo}.pdf`);
+  };
+
   const { id } = useParams<{ id: string }>();
   const [informe, setInforme] = useState<InformeCompletadoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -234,6 +250,10 @@ export default function InformeCatedraDetalle() {
           <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">{informe.titulo || "Informe de Cátedra"}</h1>
           </div>
+          <button onClick={handlePDF} className="btn btn-success rounded-pill px-4">
+            Exportar PDF
+          </button>
+
 
           <div className="card-body p-4 p-md-5">
             <style>
@@ -292,8 +312,8 @@ export default function InformeCatedraDetalle() {
                 cantidad={cantidad}
                 docenteMateriaId={informe.docente_materia_id}
                 datosIniciales={datosGenerales}
-                manejarCambio={() => {}}
-                onDatosGenerados={() => {}}
+                manejarCambio={() => { }}
+                onDatosGenerados={() => { }}
                 nombresFuncion={{
                   JTP: informe.JTP,
                   aux1: informe.aux_primera,
