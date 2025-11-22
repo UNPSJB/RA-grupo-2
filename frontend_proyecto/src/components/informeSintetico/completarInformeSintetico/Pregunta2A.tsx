@@ -23,6 +23,7 @@ interface ContenidosProps {
     periodo: string;
     pregunta: Pregunta;
     manejarCambio?: (respuestas: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void; // Agregado
 }
 
 export default function ContenidosAlcanzados({
@@ -32,19 +33,26 @@ export default function ContenidosAlcanzados({
     periodo,
     pregunta,
     manejarCambio,
+    notificarValidacion // Agregado
 }: ContenidosProps) {
     const [items, setItems] = useState<ContenidosItem[]>([]);
+    // Estado para guardar originales y validar contra ellos
+    const [itemsOriginales, setItemsOriginales] = useState<ContenidosItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // Bloqueo inicial
+        notificarValidacion?.(false);
+
         if (!id_dpto || !id_carrera || !anio || !periodo) return;
 
         const fetchData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                
+                notificarValidacion?.(false); // Bloqueo durante fetch
+
                 const res = await fetch(
                     `http://127.0.0.1:8000/informes_sinteticos_completados/temas-desarrollados/?id_dpto=${id_dpto}&id_carrera=${id_carrera}&anio=${anio}&periodo=${periodo}`
                 );
@@ -76,6 +84,8 @@ export default function ContenidosAlcanzados({
                 });
                 
                 setItems(itemsIniciales);
+                // Guardar copia original para validación
+                setItemsOriginales(JSON.parse(JSON.stringify(itemsIniciales)));
 
                 const respuestasIniciales: Respuesta[] = itemsIniciales.map((item) => ({
                     pregunta_id: pregunta.id,
@@ -102,6 +112,45 @@ export default function ContenidosAlcanzados({
         fetchData();
     }, [id_dpto, id_carrera, anio, periodo, pregunta.id]);
 
+    // --- VALIDACIÓN CENTRALIZADA ---
+    useEffect(() => {
+        if (isLoading) {
+            notificarValidacion?.(false);
+            return;
+        }
+        
+        if (items.length === 0 && !isLoading) {
+            notificarValidacion?.(true);
+            return;
+        }
+
+        const hayError = items.some((item, idx) => {
+            const original = itemsOriginales[idx];
+            if (!original) return false;
+
+            // Regla: Si el original tenía dato, el actual no puede estar vacío.
+            const errorPorcentaje = original.porcentaje !== null && item.porcentaje === null;
+            const errorEstrategias = original.estrategias.trim() !== "" && item.estrategias.trim() === "";
+
+            return errorPorcentaje || errorEstrategias;
+        });
+
+        notificarValidacion?.(!hayError);
+
+    }, [items, itemsOriginales, notificarValidacion, isLoading]);
+
+
+    const reportarCambios = (currentItems: ContenidosItem[]) => {
+        const respuestas: Respuesta[] = currentItems.map((item) => ({
+            pregunta_id: pregunta.id,
+            materia_id: item.materia.id,
+            texto_respuesta: JSON.stringify({
+                porcentaje: item.porcentaje,
+                estrategias: item.estrategias
+            })
+        }));
+        manejarCambio?.(respuestas);
+    }
 
     const handleChange = <K extends keyof ContenidosItem>(
         index: number,
@@ -111,16 +160,25 @@ export default function ContenidosAlcanzados({
         const updated = [...items];
         updated[index][field] = value;
         setItems(updated);
+        reportarCambios(updated);
+    };
 
-        const respuestas: Respuesta[] = updated.map((item) => ({
-            pregunta_id: pregunta.id,
-            materia_id: item.materia.id,
-            texto_respuesta: JSON.stringify({
-                porcentaje: item.porcentaje,
-                estrategias: item.estrategias
-            })
-        }));
-        manejarCambio?.(respuestas);
+    // Validación Visual Individual
+    const checkError = (idx: number, field: 'porcentaje' | 'estrategias') => {
+        // Necesitas acceder a los originales
+        if (!itemsOriginales[idx]) return false;
+        const original = itemsOriginales[idx];
+        const current = items[idx];
+    
+        if (field === 'porcentaje') {
+            // Error SOLO si antes tenía dato y ahora es null
+            return original.porcentaje !== null && current.porcentaje === null;
+        }
+        if (field === 'estrategias') {
+            // Error SOLO si antes tenía texto y ahora está vacío
+            return original.estrategias.trim() !== "" && current.estrategias.trim() === "";
+        }
+        return false;
     };
 
     return (
@@ -141,43 +199,50 @@ export default function ContenidosAlcanzados({
             ) : (
                 <>
                     <div className="accordion" id="accordionContenidos">
-                        {items.map((item, index) => (
-                            <div className="accordion-item" key={item.materia.id}>
-                                <h2 className="accordion-header" id={`heading${index}`}>
-                                    <button
-                                        className="accordion-button collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapse${index}`}
-                                        aria-expanded="false"
-                                        aria-controls={`collapse${index}`}
+                        {items.map((item, index) => {
+                             const hasError = checkError(index, 'porcentaje') || checkError(index, 'estrategias');
+                             
+                             return (
+                                <div className="accordion-item" key={item.materia.id}>
+                                    <h2 className="accordion-header" id={`heading${index}`}>
+                                        <button
+                                            className={`accordion-button ${!hasError ? 'collapsed' : ''}`}
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target={`#collapse${index}`}
+                                            aria-expanded={hasError}
+                                            aria-controls={`collapse${index}`}
+                                        >
+                                            {item.codigo} - {item.nombre}
+                                            {hasError && <span className="badge bg-danger ms-2">!</span>}
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id={`collapse${index}`}
+                                        className={`accordion-collapse collapse ${hasError ? 'show' : ''}`}
+                                        aria-labelledby={`heading${index}`}
+                                        data-bs-parent="#accordionContenidos"
                                     >
-                                        {item.codigo} - {item.nombre}
-                                    </button>
-                                </h2>
-                                <div
-                                    id={`collapse${index}`}
-                                    className="accordion-collapse collapse"
-                                    aria-labelledby={`heading${index}`}
-                                    data-bs-parent="#accordionContenidos"
-                                >
-                                    <div className="accordion-body">
-                                        <div className="row g-3">
-                                            <CampoPorcentaje
-                                                label="Porcentual contenidos alcanzados (%)"
-                                                value={item.porcentaje}
-                                                onChange={(v) => handleChange(index, "porcentaje", v)}
-                                            />
-                                            <CampoTextArea
-                                                label="Estrategias propuestas"
-                                                value={item.estrategias}
-                                                onChange={(v) => handleChange(index, "estrategias", v)}
-                                            />
+                                        <div className="accordion-body">
+                                            <div className="row g-3">
+                                                <CampoPorcentaje
+                                                    label="Porcentual contenidos alcanzados (%)"
+                                                    value={item.porcentaje}
+                                                    onChange={(v) => handleChange(index, "porcentaje", v)}
+                                                    error={checkError(index, 'porcentaje')}
+                                                />
+                                                <CampoTextArea
+                                                    label="Estrategias propuestas"
+                                                    value={item.estrategias}
+                                                    onChange={(v) => handleChange(index, "estrategias", v)}
+                                                    error={checkError(index, 'estrategias')}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </>
             )}

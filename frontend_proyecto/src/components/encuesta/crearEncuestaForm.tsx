@@ -5,7 +5,13 @@ import OpcionesManager from "../informeCatedra/ManejadorOpciones";
 import ROUTES from "../../paths";
 
 interface CategoriaTemp { cod: string; texto: string; }
-interface PreguntaTemp { enunciado: string; categoria_cod: string; tipo: 'abierta' | 'cerrada'; opcion_ids: number[]; }
+interface PreguntaTemp { 
+    enunciado: string; 
+    categoria_cod: string; 
+    tipo: 'abierta' | 'cerrada'; 
+    opcion_ids: number[]; 
+    obligatoria: boolean; 
+}
 interface Opcion { id: number; contenido: string; }
 
 export default function EncuestaBaseForm() {
@@ -21,7 +27,8 @@ export default function EncuestaBaseForm() {
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
     const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta'); 
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
-    
+    const [esObligatoria, setEsObligatoria] = useState(false); // Nuevo estado
+
     useEffect(() => {
         fetch("http://localhost:8000/opciones")
             .then((res) => res.json())
@@ -44,11 +51,14 @@ export default function EncuestaBaseForm() {
             categoria_cod: categoriaSeleccionada,
             tipo: nuevoTipoPregunta,
             opcion_ids: nuevoTipoPregunta === 'cerrada' ? opcionesSeleccionadas : [],
+            obligatoria: esObligatoria, 
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
+        
         setNuevoEnunciado("");
         setOpcionesSeleccionadas([]);
+        setEsObligatoria(false); 
     };
 
     const eliminarPregunta = (index: number) => {
@@ -103,6 +113,7 @@ export default function EncuestaBaseForm() {
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
+                    obligatoria: preg.obligatoria, 
                     tipo: preg.tipo, 
                     ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }), 
                 };
@@ -118,13 +129,13 @@ export default function EncuestaBaseForm() {
                 }
             }
 
-            alert("Encuesta creado con éxito.");
+            alert("Encuesta creada con éxito.");
             navigate(ROUTES.HOME);
 
         } catch (error) {
             console.error("Error en la cascada de creación:", error);
             const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
-            alert(`Fallo en la creación del encuesta. Error: ${messageToShow}`);
+            alert(`Fallo en la creación de la encuesta. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
         }
@@ -172,10 +183,26 @@ export default function EncuestaBaseForm() {
                                     </select>
                                 </div>
                             </div>
+                            
                             <div className="mb-3">
                                 <label className="form-label fw-bold">Enunciado</label>
                                 <textarea className="form-control" rows={2} value={nuevoEnunciado} onChange={(e) => setNuevoEnunciado(e.target.value)} disabled={cargando || categorias.length === 0} />
                             </div>
+
+                            <div className="mb-3 form-check">
+                                <input 
+                                    type="checkbox" 
+                                    className="form-check-input" 
+                                    id="checkObligatoria" 
+                                    checked={esObligatoria}
+                                    onChange={(e) => setEsObligatoria(e.target.checked)}
+                                    disabled={cargando || categorias.length === 0}
+                                />
+                                <label className="form-check-label fw-bold" htmlFor="checkObligatoria">
+                                    Marque si la pregunta es obligatoria de responder
+                                </label>
+                            </div>
+
                             {nuevoTipoPregunta === 'cerrada' && (
                                 <OpcionesManager
                                     opcionesCatalogo={opcionesCatalogo}
@@ -202,11 +229,12 @@ export default function EncuestaBaseForm() {
                                     <li key={i} className={`list-group-item d-flex justify-content-between align-items-center ${preg.tipo === 'cerrada' ? 'bg-info-subtle' : ''}`}>
                                         <span>
                                             <strong className={`badge ${preg.tipo === 'cerrada' ? 'bg-primary' : 'bg-secondary'} me-2`}>{preg.tipo.toUpperCase()}</strong>
+                                            {preg.obligatoria && <span className="badge bg-danger me-2">OBLIGATORIA</span>}
                                             <strong className="text-primary">[{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
                                         <button 
-                                            type="button" 
                                                 className="btn btn-danger btn-sm rounded-pill" 
+                                            type="button" 
                                             onClick={() => eliminarPregunta(i)} 
                                             disabled={cargando}
                                         >

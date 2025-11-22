@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Text, ForeignKey, Enum, Column, String
+from sqlalchemy import Integer, Text, ForeignKey, Enum, Column, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import ModeloBase
 from typing import List
@@ -11,7 +11,8 @@ class PreguntaInformeSintetico(ModeloBase):
     enunciado = Column(Text, nullable=False) 
     orden = Column(Integer, nullable=False) 
     informe_base_id = Column(Integer, ForeignKey("informes_sinteticos_base.id"), nullable=False)
-
+    obligatoria = Column(Boolean, default=False, nullable=False)
+    
     informe_base: Mapped["InformeSinteticoBase"] = relationship(
         "InformeSinteticoBase",
         back_populates="preguntas"

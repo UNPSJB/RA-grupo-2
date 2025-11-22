@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"; 
 import type { Materia } from "../../../types/types";
-import { CampoCheckbox, CampoTextArea } from "./Campos"; // Asegúrate de que la ruta a Campos sea correcta
+import { CampoCheckbox, CampoTextArea } from "./Campos"; 
 
 interface Pregunta {
     id: number;
@@ -35,6 +35,7 @@ interface Props {
     periodo: string;
     pregunta: Pregunta;
     manejarCambio?: (respuestas: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void; 
 }
 
 export default function ActividadesDocentes({
@@ -44,17 +45,23 @@ export default function ActividadesDocentes({
     periodo,
     pregunta,
     manejarCambio,
+    notificarValidacion 
 }: Props) {
     const [listaMaterias, setListaMaterias] = useState<ActividadesPorMateriaItem[]>([]);
+    const [listaOriginal, setListaOriginal] = useState<ActividadesPorMateriaItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        notificarValidacion?.(false);
+
         if (!id_dpto || !id_carrera || !anio || !periodo) return;
+        
         const fetchData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
+                notificarValidacion?.(false);
                 
                 const res = await fetch(
                     `http://127.0.0.1:8000/informes_sinteticos_completados/actividades-docentes/?id_dpto=${id_dpto}&id_carrera=${id_carrera}&anio=${anio}&periodo=${periodo}`
@@ -74,12 +81,14 @@ export default function ActividadesDocentes({
                         ...docente,
                         actividades: {
                             ...docente.actividades,
-                            observaciones: docente.actividades.observaciones || ""
+                            observaciones: docente.actividades.observaciones || "",
+                            gestion_texto: docente.actividades.gestion_texto || ""
                         }
                     }))
                 }));
 
                 setListaMaterias(datosIniciales);
+                setListaOriginal(JSON.parse(JSON.stringify(datosIniciales)));
 
                 const respuestasIniciales: Respuesta[] = datosIniciales.map((itemMateria) => ({
                     pregunta_id: pregunta.id,
@@ -87,6 +96,7 @@ export default function ActividadesDocentes({
                     texto_respuesta: JSON.stringify(itemMateria.docentes)
                 }));
                 manejarCambio?.(respuestasIniciales);
+
             } catch (err) {
                 console.error("Error al obtener actividades docentes:", err);
                 if (err instanceof Error) setError(err.message);
@@ -97,6 +107,37 @@ export default function ActividadesDocentes({
         };
         fetchData();
     }, [id_dpto, id_carrera, anio, periodo, pregunta.id]);
+
+    useEffect(() => {
+        if (isLoading) {
+            notificarValidacion?.(false);
+            return;
+        }
+        
+        if (listaMaterias.length === 0 && !isLoading) {
+            notificarValidacion?.(true);
+            return;
+        }
+
+        const hayError = listaMaterias.some((materia, mIdx) => {
+            const materiaOriginal = listaOriginal[mIdx];
+            if (!materiaOriginal) return false;
+
+            return materia.docentes.some((docente, dIdx) => {
+                const docenteOriginal = materiaOriginal.docentes[dIdx];
+                if (!docenteOriginal) return false;
+                const origObs = docenteOriginal.actividades.observaciones || "";
+                const currObs = docente.actividades.observaciones || "";
+                
+                if (origObs.trim() !== "" && currObs.trim() === "") return true;
+
+                return false;
+            });
+        });
+
+        notificarValidacion?.(!hayError);
+    }, [listaMaterias, listaOriginal, notificarValidacion, isLoading]);
+
 
     const handleChange = (
         materiaIndex: number, 
@@ -125,6 +166,17 @@ export default function ActividadesDocentes({
         }));
         
         manejarCambio?.(respuestas);
+    };
+
+    const isError = (mIndex: number, dIndex: number, field: keyof DocenteActividades) => {
+        if (!listaOriginal[mIndex] || !listaOriginal[mIndex].docentes[dIndex]) return false;
+        const valOriginal = listaOriginal[mIndex].docentes[dIndex].actividades[field];
+        const valActual = listaMaterias[mIndex].docentes[dIndex].actividades[field];
+        if (typeof valOriginal === 'string' && typeof valActual === 'string') {
+            return valOriginal.trim() !== "" && valActual.trim() === "";
+        }
+        
+        return false;
     };
 
     return (
@@ -213,6 +265,7 @@ export default function ActividadesDocentes({
                                                                 label={null}
                                                                 value={itemDocente.actividades.observaciones || ""}
                                                                 onChange={(v) => handleChange(materiaIndex, docenteIndex, 'observaciones', v)}
+                                                                error={isError(materiaIndex, docenteIndex, 'observaciones')}
                                                             />
                                                         </td>
                                                     </tr>

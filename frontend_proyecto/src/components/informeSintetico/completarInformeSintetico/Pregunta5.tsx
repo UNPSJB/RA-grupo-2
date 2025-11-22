@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { CampoTextArea } from "./Campos"; 
 
 interface Pregunta {
@@ -12,14 +11,17 @@ interface Respuesta {
     texto_respuesta: string;
     materia_id?: number; 
 }
+
 interface Props {
     pregunta: Pregunta;
     manejarCambio?: (respuesta: Respuesta[] | Respuesta) => void;
+    notificarValidacion?: (valido: boolean) => void;
 }
 
 export default function ObservacionesComentarios({
     pregunta,
     manejarCambio,
+    notificarValidacion
 }: Props) {
     const [contenido, setContenido] = useState<string>("");
 
@@ -28,12 +30,20 @@ export default function ObservacionesComentarios({
             pregunta_id: pregunta.id,
             texto_respuesta: JSON.stringify({ observaciones_comentarios: "" }),
         });
+        
+        notificarValidacion?.(false);
+        
     }, [pregunta.id]); 
+
+
+    useEffect(() => {
+        const esValido = contenido.trim() !== "";
+        notificarValidacion?.(esValido);
+    }, [contenido, notificarValidacion]);
 
     const handleContentChange = (nuevoContenido: string) => {
         setContenido(nuevoContenido);
 
-        // Serializamos el contenido
         const respuestaSerializada = JSON.stringify({
             observaciones_comentarios: nuevoContenido
         });
@@ -43,7 +53,7 @@ export default function ObservacionesComentarios({
             texto_respuesta: respuestaSerializada, 
             materia_id: undefined 
         });
-    };
+};
 
     return (
         <div className="container mt-4">
@@ -54,6 +64,7 @@ export default function ObservacionesComentarios({
                 label={null}
                 value={contenido}
                 onChange={handleContentChange}
+                error={contenido.trim() === ""}
             />
         </div>
     );
