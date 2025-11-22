@@ -1,3 +1,4 @@
+// src/components/encuesta/completarEncuesta/CompletarEncuesta.tsx
 import { useEffect, useState, useRef, useMemo } from "react";
 import PreguntasCategoria from "./Categoria";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
@@ -5,7 +6,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import type { Categoria } from "../../../types/types";
-import type {Materia} from "../../../types/types.ts";
+import type { Materia } from "../../../types/types.ts";
+// IMPORTAMOS NUESTRA INSTANCIA DE AXIOS
+import api from "../../../services/api";
+// IMPORTAMOS LOS TIPOS DE AXIOS PARA CORREGIR LOS ERRORES
+import axios from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
+
 interface Respuesta {
   pregunta_id: number;
   opcion_id: number | null;
@@ -21,7 +28,9 @@ export default function CompletarEncuesta() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
-  const [materia, setMateria] = useState<Materia>();
+  
+  // Corrección variable no usada: Ignoramos el primer elemento (materia)
+  const [, setMateria] = useState<Materia>();
 
   const [preguntasPorCategoria, setPreguntasPorCategoria] = useState<Record<number, number>>({});
 
@@ -84,35 +93,46 @@ export default function CompletarEncuesta() {
   };
 
   useEffect(() => {
-    const {materiaId} = location.state
-    fetch(`http://127.0.0.1:8000/materias/${materiaId}`)
-    .then(res=>{
-      if (!res.ok) throw new Error("Error al obtener la materia");
-        return res.json();
-    })
-    .then(setMateria)
-    .catch(console.error);
+    const { materiaId } = location.state || {};
     const { encuestaId = 1 } = location.state || {};
+
+    if (!materiaId) {
+        console.error("Falta materiaId en location.state");
+        setError("No se especificó la materia.");
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:8000/encuestas/${encuestaId}/categorias`)
-      .then((res) => {
-        if (!res.ok) throw new Error('No se pudieron cargar las categorías.');
-        return res.json();
+    // GET Materia con tipos corregidos
+    api.get<Materia>(`/materias/${materiaId}`)
+      .then((res: AxiosResponse<Materia>) => { // Tipado explícito
+        setMateria(res.data);
       })
-      .then((todas: Categoria[]) => {
+      .catch((err: AxiosError) => { // Tipado explícito
+        console.error("Error al obtener la materia:", err);
+        setError("Error al cargar los datos de la materia.");
+      });
+
+
+    // GET Categorías con tipos corregidos
+    api.get<Categoria[]>(`/encuestas/${encuestaId}/categorias`)
+      .then((res: AxiosResponse<Categoria[]>) => { // Tipado explícito
+        const todas = res.data;
         const dataOrdenada = [...todas].sort((a, b) =>
           a.cod.localeCompare(b.cod, 'es', { sensitivity: 'base' })
         );
         setCategorias(dataOrdenada);
         if (dataOrdenada.length > 0) setCategoriaActivaId(dataOrdenada[0].id);
       })
-      .catch((err) => {
+      .catch((err: AxiosError | Error) => { // Tipado explícito (puede ser de Axios o genérico)
         console.error('Error al obtener categorías:', err);
-        setError((err as Error).message || 'Error desconocido');
+        setError(err instanceof Error ? err.message : 'Error desconocido al cargar categorías');
       })
       .finally(() => setLoading(false));
+
   }, [location.state]);
 
   const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number | null, texto?: string) => {
@@ -141,7 +161,7 @@ export default function CompletarEncuesta() {
 
     if (!alumnoId || !encuestaId || !materiaId) {
       console.error('Faltan parámetros:', location.state);
-      setMensaje('Error: No se pudieron cargar los datos de la encuesta');
+      setMensaje('Error: No se pudieron cargar los datos de la encuesta (faltan IDs)');
       setEnviando(false);
       return;
     }
@@ -156,23 +176,24 @@ export default function CompletarEncuesta() {
     };
 
     try {
-      const res = await fetch('http://localhost:8000/encuesta-completada/con-respuestas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({ detail: 'Error desconocido' }));
-        throw new Error(errData.detail || 'Error al enviar encuesta');
-      }
+      // POST Enviar Encuesta
+      await api.post('/encuesta-completada/con-respuestas', datos);
 
       setMensaje('Encuesta enviada con éxito.');
       setMensajeExito('¡La encuesta fue completada con éxito!');
       setRespuestasGlobales([]);
     } catch (err) {
       console.error(err);
-      setMensaje('Error al enviar la encuesta.');
+      let errorMessage = 'Error al enviar la encuesta.';
+      
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
+      // -------------------------------------------------------
+          errorMessage = err.response.data.detail;
+      } else if (err instanceof Error) {
+          errorMessage = err.message;
+      }
+      
+      setMensaje(errorMessage);
     } finally {
       setEnviando(false);
     }
@@ -199,7 +220,7 @@ export default function CompletarEncuesta() {
     return <MensajeExito mensaje={mensajeExito} onClose={cerrarPagina} />;
   }
 
-  const categoriaActiva = categorias.find((c) => c.id === categoriaActivaId) || categorias[currentStep];
+  // Corrección variable no usada: Se eliminó 'const categoriaActiva = ...'
 
   return (
     <div className="bg-light">

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+// Importamos la instancia configurada de axios
+import api from "../../services/api"; 
 import CategoriaManager from "./ManejadorCategoria"; 
 import OpcionesManager from "./ManejadorOpciones";  
 import ROUTES from "../../paths"; 
@@ -23,9 +25,9 @@ export default function InformeCatedraBaseForm() {
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
     
     useEffect(() => {
-        fetch("http://localhost:8000/opciones")
-            .then((res) => res.json())
-            .then((data) => setOpcionesCatalogo(Array.isArray(data) ? data : []))
+        // Usamos la instancia 'api'. No hace falta poner http://localhost... ni hacer .json()
+        api.get("/opciones")
+            .then((res) => setOpcionesCatalogo(Array.isArray(res.data) ? res.data : []))
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
 
@@ -66,55 +68,50 @@ export default function InformeCatedraBaseForm() {
         setCargando(true);
 
         try {
-            const resInforme = await fetch("http://localhost:8000/informes_catedra/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ titulo }),
-            });
-            if (!resInforme.ok) { 
-                const errorData = await resInforme.json();
-                throw new Error(errorData.detail || "Error al crear el informe base."); 
+            // 1. CREAR EL INFORME BASE
+            let informeId: number;
+            try {
+                const resInforme = await api.post("/informes_catedra/", { titulo });
+                informeId = resInforme.data.id;
+            } catch (error: any) {
+                // Axios guarda la respuesta del servidor en error.response
+                throw new Error(error.response?.data?.detail || "Error al crear el informe base."); 
             }
-            const { id: informeId } = await resInforme.json();
+
             const categoriasCreadas = [];
             
+            // 2. CREAR LAS CATEGORÍAS
             for (const categoriaTemp of categorias) {
-                const resCat = await fetch("http://localhost:8000/categorias/paraInforme/", { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+                try {
+                    const resCat = await api.post("/categorias/paraInforme/", { 
                         cod: categoriaTemp.cod,
                         texto: categoriaTemp.texto || "",
                         informe_base_id: informeId,
-                    }),
-                });
-                if (!resCat.ok) { 
-                    const errorData = await resCat.json();
-                    throw new Error(errorData.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`); 
+                    });
+                    categoriasCreadas.push(resCat.data);
+                } catch (error: any) {
+                    throw new Error(error.response?.data?.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`); 
                 }
-                const categoriaCreada = await resCat.json();
-                categoriasCreadas.push(categoriaCreada);
             }
 
+            // 3. CREAR LAS PREGUNTAS
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
                 if (!categoria) continue; 
-                const endpoint = preg.tipo === 'cerrada' ? "http://localhost:8000/preguntas/cerrada" : "http://localhost:8000/preguntas/abierta";   
+                
+                const endpoint = preg.tipo === 'cerrada' ? "/preguntas/cerrada" : "/preguntas/abierta";   
+                
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
                     tipo: preg.tipo, 
                     ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }), 
                 };
-                const resPreg = await fetch(endpoint, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload),
-                });
 
-                if (!resPreg.ok) { 
-                     const errorData = await resPreg.json();
-                     throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
+                try {
+                    await api.post(endpoint, payload);
+                } catch (error: any) {
+                     throw new Error(error.response?.data?.detail || `Error al crear la pregunta: ${preg.enunciado}`);
                 }
             }
 
@@ -129,6 +126,8 @@ export default function InformeCatedraBaseForm() {
             setCargando(false);
         }
     };
+
+    // ESTILOS
     const cardStyle = { 
         backgroundColor: 'var(--color-component-bg)',
         border: '1px solid var(--color-unpsjb-border)', 
@@ -173,6 +172,7 @@ export default function InformeCatedraBaseForm() {
                                 style={inputFieldStyle}
                             />
                         </div>
+                        
                         <CategoriaManager
                             categorias={categorias}
                             setCategorias={setCategorias}
