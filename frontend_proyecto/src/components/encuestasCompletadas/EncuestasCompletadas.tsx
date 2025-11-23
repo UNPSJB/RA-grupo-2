@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Materia } from "../../types/types";
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths";
+import { MostrarPeriodo } from "../../constants";
 
 type Respuesta = {
   id: number;
@@ -60,7 +61,7 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
 
                 <span className="text-dark">
                   {" "}
-                  — {e.anio} {e.periodo}
+                  — {e.anio} {MostrarPeriodo(e.periodo)}
                 </span>
               </div>
               <Link

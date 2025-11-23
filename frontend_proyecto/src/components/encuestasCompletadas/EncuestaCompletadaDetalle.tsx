@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ROUTES from "../../paths";
+import { MostrarPeriodo } from "../../constants";
 
 interface Opcion {
   id: number;
@@ -122,10 +123,10 @@ export default function EncuestaCompletadaDetalle() {
         </div>
 
         <div className="card-body">
-          <div className="alert alert-info">
+          <div className="mb-3">
             <strong>Año:</strong> {encuesta.anio}
             <br />
-            <strong>Período:</strong> {encuesta.periodo}
+            <strong>Período:</strong> {MostrarPeriodo(encuesta.periodo)}
           </div>
 
           <h5 className="mt-4">Respuestas</h5>
@@ -181,7 +182,7 @@ export default function EncuestaCompletadaDetalle() {
             </div>
           )}
 
-          <Link to= {ROUTES.ENCUESTAS_COMPLETADAS} className="btn btn-secondary mt-4">
+          <Link to= {ROUTES.ENCUESTAS_COMPLETADAS} className="btn btn-theme-primary rounded-pill px-4 mt-4">
             Volver al listado
           </Link>
         </div>
