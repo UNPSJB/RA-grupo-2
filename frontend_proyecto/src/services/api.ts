@@ -2,9 +2,9 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // ELIMINA LOS HEADERS GLOBALES AQUÍ
+  // headers: { 'Content-Type': 'application/json' }, <--- BORRA ESTO
+  withCredentials: true,
 });
 
 export default api;

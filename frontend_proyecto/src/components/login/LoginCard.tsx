@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import ROUTES from '../../paths';
+// 1. IMPORTAR EL HOOK DE AUTENTICACIÓN
+import { useAuth } from '../../context/AuthContext'; 
 
 interface LoginCardProps {
   isDarkMode: boolean;
@@ -8,10 +10,27 @@ interface LoginCardProps {
 
 const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
   const navigate = useNavigate();
+  
+  // 2. EXTRAER FUNCIONES DEL CONTEXTO
+  const { login, isAuthenticated, error } = useAuth(); 
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 3. SI YA ESTÁ LOGUEADO, REDIRIGIR AL MENU AUTOMÁTICAMENTE
+  useEffect(() => {
+    if (isAuthenticated) {
+        navigate(ROUTES.HOME);
+    }
+  }, [isAuthenticated, navigate]);
+
+  // 4. MANEJAR EL ENVÍO DEL FORMULARIO
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Llamamos a la función login del contexto
+    // Esto hará la petición al backend y actualizará el estado isAuthenticated
+    await login({ username, password });
   };
 
   const togglePassword = () => {
@@ -22,6 +41,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
     <div className="card glass-card overflow-hidden border-0" style={{ width: '100%', maxWidth: '950px' }}>
       <div className="row g-0">
         
+        {/* COLUMNA IZQUIERDA (INFO) - Sin cambios */}
         <div className={`col-md-5 d-none d-md-flex flex-column justify-content-between p-5 info-panel`}>
           <div>
             <div className="mb-4">
@@ -49,6 +69,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
           </div>
         </div>
 
+        {/* COLUMNA DERECHA (FORMULARIO) */}
         <div className="col-md-7 p-5 form-panel">
           <div className="h-100 d-flex flex-column justify-content-center">
             <div className="mb-4">
@@ -58,6 +79,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
               </p>
             </div>
 
+            {/* AQUI EL CAMBIO: Llamamos a handleSubmit */}
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="username" className={`form-label small fw-bold ${isDarkMode ? 'text-light opacity-75' : 'text-secondary'}`}>Usuario</label>
@@ -73,6 +95,8 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
                     id="username" 
                     placeholder="Nombre de usuario" 
                     required 
+                    value={username} // VINCULAMOS AL ESTADO
+                    onChange={(e) => setUsername(e.target.value)} // CAPTURAMOS CAMBIO
                   />
                 </div>
               </div>
@@ -91,6 +115,8 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
                     id="password" 
                     placeholder="Contraseña" 
                     required 
+                    value={password} // VINCULAMOS AL ESTADO
+                    onChange={(e) => setPassword(e.target.value)} // CAPTURAMOS CAMBIO
                   />
                   <button 
                     type="button"
@@ -123,8 +149,16 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
                 </a>
               </div>
 
+              {/* MOSTRAMOS ERROR SI FALLA EL LOGIN */}
+              {error && (
+                  <div className="alert alert-danger py-2 mb-3 text-center small">
+                      {error}
+                  </div>
+              )}
+
               <div className="d-grid">
-                <button type="submit" className="btn btn-primary py-2 fw-bold shadow-sm border-0" onClick={() => navigate(ROUTES.HOME)} style={{ background: isDarkMode ? '#3b82f6' : '#2563eb' }}>
+                {/* Quitamos el onClick manual porque ya usamos onSubmit en el form */}
+                <button type="submit" className="btn btn-primary py-2 fw-bold shadow-sm border-0" style={{ background: isDarkMode ? '#3b82f6' : '#2563eb' }}>
                   Ingresar al Sistema
                 </button>
               </div>

@@ -14,6 +14,7 @@ def main():
         "alumno",
         "docente",
         "secretaria_academica",
+        "departamento",
     ]
     for rol in roles:
         rol_usuario = Role(name=rol)

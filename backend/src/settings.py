@@ -14,8 +14,8 @@ ROOT_PATH = os.getenv("ROOT_PATH")
 MAIN_SITE_DOMAIN = os.getenv(f"MAIN_SITE_DOMAIN_{ENV}")
 API_SITE_DOMAIN = os.getenv(f"API_SITE_DOMAIN_{ENV}")
 SECURE_COOKIES = False
-REFRESH_TOKEN_COOKIE_NAME = "refresh_token"
-ACCESS_TOKEN_COOKIE_NAME = "access_token"
+REFRESH_TOKEN_COOKIE_NAME = os.getenv("REFRESH_TOKEN_COOKIE_NAME")
+ACCESS_TOKEN_COOKIE_NAME = os.getenv("ACCESS_TOKEN_COOKIE_NAME")
 
 def get_base_cookie_config(key: str) -> Dict:
     return {
