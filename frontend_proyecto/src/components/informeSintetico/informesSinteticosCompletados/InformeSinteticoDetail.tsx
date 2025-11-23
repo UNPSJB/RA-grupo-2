@@ -41,7 +41,7 @@ function InformeSinteticoDetail() {
     const [departamento, setDepartamento] = useState<Departamento | null>(null);
 
     const handleDownloadPDF = async () => {
-        if (!informe|| !carrera || !departamento) return;
+        if (!informe || !carrera || !departamento) return;
 
         const blob = await pdf(
             <InformeSinteticoPDF
@@ -165,6 +165,11 @@ function InformeSinteticoDetail() {
     return (
         <div className="bg-light">
             <div className="container-lg py-4">
+                <div className="text-end mt-0 mb-3 me-4">
+                    <button onClick={handleDownloadPDF} className="btn btn-theme-primary rounded-pill px-4">
+                        Exportar PDF
+                    </button>
+                </div>
                 <div className="card shadow-sm border-0 rounded-3">
                     <div className="card-header bg-unpsjb-header text-center rounded-top-3">
                         <h1 className="h4 mb-0 text-white">{informe.titulo}</h1>
@@ -273,13 +278,13 @@ function InformeSinteticoDetail() {
                             {isLastStep ? (
                                 <Link
                                     to={returnPath}
-                                    className="btn btn-primary rounded-pill px-4"
+                                    className="btn btn-theme-primary rounded-pill px-4"
                                 >
                                     Volver al listado
                                 </Link>
                             ) : (
                                 <button
-                                    className="btn btn-primary rounded-pill px-4"
+                                    className="btn btn-theme-primary rounded-pill px-4"
                                     onClick={() => setCurrentStep(currentStep + 1)}
                                     disabled={totalSteps === 0 || currentStep >= totalSteps - 1}
                                 >
@@ -289,11 +294,6 @@ function InformeSinteticoDetail() {
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className="text-center mt-3 mb-2">
-                <button onClick={handleDownloadPDF} className="btn btn-success rounded-pill px-4">
-                    Exportar PDF
-                </button>
             </div>
         </div >
     );

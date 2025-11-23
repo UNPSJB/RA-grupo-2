@@ -263,14 +263,14 @@ export default function InformeCatedraDetalle() {
   return (
     <div className="bg-light">
       <div className="container-lg py-4">
+        <div className="text-end mt-0 mb-3 me-4">
+          <button onClick={handlePDF} className="btn btn-theme-primary rounded-pill px-4">
+            Exportar PDF
+          </button>
+        </div>
         <div className="card shadow-sm border-0 rounded-3">
           <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">{informe.titulo || "Informe de Cátedra"}</h1>
-          </div>
-          <div className="text-center mt-3 mb-2">
-            <button onClick={handlePDF} className="btn btn-success rounded-pill px-4">
-              Exportar PDF
-            </button>
           </div>
           <div className="card-body p-4 p-md-5">
             <style>
