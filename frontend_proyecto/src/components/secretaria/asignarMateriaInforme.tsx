@@ -159,9 +159,9 @@ export default function AsignarFormularios() {
   if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div className="container mt-4">
-      <div className="card shadow-sm">
-        <div className="card-header bg-unpsjb-header text-white">
+    <div className="container py-4">
+      <div className="card shadow">
+        <div className="card-header bg-unpsjb-header">
           <h4 className="mb-0">Asignar Formularios a Materias</h4>
         </div>
         <div className="card-body">
