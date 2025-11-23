@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchInformes } from "./informesService";
 import ROUTES from "../../../paths";
+import { MostrarPeriodo } from "../../../constants";
 
 interface Informe {
   id: number;
@@ -35,7 +36,7 @@ function InformeSinteticoList() {
                   <span className="fw-bold">
                     {inf.titulo} 
                   </span>
-                  <span className="text"> – {inf.periodo} {inf.anio}</span>
+                  <span className="text"> – {MostrarPeriodo(inf.periodo)} {inf.anio}</span>
                 </div>
                 <Link
                   to={ROUTES.INFORME_SINTETICO_DETALLE_SECRETARIA(inf.id)}
