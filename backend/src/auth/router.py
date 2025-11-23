@@ -95,13 +95,11 @@ async def password_reset(
     return service.reset_user_password(db, user, password_reset_data)
 
 
-@router.get("/validate-user", response_model=schemas.Token)
+@router.get("/validate-user", response_model=users_schemas.User)
 async def validate_user(
-    response: Response,
     auth_user=Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> schemas.Token:
-    if auth_user:
-        access_token = create_access_token(auth_user)
-        return schemas.Token(access_token=access_token, user_id=auth_user.id)
-    raise exceptions.NotAuthenticated()
+):
+    # Simplemente retornamos el usuario autenticado. 
+    # FastAPI y Pydantic se encargan de convertirlo al JSON con username, role_name, etc.
+    return auth_user

@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths"; 
+// 1. IMPORTAR EL HOOK DE CONTEXTO
+import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
-  
+  // 2. OBTENER DATOS Y FUNCIÓN DEL CONTEXTO
+  const { currentUser, logout } = useAuth();
+
   const navbarStyle = {
     backgroundColor: 'var(--color-background-primary)', 
     color: 'var(--color-text-primary)',               
@@ -27,8 +31,16 @@ export default function Navbar() {
     left: 'auto', 
     minWidth: '220px',
   };
-  const userName = "Juan Pérez";
-  const userRole = "Docente";
+
+  // 3. USAR DATOS REALES (O Fallback si no carga)
+  const userName = currentUser?.username || "Usuario";
+  const userRole = currentUser?.role_name || "Invitado";
+
+  // 4. MANEJAR EL LOGOUT
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault(); // Evita la navegación por defecto del link
+    logout(); // Llama a la función del contexto (borra estado y redirige)
+  };
 
   return (
     <nav 
@@ -66,16 +78,11 @@ export default function Navbar() {
         <div className="collapse navbar-collapse" id="navbarContent">
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0"> 
             
+            {/* ... (TUS MENÚS DESPLEGABLES SIGUEN IGUAL) ... */}
+            {/* Puedes agregar lógica aquí para mostrar menús según 'userRole' si quieres */}
+            
             <li className="nav-item dropdown">
-              <a 
-                className="nav-link dropdown-toggle nav-link-animated" 
-                href="#" 
-                id="alumnoDropdown" 
-                role="button" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                style={navLinkStyle}
-              >
+              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="alumnoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>
                 Alumno
               </a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="alumnoDropdown" style={dropdownMenuStyle}>
@@ -85,30 +92,15 @@ export default function Navbar() {
             </li>
             
             <li className="nav-item dropdown">
-              <a 
-                className="nav-link dropdown-toggle nav-link-animated" 
-                href="#" 
-                id="alumnoDropdown" 
-                role="button" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                style={navLinkStyle}
-              >
+              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="docenteDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>
                 Docente
               </a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="docenteDropdown" style={dropdownMenuStyle}>
-                <li>
-                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>
-                    Informes de Cátedra Pendientes
-                  </Link>
-                </li>
-                <li>  
-                  <Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_COMPLETADOS}>
-                    Informes de Cátedra Completados
-                  </Link>
-                </li>
+                <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>Informes de Cátedra Pendientes</Link></li>
+                <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_COMPLETADOS}>Informes de Cátedra Completados</Link></li>
               </ul>
             </li>
+
             <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="departamentoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Departamento</a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="departamentoDropdown" style={dropdownMenuStyle}>
@@ -117,6 +109,7 @@ export default function Navbar() {
                 <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA}>Informes de Cátedra Completados</Link></li>
               </ul>
             </li>
+
             <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="secretariaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Secretaría Académica</a>
               <ul className="dropdown-menu custom-dropdown" aria-labelledby="secretariaDropdown" style={dropdownMenuStyle}>
@@ -129,6 +122,7 @@ export default function Navbar() {
             </li>        
           </ul>
         </div>
+
         <div className="navbar-nav ms-auto"> 
           <li className="nav-item dropdown d-none d-lg-block"> 
             
@@ -142,6 +136,7 @@ export default function Navbar() {
               style={{ padding: '0.5rem 0.5rem' }} 
             >
               <div className="d-flex flex-column align-items-end me-3">
+                  {/* DATOS REALES DEL CONTEXTO */}
                   <span className="fw-bold" style={{ color: 'var(--color-text-primary)', fontSize: '1.0rem' }}>{userName}</span>
                   <span className="text-muted" style={{ color: 'var(--color-text-primary)', fontSize: '0.75rem', opacity: 0.7 }}>{userRole}</span>
               </div>
@@ -162,7 +157,15 @@ export default function Navbar() {
             
             <ul className="dropdown-menu custom-dropdown user-dropdown-menu" aria-labelledby="userDropdown" style={userDropdownMenuStyle}>
               <li>
-                  <Link className="dropdown-item" to={ROUTES.LOGIN}>Cerrar Sesión</Link>
+                  {/* CAMBIO AQUÍ: Usamos onClick con handleLogout */}
+                  <a 
+                    className="dropdown-item" 
+                    href="#" 
+                    onClick={handleLogout}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Cerrar Sesión
+                  </a>
               </li>
             </ul>
           </li>
