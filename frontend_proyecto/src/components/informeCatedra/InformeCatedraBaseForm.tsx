@@ -140,38 +140,15 @@ export default function InformeCatedraBaseForm() {
         }
     };
 
-    const cardStyle = {
-        backgroundColor: 'var(--color-component-bg)',
-        border: '1px solid var(--color-unpsjb-border)',
-        color: 'var(--color-text-primary)'
-    };
-
-    const cardHeaderStyle = {
-        backgroundColor: 'var(--color-unpsjb-blue)',
-        color: 'white',
-    };
-
-    const inputAreaStyle = {
-        backgroundColor: 'var(--color-component-bg)',
-        color: 'var(--color-text-primary)',
-        borderColor: 'var(--color-unpsjb-border)'
-    };
-    
-    const inputFieldStyle = {
-        backgroundColor: 'var(--color-input-bg)',
-        color: 'var(--color-text-primary)',
-        borderColor: 'var(--color-unpsjb-border)',
-    };
-
     return (
         <div className="container py-4">
-            <div className="card shadow" style={cardStyle}>
-                <div style={cardHeaderStyle} className="card-header bg-unpsjb-header">
+            <div className="card shadow">
+                <div className="card-header bg-unpsjb-header">
                     <h1 className="h4 mb-0">Nuevo Informe de Cátedra Base</h1>
                 </div>
                 <div className="card-body">
                     <form onSubmit={handleSubmit}>
-                        <div className="mb-4 p-3 border rounded" style={inputAreaStyle}>
+                        <div className="mb-4 p-3 border rounded">
                             <label className="form-label fw-bold">Título del Informe</label>
                             <input 
                                 type="text" 
@@ -180,7 +157,6 @@ export default function InformeCatedraBaseForm() {
                                 onChange={(e) => setTitulo(e.target.value)} 
                                 required 
                                 disabled={cargando}
-                                style={inputFieldStyle}
                             />
                         </div>
                         <CategoriaManager
@@ -190,8 +166,8 @@ export default function InformeCatedraBaseForm() {
                             cargando={cargando}
                         />
                         
-                        <h5 className="mb-3" style={{color: 'var(--color-text-primary)'}}>2. Definición de Preguntas</h5>
-                        <div className="card mb-4 p-3" style={inputAreaStyle}> 
+                        <h5 className="mb-3">2. Definición de Preguntas</h5>
+                        <div className="card mb-4 p-3"> 
                             <div className="row mb-3">
                                 <div className="col-md-3">
                                     <label className="form-label fw-bold">Tipo</label>
@@ -200,10 +176,9 @@ export default function InformeCatedraBaseForm() {
                                         value={nuevoTipoPregunta} 
                                         onChange={(e) => { setNuevoTipoPregunta(e.target.value as 'abierta' | 'cerrada'); setOpcionesSeleccionadas([]); }} 
                                         disabled={cargando || categorias.length === 0}
-                                        style={inputFieldStyle}
                                     >
-                                        <option value="abierta" style={inputFieldStyle}>Abierta</option>
-                                        <option value="cerrada" style={inputFieldStyle}>Cerrada</option>
+                                        <option value="abierta">Abierta</option>
+                                        <option value="cerrada">Cerrada</option>
                                     </select>
                                 </div>
                                 <div className="col-md-9">
@@ -213,10 +188,9 @@ export default function InformeCatedraBaseForm() {
                                         value={categoriaSeleccionada} 
                                         onChange={(e) => setCategoriaSeleccionada(e.target.value)} 
                                         disabled={cargando || categorias.length === 0}
-                                        style={inputFieldStyle}
                                     >
-                                        <option value="" style={inputFieldStyle}>Seleccione categoría</option>
-                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod} style={inputFieldStyle}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
+                                        <option value="">Seleccione categoría</option>
+                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
                                     </select>
                                 </div>
                             </div>
@@ -228,7 +202,6 @@ export default function InformeCatedraBaseForm() {
                                     value={nuevoEnunciado} 
                                     onChange={(e) => setNuevoEnunciado(e.target.value)} 
                                     disabled={cargando || categorias.length === 0}
-                                    style={inputFieldStyle}
                                 />
                             </div>
 
@@ -269,11 +242,11 @@ export default function InformeCatedraBaseForm() {
                         {preguntas.length > 0 && (
                             <ul className="list-group mb-4">
                                 {preguntas.map((preg, i) => (
-                                    <li key={i} className={`list-group-item d-flex justify-content-between align-items-center`} style={inputAreaStyle}>
+                                    <li key={i} className={`list-group-item d-flex justify-content-between align-items-center`}>
                                         <span>
                                             <strong className={`badge ${preg.tipo === 'cerrada' ? 'bg-primary' : 'bg-secondary'} me-2`}>{preg.tipo.toUpperCase()}</strong>
                                             {preg.obligatoria && <span className="badge bg-danger me-2">OBLIGATORIA</span>}
-                                            <strong style={{color: 'var(--color-text-primary)'}}> [{preg.categoria_cod}]</strong> {preg.enunciado}
+                                            <strong> [{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
                                         <button 
                                             type="button" 

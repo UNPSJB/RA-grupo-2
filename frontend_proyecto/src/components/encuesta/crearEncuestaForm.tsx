@@ -149,7 +149,7 @@ export default function EncuestaBaseForm() {
                 </div>
                 <div className="card-body">
                     <form onSubmit={handleSubmit}>  
-                        <div className="mb-4 p-3 border rounded bg-light">
+                        <div className="mb-4 p-3 border rounded">
                             <label className="form-label fw-bold">Nombre de la Encuesta</label>
                             <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} required disabled={cargando} />
                         </div>
@@ -215,7 +215,7 @@ export default function EncuestaBaseForm() {
                             <div className="d-flex justify-content-end mt-2">
                                 <button 
                                     type="button" 
-                                    className="btn btn-primary rounded-pill" 
+                                    className="btn btn-theme-primary rounded-pill" 
                                     onClick={agregarPregunta} 
                                     disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)} 
                                 >
