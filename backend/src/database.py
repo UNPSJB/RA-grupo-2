@@ -1,11 +1,8 @@
-import os
-from dotenv import load_dotenv
+from settings import DB_URL
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-load_dotenv()
-
-engine = create_engine(os.getenv("DB_URL"), connect_args={"check_same_thread": False})
+engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Dependency

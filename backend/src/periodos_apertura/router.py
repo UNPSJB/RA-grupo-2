@@ -3,13 +3,15 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.periodos_apertura import schemas, services
 from src.asociaciones.models import Periodo  
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/periodos_apertura", tags=["periodos_apertura"])
 
 # Rutas para periodos de apertura
 
 @router.post("/", response_model=schemas.PeriodoApertura)
-def create_periodo_apertura(apertura: schemas.PeriodoAperturaCreate, db: Session = Depends(get_db)):
+def create_periodo_apertura(apertura: schemas.PeriodoAperturaCreate, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_periodo_apertura(db, apertura)
 
 @router.get("/", response_model= schemas.PeriodoApertura)

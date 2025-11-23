@@ -7,6 +7,8 @@ from src.asociaciones.models import Periodo
 from src.materias.schemas import Materia
 from src.docentes import services as docente_services
 from src.asociaciones.docente_materia.models import DocenteMateria
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_docente
 
 router = APIRouter(prefix="/docentes", tags=["docentes"])
 
@@ -27,7 +29,7 @@ def asignar_materia_docente(docente_id: int, materia_id: int, periodo: Periodo, 
     return {"mensaje": "Materia asignada correctamente"}
 
 @router.get("/{docente_id}/materias")
-def obtener_materias_docente(docente_id: int, db: Session = Depends(get_db)):
+def obtener_materias_docente(docente_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_docente)):
     docente = services.leer_docente(db, docente_id)
     if not docente:
         return {"error": "Docente no encontrado"}

@@ -9,6 +9,8 @@ from . import schemas
 from . import services
 from src.informe_catedra_completado import services as informe_services
 from src.datosEstadisticos import services as estadisticas_services
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_departamento
 
 router = APIRouter(prefix="/departamentos", tags=["departamentos"])
 
@@ -21,12 +23,12 @@ def leer_departamento(departamento_id: int, db: Session = Depends(get_db)):
     return services.leer_departamento(db, departamento_id)
 
 @router.get("/{departamento_id}/carreras", response_model=List[Carrera])
-def get_carreras_por_departamento(departamento_id: int, db: Session = Depends(get_db)):
+def get_carreras_por_departamento(departamento_id: int, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_departamento)):
     return services.get_carreras_por_departamento(db, departamento_id)
 
 @router.get("/{departamento_id}/dashboard-completo", response_model=schemas.DashboardCompletoResponse)
 def get_dashboard_completo( departamento_id: int, anio: int, periodo: Periodo, carrera_id: int | None = None, 
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_departamento)):
     progreso = informe_services.get_progreso_departamento(
         db, departamento_id, anio, periodo, carrera_id
     )

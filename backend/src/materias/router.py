@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.materias import schemas, services
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/materias", tags=["materias"])
 
@@ -17,7 +19,8 @@ def read_materia(materia_id: int, db: Session = Depends(get_db)):
 @router.patch("/asignar-formularios/", status_code=200)
 def asignar_formularios_a_materias(
     data: schemas.MateriasAsignarFormularios, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: user_schemas.User = Depends(tiene_rol_secretaria)
 ):
     if not data.materia_ids:
         raise HTTPException(status_code=400, detail="No se seleccionaron materias")

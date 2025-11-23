@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.carreras import schemas, services
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_departamento
 
 router = APIRouter(prefix="/carreras", tags=["carreras"])
 
@@ -14,9 +16,9 @@ def leer_carrera(carrera_id: int, db: Session = Depends(get_db)):
     return services.leer_carrera(db, carrera_id)
 
 @router.get("/departamento/{departamento_id}", response_model=list[schemas.Carrera])
-def leer_carreras_por_departamento(departamento_id: int, db: Session = Depends(get_db)):
+def leer_carreras_por_departamento(departamento_id: int, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_departamento)):
     return services.listar_carreras_por_departamento(db, departamento_id)
 
 @router.get("/departamento/{departamento_id}/informes_pendientes", response_model=list[schemas.Carrera])
-def informes_pendientes(departamento_id: int, db: Session = Depends(get_db)):
+def informes_pendientes(departamento_id: int, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_departamento)):
     return services.informes_sinteticos_pendientes(db, departamento_id)
