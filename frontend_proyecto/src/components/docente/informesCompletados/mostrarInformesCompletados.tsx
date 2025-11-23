@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { PERIODO_ACTUAL, DOCENTE_ID } from "../../../constants";
+import { DOCENTE_ID, MostrarPeriodo } from "../../../constants";
 import type { Docente } from "../../../types/types";
 import ROUTES from "../../../paths";
 
@@ -59,7 +59,7 @@ export default function InformeCatedraCompletadoDocente() {
                       <div>
                         <span className="text-muted me-3">{i + 1}.</span>
                         <span className="fw-bold">
-                          {inf.titulo} – {inf.anio} ({PERIODO_ACTUAL})
+                          {inf.titulo} – ({MostrarPeriodo(inf.periodo)})
                         </span>
                       </div>
                       <Link

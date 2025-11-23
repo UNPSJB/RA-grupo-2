@@ -337,7 +337,7 @@ export default function CompletarInformeCatedra() {
               </button>
 
               {currentStep < totalSteps && (
-                <button onClick={nextStep} className="btn btn-primary rounded-pill px-4">
+                <button onClick={nextStep} className="btn btn-theme-primary rounded-pill px-4">
                   Siguiente<i className="bi bi-arrow-right ms-2"></i>
                 </button>
               )}

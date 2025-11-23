@@ -280,7 +280,7 @@ export default function CompletarInformeSintetico() {
                             {isLastStep ? (
                                 <button onClick={enviarInforme} className="btn btn-success rounded-pill px-4 shadow-sm" disabled={enviando}>{enviando ? "Enviando..." : "Enviar Informe"}</button>
                             ) : (
-                                <button onClick={nextStep} className="btn btn-primary rounded-pill px-4">Siguiente</button>
+                                <button onClick={nextStep} className="btn btn-theme-primary rounded-pill px-4">Siguiente</button>
                             )}
                         </div>
                         {mensaje && <div className={`mt-4 alert ${mensaje.includes("éxito") ? "alert-success" : "alert-danger"}`}>{mensaje}</div>}

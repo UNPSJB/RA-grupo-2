@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment } from "react";
-import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
+import { ANIO_ACTUAL, PERIODO_ACTUAL, MostrarPeriodo } from "../../../constants";
 
 interface InformeActividad {
   sede: string;
@@ -165,7 +165,7 @@ export default function CompletarInformeCatedraFuncion({
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Período</p>
-          <p className="fw-medium">{data.periodo}</p>
+          <p className="fw-medium">{MostrarPeriodo(data.periodo)}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Alumnos Inscriptos</p>

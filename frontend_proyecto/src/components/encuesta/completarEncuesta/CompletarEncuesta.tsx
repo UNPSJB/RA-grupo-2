@@ -349,7 +349,7 @@ export default function CompletarEncuesta() {
                   className="btn btn-success rounded-pill px-4 shadow-sm"
                   disabled={enviando}>{enviando ? 'Enviando...' : 'Enviar Encuesta'}</button>
               ) : (
-                <button type="button" onClick={nextStep} className="btn btn-primary rounded-pill px-4">
+                <button type="button" onClick={nextStep} className="btn btn-theme-primary rounded-pill px-4">
                   Siguiente
                 </button>
               )}
