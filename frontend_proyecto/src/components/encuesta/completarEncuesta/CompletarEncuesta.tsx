@@ -144,7 +144,7 @@ export default function CompletarEncuesta() {
 
     const nextIndex = currentStep + 1;
     setMaxStepReached(prev => Math.max(prev, nextIndex));
-    
+
     goToStep(nextIndex);
   };
 
@@ -236,7 +236,7 @@ export default function CompletarEncuesta() {
     }
   }, [currentStep, categorias]);
 
-  const handleMouseDown = (e: React.MouseEvent) => { if (scrollRef.current) { setIsDragging(true); e.preventDefault(); setStartX(e.pageX - scrollRef.current.offsetLeft); setScrollLeft(scrollRef.current.scrollLeft); }};
+  const handleMouseDown = (e: React.MouseEvent) => { if (scrollRef.current) { setIsDragging(true); e.preventDefault(); setStartX(e.pageX - scrollRef.current.offsetLeft); setScrollLeft(scrollRef.current.scrollLeft); } };
   const handleMouseUp = () => setIsDragging(false);
   const handleMouseLeave = () => setIsDragging(false);
   const handleMouseMove = (e: React.MouseEvent) => { if (!isDragging || !scrollRef.current) return; const x = e.pageX - scrollRef.current.offsetLeft; const walk = (x - startX) * 1.5; scrollRef.current.scrollLeft = scrollLeft - walk; };
@@ -261,7 +261,7 @@ export default function CompletarEncuesta() {
   if (mensajeExito) return <MensajeExito mensaje={mensajeExito} onClose={cerrarPagina} />;
 
   return (
-    <div className="bg-light" style={{ minHeight: '100vh' }}>
+    <div className="bg-light">
       <div className="container-lg py-4">
         <div className="card shadow-sm border-0 rounded-3">
           <div className="card-header bg-unpsjb-header">
@@ -269,74 +269,45 @@ export default function CompletarEncuesta() {
           </div>
 
           <div className="card-body p-4 p-md-5">
-            
+
             <div className="mb-4">
               <div className="d-flex justify-content-between align-items-center mb-1">
                 <span className="badge bg-primary rounded-pill">{progresoVisual}% Completado</span>
               </div>
               <div className="progress" style={{ height: "8px", backgroundColor: "#e9ecef" }}>
-                <div 
-                    className="progress-bar bg-success" 
-                    role="progressbar" 
-                    style={{ width: `${progresoVisual}%`, transition: "width 0.5s ease" }} 
-                    aria-valuenow={progresoVisual} 
-                    aria-valuemin={0} 
-                    aria-valuemax={100}
+                <div
+                  className="progress-bar bg-success"
+                  role="progressbar"
+                  style={{ width: `${progresoVisual}%`, transition: "width 0.5s ease" }}
+                  aria-valuenow={progresoVisual}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
                 ></div>
               </div>
             </div>
 
-            <style>
-              {`
-                .horizontal-scroll-hidden::-webkit-scrollbar { display: none; }
-                .horizontal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
-                .is-dragging { cursor: grabbing !important; }
-
-                .nav-pills .nav-item { 
-                    flex-shrink: 0; 
-                }
-                .nav-pills .nav-item .nav-link { 
-                    background-color: transparent !important; 
-                    color: #212529 !important; 
-                    font-weight: 500;
-                    border: none;
-                    padding: 0.5rem 2rem; 
-                    margin-right: 0px; 
-                    opacity: 1; 
-                    white-space: nowrap; 
-                    border-radius: 0;
-                }
-
-                .nav-pills .nav-item .nav-link.active {
-                    background-color: var(--color-unpsjb-blue) !important; 
-                    color: white !important; 
-                    cursor: default;
-                }
-                
-                .nav-pills-scrollable { display: flex; flex-wrap: nowrap; width: fit-content; }
-              `}
-            </style>
+            <style>{`.horizontal-scroll-hidden::-webkit-scrollbar { display: none; } .horizontal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; } .is-dragging { cursor: grabbing !important; } .nav-pills .nav-item { flex-shrink: 0; } .nav-pills .nav-item .nav-link { background-color: transparent !important; color: #212529 !important; font-weight: 500; border: none; padding: 0.5rem 2rem; margin-right: 0px; opacity: 1; white-space: nowrap; border-radius: 0; } .nav-pills .nav-item .nav-link.active { background-color: var(--color-unpsjb-blue) !important; color: white !important; border: none; opacity: 1; border-radius: 5px !important; } .nav-pills .nav-item .nav-link.disabled-tab { color: #adb5bd !important; cursor: pointer !important; } .nav-pills .nav-item .nav-link:not(.active):not(.disabled-tab):hover { color: black !important; } .nav-pills-scrollable { display: flex; flex-wrap: nowrap; width: fit-content; }`}</style>
 
             <div ref={scrollRef} className={`horizontal-scroll-hidden mb-4 ${isDragging ? 'is-dragging' : ''}`} style={{ overflowX: 'auto', whiteSpace: 'nowrap', cursor: isDragging ? 'grabbing' : 'grab' }} onMouseDown={handleMouseDown} onMouseLeave={handleMouseLeave} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
               <ul className="nav nav-pills mb-0 nav-pills-scrollable">
                 {categorias.map((categoria, index) => {
-                    const isUnlocked = index <= maxStepReached;
-                    const isActive = categoria.id === categoriaActivaId;
+                  const isUnlocked = index <= maxStepReached;
+                  const isActive = categoria.id === categoriaActivaId;
 
-                    return (
-                        <li key={categoria.id} className="nav-item">
-                            <a 
-                                className={`nav-link ${isActive ? 'active' : ''} ${isUnlocked ? 'unlocked' : ''}`} 
-                                href="#" 
-                                onClick={(e) => { 
-                                    e.preventDefault(); 
-                                    handleTabClick(categoria.id); 
-                                }}
-                            >
-                            {`${categoria.cod}: ${categoria.texto}`}
-                            </a>
-                        </li>
-                    );
+                  return (
+                    <li key={categoria.id} className="nav-item">
+                      <a
+                        className={`nav-link ${isActive ? 'active' : ''} ${isUnlocked ? 'unlocked' : ''}`}
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleTabClick(categoria.id);
+                        }}
+                      >
+                        {`${categoria.cod}: ${categoria.texto}`}
+                      </a>
+                    </li>
+                  );
                 })}
               </ul>
             </div>
@@ -361,9 +332,9 @@ export default function CompletarEncuesta() {
 
             <div className="d-flex justify-content-between">
               {/* type="button" es crucial para evitar recargas accidentales */}
-              <button 
+              <button
                 type="button"
-                onClick={prevStep} 
+                onClick={prevStep}
                 className="btn btn-outline-secondary rounded-pill px-4"
                 disabled={isFirstStep}
                 style={{ visibility: isFirstStep ? 'hidden' : 'visible' }}
@@ -372,11 +343,11 @@ export default function CompletarEncuesta() {
               </button>
 
               {isLastStep ? (
-                <button 
-                type="button"
-                onClick={enviarEncuesta} 
-                className="btn btn-success rounded-pill px-4 shadow-sm"
-                disabled={enviando}>{enviando ? 'Enviando...' : 'Enviar Encuesta'}</button>
+                <button
+                  type="button"
+                  onClick={enviarEncuesta}
+                  className="btn btn-success rounded-pill px-4 shadow-sm"
+                  disabled={enviando}>{enviando ? 'Enviando...' : 'Enviar Encuesta'}</button>
               ) : (
                 <button type="button" onClick={nextStep} className="btn btn-primary rounded-pill px-4">
                   Siguiente

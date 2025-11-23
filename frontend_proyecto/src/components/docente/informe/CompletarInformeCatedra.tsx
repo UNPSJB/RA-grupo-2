@@ -52,19 +52,19 @@ export default function CompletarInformeCatedra() {
   const [datosEstadisticos, setDatosEstadisticos] = useState<DatosEstadisticosCategoria[]>([]);
   const [cantidad, setCantidad] = useState<number>(0);
   const [cantidadInscriptos, setCantidadInscriptos] = useState<number>(0);
-  
+
   const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] = useState(-1);
   const [cantidadComisionesPracticas, setCantidadComisionesPracticas] = useState(-1);
-  
+
   const [JTP, SetJTP] = useState("");
   const [aux1, SetAux1] = useState("");
   const [aux2, SetAux2] = useState("");
-  
+
   const { docenteMateriaId, materiaId, materiaNombre, anio, periodo, informeBaseId = 3 } = location.state || {};
 
   const [currentStep, setCurrentStep] = useState(1);
   const [maxStepReached, setMaxStepReached] = useState(1);
-  
+
   const steps = [
     { id: 1, name: "Datos Generales" },
     { id: 2, name: "Datos Estadísticos" },
@@ -75,8 +75,8 @@ export default function CompletarInformeCatedra() {
   ];
   const totalSteps = steps.length;
 
-  const porcentajeAvance = totalSteps > 1 
-    ? Math.round(((currentStep - 1) / (totalSteps - 1)) * 100) 
+  const porcentajeAvance = totalSteps > 1
+    ? Math.round(((currentStep - 1) / (totalSteps - 1)) * 100)
     : 100;
 
   const handleComisionesChange = (tipo: 'teoricas' | 'practicas', valor: number) => {
@@ -88,53 +88,53 @@ export default function CompletarInformeCatedra() {
     setMensaje(null);
 
     if (currentStep === 1) {
-        if (cantidadComisionesTeoricas <= 0 || cantidadComisionesPracticas <= 0) {
-            setMensaje("La cantidad de comisiones debe ser mayor a 0.");
-            return false;
-        }
-        return true;
+      if (cantidadComisionesTeoricas <= 0 || cantidadComisionesPracticas <= 0) {
+        setMensaje("La cantidad de comisiones debe ser mayor a 0.");
+        return false;
+      }
+      return true;
     }
 
     if (currentStep === 2) return true;
 
     let codigosCategorias: string[] = [];
-    if (currentStep === 3) codigosCategorias = ["1"]; 
-    if (currentStep === 4) codigosCategorias = ["2", "2.A", "2.B", "2.C"]; 
-    if (currentStep === 5) codigosCategorias = ["3"]; 
-    if (currentStep === 6) codigosCategorias = ["4"]; 
+    if (currentStep === 3) codigosCategorias = ["1"];
+    if (currentStep === 4) codigosCategorias = ["2", "2.A", "2.B", "2.C"];
+    if (currentStep === 5) codigosCategorias = ["3"];
+    if (currentStep === 6) codigosCategorias = ["4"];
 
     const categoriasDelPaso = categoriasConPreguntas.filter(cat => codigosCategorias.includes(cat.cod));
     const preguntasAValidar = categoriasDelPaso.flatMap(cat => cat.preguntas);
 
     for (const pregunta of preguntasAValidar) {
-        const enunciadoLower = pregunta.enunciado.toLowerCase();
-        
-        if (enunciadoLower.includes("jtp") && !JTP.trim()) continue;
-        if (enunciadoLower.includes("auxiliar de primera") && !aux1.trim()) continue;
-        if (enunciadoLower.includes("auxiliar de segunda") && !aux2.trim()) continue;
+      const enunciadoLower = pregunta.enunciado.toLowerCase();
 
-        if (pregunta.obligatoria) {
-            const respuesta = respuestas[pregunta.id];
-            const tieneTexto = respuesta?.texto_respuesta && respuesta.texto_respuesta.trim().length > 0;
-            const tieneOpcion = respuesta?.opcion_id !== null && respuesta?.opcion_id !== undefined;
+      if (enunciadoLower.includes("jtp") && !JTP.trim()) continue;
+      if (enunciadoLower.includes("auxiliar de primera") && !aux1.trim()) continue;
+      if (enunciadoLower.includes("auxiliar de segunda") && !aux2.trim()) continue;
 
-            if (!tieneTexto && !tieneOpcion) {
-                setMensaje(`Falta completar el apartado: "${pregunta.enunciado}"`);
-                return false;
-            }
+      if (pregunta.obligatoria) {
+        const respuesta = respuestas[pregunta.id];
+        const tieneTexto = respuesta?.texto_respuesta && respuesta.texto_respuesta.trim().length > 0;
+        const tieneOpcion = respuesta?.opcion_id !== null && respuesta?.opcion_id !== undefined;
+
+        if (!tieneTexto && !tieneOpcion) {
+          setMensaje(`Falta completar el apartado: "${pregunta.enunciado}"`);
+          return false;
         }
+      }
     }
     return true;
   };
 
   const nextStep = () => {
     if (validarPasoActual()) {
-        const next = Math.min(currentStep + 1, totalSteps);
-        setCurrentStep(next);
-        if (next > maxStepReached) {
-            setMaxStepReached(next);
-        }
-        window.scrollTo(0, 0);
+      const next = Math.min(currentStep + 1, totalSteps);
+      setCurrentStep(next);
+      if (next > maxStepReached) {
+        setMaxStepReached(next);
+      }
+      window.scrollTo(0, 0);
     }
   };
 
@@ -146,10 +146,10 @@ export default function CompletarInformeCatedra() {
 
   const goToStep = (stepId: number) => {
     if (stepId <= maxStepReached) {
-        setMensaje(null);
-        setCurrentStep(stepId);
+      setMensaje(null);
+      setCurrentStep(stepId);
     } else if (stepId === currentStep + 1) {
-        nextStep();
+      nextStep();
     }
   };
 
@@ -160,24 +160,24 @@ export default function CompletarInformeCatedra() {
       return;
     }
     fetch(`http://127.0.0.1:8000/informes_catedra/${informeBaseId}/categorias_con_preguntas`)
-      .then((res) => { 
-          if (!res.ok) throw new Error("Error de conexión al cargar estructura."); 
-          return res.json(); 
+      .then((res) => {
+        if (!res.ok) throw new Error("Error de conexión al cargar estructura.");
+        return res.json();
       })
       .then((data: CategoriaConPreguntas[]) => {
         const dataOrdenada = [...data].sort((a, b) => a.cod.localeCompare(b.cod, "es", { sensitivity: "base" }));
         setCategoriasConPreguntas(dataOrdenada);
       })
-      .catch((err) => { 
-          console.error(err); 
-          setError(err instanceof Error ? err.message : "Error desconocido."); 
+      .catch((err) => {
+        console.error(err);
+        setError(err instanceof Error ? err.message : "Error desconocido.");
       })
       .finally(() => setLoading(false));
   }, [informeBaseId]);
 
   useEffect(() => {
     setDatosEstadisticos([]);
-    if(!materiaId) return;
+    if (!materiaId) return;
 
     fetch(`http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
       .then((res) => { if (!res.ok) throw new Error("Error datos estadísticos"); return res.json(); })
@@ -192,14 +192,14 @@ export default function CompletarInformeCatedra() {
   }, [materiaId, anio, periodo]);
 
   useEffect(() => {
-    if(!materiaId) return;
+    if (!materiaId) return;
     fetch(`http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
       .then((res) => { if (!res.ok) throw new Error("Error cantidad"); return res.json(); })
       .then((data) => { setCantidad(data); })
       .catch((error) => { console.error(error); });
   }, [anio, materiaId, periodo]);
 
-  
+
   const manejarCambio = (preguntaId: number, valor: RespuestaValor) => {
     setRespuestas((prev) => ({ ...prev, [preguntaId]: valor }));
     if (mensaje && mensaje.includes("Falta completar")) setMensaje(null);
@@ -207,7 +207,7 @@ export default function CompletarInformeCatedra() {
 
   const manejarDatosGenerados = (datos: any) => {
     setCantidadInscriptos(datos.cantidadAlumnos);
-    
+
     SetJTP((prev) => (prev && prev.trim() !== "" ? prev : (datos.JTP || "")));
     SetAux1((prev) => (prev && prev.trim() !== "" ? prev : (datos.aux1 || "")));
     SetAux2((prev) => (prev && prev.trim() !== "" ? prev : (datos.aux2 || "")));
@@ -236,9 +236,9 @@ export default function CompletarInformeCatedra() {
       periodo: periodo,
       cantidadComisionesTeoricas,
       cantidadComisionesPracticas,
-      JTP: JTP.trim()? JTP: null,
-      aux_primera: aux1.trim()? aux1 : null,
-      aux_segunda: aux2.trim()? aux2 : null,
+      JTP: JTP.trim() ? JTP : null,
+      aux_primera: aux1.trim() ? aux1 : null,
+      aux_segunda: aux2.trim() ? aux2 : null,
       respuestas: respuestasFormateadas,
     };
     try {
@@ -248,15 +248,15 @@ export default function CompletarInformeCatedra() {
         body: JSON.stringify(datosParaBackend),
       });
       if (!res.ok) throw new Error("Error al enviar el informe.");
-      
+
       const data = await res.json();
       fetch(`http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`, { method: "POST" }).catch(console.error);
 
       setMensaje("¡Informe enviado con éxito!");
       setTimeout(() => { navigate(ROUTES.INFORMES_CATEDRA_PENDIENTES); }, 2000);
-    } catch (err: unknown) { 
-        console.error(err); 
-        setMensaje(`Error: ${err instanceof Error ? err.message : "Desconocido"}`);
+    } catch (err: unknown) {
+      console.error(err);
+      setMensaje(`Error: ${err instanceof Error ? err.message : "Desconocido"}`);
     } finally { setEnviando(false); }
   };
 
@@ -266,10 +266,10 @@ export default function CompletarInformeCatedra() {
   if (error) return <div className="alert alert-danger m-4">{error}</div>;
 
   return (
-    <div className="bg-light min-vh-100">
+    <div className="bg-light">
       <div className="container-lg py-4">
         <div className="card shadow-sm border-0 rounded-3">
-          <div className="card-header bg-unpsjb-header text-white py-3">
+          <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">Informe de Cátedra – {materiaNombre}</h1>
           </div>
 
@@ -284,12 +284,12 @@ export default function CompletarInformeCatedra() {
             </style>
 
             <div className="mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="badge bg-primary rounded-pill">{porcentajeAvance}% Completado</span>
-                </div>
-                <div className="progress" style={{ height: "10px", backgroundColor: "#e9ecef" }}>
-                    <div className="progress-bar bg-success" role="progressbar" style={{ width: `${porcentajeAvance}%` }} aria-valuenow={porcentajeAvance} aria-valuemin={0} aria-valuemax={100}></div>
-                </div>
+              <div className="d-flex justify-content-between align-items-center mb-1">
+                <span className="badge bg-primary rounded-pill">{porcentajeAvance}% Completado</span>
+              </div>
+              <div className="progress" style={{ height: "8px", backgroundColor: "#e9ecef" }}>
+                <div className="progress-bar bg-success" role="progressbar" style={{ width: `${porcentajeAvance}%` }} aria-valuenow={porcentajeAvance} aria-valuemin={0} aria-valuemax={100}></div>
+              </div>
             </div>
 
             <ul className="nav nav-pills nav-fill mb-4 border-bottom pb-3">
@@ -299,9 +299,9 @@ export default function CompletarInformeCatedra() {
                   <li key={step.id} className="nav-item">
                     <button
                       className={`nav-link ${currentStep === step.id ? 'active' : ''} ${!isAccessible ? 'disabled' : ''}`}
-                      onClick={(e) => { 
-                        e.preventDefault(); 
-                        if (isAccessible) goToStep(step.id); 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (isAccessible) goToStep(step.id);
                       }}
                       style={{ cursor: isAccessible ? 'pointer' : 'not-allowed', fontWeight: 500 }}
                     >
@@ -335,7 +335,7 @@ export default function CompletarInformeCatedra() {
               <button onClick={prevStep} className="btn btn-outline-secondary rounded-pill px-4" disabled={currentStep === 1}>
                 <i className="bi bi-arrow-left me-2"></i>Anterior
               </button>
-              
+
               {currentStep < totalSteps && (
                 <button onClick={nextStep} className="btn btn-primary rounded-pill px-4">
                   Siguiente<i className="bi bi-arrow-right ms-2"></i>
@@ -356,7 +356,7 @@ export default function CompletarInformeCatedra() {
               </div>
             )}
           </div>
-        </div> 
+        </div>
       </div>
     </div>
   );

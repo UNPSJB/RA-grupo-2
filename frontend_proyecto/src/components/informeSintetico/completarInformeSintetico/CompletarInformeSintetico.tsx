@@ -240,11 +240,10 @@ export default function CompletarInformeSintetico() {
                     <div className="card-body p-4 p-md-5">
                         <div className="mb-4">
                             <div className="d-flex justify-content-between align-items-center mb-1">
-                                <small className="text-muted text-uppercase fw-bold">Progreso</small>
-                                <small className={`fw-bold ${!pasoValido ? "text-danger" : "text-primary"}`}>{progresoActual}%</small>
+                                <span className="badge bg-primary rounded-pill">{progresoActual}% Completado</span>
                             </div>
                             <div className="progress" style={{ height: "6px" }}>
-                                <div className={`progress-bar ${!pasoValido ? "bg-danger" : "bg-primary"}`} style={{ width: `${progresoActual}%`, transition: "width 0.5s ease" }}></div>
+                                <div className={`progress-bar ${!pasoValido ? "bg-danger" : "bg-success"}`} role="progressbar" style={{ width: `${progresoActual}%`, transition: "width 0.5s ease" }}aria-valuenow={progresoActual}aria-valuemin={0}aria-valuemax={100}></div>
                             </div>
                         </div>
 
