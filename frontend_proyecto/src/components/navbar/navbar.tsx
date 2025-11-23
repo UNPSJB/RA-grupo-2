@@ -21,15 +21,6 @@ export default function Navbar() {
     color: 'var(--color-text-primary)', 
   };
 
-  const userDropdownMenuStyle = {
-    ...dropdownMenuStyle,
-    right: 0, 
-    left: 'auto', 
-    minWidth: '220px',
-  };
-  const userName = "Juan Pérez";
-  const userRole = "Docente";
-
   return (
     <nav 
       className="navbar navbar-expand-lg shadow-sm fixed-top" 
@@ -128,44 +119,6 @@ export default function Navbar() {
               </ul>
             </li>        
           </ul>
-        </div>
-        <div className="navbar-nav ms-auto"> 
-          <li className="nav-item dropdown d-none d-lg-block"> 
-            
-            <a 
-              className="nav-link nav-link-animated d-flex align-items-center" 
-              href="#" 
-              id="userDropdown" 
-              role="button" 
-              data-bs-toggle="dropdown" 
-              aria-expanded="false"
-              style={{ padding: '0.5rem 0.5rem' }} 
-            >
-              <div className="d-flex flex-column align-items-end me-3">
-                  <span className="fw-bold" style={{ color: 'var(--color-text-primary)', fontSize: '1.0rem' }}>{userName}</span>
-                  <span className="text-muted" style={{ color: 'var(--color-text-primary)', fontSize: '0.75rem', opacity: 0.7 }}>{userRole}</span>
-              </div>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="32" 
-                height="32" 
-                fill="currentColor" 
-                className="user-icon-svg" 
-                viewBox="0 0 16 16"
-                style={{ color: 'var(--color-text-primary)' }} 
-              >
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
-              </svg>
-              
-            </a>
-            
-            <ul className="dropdown-menu custom-dropdown user-dropdown-menu" aria-labelledby="userDropdown" style={userDropdownMenuStyle}>
-              <li>
-                  Cerrar Sesión
-              </li>
-            </ul>
-          </li>
         </div>
       </div>
     </nav>

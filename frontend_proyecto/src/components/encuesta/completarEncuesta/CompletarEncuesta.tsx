@@ -341,7 +341,7 @@ export default function CompletarEncuesta() {
               </ul>
             </div>
 
-            <div className="step-content-container" style={{ overflowY: 'auto', paddingRight: '15px' }}>
+            <div className="step-content-container" style={{ paddingRight: '15px' }}>
               {categorias.map((c) => (
                 <div key={c.id} style={{ display: c.id === categoriaActivaId ? 'block' : 'none' }}>
                   <PreguntasCategoria
