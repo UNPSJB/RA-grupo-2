@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import EncuestasDisponibles from "./EncuestasDisponibles";
 import type { Alumno } from "../../types/types.ts"
-import { ALUMNO_ID } from "../../constants.ts"
 import { EsPeriodoEncuesta } from "../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 type EncuestaDisponible = {
   materia: string;
@@ -14,12 +14,14 @@ type EncuestaDisponible = {
 };
 
 export default function EncuestasPage() {
-  const alumnoId = ALUMNO_ID; // hardcodeado por ahora
+  const { currentUser} = useAuth();
+  const alumnoId = currentUser?.alumno_id; 
   const [alumno, setAlumno] = useState<Alumno>()
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
   const periodoEncuesta = EsPeriodoEncuesta();
 
   useEffect(() => {
+    if(!alumnoId) return;
     api.get(`/alumnos/${alumnoId}`)
       .then(res => {
         setAlumno(res.data);
@@ -39,6 +41,16 @@ export default function EncuestasPage() {
 
 if (!periodoEncuesta) {
   return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"}/>;
+}
+
+if(!alumnoId) {
+  return (
+    <div className="container py-4">
+      <div className="alert alert-danger" role="alert">
+        No se pudo obtener la información del alumno. Por favor, inicie sesión nuevamente.
+      </div>
+    </div>
+  );
 }
 
   return (
