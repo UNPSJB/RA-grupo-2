@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { Materia } from "../../types/types";
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths";
-import api from "../../services/api";
+import { MostrarPeriodo } from "../../constants";
 
 type Respuesta = {
   id: number;
@@ -30,11 +30,9 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
   const [materias, setMaterias] = useState<Materia[]>([]);
 
   useEffect(() => {
-    api.get("/materias")
-      .then((res) => {
-        const data: Materia[] = res.data;
-        setMaterias(data);
-      })
+    fetch(`http://127.0.0.1:8000/materias`)
+      .then((res) => res.json())
+      .then((data: Materia[]) => setMaterias(data))
       .catch((err) => {
         console.error("Error al obtener materias:", err);
         setMaterias([]);
@@ -46,6 +44,7 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
       <p className="text-muted">No ha completado encuestas.</p>
     );
   }
+
 
   return (
     <div className="list-group">
@@ -62,7 +61,7 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
 
                 <span className="text-dark">
                   {" "}
-                  — {e.anio} {e.periodo}
+                  — {e.anio} {MostrarPeriodo(e.periodo)}
                 </span>
               </div>
               <Link

@@ -7,6 +7,9 @@ export interface User {
     email: string;
     role_name: string; // 'admin', 'docente', 'alumno', 'secretaria'
     role_id: number;
+    alumno_id: number | null;
+    docente_id: number | null;
+    departamento_id: number | null;
 }
 
 // Equivalente a partes de AuthTypes.ts

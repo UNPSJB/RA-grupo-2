@@ -3,10 +3,15 @@ import { useNavigate } from "react-router-dom";
 import CategoriaManager from "../informeCatedra/ManejadorCategoria"
 import OpcionesManager from "../informeCatedra/ManejadorOpciones";
 import ROUTES from "../../paths";
-import api from "../../services/api";
 
 interface CategoriaTemp { cod: string; texto: string; }
-interface PreguntaTemp { enunciado: string; categoria_cod: string; tipo: 'abierta' | 'cerrada'; opcion_ids: number[]; }
+interface PreguntaTemp { 
+    enunciado: string; 
+    categoria_cod: string; 
+    tipo: 'abierta' | 'cerrada'; 
+    opcion_ids: number[]; 
+    obligatoria: boolean; 
+}
 interface Opcion { id: number; contenido: string; }
 
 export default function EncuestaBaseForm() {
@@ -22,13 +27,12 @@ export default function EncuestaBaseForm() {
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
     const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta'); 
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
-    
+    const [esObligatoria, setEsObligatoria] = useState(false); // Nuevo estado
+
     useEffect(() => {
-        api.get("/opciones")
-            .then((res) => {
-                const data = res.data;
-                setOpcionesCatalogo(Array.isArray(data) ? data : []);
-            })
+        fetch("http://localhost:8000/opciones")
+            .then((res) => res.json())
+            .then((data) => setOpcionesCatalogo(Array.isArray(data) ? data : []))
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
 
@@ -47,11 +51,14 @@ export default function EncuestaBaseForm() {
             categoria_cod: categoriaSeleccionada,
             tipo: nuevoTipoPregunta,
             opcion_ids: nuevoTipoPregunta === 'cerrada' ? opcionesSeleccionadas : [],
+            obligatoria: esObligatoria, 
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
+        
         setNuevoEnunciado("");
         setOpcionesSeleccionadas([]);
+        setEsObligatoria(false); 
     };
 
     const eliminarPregunta = (index: number) => {
@@ -69,40 +76,66 @@ export default function EncuestaBaseForm() {
         setCargando(true);
 
         try {
-            const resEncuesta = await api.post("/encuestas/", { nombre });
-            const { id: encuestaId } = resEncuesta.data;
+            const resEncuesta = await fetch("http://localhost:8000/encuestas/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre }),
+            });
+            if (!resEncuesta.ok) { 
+                const errorData = await resEncuesta.json();
+                throw new Error(errorData.detail || "Error al crear encuesta."); 
+            }
+            const { id: encuestaId } = await resEncuesta.json();
             const categoriasCreadas = [];
             
             for (const categoriaTemp of categorias) {
-                const resCat = await api.post("/categorias/paraEncuesta/", {
-                    cod: categoriaTemp.cod,
-                    texto: categoriaTemp.texto || "",
-                    encuesta_id: encuestaId,
+                const resCat = await fetch("http://localhost:8000/categorias/paraEncuesta/", { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        cod: categoriaTemp.cod,
+                        texto: categoriaTemp.texto || "",
+                        encuesta_id: encuestaId,
+                    }),
                 });
-                const categoriaCreada = resCat.data;
+                if (!resCat.ok) { 
+                    const errorData = await resCat.json();
+                    throw new Error(errorData.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`); 
+                }
+                const categoriaCreada = await resCat.json();
                 categoriasCreadas.push(categoriaCreada);
             }
 
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
                 if (!categoria) continue; 
-                const endpoint = preg.tipo === 'cerrada' ? "/preguntas/cerrada" : "/preguntas/abierta";   
+                const endpoint = preg.tipo === 'cerrada' ? "http://localhost:8000/preguntas/cerrada" : "http://localhost:8000/preguntas/abierta";   
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
+                    obligatoria: preg.obligatoria, 
                     tipo: preg.tipo, 
                     ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }), 
                 };
-                await api.post(endpoint, payload);
+                const resPreg = await fetch(endpoint, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+
+                if (!resPreg.ok) { 
+                     const errorData = await resPreg.json();
+                     throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
+                }
             }
 
-            alert("Encuesta creado con éxito.");
+            alert("Encuesta creada con éxito.");
             navigate(ROUTES.HOME);
 
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error en la cascada de creación:", error);
-            const messageToShow = error.response?.data?.detail || error.message || "Error desconocido al procesar la solicitud.";
-            alert(`Fallo en la creación del encuesta. Error: ${messageToShow}`);
+            const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
+            alert(`Fallo en la creación de la encuesta. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
         }
@@ -116,7 +149,7 @@ export default function EncuestaBaseForm() {
                 </div>
                 <div className="card-body">
                     <form onSubmit={handleSubmit}>  
-                        <div className="mb-4 p-3 border rounded bg-light">
+                        <div className="mb-4 p-3 border rounded">
                             <label className="form-label fw-bold">Nombre de la Encuesta</label>
                             <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} required disabled={cargando} />
                         </div>
@@ -150,10 +183,26 @@ export default function EncuestaBaseForm() {
                                     </select>
                                 </div>
                             </div>
+                            
                             <div className="mb-3">
                                 <label className="form-label fw-bold">Enunciado</label>
                                 <textarea className="form-control" rows={2} value={nuevoEnunciado} onChange={(e) => setNuevoEnunciado(e.target.value)} disabled={cargando || categorias.length === 0} />
                             </div>
+
+                            <div className="mb-3 form-check">
+                                <input 
+                                    type="checkbox" 
+                                    className="form-check-input" 
+                                    id="checkObligatoria" 
+                                    checked={esObligatoria}
+                                    onChange={(e) => setEsObligatoria(e.target.checked)}
+                                    disabled={cargando || categorias.length === 0}
+                                />
+                                <label className="form-check-label fw-bold" htmlFor="checkObligatoria">
+                                    Marque si la pregunta es obligatoria de responder
+                                </label>
+                            </div>
+
                             {nuevoTipoPregunta === 'cerrada' && (
                                 <OpcionesManager
                                     opcionesCatalogo={opcionesCatalogo}
@@ -166,7 +215,7 @@ export default function EncuestaBaseForm() {
                             <div className="d-flex justify-content-end mt-2">
                                 <button 
                                     type="button" 
-                                    className="btn btn-primary rounded-pill" 
+                                    className="btn btn-theme-primary rounded-pill" 
                                     onClick={agregarPregunta} 
                                     disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)} 
                                 >
@@ -180,11 +229,12 @@ export default function EncuestaBaseForm() {
                                     <li key={i} className={`list-group-item d-flex justify-content-between align-items-center ${preg.tipo === 'cerrada' ? 'bg-info-subtle' : ''}`}>
                                         <span>
                                             <strong className={`badge ${preg.tipo === 'cerrada' ? 'bg-primary' : 'bg-secondary'} me-2`}>{preg.tipo.toUpperCase()}</strong>
+                                            {preg.obligatoria && <span className="badge bg-danger me-2">OBLIGATORIA</span>}
                                             <strong className="text-primary">[{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
                                         <button 
-                                            type="button" 
                                                 className="btn btn-danger btn-sm rounded-pill" 
+                                            type="button" 
                                             onClick={() => eliminarPregunta(i)} 
                                             disabled={cargando}
                                         >

@@ -97,6 +97,9 @@ def get_elementos_pregunta2B(db: Session, id_dpto: int, id_carrera: int, anio: i
         ep: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
                 if r.pregunta.enunciado == "E(PRACTICA): Actuación de los miembros de la Cátedra "), None)
 
+        obs: RespuestaInforme = next((r for r in informe_completado.respuestas_informe
+                if r.pregunta.enunciado == "Observaciones:"), None)
+
         elemento = schemas.TablaPregunta2BItem(
             materia = materia,
             encuesta_B = b.texto_respuesta if b else "-",
@@ -104,7 +107,7 @@ def get_elementos_pregunta2B(db: Session, id_dpto: int, id_carrera: int, anio: i
             encuesta_D = d.texto_respuesta if d else "-",
             encuesta_ET = et.texto_respuesta if et else "-",
             encuesta_EP = ep.texto_respuesta if ep else "-",
-            juicio_valor = ""
+            juicio_valor = obs.texto_respuesta if obs else ""
         )
         elementos.append(elemento)
     return elementos

@@ -1,21 +1,22 @@
 import { useEffect, useState, Fragment } from "react";
 
-type RespuestaValor = { 
-  opcion_id: number | null; 
-  texto_respuesta: string | null; 
+type RespuestaValor = {
+  opcion_id: number | null;
+  texto_respuesta: string | null;
 };
 
-interface Pregunta { 
-  id: number; 
-  enunciado: string; 
-  categoria_id: number; 
+interface Pregunta {
+  id: number;
+  enunciado: string;
+  categoria_id: number;
+  obligatoria?: boolean;
 }
 
-interface Categoria { 
-  id: number; 
-  cod: string; 
-  texto: string; 
-  preguntas: Pregunta[]; 
+interface Categoria {
+  id: number;
+  cod: string;
+  texto: string;
+  preguntas: Pregunta[];
 }
 
 interface Props {
@@ -25,7 +26,7 @@ interface Props {
   isReadOnly?: boolean;
 }
 
-export default function Categoria2CInforme({ categoria, manejarCambio, respuestas, isReadOnly = false}: Props) {
+export default function Categoria2CInforme({ categoria, manejarCambio, respuestas, isReadOnly = false }: Props) {
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
   const [reflexion, setReflexion] = useState<Pregunta | null>(null);
 
@@ -72,13 +73,20 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
   const pAprObs = getPregunta("Obstáculos: Proceso de aprendizaje");
   const pEstrategias = getPregunta("Estrategias a implementar");
 
+  const renderAsterisco = (pregunta: Pregunta | undefined) => {
+    if (pregunta?.obligatoria && !isReadOnly) {
+      return <span className="text-danger ms-1">*</span>;
+    }
+    return null;
+  };
+
   return (
     <Fragment>
       <div className="mb-4">
         <h6 className="fw-bold mb-3">Aspectos positivos</h6>
         <div className="mb-3">
           <label className="form-label mb-2 fw-bold">
-            Proceso enseñanza
+            Proceso enseñanza {renderAsterisco(pEnsPos)}
           </label>
           {isReadOnly ? (
             <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
@@ -102,7 +110,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
         </div>
         <div>
           <label className="form-label mb-2 fw-bold">
-            Proceso de aprendizaje
+            Proceso de aprendizaje {renderAsterisco(pAprPos)}
           </label>
           {isReadOnly ? (
             <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
@@ -130,7 +138,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
         <h6 className="fw-bold mb-3">Obstáculos</h6>
         <div className="mb-3">
           <label className="form-label mb-3 fw-bold">
-            Proceso enseñanza
+            Proceso enseñanza {renderAsterisco(pEnsObs)}
           </label>
           {isReadOnly ? (
             <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
@@ -154,7 +162,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
         </div>
         <div>
           <label className="form-label mb-3 fw-bold">
-            Proceso de aprendizaje
+            Proceso de aprendizaje {renderAsterisco(pAprObs)}
           </label>
           {isReadOnly ? (
             <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
@@ -179,7 +187,7 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
       </div>
 
       <div className="mb-4">
-        <h6 className="fw-bold mb-3">Estrategias a implementar</h6>
+        <h6 className="fw-bold mb-3">Estrategias a implementar {renderAsterisco(pEstrategias)}</h6>
         {isReadOnly ? (
           <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
             {respuestas[pEstrategias?.id || 0]?.texto_respuesta?.trim() || "—"}
@@ -203,7 +211,9 @@ export default function Categoria2CInforme({ categoria, manejarCambio, respuesta
 
       {reflexion && (
         <div className="mb-4">
-          <h6 className="fw-bold mb-3">{reflexion.enunciado}</h6>
+          <h6 className="fw-bold mb-3">
+            {reflexion.enunciado} {renderAsterisco(reflexion)}
+          </h6>
           {isReadOnly ? (
             <p className="form-control-plaintext" style={{ whiteSpace: 'pre-wrap' }}>
               {respuestas[reflexion.id]?.texto_respuesta?.trim() || "—"}

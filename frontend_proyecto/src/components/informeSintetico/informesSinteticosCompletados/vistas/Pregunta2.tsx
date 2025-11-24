@@ -66,7 +66,7 @@ export default function VistaPorcentajeHoras({
                         <div className="accordion-item" key={item.materia.id}>
                             <h2 className="accordion-header" id={`headingVP2${index}`}>
                                 <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapseVP2${index}`}
@@ -78,9 +78,8 @@ export default function VistaPorcentajeHoras({
                             </h2>
                             <div
                                 id={`collapseVP2${index}`}
-                                className="accordion-collapse collapse"
+                                className="accordion-collapse collapse show"
                                 aria-labelledby={`headingVP2${index}`}
-                                data-bs-parent="#accordionVistaP2"
                             >
                                 <div className="accordion-body">
                                     <div className="row g-3">

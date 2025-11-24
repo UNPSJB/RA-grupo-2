@@ -2,7 +2,7 @@ import { useEffect, useState, Fragment } from "react";
 
 type RespuestaValor = { opcion_id: number | null; texto_respuesta: string | null };
 interface Opcion { id: number; contenido: string; }
-interface Pregunta { id: number; enunciado: string; categoria_id: number; opciones?: Opcion[]; }
+interface Pregunta { id: number; enunciado: string; categoria_id: number; opciones?: Opcion[]; obligatoria?: boolean; }
 interface Categoria { id: number; cod: string; texto: string; preguntas: Pregunta[]; }
 
 interface Props {
@@ -55,16 +55,15 @@ export default function Categoria4Informe({
     manejarCambio(preguntaId, nuevoValor);
   };
 
-  const findPreguntaId = (
+  const findPregunta = (
     rolKey: string,
     tipo: "calificacion" | "justificacion"
-  ): number => {
+  ): Pregunta | undefined => {
     const searchTerm = tipo === "calificacion" ? "calificacion" : "justificacion";
     const expectedEnunciado = normalizarString(`${searchTerm} - ${rolKey}`);
-    const p = preguntas.find(
+    return preguntas.find(
       (p) => normalizarString(p.enunciado) === expectedEnunciado
     );
-    return p ? p.id : 0;
   };
 
   const getOpcionTexto = (preguntaId: number): string => {
@@ -77,16 +76,16 @@ export default function Categoria4Informe({
 
   const getNombreFuncion = (rolKey: string): string => {
     if (!nombresFuncion) return "";
-    if (rolKey === "jtp") return nombresFuncion.JTP? nombresFuncion.JTP : "";
-    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1? nombresFuncion.aux1 : "";
-    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2? nombresFuncion.aux2 : "";
+    if (rolKey === "jtp") return nombresFuncion.JTP ? nombresFuncion.JTP : "";
+    if (rolKey === "auxiliar de primera") return nombresFuncion.aux1 ? nombresFuncion.aux1 : "";
+    if (rolKey === "auxiliar de segunda") return nombresFuncion.aux2 ? nombresFuncion.aux2 : "";
     return "";
   };
 
   const rolesVisibles = isReadOnly
-    ? ROLES.filter((rol) => getNombreFuncion(rol.key).trim()) // solo los que tienen nombre
+    ? ROLES.filter((rol) => getNombreFuncion(rol.key).trim())
     : ROLES;
- 
+
   return (
     <Fragment>
       <div className="table-responsive">
@@ -100,14 +99,12 @@ export default function Categoria4Informe({
           </thead>
           <tbody>
             {rolesVisibles.map((rol) => {
-              const calificacionPId = findPreguntaId(rol.key, "calificacion");
-              const justificacionPId = findPreguntaId(rol.key, "justificacion");
+              const pCalif = findPregunta(rol.key, "calificacion");
+              const pJust = findPregunta(rol.key, "justificacion");
+              const calificacionPId = pCalif ? pCalif.id : 0;
+              const justificacionPId = pJust ? pJust.id : 0;
 
-              const preguntaCalificacion = preguntas.find(
-                (p) => p.id === calificacionPId
-              );
-              const opciones = preguntaCalificacion?.opciones || [];
-
+              const opciones = pCalif?.opciones || [];
               const nombre = getNombreFuncion(rol.key);
               const habilitado = !!nombre.trim();
 
@@ -128,26 +125,29 @@ export default function Categoria4Informe({
                         {getOpcionTexto(calificacionPId)}
                       </p>
                     ) : (
-                      <select
-                        className="form-select border-0"
-                        style={{ borderBottom: "1px solid #9ea5abff" }}
-                        value={respuestas[calificacionPId]?.opcion_id || ""}
-                        onChange={(e) =>
-                          actualizarRespuesta(
-                            calificacionPId,
-                            e.target.value,
-                            "cerrada"
-                          )
-                        }
-                        disabled={!habilitado || !calificacionPId}
-                      >
-                        <option value="">Seleccionar</option>
-                        {opciones.map((opt) => (
-                          <option key={opt.id} value={opt.id}>
-                            {opt.contenido}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="d-flex align-items-center">
+                        <select
+                          className="form-select border-0"
+                          style={{ borderBottom: "1px solid #9ea5abff" }}
+                          value={respuestas[calificacionPId]?.opcion_id || ""}
+                          onChange={(e) =>
+                            actualizarRespuesta(
+                              calificacionPId,
+                              e.target.value,
+                              "cerrada"
+                            )
+                          }
+                          disabled={!habilitado || !calificacionPId}
+                        >
+                          <option value="">Seleccionar</option>
+                          {opciones.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.contenido}
+                            </option>
+                          ))}
+                        </select>
+                        {pCalif?.obligatoria && habilitado && <span className="text-danger ms-1">*</span>}
+                      </div>
                     )}
                   </td>
 
@@ -160,22 +160,25 @@ export default function Categoria4Informe({
                         {respuestas[justificacionPId]?.texto_respuesta || "—"}
                       </p>
                     ) : (
-                      <textarea
-                        className="form-control border-0"
-                        rows={2}
-                        value={respuestas[justificacionPId]?.texto_respuesta || ""}
-                        onChange={(e) => {
-                          actualizarRespuesta(
-                            justificacionPId,
-                            e.target.value,
-                            "abierta"
-                          );
-                          autoExpand(e);
-                        }}
-                        onInput={autoExpand}
-                        disabled={!habilitado || !justificacionPId}
-                        style={{ resize: "none" }}
-                      />
+                      <div className="d-flex align-items-start">
+                        <textarea
+                          className="form-control border-0"
+                          rows={2}
+                          value={respuestas[justificacionPId]?.texto_respuesta || ""}
+                          onChange={(e) => {
+                            actualizarRespuesta(
+                              justificacionPId,
+                              e.target.value,
+                              "abierta"
+                            );
+                            autoExpand(e);
+                          }}
+                          onInput={autoExpand}
+                          disabled={!habilitado || !justificacionPId}
+                          style={{ resize: "none" }}
+                        />
+                        {pJust?.obligatoria && habilitado && <span className="text-danger ms-1">*</span>}
+                      </div>
                     )}
                   </td>
                 </tr>

@@ -4,102 +4,117 @@ import type { Categoria } from "../../../types/types";
 import api from "../../../services/api";
 
 interface Pregunta {
-  id: number;
-  enunciado: string;
-  categoria_id: number;
-  encuesta_id: number;
-  tipo: "cerrada" | "abierta";
+  id: number;
+  enunciado: string;
+  categoria_id: number;
+  encuesta_id: number;
+  tipo: "cerrada" | "abierta"; 
+  obligatoria?: boolean ;
 }
 
 interface Opcion {
-  id: number;
-  contenido: string;
-  pregunta_id: number;
+  id: number;
+  contenido: string;
+  pregunta_id: number;
+}
+
+interface Respuesta {
+  pregunta_id: number;
+  opcion_id: number | null;
+  texto_respuesta?: string | null;
+}
+
+interface PreguntaMetadata {
+  id: number;
+  enunciado: string;
+  obligatoria: boolean;
 }
 
 interface Props {
-  categoria: Categoria;
-  onRespuesta: (pregunta_id: number, opcion_id: number | null, texto?: string) => void;
-  onTotalPreguntas?: (id: number, cantidad: number) => void;
+  categoria: Categoria;
+  onRespuesta: (pregunta_id: number, opcion_id: number | null, texto?: string) => void;
+  onQuestionsLoaded?: (catId: number, preguntas: PreguntaMetadata[]) => void;
+  respuestasGlobales: Respuesta[];
 }
 
-export default function PreguntasCategoria({ categoria, onRespuesta, onTotalPreguntas }: Props) {
-  const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
-  const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
-  const [respuestas, setRespuestas] = useState<Record<number, { opcion_id: number | null; texto?: string }>>({});
-  const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
+export default function PreguntasCategoria({ categoria, onRespuesta, onQuestionsLoaded, respuestasGlobales }: Props) {
+  const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
+  const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
+  const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
 
-  useEffect(() => {
-    api.get<Pregunta[]>(`/categorias/${categoria.id}/preguntas`)
+  useEffect(() => {
+    api.get(`/categorias/${categoria.id}/preguntas`)
       .then((res) => {
-        const data = res.data; 
+        const data: Pregunta[] = res.data;
         setPreguntas(data);
-        const inicial: Record<number, { opcion_id: number | null; texto?: string }> = {};
-        data.forEach((p) => (inicial[p.id] = { opcion_id: null, texto: "" }));
-        setRespuestas(inicial);
-        onTotalPreguntas?.(categoria.id, data.length);
+        if (onQuestionsLoaded) {
+            onQuestionsLoaded(categoria.id, data.map(p => ({ 
+                id: p.id, 
+                enunciado: p.enunciado,
+                obligatoria: Boolean(Number(p.obligatoria)) 
+            })));
+        }
       })
-      .catch((err) =>
-        console.error("Error al obtener preguntas de la categoría:", err)
-      );
-  }, [categoria.id, onTotalPreguntas]); 
+      .catch((err) => console.error(err));
+  }, [categoria.id]);
 
-  const cargarOpciones = (preguntaId: number) => {
-    if (opciones[preguntaId]) return;
-    api.get<Opcion[]>(`/preguntas/${preguntaId}/opciones`)
+  const cargarOpciones = (preguntaId: number) => {
+    if (opciones[preguntaId]) return;
+    api.get(`/preguntas/${preguntaId}/opciones`)
       .then((res) => {
-        const data = res.data; 
+        const data: Opcion[] = res.data;
         setOpciones((prev) => ({ ...prev, [preguntaId]: data }));
       })
-      .catch((err) => console.error("Error al cargar opciones:", err));
+      .catch((err) => console.error(err));
   };
 
-  const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
-    setRespuestas((prev) => {
-      const nuevaRespuesta = { ...prev[preguntaId], opcion_id: opcionId };
-      onRespuesta(preguntaId, opcionId, nuevaRespuesta.texto);
-      return { ...prev, [preguntaId]: nuevaRespuesta };
-    });
-    setDropdownAbierto(null);
-  };
+  const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
+    onRespuesta(preguntaId, opcionId, undefined);
+    setDropdownAbierto(null);
+  };
 
-  const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
-    setRespuestas((prev) => {
-      const nuevaRespuesta = { ...prev[preguntaId], texto };
-      onRespuesta(preguntaId, nuevaRespuesta.opcion_id, texto);
-      return { ...prev, [preguntaId]: nuevaRespuesta };
-    });
-  };
+  const actualizarRespuestaTexto = (preguntaId: number, texto: string) => {
+    onRespuesta(preguntaId, null, texto);
+  };
 
-  return (
-    <div>
-      {preguntas.length === 0 ? (
-        <div className="alert alert-warning">
-          No hay preguntas disponibles para esta categoría.
-        </div>
-      ) : (
-        preguntas.map((p, i) => (
-          <PreguntaItem
-            key={p.id}
-            index={i}
-            pregunta={p}
-            opciones={opciones[p.id] || []}
-            seleccionada={respuestas[p.id]?.opcion_id || null}
-            texto={respuestas[p.id]?.texto || ""}
-            esAbierta={p.tipo === "abierta"}
-            dropdownAbierto={dropdownAbierto === p.id}
-            onToggle={async () => {
-              if (dropdownAbierto === p.id) setDropdownAbierto(null);
-              else {
-                await cargarOpciones(p.id);
-                setDropdownAbierto(p.id);
-              }
-            }}
-            onSeleccionar={(opcionId) => seleccionarOpcion(p.id, opcionId)}
-            onChangeTexto={(texto) => actualizarRespuestaTexto(p.id, texto)}
-          />
-        ))
-      )}
-    </div>
-  );
+  const getRespuestaActual = (preguntaId: number) => {
+    const resp = respuestasGlobales.find(r => r.pregunta_id === preguntaId);
+    return {
+        opcion_id: resp?.opcion_id || null,
+        texto: resp?.texto_respuesta || ""
+    };
+  };
+
+  return (
+    <div>
+      {preguntas.length === 0 ? (
+        <div className="alert alert-warning">No hay preguntas disponibles.</div>
+      ) : (
+        preguntas.map((p, i) => {
+            const respuestaActual = getRespuestaActual(p.id);
+            return (
+              <PreguntaItem
+                key={p.id}
+                index={i}
+                pregunta={p}
+                opciones={opciones[p.id] || []}
+                seleccionada={respuestaActual.opcion_id}
+                texto={respuestaActual.texto || ""}
+                esAbierta={p.tipo === "abierta"}
+                dropdownAbierto={dropdownAbierto === p.id}
+                onToggle={async () => {
+                  if (dropdownAbierto === p.id) setDropdownAbierto(null);
+                  else {
+                    await cargarOpciones(p.id);
+                    setDropdownAbierto(p.id);
+                  }
+                }}
+                onSeleccionar={(opcionId) => seleccionarOpcion(p.id, opcionId)}
+                onChangeTexto={(texto) => actualizarRespuestaTexto(p.id, texto)}
+              />
+            );
+        })
+      )}
+    </div>
+  );
 }

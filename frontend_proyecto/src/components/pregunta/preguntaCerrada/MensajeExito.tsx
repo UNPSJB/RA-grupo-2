@@ -5,9 +5,11 @@ interface Props {
 
 export default function MensajeExito({ mensaje, onClose }: Props) {
   return (
-    <div className="alert alert-success d-flex justify-content-between align-items-center">
-      <span>{mensaje}</span>
-      <button className="btn-close" onClick={onClose}></button>
+    <div className="d-flex justify-content-center mt-3">
+      <div className="alert alert-success d-flex justify-content-between align-items-center">
+        <span>{mensaje}</span>
+        <button className="btn-close" onClick={onClose}></button>
+      </div>
     </div>
   );
 }

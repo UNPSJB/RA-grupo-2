@@ -9,6 +9,7 @@ interface Pregunta {
   id: number;
   enunciado: string;
   categoria_id: number;
+  obligatoria?: boolean;
 }
 
 interface Categoria {
@@ -65,12 +66,19 @@ export default function Categoria3Informe({
     return p ? p.id : 0;
   };
 
+  const findPregunta = (rol: string, act: string): Pregunta | undefined => {
+    const enunciadoBuscado = normalizarString(`${act} - ${rol}`);
+    return preguntas.find(
+      (p) => normalizarString(p.enunciado) === enunciadoBuscado
+    );
+  };
+
   const rolesFiltrados = isReadOnly
     ? roles.filter((rol) => {
       return actividades.some((act) => {
         const pId = findPreguntaId(rol, act);
         const respuesta = respuestas[pId]?.texto_respuesta?.trim();
-        return !!respuesta; 
+        return !!respuesta;
       });
     })
     : roles;
@@ -107,13 +115,16 @@ export default function Categoria3Informe({
             >
               <div className="accordion-body">
                 {actividades.map((act) => {
-                  const pId = findPreguntaId(rol, act);
+                  const pregunta = findPregunta(rol, act);
+                  const pId = pregunta ? pregunta.id : 0;
                   const label = act === "Observaciones" ? "Observaciones y comentarios" : act;
+                  const esObligatorio = pregunta?.obligatoria && habilitado && !isReadOnly;
 
                   return (
                     <div key={`${rol}-${act}`} className="mb-3">
                       <label htmlFor={`preg-${pId}`} className="form-label fw-bold">
                         {label}
+                        {esObligatorio && <span className="text-danger ms-1">*</span>}
                       </label>
                       {isReadOnly ? (
                         <p className="form-control-plaintext" style={{ whiteSpace: "pre-wrap" }}>

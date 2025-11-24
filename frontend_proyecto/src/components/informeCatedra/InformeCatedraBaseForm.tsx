@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../services/api"; 
 import CategoriaManager from "./ManejadorCategoria"; 
 import OpcionesManager from "./ManejadorOpciones";  
 import ROUTES from "../../paths"; 
+import api from "../../services/api";
 
 interface CategoriaTemp { cod: string; texto: string; }
-interface PreguntaTemp { enunciado: string; categoria_cod: string; tipo: 'abierta' | 'cerrada'; opcion_ids: number[]; }
+interface PreguntaTemp { 
+    enunciado: string; 
+    categoria_cod: string; 
+    tipo: 'abierta' | 'cerrada'; 
+    opcion_ids: number[]; 
+    obligatoria: boolean; 
+}
 interface Opcion { id: number; contenido: string; }
 
 export default function InformeCatedraBaseForm() {
@@ -16,16 +22,20 @@ export default function InformeCatedraBaseForm() {
 
     const [categorias, setCategorias] = useState<CategoriaTemp[]>([]);
     const [preguntas, setPreguntas] = useState<PreguntaTemp[]>([]);
-    const [opcionesCatalogo, setOpcionesCatalogo] = useState<Opcion[]>([]); 
+    const [opcionesCatalogo, setOpcionesCatalogo] = useState<Opcion[]>([]);
 
     const [nuevoEnunciado, setNuevoEnunciado] = useState("");
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
-    const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta'); 
-    const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
-    
+    const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta');
+    const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]);
+    const [esObligatoria, setEsObligatoria] = useState(false);
+
     useEffect(() => {
         api.get("/opciones")
-            .then((res) => setOpcionesCatalogo(Array.isArray(res.data) ? res.data : []))
+            .then((res) => {
+                const data = res.data;
+                setOpcionesCatalogo(Array.isArray(data) ? data : []);
+            })
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
 
@@ -44,11 +54,13 @@ export default function InformeCatedraBaseForm() {
             categoria_cod: categoriaSeleccionada,
             tipo: nuevoTipoPregunta,
             opcion_ids: nuevoTipoPregunta === 'cerrada' ? opcionesSeleccionadas : [],
+            obligatoria: esObligatoria,
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
         setNuevoEnunciado("");
         setOpcionesSeleccionadas([]);
+        setEsObligatoria(false);
     };
 
     const eliminarPregunta = (index: number) => {
@@ -66,95 +78,55 @@ export default function InformeCatedraBaseForm() {
         setCargando(true);
 
         try {
-            let informeId: number;
-            try {
-                const resInforme = await api.post("/informes_catedra/", { titulo });
-                informeId = resInforme.data.id;
-            } catch (error: any) {
-                throw new Error(error.response?.data?.detail || "Error al crear el informe base."); 
-            }
-
+            const resInforme = await api.post("/informes_catedra/", { titulo });
+            const { id: informeId } = resInforme.data;
             const categoriasCreadas = [];
             
             for (const categoriaTemp of categorias) {
-                try {
-                    const resCat = await api.post("/categorias/paraInforme/", { 
-                        cod: categoriaTemp.cod,
-                        texto: categoriaTemp.texto || "",
-                        informe_base_id: informeId,
-                    });
-                    categoriasCreadas.push(resCat.data);
-                } catch (error: any) {
-                    throw new Error(error.response?.data?.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`); 
-                }
+                const resCat = await api.post("/categorias/paraInforme/", {
+                    cod: categoriaTemp.cod,
+                    texto: categoriaTemp.texto || "",
+                    informe_base_id: informeId,
+                });
+                const categoriaCreada = resCat.data;
+                categoriasCreadas.push(categoriaCreada);
             }
-
 
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
-                if (!categoria) continue; 
-                
+                if (!categoria) continue;
                 const endpoint = preg.tipo === 'cerrada' ? "/preguntas/cerrada" : "/preguntas/abierta";   
-                
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
-                    tipo: preg.tipo, 
-                    ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }), 
+                    tipo: preg.tipo,
+                    obligatoria: preg.obligatoria,
+                    ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }),
                 };
-
-                try {
-                    await api.post(endpoint, payload);
-                } catch (error: any) {
-                     throw new Error(error.response?.data?.detail || `Error al crear la pregunta: ${preg.enunciado}`);
-                }
+                await api.post(endpoint, payload);
             }
 
             alert("Informe creado con éxito.");
             navigate(ROUTES.HOME);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error en la cascada de creación:", error);
-            const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
+            const messageToShow = error.response?.data?.detail || error.message || "Error desconocido al procesar la solicitud.";
             alert(`Fallo en la creación del informe. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
         }
     };
 
-    const cardStyle = { 
-        backgroundColor: 'var(--color-component-bg)',
-        border: '1px solid var(--color-unpsjb-border)', 
-        color: 'var(--color-text-primary)' 
-    };
-
-    const cardHeaderStyle = {
-        backgroundColor: 'var(--color-unpsjb-blue)', 
-        color: 'white',
-    };
-
-    const inputAreaStyle = { 
-        backgroundColor: 'var(--color-component-bg)',
-        color: 'var(--color-text-primary)', 
-        borderColor: 'var(--color-unpsjb-border)'
-    };
-    
-    const inputFieldStyle = {
-        backgroundColor: 'var(--color-input-bg)',
-        color: 'var(--color-text-primary)',
-        borderColor: 'var(--color-unpsjb-border)',
-    };
-
     return (
         <div className="container py-4">
-            <div className="card shadow" style={cardStyle}>
-                <div style={cardHeaderStyle} className="card-header bg-unpsjb-header">
+            <div className="card shadow">
+                <div className="card-header bg-unpsjb-header">
                     <h1 className="h4 mb-0">Nuevo Informe de Cátedra Base</h1>
                 </div>
                 <div className="card-body">
-                    <form onSubmit={handleSubmit}>  
-                        {/* TÍTULO DEL INFORME */}
-                        <div className="mb-4 p-3 border rounded" style={inputAreaStyle}> 
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-4 p-3 border rounded">
                             <label className="form-label fw-bold">Título del Informe</label>
                             <input 
                                 type="text" 
@@ -163,10 +135,8 @@ export default function InformeCatedraBaseForm() {
                                 onChange={(e) => setTitulo(e.target.value)} 
                                 required 
                                 disabled={cargando}
-                                style={inputFieldStyle}
                             />
                         </div>
-                        
                         <CategoriaManager
                             categorias={categorias}
                             setCategorias={setCategorias}
@@ -174,8 +144,8 @@ export default function InformeCatedraBaseForm() {
                             cargando={cargando}
                         />
                         
-                        <h5 className="mb-3" style={{color: 'var(--color-text-primary)'}}>2. Definición de Preguntas</h5>
-                        <div className="card mb-4 p-3" style={inputAreaStyle}> 
+                        <h5 className="mb-3">2. Definición de Preguntas</h5>
+                        <div className="card mb-4 p-3"> 
                             <div className="row mb-3">
                                 <div className="col-md-3">
                                     <label className="form-label fw-bold">Tipo</label>
@@ -184,10 +154,9 @@ export default function InformeCatedraBaseForm() {
                                         value={nuevoTipoPregunta} 
                                         onChange={(e) => { setNuevoTipoPregunta(e.target.value as 'abierta' | 'cerrada'); setOpcionesSeleccionadas([]); }} 
                                         disabled={cargando || categorias.length === 0}
-                                        style={inputFieldStyle}
                                     >
-                                        <option value="abierta" style={inputFieldStyle}>Abierta</option>
-                                        <option value="cerrada" style={inputFieldStyle}>Cerrada</option>
+                                        <option value="abierta">Abierta</option>
+                                        <option value="cerrada">Cerrada</option>
                                     </select>
                                 </div>
                                 <div className="col-md-9">
@@ -197,10 +166,9 @@ export default function InformeCatedraBaseForm() {
                                         value={categoriaSeleccionada} 
                                         onChange={(e) => setCategoriaSeleccionada(e.target.value)} 
                                         disabled={cargando || categorias.length === 0}
-                                        style={inputFieldStyle}
                                     >
-                                        <option value="" style={inputFieldStyle}>Seleccione categoría</option>
-                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod} style={inputFieldStyle}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
+                                        <option value="">Seleccione categoría</option>
+                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
                                     </select>
                                 </div>
                             </div>
@@ -212,9 +180,23 @@ export default function InformeCatedraBaseForm() {
                                     value={nuevoEnunciado} 
                                     onChange={(e) => setNuevoEnunciado(e.target.value)} 
                                     disabled={cargando || categorias.length === 0}
-                                    style={inputFieldStyle}
                                 />
                             </div>
+
+                            <div className="mb-3 form-check">
+                                <input 
+                                    type="checkbox" 
+                                    className="form-check-input" 
+                                    id="checkObligatoriaInforme" 
+                                    checked={esObligatoria}
+                                    onChange={(e) => setEsObligatoria(e.target.checked)}
+                                    disabled={cargando || categorias.length === 0}
+                                />
+                                <label className="form-check-label fw-bold" htmlFor="checkObligatoriaInforme">
+                                    Marque si la pregunta es obligatoria de responder
+                                </label>
+                            </div>
+
                             {nuevoTipoPregunta === 'cerrada' && (
                                 <OpcionesManager
                                     opcionesCatalogo={opcionesCatalogo}
@@ -238,10 +220,11 @@ export default function InformeCatedraBaseForm() {
                         {preguntas.length > 0 && (
                             <ul className="list-group mb-4">
                                 {preguntas.map((preg, i) => (
-                                    <li key={i} className={`list-group-item d-flex justify-content-between align-items-center`} style={inputAreaStyle}>
+                                    <li key={i} className={`list-group-item d-flex justify-content-between align-items-center`}>
                                         <span>
                                             <strong className={`badge ${preg.tipo === 'cerrada' ? 'bg-primary' : 'bg-secondary'} me-2`}>{preg.tipo.toUpperCase()}</strong>
-                                            <strong style={{color: 'var(--color-text-primary)'}}> [{preg.categoria_cod}]</strong> {preg.enunciado}
+                                            {preg.obligatoria && <span className="badge bg-danger me-2">OBLIGATORIA</span>}
+                                            <strong> [{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
                                         <button 
                                             type="button" 

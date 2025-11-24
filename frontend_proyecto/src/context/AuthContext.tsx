@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService"; // Usamos el servicio que creamos antes
 import type { AuthContextType, LoginData, User } from "../types/auth";
 
@@ -28,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
+    const navigate = useNavigate();
     // A. Efecto de Carga Inicial (F5)
     // Al recargar la página, preguntamos al backend: "¿Sigo logueado?"
     useEffect(() => {
@@ -93,19 +94,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // C. Función Logout
     const logout = useCallback(async () => {
-        try {
-            // 1. Avisamos al backend para borrar cookie
-            await authService.logout();
-        } catch (error) {
-            console.error("Error al cerrar sesión en servidor", error);
-        } finally {
-            // 2. Limpiamos estado local pase lo que pase
-            setCurrentUser(null);
-            setIsAuthenticated(false);
-            // 3. Forzamos redirección al login para limpiar caché visual
-            window.location.href = "/login";
-        }
-    }, []);
+            try {
+                await authService.logout();
+            } catch (error) {
+                console.error("Error al cerrar sesión en servidor", error);
+            } finally {
+                setCurrentUser(null);
+                setIsAuthenticated(false);
+                
+                // --- AQUÍ ESTÁ LA SOLUCIÓN DEL PARPADEO ---
+                // Borra la línea que dice window.location.href
+                // Usa ESTA línea en su lugar:
+                navigate("/login"); 
+            }
+        }, [navigate]);
 
     return (
         <AuthContext.Provider value={{ currentUser, isAuthenticated, isLoading, error, login, logout }}>

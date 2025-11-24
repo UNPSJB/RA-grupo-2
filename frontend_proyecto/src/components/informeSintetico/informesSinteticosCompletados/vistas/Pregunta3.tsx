@@ -93,7 +93,7 @@ export default function VistaActividadesDocentes({
                             
                             <h2 className="accordion-header" id={`headingVP3_${materiaIndex}`}>
                                 <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapseVP3_${materiaIndex}`}
@@ -106,9 +106,8 @@ export default function VistaActividadesDocentes({
 
                             <div
                                 id={`collapseVP3_${materiaIndex}`}
-                                className="accordion-collapse collapse"
+                                className="accordion-collapse collapse show"
                                 aria-labelledby={`headingVP3_${materiaIndex}`}
-                                data-bs-parent="#accordionVistaP3"
                             >
                                 <div className="accordion-body p-0">
                                     <div className="table-responsive">

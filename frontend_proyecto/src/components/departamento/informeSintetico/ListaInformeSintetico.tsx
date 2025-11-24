@@ -1,11 +1,10 @@
-// src/components/departamento/informeSintetico/ListaInformeSintetico.tsx
-
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchInformes } from "../../informeSintetico/informesSinteticosCompletados/informesService"; 
 import ROUTES from "../../../paths"; 
 import type { Departamento } from "../../../types/types";
-import api from "../../../services/api";
+import { MostrarPeriodo } from "../../../constants";
+import api from "../../../services/api"; 
 
 interface Informe {
   id: number;
@@ -26,6 +25,7 @@ function ListaInformeSintetico() {
         api.get(`/departamentos/${departamentoId}`)
           .then((res) => setDepartamento(res.data))
           .catch((err) => console.error("Error cargando departamento:", err));
+          
         fetchInformes(departamentoId) 
           .then(setInformes)
           .catch((err) => console.error("Error cargando informes completados:", err));
@@ -36,6 +36,7 @@ function ListaInformeSintetico() {
         console.warn("ID de departamento no disponible en la URL.");
     }
   }, [id_dpto]); 
+  
   if (!departamento) {
     return (
       <div className="container py-4">
@@ -62,7 +63,7 @@ function ListaInformeSintetico() {
                       <span className="fw-bold">
                         {inf.titulo} 
                       </span>
-                      <span className="text"> – {inf.periodo} {inf.anio}</span>
+                      <span className="text"> – {MostrarPeriodo(inf.periodo)} {inf.anio}</span>
                     </div>
                     <Link
                         to={ROUTES.INFORME_SINTETICO_DETALLE(id_dpto, inf.id)} 

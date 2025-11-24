@@ -1,7 +1,13 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ROUTES from "../../paths";
-import api from "../../services/api";
+import { MostrarPeriodo } from "../../constants";
+
+export interface Categoria {
+  id: number;
+  texto: string;
+  cod: string;
+}
 
 interface Opcion {
   id: number;
@@ -19,7 +25,7 @@ interface Pregunta {
 interface Respuesta {
   id: number;
   pregunta_id: number;
-  opcion_id: number[];
+  opcion_id: number[] | number | null;
   texto_respuesta: string;
   encuesta_completada_id: number;
 }
@@ -46,52 +52,128 @@ export default function EncuestaCompletadaDetalle() {
   const [materia, setMateria] = useState<Materia | null>(null);
   const [preguntas, setPreguntas] = useState<Record<number, Pregunta>>({});
   const [opciones, setOpciones] = useState<Record<number, Opcion[]>>({});
+  const [categoriasInfo, setCategoriasInfo] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [currentTab, setCurrentTab] = useState(0);
+
+  // Scroll estilo informe
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (scrollRef.current) {
+      setIsDragging(true);
+      e.preventDefault();
+      setStartX(e.pageX - scrollRef.current.offsetLeft);
+      setScrollLeft(scrollRef.current.scrollLeft);
+    }
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   useEffect(() => {
     if (!id) return;
 
-    api.get(`/encuesta-completada/${id}`)
+    fetch(`http://127.0.0.1:8000/encuesta-completada/${id}`)
       .then((res) => {
-        const data: EncuestaCompletada = res.data;
+        if (!res.ok) throw new Error("Error al obtener la encuesta completada");
+        return res.json();
+      })
+      .then(async (data: EncuestaCompletada) => {
         setEncuesta(data);
 
-        api.get(`/materias/${data.materia_id}`)
-          .then((res) => {
-            const m: Materia = res.data;
-            setMateria(m);
-          })
+        // Fetch materia
+        fetch(`http://127.0.0.1:8000/materias/${data.materia_id}`)
+          .then((res) => res.json())
+          .then((m: Materia) => setMateria(m))
           .catch(() => setMateria(null));
 
+        // Fetch categorías
+        fetch("http://127.0.0.1:8000/categorias/")
+          .then((res) => res.json())
+          .then((cats: Categoria[]) => setCategoriasInfo(cats))
+          .catch(() => setCategoriasInfo([]));
+
+        // Preguntas + opciones
         const preguntasTemp: Record<number, Pregunta> = {};
         const opcionesTemp: Record<number, Opcion[]> = {};
 
-        Promise.all(
+        await Promise.all(
           data.respuestas.map(async (r) => {
-            const pRes = await api.get(`/preguntas/${r.pregunta_id}`);
-            const pregunta: Pregunta = pRes.data;
-            preguntasTemp[r.pregunta_id] = pregunta;
+            const pRes = await fetch(
+              `http://127.0.0.1:8000/preguntas/${r.pregunta_id}`
+            );
+            if (pRes.ok) {
+              const pregunta: Pregunta = await pRes.json();
+              preguntasTemp[r.pregunta_id] = pregunta;
 
-            if (pregunta.tipo === "cerrada") {
-              const oRes = await api.get(`/preguntas/${pregunta.id}/opciones`);
-              const ops: Opcion[] = oRes.data;
-              opcionesTemp[pregunta.id] = ops;
+              if (pregunta.tipo === "cerrada") {
+                const oRes = await fetch(
+                  `http://127.0.0.1:8000/preguntas/${pregunta.id}/opciones`
+                );
+                if (oRes.ok) {
+                  const ops: Opcion[] = await oRes.json();
+                  opcionesTemp[pregunta.id] = ops;
+                }
+              }
             }
           })
-        )
-          .then(() => {
-            setPreguntas(preguntasTemp);
-            setOpciones(opcionesTemp);
-          })
-          .catch((err) => console.error("Error cargando preguntas/opciones:", err));
+        );
+
+        setPreguntas(preguntasTemp);
+        setOpciones(opcionesTemp);
       })
-      .catch((err) => {
-        console.error(err);
-        setError("No se pudo cargar la encuesta completada");
-      })
+      .catch(() => setError("No se pudo cargar la encuesta completada"))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const categorias = Object.values(preguntas).reduce((acc, p) => {
+    if (!acc[p.categoria_id]) acc[p.categoria_id] = [];
+    acc[p.categoria_id].push(p);
+    return acc;
+  }, {} as Record<number, Pregunta[]>);
+
+  const categoriasOrdenadas = Object.keys(categorias)
+    .map((id) => Number(id))
+    .sort((a, b) => {
+      const catA = categoriasInfo.find(c => c.id === a);
+      const catB = categoriasInfo.find(c => c.id === b);
+      if (!catA || !catB) return a - b;
+      return catA.cod.localeCompare(catB.cod, "es", { numeric: true });
+    });
+
+
+  // Mostrar cod + texto
+  const mostrarCategoria = (id: number) => {
+    const cat = categoriasInfo.find((c) => c.id === id);
+    if (!cat) return `Categoría ${id}`;
+    return `${cat.cod} - ${cat.texto}`;
+  };
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      const activeElement = scrollRef.current.querySelector(".nav-link.active");
+      if (activeElement instanceof HTMLElement) {
+        activeElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [currentTab, categoriasOrdenadas]);
 
   if (loading)
     return <div className="text-center mt-4">Cargando encuesta...</div>;
@@ -106,78 +188,174 @@ export default function EncuestaCompletadaDetalle() {
       </div>
     );
 
-  return (
-    <div className="container py-4">
-      <div className="card">
-        <div className="card-header bg-unpsjb-header">
-          <h1 className="h4 mb-0">
-            Materia: {materia ? materia.nombre : "Desconocida"}
-          </h1>
-        </div>
 
-        <div className="card-body">
-          <div className="alert alert-info">
-            <strong>Año:</strong> {encuesta.anio}
-            <br />
-            <strong>Período:</strong> {encuesta.periodo}
+  return (
+    <div className="bg-light">
+      <div className="container-lg py-4">
+
+        <div className="card shadow-sm border-0 rounded-3">
+          <div className="card-header bg-unpsjb-header text-white text-center">
+            <h1 className="h4 mb-0">
+              {materia ? materia.nombre : "Desconocida"} {encuesta.anio}{" "}
+              {MostrarPeriodo(encuesta.periodo)}
+            </h1>
           </div>
 
-          <h5 className="mt-4">Respuestas</h5>
+          <div className="card-body p-4 p-md-5">
 
-          {encuesta.respuestas.length > 0 ? (
-            <ul className="list-group">
-              {encuesta.respuestas.map((r) => {
-                const pregunta = preguntas[r.pregunta_id];
-                if (!pregunta) {
-                  return (
-                    <li key={r.id} className="list-group-item text-muted">
-                      Pregunta no encontrada (ID {r.pregunta_id})
-                    </li>
-                  );
-                }
+            {/* === ESTILOS IDENTICOS AL INFORME === */}
+            <style>
+              {`
+              .horizontal-scroll-hidden::-webkit-scrollbar { display: none; }
+              .horizontal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+              .is-dragging { cursor: grabbing !important; }
+              .nav-pills .nav-item { flex-shrink: 0; }
 
-                let respuestaTexto = "—";
+              .nav-pills .nav-item .nav-link { 
+                background-color: transparent !important; 
+                color: #212529 !important; 
+                font-weight: 500;
+                border: none;
+                padding: 0.5rem 2rem; 
+                margin-right: 0px; 
+                opacity: 1 !important; 
+                white-space: nowrap; 
+                border-radius: 0; 
+              }
 
-                if (pregunta.tipo === "abierta") {
-                  respuestaTexto = r.texto_respuesta || "—";
-                } else if (pregunta.tipo === "cerrada") {
-                  const opcionesDePregunta = opciones[pregunta.id] || [];
-                  const opcionIds = Array.isArray(r.opcion_id)
-                    ? r.opcion_id
-                    : r.opcion_id != null
-                    ? [r.opcion_id]
-                    : [];
+              .nav-pills .nav-item .nav-link.active {
+                background-color: var(--color-unpsjb-blue, #005ec2) !important; 
+                color: white !important; 
+                border-radius: 5px !important; 
+              }
 
-                  const seleccionadas = opcionesDePregunta.filter((op) =>
-                    opcionIds.includes(op.id)
-                  );
+              .nav-pills-scrollable { 
+                display: flex; 
+                flex-wrap: nowrap; 
+                width: fit-content; 
+              }
+              `}
+            </style>
 
-                  respuestaTexto =
-                    seleccionadas.length > 0
-                      ? seleccionadas.map((op) => op.contenido).join(", ")
-                      : "—";
-                }
+            {/* === TABS === */}
+            <div
+              ref={scrollRef}
+              className={`horizontal-scroll-hidden mb-4 ${isDragging ? "is-dragging" : ""
+                }`}
+              style={{ overflowX: "auto" }}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseLeave}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+            >
+              <ul className="nav nav-pills mb-0 nav-pills-scrollable" role="tablist">
+                {categoriasOrdenadas.map((catId, index) => (
+                  <li key={catId} className="nav-item">
+                    <a
+                      className={`nav-link ${currentTab === index ? "active" : "text-dark"
+                        }`}
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentTab(index);
+                      }}
+                    >
+                      {mostrarCategoria(catId)}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* === CONTENIDO === */}
+            <div className="mt-4" style={{ minHeight: "40vh" }}>
+              {categoriasOrdenadas.map((catId, index) => {
+                if (index !== currentTab) return null;
 
                 return (
-                  <li key={r.id} className="list-group-item">
-                    {pregunta.enunciado}
-                    <br />
-                    <span>
-                      Respuesta: {respuestaTexto}
-                    </span>
-                  </li>
+                  <div key={catId}>
+                    {categorias[catId].map((preg) => {
+                      const resp = encuesta.respuestas.find(
+                        (r) => r.pregunta_id === preg.id
+                      );
+
+                      let respuestaTexto = "—";
+
+                      if (resp) {
+                        if (preg.tipo === "abierta") {
+                          respuestaTexto = resp.texto_respuesta || "—";
+                        } else {
+                          const ops = opciones[preg.id] || [];
+
+                          const opcionIds = Array.isArray(resp.opcion_id)
+                            ? resp.opcion_id
+                            : resp.opcion_id != null
+                              ? [resp.opcion_id]
+                              : [];
+
+                          const seleccionadas = ops.filter((o) =>
+                            opcionIds.includes(o.id)
+                          );
+
+                          respuestaTexto =
+                            seleccionadas.length > 0
+                              ? seleccionadas.map((o) => o.contenido).join(", ")
+                              : "—";
+                        }
+                      }
+
+                      return (
+                        <div key={preg.id} className="mb-3 p-3 border rounded">
+                          <strong>{preg.enunciado}</strong>
+                          <div className="mt-1 text-muted">
+                            Respuesta: {respuestaTexto}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 );
               })}
-            </ul>
-          ) : (
-            <div className="alert alert-secondary mt-3">
-              No hay respuestas registradas
             </div>
-          )}
 
-          <Link to= {ROUTES.ENCUESTAS_COMPLETADAS} className="btn btn-secondary mt-4">
-            Volver al listado
-          </Link>
+            {/* === FOOTER CON NAVEGACIÓN IGUAL AL INFORME === */}
+            <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
+              <div className="d-flex justify-content-between">
+
+                {/* ANTERIOR */}
+                {!(currentTab === 0) ? (
+                  <button
+                    onClick={() => setCurrentTab(currentTab - 1)}
+                    className="btn btn-outline-secondary rounded-pill px-4"
+                  >
+                    Anterior
+                  </button>
+                ) : (
+                  <div></div>  // para mantener alineación
+                )}
+
+                {/* SIGUIENTE o VOLVER */}
+                {(currentTab === categoriasOrdenadas.length - 1) ? (
+                  <Link
+                    to={ROUTES.ENCUESTAS_COMPLETADAS}
+                    className="btn btn-theme-primary rounded-pill px-4"
+                  >
+                    Volver al listado
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setCurrentTab(currentTab + 1)}
+                    className="btn btn-theme-primary rounded-pill px-4"
+                    disabled={categoriasOrdenadas.length === 0}
+                  >
+                    Siguiente
+                  </button>
+                )}
+
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

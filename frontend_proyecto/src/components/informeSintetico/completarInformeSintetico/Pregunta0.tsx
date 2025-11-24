@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+import { CampoTextoNumero } from "./Campos";
 // instancia api
 import api from "../../../services/api";
-import { CampoTextoNumero } from "./Campos";
 
 interface MateriaInfo {
     materia: Materia;
@@ -20,6 +20,7 @@ interface InformacionGeneralProps {
     periodo: string;
     pregunta: Pregunta;
     manejarCambio?: (respuestas: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void; 
 }
 
 export default function InformacionGeneral({
@@ -29,18 +30,24 @@ export default function InformacionGeneral({
     periodo,
     pregunta,
     manejarCambio,
+    notificarValidacion 
 }: InformacionGeneralProps) {
     const [materias, setMaterias] = useState<MateriaInfo[]>([]);
+    const [materiasOriginales, setMateriasOriginales] = useState<MateriaInfo[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        notificarValidacion?.(false);
+
         if (!id_dpto || !id_carrera || !anio || !periodo) return;
 
         const fetchData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
+                notificarValidacion?.(false); 
+                
                 const res = await api.get(
                     "/informes_sinteticos_completados/informacion-general/",
                     {
@@ -54,12 +61,22 @@ export default function InformacionGeneral({
                 );
                 const data: MateriaInfo[] = res.data;
 
+
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
 
-                setMaterias(data);
-                const respuestasIniciales: Respuesta[] = data.map((m) => ({
+                const datosLimpios = data.map(d => ({
+                    ...d,
+                    cantidad_alumnos: d.cantidad_alumnos || 0,
+                    cantidad_comisiones_teoricas: d.cantidad_comisiones_teoricas || 0,
+                    cantidad_comisiones_practicas: d.cantidad_comisiones_practicas || 0
+                }));
+
+                setMaterias(datosLimpios);
+                setMateriasOriginales(JSON.parse(JSON.stringify(datosLimpios)));
+
+                const respuestasIniciales: Respuesta[] = datosLimpios.map((m) => ({
                     pregunta_id: pregunta.id,
                     materia_id: m.materia.id,
                     texto_respuesta: JSON.stringify({
@@ -83,6 +100,30 @@ export default function InformacionGeneral({
     }, [id_dpto, id_carrera, anio, periodo, pregunta.id]);
 
 
+    useEffect(() => {
+        if (isLoading) {
+            notificarValidacion?.(false);
+            return;
+        }
+        
+        if (materias.length === 0 && !isLoading) {
+            notificarValidacion?.(true);
+            return;
+        }
+
+        const hayError = materias.some((materia, idx) => {
+            const orig = materiasOriginales[idx];
+            if (!orig) return false;
+            if (orig.cantidad_alumnos > 0 && materia.cantidad_alumnos === 0) return true;
+            if (orig.cantidad_comisiones_teoricas > 0 && materia.cantidad_comisiones_teoricas === 0) return true;
+            if (orig.cantidad_comisiones_practicas > 0 && materia.cantidad_comisiones_practicas === 0) return true;
+
+            return false;
+        });
+
+        notificarValidacion?.(!hayError);
+    }, [materias, materiasOriginales, notificarValidacion, isLoading]);
+
     const handleChange = <K extends keyof MateriaInfo>(
         index: number,
         field: K,
@@ -102,6 +143,13 @@ export default function InformacionGeneral({
             })
         }));
         manejarCambio?.(respuestas);
+    };
+
+    const isError = (idx: number, field: keyof MateriaInfo) => {
+        if (!materiasOriginales[idx]) return false;
+        const orig = materiasOriginales[idx][field] as number;
+        const curr = materias[idx][field] as number;
+        return orig > 0 && curr === 0;
     };
 
     return (
@@ -146,6 +194,7 @@ export default function InformacionGeneral({
                                                 label="Cantidad de alumnos"
                                                 value={materia.cantidad_alumnos}
                                                 onChange={(v) => handleChange(index, "cantidad_alumnos", v)}
+                                                error={isError(index, "cantidad_alumnos")} 
                                             />
                                             <CampoTextoNumero
                                                 label="Comisiones Teóricas"
@@ -153,6 +202,7 @@ export default function InformacionGeneral({
                                                 onChange={(v) =>
                                                     handleChange(index, "cantidad_comisiones_teoricas", v)
                                                 }
+                                                error={isError(index, "cantidad_comisiones_teoricas")} 
                                             />
                                             <CampoTextoNumero
                                                 label="Comisiones Prácticas"
@@ -160,6 +210,7 @@ export default function InformacionGeneral({
                                                 onChange={(v) =>
                                                     handleChange(index, "cantidad_comisiones_practicas", v)
                                                 }
+                                                error={isError(index, "cantidad_comisiones_practicas")} 
                                             />
                                         </div>
                                     </div>

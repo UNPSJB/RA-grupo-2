@@ -3,6 +3,9 @@ import { useEffect, useState, useMemo } from "react";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "../../docente/informe/ContenidoPasos";
 import type { Categoria } from "../../../types/types";
+import { pdf } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import InformeCatedraPDF from "./InformeCatedraPdf";
 // instancia de axios 
 import api from "../../../services/api";
 
@@ -14,14 +17,19 @@ interface Pregunta {
   categoria: Categoria;
 }
 
-interface RespuestaConPregunta {
+export interface Opcion {
+  id: number;
+  contenido: string;
+}
+
+export interface RespuestaConPregunta {
   id: number;
   texto_respuesta: string | null;
   opcion_id: number | null;
   pregunta: Pregunta;
 }
 
-interface InformeCompletadoDetalle {
+export interface InformeCompletadoDetalle {
   id: number;
   titulo: string | null;
   contenido: string | null;
@@ -43,7 +51,7 @@ interface InformeCompletadoDetalle {
   informe_catedra_base_id: number;
 }
 
-interface CategoriaConPreguntas {
+export interface CategoriaConPreguntas {
   id: number;
   cod: string;
   texto: string;
@@ -55,21 +63,22 @@ type RespuestaValor = {
   texto_respuesta: string | null;
 };
 
-export function mostrarPeriodo(periodo: string) {
-  switch (periodo) {
-    case "PRIMER_CUATRI":
-      return "Primer Cuatrimestre";
-    case "SEGUNDO_CUATRI":
-      return "Segundo Cuatrimestre";
-    case "ANUAL":
-      return "Anual";
-    default:
-      return periodo;
-  }
-}
-
 export default function InformeCatedraDetalle() {
-  const { id } = useParams<{ id: string }>();
+  const handlePDF = async () => {
+    if (!informe) return;
+
+    const blob = await pdf(
+      <InformeCatedraPDF
+        informe={informe}
+        categorias={gruposBase}
+        opciones={opciones}
+      />
+    ).toBlob();
+
+    saveAs(blob, `InformeCatedra_${informe.materiaCodigo}.pdf`);
+  };
+
+  const { id_dpto, id } = useParams<{ id_dpto: string, id: string }>();
   const [informe, setInforme] = useState<InformeCompletadoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +86,7 @@ export default function InformeCatedraDetalle() {
   const [datosEstadisticos, setDatosEstadisticos] = useState<any[]>([]);
   const [cantidad, setCantidad] = useState<number>(0);
   const [gruposBase, setGruposBase] = useState<CategoriaConPreguntas[]>([]);
+  const [opciones, SetOpciones] = useState<Opcion[]>([]);
 
   const steps = [
     { id: 1, name: "Datos Generales" },
@@ -104,13 +114,12 @@ export default function InformeCatedraDetalle() {
         const dataInforme: InformeCompletadoDetalle = res.data;
 
         setInforme(dataInforme);
+
         if (dataInforme.informe_catedra_base_id) {
           const resBase = await api.get(
             `/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`
           );
-          
           const dataBase: CategoriaConPreguntas[] = resBase.data;
-          
           const dataOrdenada = [...dataBase].sort((a, b) =>
             a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
           );
@@ -121,6 +130,7 @@ export default function InformeCatedraDetalle() {
 
           setGruposBase(dataOrdenada);
         }
+
         const { materiaId, anio, periodo } = dataInforme;
 
         const paramsEstadistica = {
@@ -200,13 +210,20 @@ export default function InformeCatedraDetalle() {
     );
   }
 
+  const returnPath = (() => {
+        if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
+            return ROUTES.INFORMES_CATEDRA;
+        }
+        return ROUTES.INFORMES_CATEDRA_COMPLETADOS;
+    })();
+
   if (error) {
     return (
       <div className="container py-4">
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Error</h4>
           <p>{error}</p>
-          <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-outline-danger">
+          <Link to={returnPath} className="btn btn-outline-danger">
             Volver al listado
           </Link>
         </div>
@@ -220,7 +237,7 @@ export default function InformeCatedraDetalle() {
         <div className="alert alert-warning" role="alert">
           No se encontró el informe solicitado.
         </div>
-        <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-secondary">
+        <Link to={returnPath} className="btn btn-secondary">
           Volver al listado
         </Link>
       </div>
@@ -230,11 +247,15 @@ export default function InformeCatedraDetalle() {
   return (
     <div className="bg-light">
       <div className="container-lg py-4">
+        <div className="text-end mt-0 mb-3 me-4">
+          <button onClick={handlePDF} className="btn btn-theme-primary rounded-pill px-4">
+            Exportar PDF
+          </button>
+        </div>
         <div className="card shadow-sm border-0 rounded-3">
           <div className="card-header bg-unpsjb-header">
             <h1 className="h4 mb-0 text-center">{informe.titulo || "Informe de Cátedra"}</h1>
           </div>
-
           <div className="card-body p-4 p-md-5">
             <style>
               {`
@@ -292,8 +313,8 @@ export default function InformeCatedraDetalle() {
                 cantidad={cantidad}
                 docenteMateriaId={informe.docente_materia_id}
                 datosIniciales={datosGenerales}
-                manejarCambio={() => {}}
-                onDatosGenerados={() => {}}
+                manejarCambio={() => { }}
+                onDatosGenerados={() => { }}
                 nombresFuncion={{
                   JTP: informe.JTP,
                   aux1: informe.aux_primera,
@@ -317,7 +338,7 @@ export default function InformeCatedraDetalle() {
               )}
               {isLastStep ? (
                 <Link
-                  to={ROUTES.INFORMES_CATEDRA}
+                  to={returnPath}
                   className="btn btn-primary rounded-pill px-4"
                   style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
                 >
