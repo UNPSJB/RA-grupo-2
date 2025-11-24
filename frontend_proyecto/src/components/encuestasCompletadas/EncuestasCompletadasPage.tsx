@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import EncuestasCompletadas from "./EncuestasCompletadas";
-import type {Alumno} from "../../types/types.ts"
-import {ALUMNO_ID} from "../../constants.ts"
+import type { Alumno } from "../../types/types.ts"
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 
 type Respuesta = {
@@ -23,16 +23,17 @@ type EncuestaCompletada = {
 };
 
 export default function EncuestasCompletadasPage() {
-  const alumnoId = ALUMNO_ID; // hardcodeado por ahora
+  const { currentUser } = useAuth();
+  const alumnoId = currentUser?.alumno_id;
   const [alumno, setAlumno] = useState<Alumno>()
   const [encuestas, setEncuestas] = useState<EncuestaCompletada[]>([]);
 
   useEffect(() => {
     api.get(`/alumnos/${alumnoId}`)
-    .then(res => {
-      setAlumno(res.data);
-    })
-    .catch(console.error);
+      .then(res => {
+        setAlumno(res.data);
+      })
+      .catch(console.error);
 
     api.get(`/encuesta-completada/alumno/${alumnoId}`)
       .then((res) => {
@@ -45,19 +46,29 @@ export default function EncuestasCompletadasPage() {
       });
   }, [alumnoId]);
 
-  return (
-    <div className="container py-4">
-        <div className="card">
-          <div className="card-header bg-unpsjb-header">
-            <h1 className="h4 mb-0">Alumno {alumno?.nombre} {alumno?.apellido}</h1>
-          </div>
-          <div className="card-body">
-            <h2 className="h5 mb-3">Encuestas Completadas</h2>
-            <EncuestasCompletadas
-              encuestas={encuestas}
-              />
-          </div>
+  if (!alumnoId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-danger" role="alert">
+          No se pudo obtener la información del alumno. Por favor, inicie sesión nuevamente.
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="container py-4">
+      <div className="card">
+        <div className="card-header bg-unpsjb-header">
+          <h1 className="h4 mb-0">Alumno {alumno?.nombre} {alumno?.apellido}</h1>
+        </div>
+        <div className="card-body">
+          <h2 className="h5 mb-3">Encuestas Completadas</h2>
+          <EncuestasCompletadas
+            encuestas={encuestas}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

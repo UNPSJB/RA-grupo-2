@@ -14,14 +14,14 @@ type EncuestaDisponible = {
 };
 
 export default function EncuestasPage() {
-  const { currentUser} = useAuth();
-  const alumnoId = currentUser?.alumno_id; 
+  const { currentUser } = useAuth();
+  const alumnoId = currentUser?.alumno_id;
   const [alumno, setAlumno] = useState<Alumno>()
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
   const periodoEncuesta = EsPeriodoEncuesta();
 
   useEffect(() => {
-    if(!alumnoId) return;
+    if (!alumnoId) return;
     api.get(`/alumnos/${alumnoId}`)
       .then(res => {
         setAlumno(res.data);
@@ -39,19 +39,19 @@ export default function EncuestasPage() {
       });
   }, [alumnoId]);
 
-if (!periodoEncuesta) {
-  return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"}/>;
-}
+  if (!periodoEncuesta) {
+    return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"} />;
+  }
 
-if(!alumnoId) {
-  return (
-    <div className="container py-4">
-      <div className="alert alert-danger" role="alert">
-        No se pudo obtener la información del alumno. Por favor, inicie sesión nuevamente.
+  if (!alumnoId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-danger" role="alert">
+          No se pudo obtener la información del alumno. Por favor, inicie sesión nuevamente.
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="container py-4">
