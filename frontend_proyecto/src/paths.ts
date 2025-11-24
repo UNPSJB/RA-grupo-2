@@ -14,6 +14,7 @@ const ROUTES = {
   COMPLETAR_INFORME_CATEDRA: "/docentes/informes-pendientes/completar",
   INFORMES_CATEDRA_COMPLETADOS: "/docentes/informes-catedra-completados",
   INFORME_CATEDRA_COMPLETADO_DETALLE: (id: number | string = ":id") => `/docentes/informes-catedra-completados/${id}`,
+  DASHBOARD_DOCENTE: "/docentes/dashboard-estadistico",
 
   //DEPARTAMENTOS
   CARRERAS_DPTO: `/departamento/carreras`,

@@ -310,6 +310,7 @@ export default function CompletarInformeCatedra() {
 
             <div className="step-content-container" style={{ minHeight: '400px', maxHeight: '600px', overflowY: 'auto', paddingRight: '10px' }}>
               <ContenidoPasos
+                datosIniciales={{ materiaId, anio, periodo }}
                 currentStep={currentStep}
                 categoriasConPreguntas={categoriasConPreguntas}
                 datosEstadisticos={datosEstadisticos}

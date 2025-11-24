@@ -19,6 +19,7 @@ import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/Encuest
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra"; // Completar informe cátedra
 import InformeCatedraCompletadoDocente from "./components/docente/informesCompletados/mostrarInformesCompletados";
+import DashboardDocente from "./components/docente/dashboardDocente/DashboardDocentes";
 
 // --- PAGINAS DEPARTAMENTO / SECRETARIA ---
 import DetalleDepartamento from "./components/departamento/DetalleDepartamento";
@@ -55,6 +56,7 @@ function App() {
         </Route>
         {/* C. Rutas de DOCENTES */}
         <Route element={<ProtectedRoute allowedRoles={['docente', 'admin']} />}>
+          <Route path={ROUTES.DASHBOARD_DOCENTE} element={<DashboardDocente />} />
           <Route path={ROUTES.INFORMES_CATEDRA_PENDIENTES} element={<InformesPendientesPage />} />
           <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
           <Route path={ROUTES.INFORMES_CATEDRA_COMPLETADOS} element={<InformeCatedraCompletadoDocente />} />
