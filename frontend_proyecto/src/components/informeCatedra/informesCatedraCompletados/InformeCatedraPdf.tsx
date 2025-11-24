@@ -13,7 +13,7 @@ import type {
     Opcion
 } from "./InformeCatedraCompletadoDetail";
 
-import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
+import { MostrarPeriodo } from "../../../constants";
 
 const styles = StyleSheet.create({
     page: {
@@ -137,7 +137,7 @@ export default function InformeCatedraPDF({
 
                     <Text style={styles.respuesta}>
                         <Text style={{ fontWeight: "bold" }}>Ciclo Lectivo:</Text>{" "}
-                        {informe.anio} - {mostrarPeriodo(informe.periodo)}
+                        {informe.anio} - {MostrarPeriodo(informe.periodo)}
                     </Text>
 
                     <Text style={styles.respuesta}>
