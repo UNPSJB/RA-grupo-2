@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 // instancia api
-import api from "../../../services/api"; 
+import api from "../../../services/api";
 import { MostrarPeriodo } from "../../../constants";
 import type { Departamento } from "../../../types/types";
 import ROUTES from "../../../paths";
+import { useAuth } from "../../../context/AuthContext";
 
 interface InformeCatedraCompletado {
   id: number;
@@ -14,21 +15,31 @@ interface InformeCatedraCompletado {
 }
 
 export default function InformeCatedraList() {
+  const { currentUser } = useAuth();
+  const departamentoId = currentUser?.departamento_id;
   const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
-  const departamentoId = 1; 
 
   useEffect(() => {
+    if(!departamentoId) return;
     api.get(`/departamentos/${departamentoId}`)
-      .then(res => setDepartamento(res.data)) 
+      .then(res => setDepartamento(res.data))
       .catch(err => console.error("Error cargando departamento:", err));
 
     api.get(`/informe-catedra-completado/departamento/${departamentoId}`)
       .then(res => setInformes(res.data))
       .catch(err => console.error("Error cargando informes:", err));
-      
+
   }, [departamentoId]);
 
+  if (!departamentoId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-warning">Cargando departamento..</div>
+      </div>
+    );
+  }
+  
   return (
     <div className="container py-4">
       <div className="card">
@@ -54,7 +65,7 @@ export default function InformeCatedraList() {
                         </span>
                       </div>
                       <Link
-                        to={ROUTES.INFORME_CATEDRA_DETALLE(departamentoId, inf.id)}
+                        to={ROUTES.INFORME_CATEDRA_DETALLE(inf.id)}
                         className="btn btn-theme-primary rounded-pill px-4"
                       >
                         Ver Detalle

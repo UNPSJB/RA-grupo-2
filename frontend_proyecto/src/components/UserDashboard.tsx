@@ -41,8 +41,8 @@ const dashboardLinks = (role: string) => {
 
     if (role === 'departamento') {
         baseLinks.push(
-            { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO(1) },
-            { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS(1) },
+            { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO },
+            { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS },
             { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA }
         );
     }
@@ -53,8 +53,6 @@ const dashboardLinks = (role: string) => {
             { title: "Encuestas Completadas", to: ROUTES.ENCUESTAS_COMPLETADAS },
             { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
             { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
-            { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO(1) },
-            { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS(1) },
             { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA },
             { title: "Crear Informe de Cátedra Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
             { title: "Crear Encuesta Base", to: ROUTES.ENCUESTA_BASE_NUEVA },
