@@ -54,7 +54,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
             </div>
             
             <h1 className="fw-bold display-6 mb-2">Bienvenido</h1>
-            <h4 className={`h6 mb-4 ${isDarkMode ? 'opacity-75' : 'text-muted'}`}>Sistema de Encuestas</h4>
+            <h4 className={`h6 mb-4 ${isDarkMode ? 'opacity-75' : 'text-muted'}`}>Sistema de Encuestas UNPSJB</h4>
             <p className={`small ${isDarkMode ? 'opacity-75' : 'text-secondary'}`} style={{ lineHeight: '1.6' }}>
               Accede a la plataforma institucional para gestionar y participar en los procesos de evaluación académica.
             </p>
@@ -167,7 +167,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
 
             <div className="mt-5 text-center">
               <p className={`small mb-0 ${isDarkMode ? 'text-light opacity-25' : 'text-muted opacity-50'}`} style={{ fontSize: '0.75rem' }}>
-                © 2025 Universidad Nacional
+                © 2025 Universidad Nacional de la Patagonia San Juan Bosco
               </p>
             </div>
           </div>
