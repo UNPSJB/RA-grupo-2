@@ -68,7 +68,7 @@ function ListaInformeSintetico() {
                       <span className="text"> – {MostrarPeriodo(inf.periodo)} {inf.anio}</span>
                     </div>
                     <Link
-                        to={ROUTES.INFORME_SINTETICO_DETALLE(id_dpto, inf.id)} 
+                        to={ROUTES.INFORME_SINTETICO_DETALLE(inf.id)} 
                         className="btn btn-theme-primary rounded-pill px-4"
                         >
                       Ver Informe

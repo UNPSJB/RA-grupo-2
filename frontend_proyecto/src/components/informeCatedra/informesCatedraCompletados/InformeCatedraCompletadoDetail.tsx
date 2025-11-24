@@ -16,6 +16,7 @@ interface Pregunta {
   tipo: string;
   categoria_id: number;
   categoria: Categoria;
+  obligatoria:boolean;
 }
 
 export interface Opcion {
