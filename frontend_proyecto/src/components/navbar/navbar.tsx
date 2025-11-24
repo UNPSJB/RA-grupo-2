@@ -50,7 +50,7 @@ export default function Navbar() {
     }
     if (role === 'departamento') {
       baseLinks.push(
-        { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO(1) },
+        { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO},
         { title: "Informes Cátedra", to: ROUTES.INFORMES_CATEDRA }
       );
     }
@@ -58,7 +58,7 @@ export default function Navbar() {
       baseLinks.push(
         { title: "Encuestas", to: ROUTES.ENCUESTAS_DISPONIBLES },
         { title: "Informes Cátedra", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-        { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO(1) },
+        { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO},
         { title: "Configuración", to: ROUTES.DEFINIR_FECHAS }
       );
     }

@@ -8,6 +8,7 @@ import { saveAs } from "file-saver";
 import InformeCatedraPDF from "./InformeCatedraPdf";
 // instancia de axios 
 import api from "../../../services/api";
+import { useAuth } from "../../../context/AuthContext";
 
 interface Pregunta {
   id: number;
@@ -15,6 +16,7 @@ interface Pregunta {
   tipo: string;
   categoria_id: number;
   categoria: Categoria;
+  obligatoria:boolean;
 }
 
 export interface Opcion {
@@ -78,7 +80,9 @@ export default function InformeCatedraDetalle() {
     saveAs(blob, `InformeCatedra_${informe.materiaCodigo}.pdf`);
   };
 
-  const { id_dpto, id } = useParams<{ id_dpto: string, id: string }>();
+  const { id } = useParams<{ id: string }>();
+  const { currentUser } = useAuth();
+  const rol = currentUser?.role_name;
   const [informe, setInforme] = useState<InformeCompletadoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,12 +146,12 @@ export default function InformeCatedraDetalle() {
         const dataStats = resEstadisticas.data;
 
         if (dataStats && dataStats.length > 0) {
-           const dataOrdenada = [...dataStats].sort((a: any, b: any) =>
-             a.categoria_cod.localeCompare(b.categoria_cod, "es", {
-               sensitivity: "base",
-             })
-           );
-           setDatosEstadisticos(dataOrdenada);
+          const dataOrdenada = [...dataStats].sort((a: any, b: any) =>
+            a.categoria_cod.localeCompare(b.categoria_cod, "es", {
+              sensitivity: "base",
+            })
+          );
+          setDatosEstadisticos(dataOrdenada);
         }
 
         const resCantidad = await api.get('/datos_estadisticos/cantidad_encuestas_completadas', { params: paramsEstadistica });
@@ -211,11 +215,12 @@ export default function InformeCatedraDetalle() {
   }
 
   const returnPath = (() => {
-        if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
-            return ROUTES.INFORMES_CATEDRA;
-        }
-        return ROUTES.INFORMES_CATEDRA_COMPLETADOS;
-    })();
+    if (rol === "departamento") {
+      return ROUTES.INFORMES_CATEDRA;
+    } else {
+      return ROUTES.INFORMES_CATEDRA_COMPLETADOS;
+    }
+  })();
 
   if (error) {
     return (

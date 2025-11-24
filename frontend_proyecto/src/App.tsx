@@ -7,7 +7,6 @@ import { ProtectedRoute } from "./components/guards/ProtectedRoute";
 
 // --- PAGINAS COMUNES ---
 import LoginPage from "./components/login/LoginPage";
-import Menu from "./components/menu";
 import UserDashboard from "./components/UserDashboard";
 
 // --- PAGINAS ALUMNOS ---
@@ -17,8 +16,6 @@ import EncuestasCompletadasPage from "./components/encuestasCompletadas/Encuesta
 import EncuestaCompletadaDetalle from "./components/encuestasCompletadas/EncuestaCompletadaDetalle";
 
 // --- PAGINAS DOCENTES ---
-import DocentePage from "./components/docente/docentesPage";
-import DetalleMateria from "./components/materia/DetalleMateria";
 import InformesPendientesPage from "./components/docente/informe/InformesPendientesPage";
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra"; // Completar informe cátedra
 import InformeCatedraCompletadoDocente from "./components/docente/informesCompletados/mostrarInformesCompletados";
@@ -58,8 +55,6 @@ function App() {
         </Route>
         {/* C. Rutas de DOCENTES */}
         <Route element={<ProtectedRoute allowedRoles={['docente', 'admin']} />}>
-          <Route path={ROUTES.MATERIAS_ASIGNADAS()} element={<DocentePage />} />
-          <Route path={ROUTES.DETALLE_MATERIA()} element={<DetalleMateria />} />
           <Route path={ROUTES.INFORMES_CATEDRA_PENDIENTES} element={<InformesPendientesPage />} />
           <Route path={ROUTES.COMPLETAR_INFORME_CATEDRA} element={<InformeForm />} />
           <Route path={ROUTES.INFORMES_CATEDRA_COMPLETADOS} element={<InformeCatedraCompletadoDocente />} />
@@ -69,7 +64,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['departamento', 'admin']} />}>
           <Route path={ROUTES.DASHBOARD_DPTO} element={<DashboardDepartamento />} />
 
-          <Route path={ROUTES.CARRERAS_DPTO()} element={<DetalleDepartamento />} />
+          <Route path={ROUTES.CARRERAS_DPTO} element={<DetalleDepartamento />} />
           <Route path={ROUTES.CARRERA()} element={<DetalleCarrera />} />
           <Route path={ROUTES.COMPLETAR_INFORME_SINTETICO} element={<CompletarInformeSintetico />} />
 
@@ -77,7 +72,7 @@ function App() {
           <Route path={ROUTES.INFORMES_CATEDRA} element={<InformeCatedraList />} />
           <Route path={ROUTES.INFORME_CATEDRA_DETALLE()} element={<InformeCatedraDetail />} />
 
-          <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS()} element={<ListaInformeSintetico />} />
+          <Route path={ROUTES.INFORMES_SINTETICOS_COMPLETADOS} element={<ListaInformeSintetico />} />
           <Route path={ROUTES.INFORME_SINTETICO_DETALLE()} element={<InformeSinteticoDetail />} />
         </Route>
 

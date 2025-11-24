@@ -176,7 +176,7 @@ export default function CompletarInformeSintetico() {
 
             setMensaje("¡Informe enviado con éxito!");
             setTimeout(() => {
-                navigate(ROUTES.CARRERAS_DPTO(dpto.id));
+                navigate(ROUTES.CARRERAS_DPTO);
             }, 2000);
 
         } catch (err: any) {
