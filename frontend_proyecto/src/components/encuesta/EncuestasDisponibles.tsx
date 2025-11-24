@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../constants";
 import MensajeExito from "../pregunta/preguntaCerrada/MensajeExito";
 import ROUTES from "../../paths";
+import api from "../../services/api";
 
 type EncuestaDisponible = {
   materia: string;
@@ -22,16 +23,16 @@ export default function EncuestasDisponibles({ encuestas, alumnoId }: Props) {
 
   const verificarYCompletar = async (e: EncuestaDisponible) => {
     try {
-      const params = new URLSearchParams({
-        alumno_id: alumnoId.toString(),
-        encuesta_id: e.encuesta_id.toString(),
-        materia_id: e.materia_id.toString(),
-        anio: ANIO_ACTUAL.toString(),
-        periodo: PERIODO_ACTUAL
+      const response = await api.get(`/encuesta-completada/existe`, {
+        params: {
+          alumno_id: alumnoId,
+          encuesta_id: e.encuesta_id,
+          materia_id: e.materia_id,
+          anio: ANIO_ACTUAL,
+          periodo: PERIODO_ACTUAL
+        }
       });
-
-      const response = await fetch(`http://localhost:8000/encuesta-completada/existe?${params}`);
-      const data = await response.json();
+      const data = response.data;
 
       if(data.existe){
         setMensajeExito(`Ya completaste la encuesta de ${e.materia}`); 

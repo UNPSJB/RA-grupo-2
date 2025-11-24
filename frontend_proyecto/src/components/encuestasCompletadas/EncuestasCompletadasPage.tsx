@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import EncuestasCompletadas from "./EncuestasCompletadas";
 import type {Alumno} from "../../types/types.ts"
 import {ALUMNO_ID} from "../../constants.ts"
+import api from "../../services/api";
 
 type Respuesta = {
   id: number;
@@ -27,17 +28,17 @@ export default function EncuestasCompletadasPage() {
   const [encuestas, setEncuestas] = useState<EncuestaCompletada[]>([]);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}`)
-    .then(res=>{
-      if (!res.ok) throw new Error("Error al obtener el alumno");
-        return res.json();
+    api.get(`/alumnos/${alumnoId}`)
+    .then(res => {
+      setAlumno(res.data);
     })
-    .then(setAlumno)
     .catch(console.error);
 
-    fetch(`http://127.0.0.1:8000/encuesta-completada/alumno/${alumnoId}`)
-      .then((res) => res.json())
-      .then((data: EncuestaCompletada[]) => setEncuestas(data))
+    api.get(`/encuesta-completada/alumno/${alumnoId}`)
+      .then((res) => {
+        const data: EncuestaCompletada[] = res.data;
+        setEncuestas(data);
+      })
       .catch((err) => {
         console.error("Error al obtener encuestas:", err);
         setEncuestas([]);
@@ -59,5 +60,4 @@ export default function EncuestasCompletadasPage() {
         </div>
       </div>
   );
-
 }

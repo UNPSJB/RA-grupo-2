@@ -1,5 +1,7 @@
 import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
+// instancia api
+import api from "../../services/api";
 import ROUTES from "../../paths"; 
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'; 
 
@@ -8,6 +10,7 @@ interface PreguntaTemp {
     enunciado: string; 
     orden: number; 
 }
+
 const reorder = (list: PreguntaTemp[], startIndex: number, endIndex: number): PreguntaTemp[] => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -17,6 +20,7 @@ const reorder = (list: PreguntaTemp[], startIndex: number, endIndex: number): Pr
         orden: index + 1,
     }));
 };
+
 const getListItemStyle = (isDragging: boolean, dragItemStyle: React.CSSProperties, draggableStyle: React.CSSProperties | undefined) => ({
     ...dragItemStyle,
     ...draggableStyle,
@@ -24,10 +28,8 @@ const getListItemStyle = (isDragging: boolean, dragItemStyle: React.CSSPropertie
         ? 'rgba(0, 123, 255, 0.2)' 
         : dragItemStyle.backgroundColor,
     width: isDragging ? '100%' : 'auto', 
-    
     boxShadow: isDragging ? '0 4px 8px rgba(0, 0, 0, 0.2)' : 'none',
 });
-
 
 export default function InformeSinteticoBaseForm() {
     const navigate = useNavigate();
@@ -87,73 +89,39 @@ export default function InformeSinteticoBaseForm() {
         setCargando(true);
 
         try {
-            const resInformeBase = await fetch("http://localhost:8000/informes_sinteticos_base/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    titulo,
-                    descripcion: descripcion || null
-                }),
+            const resInformeBase = await api.post("/informes_sinteticos_base/", { 
+                titulo,
+                descripcion: descripcion || null
             });
-
-            if (!resInformeBase.ok) { 
-                let errorResponseText = await resInformeBase.text();
-                let errorDetail = `Error ${resInformeBase.status}: ${resInformeBase.statusText}.`;
-                
-                try {
-                    const errorData = JSON.parse(errorResponseText);
-                    errorDetail = errorData.detail || JSON.stringify(errorData); 
-                } catch (e) {
-                    errorDetail = errorResponseText;
-                }
-                
-                throw new Error(`Fallo al crear Informe Base. Mensaje del servidor: ${errorDetail}`); 
-            }
-            
-            const { id: informeBaseId } = await resInformeBase.json();
-
+            const informeBaseId = resInformeBase.data.id;
             for (const preg of preguntas) {
-                const urlPregunta = `http://localhost:8000/preguntas_sintetico/${informeBaseId.toString()}`;
+                const urlPregunta = `/preguntas_sintetico/${informeBaseId}`;
 
-                const resPreg = await fetch(urlPregunta, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+                try {
+                    await api.post(urlPregunta, {
                         cod: preg.cod,
                         enunciado: preg.enunciado, 
                         orden: preg.orden, 
                         tipo_respuesta: 'texto', 
-                    }),
-                });
-
-                if (!resPreg.ok) { 
-                    let errorResponseText = await resPreg.text();
-                    let errorDetail = `Error ${resPreg.status}: ${resPreg.statusText}.`;
-
-                    try {
-                        const errorData = JSON.parse(errorResponseText);
-                        errorDetail = errorData.detail || JSON.stringify(errorData);
-                    } catch (e) {
-                        errorDetail = errorResponseText;
-                    }
-
-                    throw new Error(`Fallo al crear la pregunta ${preg.orden}. Mensaje del servidor: ${errorDetail}`);
+                    });
+                } catch (err: any) {
+                    throw new Error(`Fallo al crear la pregunta ${preg.orden}. Detalle: ${err.response?.data?.detail || err.message}`);
                 }
             }
 
             alert("Informe Sintético Base creado con éxito.");
             navigate(ROUTES.HOME); 
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error en la cascada de creación:", error);
-            
-            const messageToShow = error instanceof Error ? error.message : "Error desconocido y no capturado.";
+            const messageToShow = error.response?.data?.detail || error.message || "Error desconocido.";
             
             alert(`Fallo en la creación del informe. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
         }
     };
+
     const cardStyle = { 
         backgroundColor: 'var(--color-component-bg)',
         border: '1px solid var(--color-unpsjb-border)', 

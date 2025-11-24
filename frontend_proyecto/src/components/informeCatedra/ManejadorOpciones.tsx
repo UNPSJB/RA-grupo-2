@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+// instancia axios
+import api from "../../services/api"; 
 
 interface Opcion {
     id: number;
@@ -28,30 +30,28 @@ export default function ManejadorOpciones({
         );
     };
 
-    const handleCrearNuevaOpcion = () => {
+    const handleCrearNuevaOpcion = async () => {
         if (!nuevaOpcionContenido.trim()) {
             alert("Ingrese contenido para la nueva opción.");
             return;
         }
         
-        fetch("http://localhost:8000/opciones", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contenido: nuevaOpcionContenido }),
-        })
-          .then((res) => {
-              if (!res.ok) throw new Error("Fallo al crear la opción.");
-              return res.json();
-          })
-          .then((data: Opcion) => {
-            setOpcionesCatalogo(prev => [...prev, data]);
-            setOpcionesSeleccionadas(prev => [...prev, data.id]);
+        try {
+            const res = await api.post("/opciones", { 
+                contenido: nuevaOpcionContenido 
+            });
+
+            const nuevaOpcion: Opcion = res.data;
+
+            setOpcionesCatalogo(prev => [...prev, nuevaOpcion]);
+            setOpcionesSeleccionadas(prev => [...prev, nuevaOpcion.id]);
             setNuevaOpcionContenido("");
-          })
-          .catch((err) => {
-              console.error("Error creando opción:", err);
-              alert("Error al crear la opción. Revise el backend.");
-          });
+
+        } catch (error: any) {
+            console.error("Error creando opción:", error);
+            const mensajeError = error.response?.data?.detail || "Error al crear la opción. Verifique conexión o backend.";
+            alert(mensajeError);
+        }
     };
     
     const cardStyle = { 

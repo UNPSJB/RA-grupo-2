@@ -4,6 +4,7 @@ import type { Departamento, Carrera } from "../../types/types";
 import { useParams } from "react-router-dom";
 import { EsPeriodoInformeSintetico } from "../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
+import api from "../../services/api";
 
 function DetalleDepartamento() {
   const { id_dpto } = useParams<{ id_dpto: string }>();
@@ -12,14 +13,12 @@ function DetalleDepartamento() {
   const periodoInforme = EsPeriodoInformeSintetico();
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/departamentos/${id_dpto}`)
-      .then((res) => res.json())
-      .then((data) => setDepartamento(data))
+    api.get(`/departamentos/${id_dpto}`)
+      .then((res) => setDepartamento(res.data))
       .catch((err) => console.error("Error cargando departamento:", err));
 
-    fetch(`http://127.0.0.1:8000/carreras/departamento/${id_dpto}/informes_pendientes`)
-      .then((res) => res.json())
-      .then((data) => setCarreras(Array.isArray(data) ? data : []))
+    api.get(`/carreras/departamento/${id_dpto}/informes_pendientes`)
+      .then((res) => setCarreras(Array.isArray(res.data) ? res.data : []))
       .catch((err) => console.error("Error cargando carreras:", err))
 
   }, [id_dpto]);

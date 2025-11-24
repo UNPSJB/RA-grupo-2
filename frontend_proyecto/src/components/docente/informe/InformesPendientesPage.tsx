@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+// instancia api
+import api from "../../../services/api";
 import { DOCENTE_ID } from "../../../constants";
 import { ANIO_ACTUAL } from "../../../constants";
 import { PERIODO_ACTUAL, MostrarPeriodo} from "../../../constants";
@@ -23,23 +25,19 @@ export default function InformesPendientesPage() {
   const periodoInforme = EsPeriodoInformeCatedra();
 
   useEffect(() => {
-    fetch(
-      `http://127.0.0.1:8000/informe-catedra-completado/docente/${docenteId}/pendientes?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`
-    )
+    api.get(`/informe-catedra-completado/docente/${docenteId}/pendientes`, {
+      params: {
+        anio: ANIO_ACTUAL,
+        periodo: PERIODO_ACTUAL
+      }
+    })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(
-            `Error ${res.status}: No se pudo obtener la lista de pendientes.`
-          );
-        }
-        return res.json();
-      })
-      .then((data: InformePendiente[]) => {
-        setInformes(data);
+        setInformes(res.data);
       })
       .catch((err) => {
         console.error("Error al obtener informes:", err);
-        setError(err.message);
+        const errorMsg = err.response?.data?.detail || err.message || "Error desconocido al cargar pendientes.";
+        setError(errorMsg);
         setInformes([]);
       })
       .finally(() => setLoading(false));
@@ -53,7 +51,7 @@ export default function InformesPendientesPage() {
         materiaId: informe.materia_id,
         anio: ANIO_ACTUAL,
         periodo: PERIODO_ACTUAL,
-        informeBaseId: 3, // Asumimos que el informe base siempre es el ID 1
+        informeBaseId: 3, 
       },
     });
   };

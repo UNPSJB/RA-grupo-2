@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+// instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 
 interface PeriodoApertura {
@@ -26,20 +28,24 @@ export default function DefinirFechas() {
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/periodos_apertura/?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`)
-            .then(res => {
-                if (res.status == 404) {
-                    setEstaDefinido(false)
-                    return null;
-                }
-                if (!res.ok) throw new Error("Error al obtener el periodo de fechas");
-                return res.json();
-            })
-            .then(data => {
-                if (data) setPeriodoApertura(data)
-            })
-            .catch(console.error);
-    })
+        api.get('/periodos_apertura/', {
+            params: {
+                anio: ANIO_ACTUAL,
+                periodo: PERIODO_ACTUAL
+            }
+        })
+        .then(res => {
+            if (res.data) setPeriodoApertura(res.data);
+            setEstaDefinido(true);
+        })
+        .catch(err => {
+            if (err.response && err.response.status === 404) {
+                setEstaDefinido(false);
+            } else {
+                console.error("Error al obtener fechas:", err);
+            }
+        });
+    }, []); 
 
     const validarOrden = () => {
         const fechas = [
@@ -61,7 +67,8 @@ export default function DefinirFechas() {
         return true;
     };
 
-    const handleGuardar = () => {
+    const handleGuardar = async (e: React.FormEvent) => { 
+        e.preventDefault(); 
         setError("");
 
         const todasCompletas = Object.values(form).every(f => f !== "");
@@ -69,7 +76,6 @@ export default function DefinirFechas() {
             setError("Debes completar todas las fechas antes de guardar.");
             return;
         }
-
 
         if (!validarOrden()) {
             setError("Cada fecha debe ser posterior a la anterior.");
@@ -82,17 +88,16 @@ export default function DefinirFechas() {
             periodo: PERIODO_ACTUAL,
         };
 
-        fetch("http://127.0.0.1:8000/periodos_apertura/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Error al guardar");
-                alert("Fechas definidas correctamente.");
-                window.location.reload();
-            })
-            .catch(err => setError(err.message));
+        try {
+            await api.post("/periodos_apertura/", body);
+            
+            alert("Fechas definidas correctamente.");
+            window.location.reload();
+        } catch (err: any) {
+            console.error(err);
+            const msg = err.response?.data?.detail || err.message || "Error al guardar";
+            setError(msg);
+        }
     };
 
     if (estaDefinido) {
@@ -158,12 +163,8 @@ export default function DefinirFechas() {
                     </div>
                 </div>
             </div>
-
-
         );
-    }
-
-    else {
+    } else {
         return (
             <div className="container py-4">
                 <div className="card shadow">
@@ -174,7 +175,7 @@ export default function DefinirFechas() {
                         <div className="card-body">
                             {error && <div className="alert alert-danger">{error}</div>}
 
-                            <form>
+                            <form onSubmit={handleGuardar}>
                                 {[
                                     ["inicio_encuesta", "Inicio encuestas"],
                                     ["fin_encuesta", "Fin encuestas"],
@@ -197,7 +198,6 @@ export default function DefinirFechas() {
                                 <button
                                     type="submit"
                                     className="btn btn-theme-primary rounded-pill"
-                                    onClick={handleGuardar}
                                 >
                                     Guardar fechas
                                 </button>

@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import api from "../../services/api";
 
 type EncuestaDisponible = {
   materia: string;
@@ -14,9 +15,9 @@ export default function EncuestaDetalle() {
   const [seleccionada, setSeleccionada] = useState<EncuestaDisponible | null>(null);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}/encuestas_disponibles`)
-      .then((res) => res.json())
-      .then((data: EncuestaDisponible[]) => {
+    api.get(`/alumnos/${alumnoId}/encuestas_disponibles`)
+      .then((res) => {
+        const data: EncuestaDisponible[] = res.data;
         setEncuestas(data);
         if (id !== undefined && data[parseInt(id)] !== undefined) {
           setSeleccionada(data[parseInt(id)]);
@@ -32,19 +33,18 @@ export default function EncuestaDetalle() {
     return <p>No se encontró la encuesta</p>;
   }
 
-
-return (
-  <div className="container py-4">
-      <div className="card">
-          <div className="card-header bg-unpsjb-header">
-              <h1 className="h4 mb-0">Materia: {seleccionada.materia}</h1>
-          </div>
-          <div className="card-body">
-              <div className="alert alert-info">
-                  <strong>Encuesta: </strong>{seleccionada.encuesta}
-              </div>
-          </div>
-      </div>
-  </div>
-);
+  return (
+    <div className="container py-4">
+        <div className="card">
+            <div className="card-header bg-unpsjb-header">
+                <h1 className="h4 mb-0">Materia: {seleccionada.materia}</h1>
+            </div>
+            <div className="card-body">
+                <div className="alert alert-info">
+                    <strong>Encuesta: </strong>{seleccionada.encuesta}
+                </div>
+            </div>
+        </div>
+    </div>
+  );
 }

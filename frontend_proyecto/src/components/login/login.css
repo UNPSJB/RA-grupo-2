@@ -1,0 +1,220 @@
+/* src/components/login/login.css */
+
+:root {
+  --login-transition-speed: 1.5s;
+  --bird-fly-speed: 25s;
+  --wing-flap-speed: 1.2s; 
+}
+
+.login-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  transition: background var(--login-transition-speed) ease-in-out;
+  z-index: 1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.theme-dark {
+  background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+  color: #e0e0e0;
+}
+
+.theme-light {
+  background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%);
+  color: #333;
+}
+
+.glass-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+  transition: all var(--login-transition-speed);
+  overflow: hidden;
+  z-index: 10; 
+  position: relative; 
+}
+
+.theme-dark .glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+}
+
+.theme-light .glass-card {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.info-panel { transition: background var(--login-transition-speed); }
+.theme-light .info-panel { background: rgba(255, 255, 255, 0.2); color: #0c4a6e; }
+.theme-dark .info-panel { background: rgba(0, 0, 0, 0.2); color: #cbd5e1; }
+
+.form-panel { transition: background var(--login-transition-speed); }
+.theme-light .form-panel { background: rgba(255, 255, 255, 0.4); }
+.theme-dark .form-panel { background: rgba(255, 255, 255, 0.03); }
+
+.custom-input-group {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.input-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px 0 16px;
+  transition: color 0.3s ease;
+}
+
+.glass-input {
+  border: none;
+  outline: none;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 12px 12px 12px 0;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.password-toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+.password-toggle-btn:hover { opacity: 0.8; }
+
+.theme-light .custom-input-group {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.theme-light .custom-input-group:focus-within {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(14, 165, 233, 0.3);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+}
+.theme-light .glass-input,
+.theme-light .input-icon-wrapper, 
+.theme-light .password-toggle-btn { color: #334155; }
+.theme-light .input-icon-wrapper { opacity: 0.6; }
+.theme-light .custom-input-group:focus-within .input-icon-wrapper { opacity: 1; color: #0284c7; }
+
+.theme-dark .custom-input-group {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.theme-dark .custom-input-group:focus-within {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.theme-dark .glass-input,
+.theme-dark .input-icon-wrapper, 
+.theme-dark .password-toggle-btn { color: #e2e8f0; }
+.theme-dark .glass-input::placeholder { color: rgba(226, 232, 240, 0.4); }
+.theme-dark .input-icon-wrapper { opacity: 0.5; }
+.theme-dark .custom-input-group:focus-within .input-icon-wrapper { opacity: 1; color: #60a5fa; }
+
+.cursor-pointer { cursor: pointer; }
+.ls-1 { letter-spacing: 1px; }
+.fw-medium { font-weight: 500; }
+
+.stars-container, .clouds-container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+.star {
+  position: absolute; background: white; border-radius: 50%; opacity: 0;
+  animation: twinkle 4s infinite ease-in-out;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.2); }
+}
+
+.nebula {
+  position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.3;
+  animation: drift 60s infinite alternate;
+}
+
+.cloud {
+  position: absolute; background: #fff; border-radius: 100px; filter: blur(8px); opacity: 0.6;
+  animation: floatCloud linear infinite;
+}
+.cloud::after, .cloud::before { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+.cloud::after { top: -50%; left: 10%; width: 50%; height: 150%; }
+.cloud::before { top: -70%; right: 10%; width: 60%; height: 180%; }
+@keyframes floatCloud {
+  from { transform: translateX(-200px); }
+  to { transform: translateX(100vw); }
+}
+
+.bird-container {
+  animation: flyAcross 22s linear infinite;
+  position: absolute; 
+  will-change: transform;
+  left: 0;
+  top: 15%; 
+  z-index: 5; 
+}
+
+.bird-wrapper {
+  animation: floatY 6s ease-in-out infinite;
+  width: 100%;
+  height: 100%;
+}
+
+.bird-body {
+  transform-origin: center center;
+  animation: bodyBob 0.9s ease-in-out infinite;
+  will-change: transform;
+}
+
+.wing-back {
+  transform-origin: 220px 230px; 
+  animation: wingAction 0.9s ease-in-out infinite;
+  will-change: transform;
+}
+
+.wing-front {
+  transform-origin: 290px 240px; 
+  animation: wingAction 0.9s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes flyAcross {
+  0% {
+    transform: translateX(-20vw) scale(0.5); 
+  }
+  100% {
+    transform: translateX(110vw) scale(0.6); 
+  }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-40px); }
+}
+
+@keyframes wingAction {
+  0% { transform: rotate(-35deg); }   
+  50% { transform: rotate(25deg); }   
+  100% { transform: rotate(-35deg); } 
+}
+
+@keyframes bodyBob {
+  0% { transform: translateY(5px); }    
+  50% { transform: translateY(-5px); }  
+  100% { transform: translateY(5px); }  
+}
