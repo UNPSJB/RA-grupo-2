@@ -7,6 +7,7 @@ import ROUTES from "../../../paths";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import InformeSinteticoPDF from "./vistas/InformeCompletoPDF";
+import { useAuth } from "../../../context/AuthContext";
 
 
 const TABS_MAP = new Map([
@@ -27,18 +28,11 @@ const syntheticSteps = [
     { name: '5. Observaciones', cod: '5' },
 ];
 
-export function mostrarPeriodo(periodo: string) {
-    switch (periodo) {
-        case "PRIMER_CUATRI": return "Primer Cuatrimestre";
-        case "SEGUNDO_CUATRI": return "Segundo Cuatrimestre";
-        case "ANUAL": return "Anual";
-        default: return periodo;
-    }
-}
-
 function InformeSinteticoDetail() {
     const [carrera, setCarrera] = useState<Carrera | null>(null);
     const [departamento, setDepartamento] = useState<Departamento | null>(null);
+    const { currentUser } = useAuth();
+    const rol = currentUser?.role_name;
 
     const handleDownloadPDF = async () => {
         if (!informe || !carrera || !departamento) return;
@@ -57,7 +51,7 @@ function InformeSinteticoDetail() {
         saveAs(blob, `Informe_${informe.titulo}.pdf`);
     };
 
-    const { id, id_dpto } = useParams<{ id: string, id_dpto: string }>();
+    const { id } = useParams<{ id: string }>();
     const [informe, setInforme] = useState<InformeCompletado | null>(null);
     const [preguntasBase, setPreguntasBase] = useState<Pregunta[]>([]);
     const [loading, setLoading] = useState(true);
@@ -156,12 +150,15 @@ function InformeSinteticoDetail() {
             {loading ? <p>Cargando...</p> : <div className="alert alert-danger">{error || "Informe no encontrado."}</div>}
         </div>
     );
+
     const returnPath = (() => {
-        if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
-            return ROUTES.INFORMES_SINTETICOS_COMPLETADOS(id_dpto);
+        if (rol === "departamento") {
+            return ROUTES.INFORMES_SINTETICOS_COMPLETADOS;
+        } else {
+            return ROUTES.INFORMES_SINTETICOS;
         }
-        return ROUTES.INFORMES_SINTETICOS;
     })();
+
     return (
         <div className="bg-light">
             <div className="container-lg py-4">

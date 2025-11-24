@@ -6,6 +6,7 @@ import TablaPendientes from './dashboard/TablaPendientes';
 import EstadisticasTabs from './dashboard/EstadisticasTabs';
 import { getResolvedColor } from '../../utils/colors';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 ChartJS.defaults.color = getResolvedColor('--color-text-primary');
@@ -40,9 +41,9 @@ export interface EstadisticasData {
   total_respuestas: number;
 }
 
-const DEPARTAMENTO_ID = 1; 
-
 export default function DashboardDepartamento() {
+  const { currentUser } = useAuth();
+  const DEPARTAMENTO_ID = currentUser?.departamento_id;
   const [anio, setAnio] = useState<number | null>(null);
   const [periodo, setPeriodo] = useState<string | null>(null);
   const [carreraId, setCarreraId] = useState<number | null>(null);
