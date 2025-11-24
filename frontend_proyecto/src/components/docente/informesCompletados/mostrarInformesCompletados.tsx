@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 //instancia api
 import api from "../../../services/api";
-import { DOCENTE_ID, MostrarPeriodo } from "../../../constants";
+import { MostrarPeriodo } from "../../../constants";
 import type { Docente } from "../../../types/types";
 import ROUTES from "../../../paths";
+import { useAuth } from "../../../context/AuthContext";
 
 interface InformeCatedraCompletado {
   id: number;
@@ -15,12 +16,13 @@ interface InformeCatedraCompletado {
 
 export default function InformeCatedraCompletadoDocente() {
   const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
+  const { currentUser } = useAuth();
+  const docenteId = currentUser?.docente_id;
   const [docente, setDocente] = useState<Docente>();
-  const docenteId = DOCENTE_ID; // hardcoedado 
 
   useEffect(() => {
     api.get(`/docentes/${docenteId}`)
-      .then(res => setDocente(res.data)) 
+      .then(res => setDocente(res.data))
       .catch(err => console.error("Error al obtener el docente:", err));
     api.get(`/informe-catedra-completado/docente/${docenteId}/completados`)
       .then(res => setInformes(res.data))

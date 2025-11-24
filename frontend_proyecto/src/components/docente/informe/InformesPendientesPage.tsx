@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // instancia api
 import api from "../../../services/api";
-import { DOCENTE_ID } from "../../../constants";
+import { useAuth } from "../../../context/AuthContext";
 import { ANIO_ACTUAL } from "../../../constants";
-import { PERIODO_ACTUAL, MostrarPeriodo} from "../../../constants";
+import { PERIODO_ACTUAL, MostrarPeriodo } from "../../../constants";
 import ROUTES from "../../../paths";
 import { EsPeriodoInformeCatedra } from "../../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../../secretaria/definirFechas/PopUpPeriodo"
@@ -16,7 +16,8 @@ type InformePendiente = {
 };
 
 export default function InformesPendientesPage() {
-  const docenteId = DOCENTE_ID;
+  const { currentUser } = useAuth();
+  const docenteId = currentUser?.docente_id;
   const [informes, setInformes] = useState<InformePendiente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +51,7 @@ export default function InformesPendientesPage() {
         materiaId: informe.materia_id,
         anio: ANIO_ACTUAL,
         periodo: PERIODO_ACTUAL,
-        informeBaseId: 3, 
+        informeBaseId: 3,
       },
     });
   };
@@ -70,7 +71,17 @@ export default function InformesPendientesPage() {
   }
 
   if (!periodoInforme) {
-    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"}/>;
+    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"} />;
+  }
+
+  if (!docenteId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-danger" role="alert">
+          No se pudo obtener la información del docente. Por favor, inicie sesión nuevamente.
+        </div>
+      </div>
+    );
   }
 
   return (
