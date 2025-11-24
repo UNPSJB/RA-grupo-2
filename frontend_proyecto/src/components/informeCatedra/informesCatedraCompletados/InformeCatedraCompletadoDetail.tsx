@@ -5,7 +5,7 @@ import ContenidoPasos from "../../docente/informe/ContenidoPasos";
 import type { Categoria } from "../../../types/types";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-import InformeCatedraPDF from "./InformeCatedraPDF";
+import InformeCatedraPDF from "./InformeCatedraPdf";
 // instancia de axios 
 import api from "../../../services/api";
 

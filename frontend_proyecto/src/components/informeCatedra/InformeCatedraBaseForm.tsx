@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CategoriaManager from "./ManejadorCategoria"; 
 import OpcionesManager from "./ManejadorOpciones";  
 import ROUTES from "../../paths"; 
+import api from "../../services/api";
 
 interface CategoriaTemp { cod: string; texto: string; }
 interface PreguntaTemp { 
@@ -30,9 +31,11 @@ export default function InformeCatedraBaseForm() {
     const [esObligatoria, setEsObligatoria] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:8000/opciones")
-            .then((res) => res.json())
-            .then((data) => setOpcionesCatalogo(Array.isArray(data) ? data : []))
+        api.get("/opciones")
+            .then((res) => {
+                const data = res.data;
+                setOpcionesCatalogo(Array.isArray(data) ? data : []);
+            })
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
 
@@ -75,40 +78,24 @@ export default function InformeCatedraBaseForm() {
         setCargando(true);
 
         try {
-            const resInforme = await fetch("http://localhost:8000/informes_catedra/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ titulo }),
-            });
-            if (!resInforme.ok) {
-                const errorData = await resInforme.json();
-                throw new Error(errorData.detail || "Error al crear el informe base.");
-            }
-            const { id: informeId } = await resInforme.json();
+            const resInforme = await api.post("/informes_catedra/", { titulo });
+            const { id: informeId } = resInforme.data;
             const categoriasCreadas = [];
             
             for (const categoriaTemp of categorias) {
-                const resCat = await fetch("http://localhost:8000/categorias/paraInforme/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        cod: categoriaTemp.cod,
-                        texto: categoriaTemp.texto || "",
-                        informe_base_id: informeId,
-                    }),
+                const resCat = await api.post("/categorias/paraInforme/", {
+                    cod: categoriaTemp.cod,
+                    texto: categoriaTemp.texto || "",
+                    informe_base_id: informeId,
                 });
-                if (!resCat.ok) {
-                    const errorData = await resCat.json();
-                    throw new Error(errorData.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`);
-                }
-                const categoriaCreada = await resCat.json();
+                const categoriaCreada = resCat.data;
                 categoriasCreadas.push(categoriaCreada);
             }
 
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
                 if (!categoria) continue;
-                const endpoint = preg.tipo === 'cerrada' ? "http://localhost:8000/preguntas/cerrada" : "http://localhost:8000/preguntas/abierta";   
+                const endpoint = preg.tipo === 'cerrada' ? "/preguntas/cerrada" : "/preguntas/abierta";   
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
@@ -116,24 +103,15 @@ export default function InformeCatedraBaseForm() {
                     obligatoria: preg.obligatoria,
                     ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }),
                 };
-                const resPreg = await fetch(endpoint, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload),
-                });
-
-                if (!resPreg.ok) {
-                     const errorData = await resPreg.json();
-                     throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
-                }
+                await api.post(endpoint, payload);
             }
 
             alert("Informe creado con éxito.");
             navigate(ROUTES.HOME);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error en la cascada de creación:", error);
-            const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
+            const messageToShow = error.response?.data?.detail || error.message || "Error desconocido al procesar la solicitud.";
             alert(`Fallo en la creación del informe. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
