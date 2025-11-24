@@ -1,8 +1,69 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CategoriaManager from "../informeCatedra/ManejadorCategoria"
 import OpcionesManager from "../informeCatedra/ManejadorOpciones";
 import ROUTES from "../../paths";
+
+// --- COMPONENTE INTERNO: SELECT PERSONALIZADO ---
+const CustomSelect = ({ label, value, options, onChange, disabled, placeholder = "Seleccione..." }: any) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find((opt: any) => opt.value === value);
+
+    return (
+        <div className="position-relative" ref={containerRef}>
+            <label className="form-label fw-bold">{label}</label>
+            <div 
+                className={`form-select d-flex align-items-center justify-content-between ${disabled ? 'bg-light text-muted' : 'bg-white'}`}
+                style={{ 
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    backgroundImage: 'none' // <--- ESTA LÍNEA ES LA QUE ELIMINA LA DOBLE FLECHA
+                }}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+            >
+                <span className={!selectedOption ? 'text-muted' : ''}>
+                    {selectedOption ? selectedOption.label : placeholder}
+                </span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 5l6 6 6-6"/>
+                </svg>
+            </div>
+
+            {isOpen && (
+                <div className="card shadow-lg position-absolute w-100 start-0 border-0" 
+                     style={{ zIndex: 1050, top: '105%', maxHeight: '250px', overflowY: 'auto' }}>
+                    <ul className="list-unstyled m-0 p-1">
+                        {options.map((opt: any) => (
+                            <li 
+                                key={opt.value}
+                                className="px-3 py-2 rounded-2 cursor-pointer custom-option-item"
+                                style={{ cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setIsOpen(false);
+                                }}
+                            >
+                                {opt.label}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+// --- FIN COMPONENTE ---
 
 interface CategoriaTemp { cod: string; texto: string; }
 interface PreguntaTemp { 
@@ -27,7 +88,7 @@ export default function EncuestaBaseForm() {
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
     const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta'); 
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
-    const [esObligatoria, setEsObligatoria] = useState(false); // Nuevo estado
+    const [esObligatoria, setEsObligatoria] = useState(false); 
 
     useEffect(() => {
         fetch("http://localhost:8000/opciones")
@@ -67,14 +128,11 @@ export default function EncuestaBaseForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!nombre.trim() || categorias.length === 0 || preguntas.length === 0) {
             alert("Complete todos los campos y agregue al menos una categoría y una pregunta.");
             return;
         }
-
         setCargando(true);
-
         try {
             const resEncuesta = await fetch("http://localhost:8000/encuestas/", {
                 method: "POST",
@@ -122,16 +180,13 @@ export default function EncuestaBaseForm() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(payload),
                 });
-
                 if (!resPreg.ok) { 
                      const errorData = await resPreg.json();
                      throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
                 }
             }
-
             alert("Encuesta creada con éxito.");
             navigate(ROUTES.HOME);
-
         } catch (error) {
             console.error("Error en la cascada de creación:", error);
             const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
@@ -140,6 +195,17 @@ export default function EncuestaBaseForm() {
             setCargando(false);
         }
     };
+
+    // Preparar opciones para el CustomSelect
+    const tipoOptions = [
+        { value: 'abierta', label: 'Abierta' },
+        { value: 'cerrada', label: 'Cerrada' }
+    ];
+
+    const categoriaOptions = categorias.map(cat => ({
+        value: cat.cod,
+        label: `${cat.cod} ${cat.texto ? `- ${cat.texto}` : ''}`
+    }));
 
     return (
         <div className="container py-4">
@@ -164,23 +230,27 @@ export default function EncuestaBaseForm() {
                         <div className="card bg-light mb-4 p-3">
                             <div className="row mb-3">
                                 <div className="col-md-3">
-                                    <label className="form-label fw-bold">Tipo</label>
-                                    <select 
-                                        className="form-select" 
-                                        value={nuevoTipoPregunta} 
-                                        onChange={(e) => { setNuevoTipoPregunta(e.target.value as 'abierta' | 'cerrada'); setOpcionesSeleccionadas([]); }} 
-                                        disabled={cargando || categorias.length === 0} 
-                                    >
-                                        <option value="abierta">Abierta</option>
-                                        <option value="cerrada">Cerrada</option>
-                                    </select>
+                                    <CustomSelect 
+                                        label="Tipo"
+                                        value={nuevoTipoPregunta}
+                                        options={tipoOptions}
+                                        disabled={cargando || categorias.length === 0}
+                                        onChange={(val: any) => { 
+                                            setNuevoTipoPregunta(val as 'abierta' | 'cerrada'); 
+                                            setOpcionesSeleccionadas([]); 
+                                        }}
+                                    />
                                 </div>
                                 <div className="col-md-9">
-                                    <label className="form-label fw-bold">Categoría</label>
-                                    <select className="form-select" value={categoriaSeleccionada} onChange={(e) => setCategoriaSeleccionada(e.target.value)} disabled={cargando || categorias.length === 0} >
-                                        <option value="">Seleccione categoría</option>
-                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
-                                    </select>
+                                    {/* USANDO EL NUEVO SELECT PERSONALIZADO */}
+                                    <CustomSelect 
+                                        label="Categoría"
+                                        value={categoriaSeleccionada}
+                                        options={categoriaOptions}
+                                        disabled={cargando || categorias.length === 0}
+                                        placeholder="Seleccione categoría"
+                                        onChange={(val: any) => setCategoriaSeleccionada(val)}
+                                    />
                                 </div>
                             </div>
                             

@@ -128,7 +128,9 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio, isRead
             />
             <button
               type="button"
-              className="btn btn-primary px-3"
+              className="btn btn-theme-primary px-3"
+              /*btn btn-theme-primary
+className="btn btn-theme-primary rounded-pill px-4 */
               onClick={agregarItemEquipo}
               disabled={!nuevoItemEquipo.trim()}
             >
@@ -182,7 +184,7 @@ export default function CategoriaEquipamiento({ categoria, manejarCambio, isRead
             />
             <button
               type="button"
-              className="btn btn-primary px-3"
+              className="btn btn-theme-primary px-3"
               onClick={agregarItemBibliografia}
               disabled={!nuevoItemBibliografia.trim()}
             >

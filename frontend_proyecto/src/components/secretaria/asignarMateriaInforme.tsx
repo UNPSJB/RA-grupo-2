@@ -252,7 +252,7 @@ export default function AsignarFormularios() {
             )}
             <button
               type="submit"
-              className="btn btn-primary w-100"
+              className="btn btn-theme-primary w-100"
               disabled={selectedMaterias.size === 0 || (!selectedEncuesta && !selectedInforme)}
             >
               Asignar Formularios a {selectedMaterias.size} Materias

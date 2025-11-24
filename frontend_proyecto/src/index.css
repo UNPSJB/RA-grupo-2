@@ -5,8 +5,8 @@
   /* --- PALETA PRINCIPAL (Modern & Airy) --- */
   
   /* Brand Colors */
-  --color-brand-primary: #005ec2; /* Royal Blue */
-  --color-brand-hover: #004694;
+  --color-brand-primary: #158ad4; /*#005ec2; /* Royal Blue */
+  --color-brand-hover: #010101;
   --color-brand-light: #e7f1ff;
   
   /* Gradients */
@@ -312,7 +312,7 @@ a:hover { color: var(--color-brand-hover); }
 
 /* --- BOTONES & FORMS --- */
 .btn-theme-primary {
-    background: var(--gradient-primary) !important; 
+    background-color: var(--color-brand-primary) !important; 
     border: none !important;
     color: white !important; 
     border-radius: var(--radius-sm);
@@ -432,4 +432,17 @@ a:hover { color: var(--color-brand-hover); }
   background: var(--color-brand-primary);
   color: white;
   transform: rotate(90deg);
+}
+
+
+.bg-unpsjb-header {
+    background-color: var(--color-unpsjb-blue) !important; 
+    color: var(--color-text-inverse) !important;
+}
+
+/* Custom Select Styles */
+.custom-option-item:hover {
+    /* Aquí aplicamos tu variable de marca EXACTA */
+    background-color: var(--color-brand-primary) !important;
+    color: white !important;
 }

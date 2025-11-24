@@ -112,14 +112,16 @@ const dashboardLinks = (role: string) => {
   if (role === 'docente') {
     baseLinks.push(
       { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-      { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS }
+      { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
+      { title: "Graficos Estádisticos", to: ROUTES.HOME }
     );
   }
   if (role === 'departamento') {
     baseLinks.push(
       { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO},
       { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS},
-      { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA }
+      { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA },
+      { title: "Graficos Estádisticos", to: ROUTES.DASHBOARD_DPTO }
     );
   }
   if (role === 'admin') {
