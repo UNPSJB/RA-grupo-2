@@ -22,7 +22,7 @@ const ROUTES = {
   CARRERA: (id: number | string = ":id") => `/departamento/carreras/${id}`,
   COMPLETAR_INFORME_SINTETICO: "/departamento/carreras/completar-informe-sintetico",
   INFORMES_CATEDRA: "/departamento/informes-catedra",
-  INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
+  INFORME_CATEDRA_DETALLE: (id_dpto: number | string = ":id_dpto",id: number | string = ":id") => `/departamento/${id_dpto}/informes-catedra/${id}`,
   DASHBOARD_DPTO: "/departamento/dashboard",
   INFORMES_SINTETICOS_COMPLETADOS: (id_dpto: number | string = ":id_dpto") => `/departamento/${id_dpto}/informes-sinteticos-completados`,
   INFORME_SINTETICO_DETALLE: (id_dpto: number | string = ":id_dpto", id: number | string = ":id") => `/departamento/${id_dpto}/informes-sinteticos-completados/${id}`,

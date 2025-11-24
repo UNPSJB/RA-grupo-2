@@ -54,7 +54,7 @@ export default function InformeCatedraList() {
                         </span>
                       </div>
                       <Link
-                        to={ROUTES.INFORME_CATEDRA_DETALLE(inf.id)}
+                        to={ROUTES.INFORME_CATEDRA_DETALLE(departamentoId, inf.id)}
                         className="btn btn-theme-primary rounded-pill px-4"
                       >
                         Ver Detalle

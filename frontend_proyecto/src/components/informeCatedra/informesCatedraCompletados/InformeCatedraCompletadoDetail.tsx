@@ -78,7 +78,7 @@ export default function InformeCatedraDetalle() {
     saveAs(blob, `InformeCatedra_${informe.materiaCodigo}.pdf`);
   };
 
-  const { id } = useParams<{ id: string }>();
+  const { id_dpto, id } = useParams<{ id_dpto: string, id: string }>();
   const [informe, setInforme] = useState<InformeCompletadoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -210,13 +210,20 @@ export default function InformeCatedraDetalle() {
     );
   }
 
+  const returnPath = (() => {
+        if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
+            return ROUTES.INFORMES_CATEDRA;
+        }
+        return ROUTES.INFORMES_CATEDRA_COMPLETADOS;
+    })();
+
   if (error) {
     return (
       <div className="container py-4">
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Error</h4>
           <p>{error}</p>
-          <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-outline-danger">
+          <Link to={returnPath} className="btn btn-outline-danger">
             Volver al listado
           </Link>
         </div>
@@ -230,7 +237,7 @@ export default function InformeCatedraDetalle() {
         <div className="alert alert-warning" role="alert">
           No se encontró el informe solicitado.
         </div>
-        <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-secondary">
+        <Link to={returnPath} className="btn btn-secondary">
           Volver al listado
         </Link>
       </div>
@@ -331,7 +338,7 @@ export default function InformeCatedraDetalle() {
               )}
               {isLastStep ? (
                 <Link
-                  to={ROUTES.INFORMES_CATEDRA}
+                  to={returnPath}
                   className="btn btn-primary rounded-pill px-4"
                   style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
                 >
