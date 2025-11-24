@@ -1,16 +1,22 @@
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths"; 
-// 1. IMPORTAR EL HOOK DE CONTEXTO
 import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
-  // 2. OBTENER DATOS Y FUNCIÓN DEL CONTEXTO
   const { currentUser, logout } = useAuth();
 
+  const role = currentUser?.role_name;
+  const userName = currentUser?.username || "Usuario";
+  const userRoleLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : "Invitado";
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault(); 
+    logout(); 
+  };
   const navbarStyle = {
     backgroundColor: 'var(--color-background-primary)', 
     color: 'var(--color-text-primary)',               
-    padding: '0.2rem 1rem',
+    padding: '0.5rem 1rem',
     borderBottom: '5px solid var(--color-unpsjb-border)',
   };
   
@@ -20,11 +26,6 @@ export default function Navbar() {
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
   };
 
-  const navLinkStyle = {
-    fontSize: '1.15rem', 
-    color: 'var(--color-text-primary)', 
-  };
-
   const userDropdownMenuStyle = {
     ...dropdownMenuStyle,
     right: 0, 
@@ -32,100 +33,31 @@ export default function Navbar() {
     minWidth: '220px',
   };
 
-  // 3. USAR DATOS REALES (O Fallback si no carga)
-  const userName = currentUser?.username || "Usuario";
-  const userRole = currentUser?.role_name || "Invitado";
-
-  // 4. MANEJAR EL LOGOUT
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault(); // Evita la navegación por defecto del link
-    logout(); // Llama a la función del contexto (borra estado y redirige)
-  };
-
   return (
     <nav 
-      className="navbar navbar-expand-lg shadow-sm fixed-top" 
+      className="navbar navbar-expand shadow-sm fixed-top" 
       style={{...navbarStyle, zIndex: 1040}} 
     >
-      <div className="container-fluid">
+      <div className="container-fluid d-flex justify-content-between align-items-center">
+        
         <Link 
-          className="navbar-brand d-flex align-items-center me-5"
+          className="navbar-brand d-flex align-items-center"
           to={ROUTES.HOME} 
-          style={{ color: 'var(--color-text-primary)' }} 
+          style={{ color: 'var(--color-text-primary)', textDecoration: 'none' }} 
         >
           <img 
             src="/unpsjb-logo.png" 
             alt="Logo UNPSJB"
-            style={{ height: '70px', marginRight: '12px', filter: 'drop-shadow(0 0 5px rgba(0, 0, 0, 0.3))' }} 
+            style={{ height: '50px', marginRight: '10px', filter: 'drop-shadow(0 0 5px rgba(0, 0, 0, 0.3))' }} 
           />
           <div className="d-flex flex-column align-items-start">
-            <span className="fw-bold" style={{ fontSize: '1.2rem' }}>Sistema de encuestas</span>
-            <span style={{ fontSize: '0.75rem', marginTop: '-3px', opacity: 0.8 }}>Universidad Nacional Pública San Juan Bosco</span>
+            <span className="fw-bold" style={{ fontSize: '1.1rem', lineHeight: '1.2' }}>Sistema de encuestas</span>
+            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Universidad Nacional de la Patagonia San Juan Bosco</span>
           </div>
         </Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-          aria-controls="navbarContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
 
-        <div className="collapse navbar-collapse" id="navbarContent">
-          <ul className="navbar-nav mx-auto mb-2 mb-lg-0"> 
-            
-            {/* ... (TUS MENÚS DESPLEGABLES SIGUEN IGUAL) ... */}
-            {/* Puedes agregar lógica aquí para mostrar menús según 'userRole' si quieres */}
-            
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="alumnoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>
-                Alumno
-              </a>
-              <ul className="dropdown-menu custom-dropdown" aria-labelledby="alumnoDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.ENCUESTAS_DISPONIBLES}>Encuestas Disponibles</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.ENCUESTAS_COMPLETADAS}>Encuestas Completadas</Link></li>
-              </ul>
-            </li>
-            
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="docenteDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>
-                Docente
-              </a>
-              <ul className="dropdown-menu custom-dropdown" aria-labelledby="docenteDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_PENDIENTES}>Informes de Cátedra Pendientes</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA_COMPLETADOS}>Informes de Cátedra Completados</Link></li>
-              </ul>
-            </li>
-
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="departamentoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Departamento</a>
-              <ul className="dropdown-menu custom-dropdown" aria-labelledby="departamentoDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.CARRERAS_DPTO(1)}>Informes Sinteticos Pendientes</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_SINTETICOS_COMPLETADOS(1)}>Informes Sinteticos Completados</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_CATEDRA}>Informes de Cátedra Completados</Link></li>
-              </ul>
-            </li>
-
-            <li className="nav-item dropdown">
-              <a className="nav-link dropdown-toggle nav-link-animated" href="#" id="secretariaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={navLinkStyle}>Secretaría Académica</a>
-              <ul className="dropdown-menu custom-dropdown" aria-labelledby="secretariaDropdown" style={dropdownMenuStyle}>
-                <li><Link className="dropdown-item" to={ROUTES.INFORME_CATEDRA_BASE_NUEVO}>Crear Informe de Cátedra Base</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.ENCUESTA_BASE_NUEVA}>Crear Encuesta Base</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.ASIGNAR_MATERIA_INFORME}>Asignar Formularios a Materias</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.DEFINIR_FECHAS}>Definir fechas de apertura y cierre</Link></li>
-                <li><Link className="dropdown-item" to={ROUTES.INFORMES_SINTETICOS}>Informes Sintéticos</Link></li>
-              </ul>
-            </li>        
-          </ul>
-        </div>
-
-        <div className="navbar-nav ms-auto"> 
-          <li className="nav-item dropdown d-none d-lg-block"> 
-            
+        <div className="navbar-nav"> 
+          <li className="nav-item dropdown"> 
             <a 
               className="nav-link nav-link-animated d-flex align-items-center" 
               href="#" 
@@ -133,12 +65,11 @@ export default function Navbar() {
               role="button" 
               data-bs-toggle="dropdown" 
               aria-expanded="false"
-              style={{ padding: '0.5rem 0.5rem' }} 
+              style={{ padding: '0.5rem' }} 
             >
-              <div className="d-flex flex-column align-items-end me-3">
-                  {/* DATOS REALES DEL CONTEXTO */}
-                  <span className="fw-bold" style={{ color: 'var(--color-text-primary)', fontSize: '1.0rem' }}>{userName}</span>
-                  <span className="text-muted" style={{ color: 'var(--color-text-primary)', fontSize: '0.75rem', opacity: 0.7 }}>{userRole}</span>
+              <div className="d-none d-md-flex flex-column align-items-end me-3">
+                  <span className="fw-bold" style={{ color: 'var(--color-text-primary)', fontSize: '0.9rem' }}>{userName}</span>
+                  <span className="text-muted" style={{ color: 'var(--color-text-primary)', fontSize: '0.75rem', opacity: 0.7 }}>{userRoleLabel}</span>
               </div>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
@@ -152,24 +83,18 @@ export default function Navbar() {
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                 <path fillRule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
               </svg>
-              
             </a>
             
             <ul className="dropdown-menu custom-dropdown user-dropdown-menu" aria-labelledby="userDropdown" style={userDropdownMenuStyle}>
               <li>
-                  {/* CAMBIO AQUÍ: Usamos onClick con handleLogout */}
-                  <a 
-                    className="dropdown-item" 
-                    href="#" 
-                    onClick={handleLogout}
-                    style={{ cursor: 'pointer' }}
-                  >
+                  <a className="dropdown-item" href="#" onClick={handleLogout} style={{ cursor: 'pointer' }}>
                     Cerrar Sesión
                   </a>
               </li>
             </ul>
           </li>
         </div>
+
       </div>
     </nav>
   );
