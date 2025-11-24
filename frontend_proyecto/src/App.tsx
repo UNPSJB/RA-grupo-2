@@ -18,6 +18,8 @@ import InformeCatedraDetail from "./components/informeCatedra/informesCatedraCom
 import InformeCatedraBaseForm from "./components/informeCatedra/InformeCatedraBaseForm";
 import InformeCatedraCompletadoDocente from "./components/docente/informesCompletados/mostrarInformesCompletados";
 import DashboardDepartamento from "./components/departamento/DashboardDpto"
+import DashboardDocente from "./components/docente/dashboardDocente/DashboardDocentes";
+
 //import DatosEstadisticosPage from "./components/datosEstadisticos/DatosEstadisticosPage";
 
 import InformeForm from "./components/docente/informe/CompletarInformeCatedra";
@@ -58,7 +60,7 @@ function App() {
             <Route path={ROUTES.INFORME_CATEDRA_DETALLE()} element={<InformeCatedraDetail />} />
             <Route path={ROUTES.INFORME_CATEDRA_BASE_NUEVO} element={<InformeCatedraBaseForm />} />
             <Route path={ROUTES.INFORMES_CATEDRA_PENDIENTES} element={<InformesPendientesPage />} />
-            
+            <Route path={ROUTES.DASHBOARD_DOCENTE} element={<DashboardDocente />} />
             <Route path={ROUTES.INFORME_CATEDRA_COMPLETADO_DETALLE()} element={<InformeCatedraDetail />} />
             <Route path={ROUTES.INFORMES_CATEDRA_COMPLETADOS} element={<InformeCatedraCompletadoDocente />} />
             <Route path={ROUTES.ASIGNAR_MATERIA_INFORME} element={<AsignarFormularios />} />

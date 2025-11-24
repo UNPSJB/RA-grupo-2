@@ -107,6 +107,11 @@ export default function Navbar() {
                     Informes de Cátedra Completados
                   </Link>
                 </li>
+                <li>  
+                  <Link className="dropdown-item" to={ROUTES.DASHBOARD_DOCENTE}>
+                    Estadisticas de Encuestas Completadas por los alumnos
+                  </Link>
+                </li>
               </ul>
             </li>
             <li className="nav-item dropdown">

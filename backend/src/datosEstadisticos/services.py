@@ -14,13 +14,13 @@ from src.datosEstadisticos import schemas
 from src.encuestas import services as encuesta_services
 from src.preguntas import schemas as pregunta_schemas
 from src.asociaciones.models import materia_carrera
+from src.asociaciones.docente_materia.models import DocenteMateria
+from src.asociaciones.models import alumno_materia
 
 def obtener_datos_estadisticos(db: Session, id_materia: int, anio: int, periodo: Periodo):
-    materia: Materia = db.scalar(select(Materia).where(Materia.id == id_materia))     
-    encuesta: Encuesta = materia.encuesta
-    categorias: List[Categoria] = encuesta.categorias
-
-    categorias = [c for c in categorias if c.cod != "A"]
+    materia = db.scalar(select(Materia).where(Materia.id == id_materia))      
+    encuesta = materia.encuesta
+    categorias = [c for c in encuesta.categorias if c.cod != "A"]
 
     if not categorias:
         return []
@@ -388,7 +388,6 @@ def get_promedio_encuestas_SUPERIOR( db: Session, departamento_id: int, anio: in
                         2
                     )
 
-
         resultado.append(
             schemas.DatosEstadisticosCategoria(
                 categoria_cod=categoria.cod,
@@ -418,3 +417,168 @@ def get_promedio_encuestas_SUPERIOR( db: Session, departamento_id: int, anio: in
         "promedio_por_categoria": resultado,
         "promedio_general": promedio_general
     }
+
+def obtener_datos_estadisticos_con_detalle(db: Session, id_materia: int, anio: int, periodo: Periodo):
+    materia = db.scalar(select(Materia).where(Materia.id == id_materia))
+    encuesta = materia.encuesta
+    categorias = [c for c in encuesta.categorias if c.cod != "A"]
+
+    if not categorias: return {"promedio_por_categoria": [], "promedio_general": []}
+    
+    encuestas_completadas = db.scalars(
+        select(EncuestaCompletada)
+        .where(EncuestaCompletada.materia_id == id_materia)
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+    ).all()
+
+    if not encuestas_completadas: return {"promedio_por_categoria": [], "promedio_general": []}
+    
+    ids_encuestas = [e.id for e in encuestas_completadas]
+    respuestas = db.scalars(select(Respuesta).where(Respuesta.encuesta_completada_id.in_(ids_encuestas))).all()
+    total_encuestas = len(encuestas_completadas)
+    
+    resultado = []
+    acumulados_generales = {}
+    conteo_generales = {}
+
+    for categoria in categorias:
+        if categoria.cod == "G": continue
+        
+        preguntas_cat = [p for p in categoria.preguntas if p.tipo == "cerrada"]
+        if not preguntas_cat: continue
+
+        acumulados_locales = {}
+        conteo_locales = {}
+
+        lista_preguntas_detalle = [] 
+
+        for pregunta in preguntas_cat:
+            respuestas_pregunta = [r for r in respuestas if r.pregunta_id == pregunta.id]
+            datos_opciones_pregunta = [] 
+
+            for opcion in pregunta.opciones:
+                resp_op = [r for r in respuestas_pregunta if r.opcion_id == opcion.id]
+                cantidad = len(resp_op)
+                porcentaje = (cantidad / total_encuestas * 100)
+
+                datos_opciones_pregunta.append(
+                    schemas.OpcionPorcentaje(opcion_id=opcion.contenido, porcentaje=round(porcentaje, 2))
+                )
+                acumulados_locales[opcion.contenido] = acumulados_locales.get(opcion.contenido, 0) + porcentaje
+                conteo_locales[opcion.contenido] = conteo_locales.get(opcion.contenido, 0) + 1
+                acumulados_generales[opcion.contenido] = acumulados_generales.get(opcion.contenido, 0) + porcentaje
+                conteo_generales[opcion.contenido] = conteo_generales.get(opcion.contenido, 0) + 1
+            
+            lista_preguntas_detalle.append(
+                schemas.DatosEstadisticosPregunta(
+                    id_pregunta=pregunta.enunciado,
+                    datos=datos_opciones_pregunta
+                )
+            )
+
+        prom_op = [schemas.OpcionPorcentaje(opcion_id=op, porcentaje=round(acumulados_locales[op]/conteo_locales[op], 2) if conteo_locales[op]>0 else 0.0) for op in acumulados_locales.keys()]
+        s_loc = sum(p.porcentaje for p in prom_op)
+        if s_loc > 0: 
+            for p in prom_op: p.porcentaje = round((p.porcentaje/s_loc)*100, 2)
+
+        resultado.append(
+            schemas.DatosEstadisticosCategoria(
+                categoria_cod=categoria.cod,
+                categoria_texto=categoria.texto,
+                promedio_categoria=prom_op,
+                preguntas=lista_preguntas_detalle 
+            )
+        )
+
+    promedio_general = [schemas.OpcionPorcentaje(opcion_id=op, porcentaje=round(acumulados_generales[op]/conteo_generales[op], 2) if conteo_generales[op]>0 else 0.0) for op in acumulados_generales.keys()]
+    s_gen = sum(p.porcentaje for p in promedio_general)
+    if s_gen > 0: 
+        for p in promedio_general: p.porcentaje = round((p.porcentaje/s_gen)*100, 2)
+
+    return {
+        "promedio_por_categoria": resultado,
+        "promedio_general": promedio_general
+    }
+def get_cantidad_total_encuestas_docente(db: Session, docente_id: int, anio: int, periodo: Periodo) -> int:
+    stmt_materias = select(Materia.id).join(DocenteMateria, Materia.id == DocenteMateria.materia_id).where(DocenteMateria.docente_id == docente_id).where(DocenteMateria.anio == anio).where(DocenteMateria.periodo == periodo)
+    materia_ids = db.scalars(stmt_materias).all()
+    if not materia_ids: return 0
+    count = db.scalar(select(func.count()).select_from(EncuestaCompletada).where(EncuestaCompletada.materia_id.in_(materia_ids)).where(EncuestaCompletada.anio == anio).where(EncuestaCompletada.periodo == periodo))
+    return count or 0
+
+def get_promedio_encuestas_docente_por_ciclo(db: Session, docente_id: int, anio: int, periodo: Periodo, id_encuesta_tipo: int):
+    stmt_materias = select(Materia.id).join(DocenteMateria, Materia.id == DocenteMateria.materia_id).where(DocenteMateria.docente_id == docente_id).where(DocenteMateria.anio == anio).where(DocenteMateria.periodo == periodo).where(Materia.encuesta_id == id_encuesta_tipo)
+    materia_ids = db.scalars(stmt_materias).all()
+    
+    if not materia_ids:
+        return {"promedio_por_categoria": [], "promedio_general": []}
+    
+    encuestas_completadas = db.scalars(
+        select(EncuestaCompletada)
+        .where(EncuestaCompletada.materia_id.in_(materia_ids))
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+    ).all()
+
+    if not encuestas_completadas: return {"promedio_por_categoria": [], "promedio_general": []}
+    
+    ids_encuestas = [e.id for e in encuestas_completadas]
+    respuestas = db.scalars(select(Respuesta).where(Respuesta.encuesta_completada_id.in_(ids_encuestas))).all()
+    
+    primera_encuesta_id = encuestas_completadas[0].encuesta_id
+    encuesta = db.get(Encuesta, primera_encuesta_id)
+    categorias = [c for c in encuesta.categorias if c.cod != "A"]
+    
+    total_encuestas = len(encuestas_completadas)
+    resultado = []
+    acumulados_generales = {}
+    conteo_generales = {}
+
+    for categoria in categorias:
+        if categoria.cod == "G": continue
+        preguntas_cat = [p for p in categoria.preguntas if p.tipo == "cerrada"]
+        if not preguntas_cat: continue
+
+        acumulados_locales = {}
+        conteo_locales = {}
+
+        for pregunta in preguntas_cat:
+            respuestas_pregunta = [r for r in respuestas if r.pregunta_id == pregunta.id]
+            for opcion in pregunta.opciones:
+                resp_op = [r for r in respuestas_pregunta if r.opcion_id == opcion.id]
+                cantidad = len(resp_op)
+                porcentaje = (cantidad / total_encuestas * 100)
+
+                acumulados_locales[opcion.contenido] = acumulados_locales.get(opcion.contenido, 0) + porcentaje
+                conteo_locales[opcion.contenido] = conteo_locales.get(opcion.contenido, 0) + 1
+                
+                acumulados_generales[opcion.contenido] = acumulados_generales.get(opcion.contenido, 0) + porcentaje
+                conteo_generales[opcion.contenido] = conteo_generales.get(opcion.contenido, 0) + 1
+
+        prom_op = [schemas.OpcionPorcentaje(opcion_id=op, porcentaje=round(acumulados_locales[op]/conteo_locales[op], 2) if conteo_locales[op]>0 else 0.0) for op in acumulados_locales.keys()]
+        s_loc = sum(p.porcentaje for p in prom_op)
+        if s_loc > 0: 
+            for p in prom_op: p.porcentaje = round((p.porcentaje/s_loc)*100, 2)
+
+        resultado.append(schemas.DatosEstadisticosCategoria(categoria_cod=categoria.cod, categoria_texto=categoria.texto, promedio_categoria=prom_op, preguntas=[]))
+
+    promedio_general = [schemas.OpcionPorcentaje(opcion_id=op, porcentaje=round(acumulados_generales[op]/conteo_generales[op], 2) if conteo_generales[op]>0 else 0.0) for op in acumulados_generales.keys()]
+    s_gen = sum(p.porcentaje for p in promedio_general)
+    if s_gen > 0: 
+        for p in promedio_general: p.porcentaje = round((p.porcentaje/s_gen)*100, 2)
+
+    return {
+        "promedio_por_categoria": resultado,
+        "promedio_general": promedio_general
+    }
+    
+def obtener_cantidad_inscriptos(db: Session, id_materia: int, anio: int, periodo: str) -> int:
+    stmt = (
+        select(func.count())
+        .select_from(alumno_materia)
+        .where(alumno_materia.c.materia_id == id_materia)
+        .where(alumno_materia.c.anio == anio)
+        .where(alumno_materia.c.periodo == periodo)
+    )
+    return db.scalar(stmt) or 0

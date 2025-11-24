@@ -24,3 +24,7 @@ class DatosAbiertosCategoria(BaseModel):
     categoria_cod: str
     categoria_texto: str
     preguntas: List[DatosAbiertosPregunta]
+
+class EstadisticasMateriaCompleto(BaseModel):
+    promedio_por_categoria: List[DatosEstadisticosCategoria]
+    promedio_general: List[OpcionPorcentaje]

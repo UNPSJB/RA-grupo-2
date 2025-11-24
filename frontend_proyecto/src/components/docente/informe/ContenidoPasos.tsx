@@ -4,9 +4,10 @@ import Categoria2CInforme from "./CAT2C";
 import Categoria3Informe from "./CAT3";
 import Categoria4Informe from "./CAT4";
 import CategoriaEquipamiento from "./CAT1";
-import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
+//import TablaDatosEstadisticos from "../../datosEstadisticos/TablaDatosEstadisticos";
 import CompletarInformeCatedraFuncion from "./CompletarInformeCatedraFuncion";
 import RespuestasAbiertas from "./RespuestasAbiertas";
+import VisualizadorEstadisticasMateria from "../dashboardDocente/VisualizarEstadistica";
 
 interface Pregunta { id: number; enunciado: string; categoria_id: number; obligatoria: boolean }
 interface CategoriaConPreguntas { id: number; cod: string; texto: string; preguntas: Pregunta[]; }
@@ -250,16 +251,27 @@ export default function ContenidoPasos({
     case 2:
       return (
         <Fragment>
-          <h5 className="text-dark fw-bold mb-3">Resultados de Encuestas</h5>
+          <div className="d-flex align-items-center mb-3">
+             <h5 className="text-dark fw-bold mb-0">Resultados de Encuestas Estudiantiles</h5>
+             <span className="badge bg-info ms-3">
+                Total: {cantidad} encuestas completadas
+             </span>
+          </div>
           <p className="text-muted mb-4">
-            Análisis basado en las encuestas completadas por los estudiantes.
+            Visualización gráfica de las opiniones de los alumnos para esta asignatura.
           </p>
           <hr className="mb-4" />
-
-          <TablaDatosEstadisticos
-            datos={datosEstadisticos}
-            cant={cantidad}
-          />
+          {datosIniciales?.materiaId && datosIniciales?.anio && datosIniciales?.periodo ? (
+              <VisualizadorEstadisticasMateria 
+                  materiaId={datosIniciales.materiaId}
+                  anio={datosIniciales.anio}
+                  periodo={datosIniciales.periodo}
+              />
+          ) : (
+              <div className="alert alert-warning">
+                  Faltan datos de la materia para cargar las estadísticas.
+              </div>
+          )}
           <RespuestasAbiertas docenteMateriaId={docenteMateriaId} />
         </Fragment>
       );
