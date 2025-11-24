@@ -15,21 +15,31 @@ const ActionCard = ({ title, to }: { title: string, to: string }) => (
 const dashboardLinks = (role: string) => {
     const baseLinks = [];
 
-    if (['alumno', 'admin', 'secretaria'].includes(role)) {
+    if (role === 'secretaria_academica') {
+        baseLinks.push(
+            { title: "Crear Informe de Cátedra Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
+            { title: "Crear Encuesta Base", to: ROUTES.ENCUESTA_BASE_NUEVA },
+            { title: "Asignar Formularios a Materias", to: ROUTES.ASIGNAR_MATERIA_INFORME },
+            { title: "Definir fechas de apertura y cierre", to: ROUTES.DEFINIR_FECHAS },
+            { title: "Informes Sintéticos", to: ROUTES.INFORMES_SINTETICOS }
+        );
+    }
+
+    if (role === 'alumno') {
         baseLinks.push(
             { title: "Encuestas Disponibles", to: ROUTES.ENCUESTAS_DISPONIBLES },
             { title: "Encuestas Completadas", to: ROUTES.ENCUESTAS_COMPLETADAS }
         );
     }
 
-    if (['docente', 'admin', 'secretaria'].includes(role)) {
+    if (role === 'docente') {
         baseLinks.push(
             { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
             { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS }
         );
     }
 
-    if (['departamento', 'admin', 'secretaria'].includes(role)) {
+    if (role === 'departamento') {
         baseLinks.push(
             { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO(1) },
             { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS(1) },
@@ -37,10 +47,20 @@ const dashboardLinks = (role: string) => {
         );
     }
     
-    if (['secretaria', 'admin'].includes(role)) {
+    if (role === 'admin') {
         baseLinks.push(
-            { title: "Crear Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
-            { title: "Asignar Formularios", to: ROUTES.ASIGNAR_MATERIA_INFORME }
+            { title: "Encuestas Disponibles", to: ROUTES.ENCUESTAS_DISPONIBLES },
+            { title: "Encuestas Completadas", to: ROUTES.ENCUESTAS_COMPLETADAS },
+            { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
+            { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
+            { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO(1) },
+            { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS(1) },
+            { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA },
+            { title: "Crear Informe de Cátedra Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
+            { title: "Crear Encuesta Base", to: ROUTES.ENCUESTA_BASE_NUEVA },
+            { title: "Asignar Formularios a Materias", to: ROUTES.ASIGNAR_MATERIA_INFORME },
+            { title: "Definir fechas de apertura y cierre", to: ROUTES.DEFINIR_FECHAS },
+            { title: "Informes Sintéticos", to: ROUTES.INFORMES_SINTETICOS }
         );
     }
     
