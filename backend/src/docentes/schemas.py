@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from typing import List, Optional
 from src.datosEstadisticos.schemas import DatosEstadisticosCategoria, OpcionPorcentaje
 
@@ -16,7 +16,6 @@ class DocenteBase(BaseModel):
 
 class Docente(DocenteBase):
        id: int
-
        model_config = {"from_attributes": True}
 
 class MateriaInfo(BaseModel):
@@ -38,6 +37,9 @@ class InformePendienteInfo(BaseModel):
 
 class DashboardDocenteResponse(BaseModel):
     total_encuestas_completadas: int
-    estadisticas_basico: EstadisticasDocenteResponse
-    estadisticas_superior: EstadisticasDocenteResponse
+    estadisticas_general: List[OpcionPorcentaje] 
+    estadisticas_basico: Optional[EstadisticasDocenteResponse] = None
+    estadisticas_superior: Optional[EstadisticasDocenteResponse] = None
     materias_del_ciclo: List[MateriaInfo]
+    progreso: ProgresoData
+    pendientes: List[InformePendienteInfo] 

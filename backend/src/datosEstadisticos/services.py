@@ -582,3 +582,45 @@ def obtener_cantidad_inscriptos(db: Session, id_materia: int, anio: int, periodo
         .where(alumno_materia.c.periodo == periodo)
     )
     return db.scalar(stmt) or 0
+
+def get_promedio_general_docente(db: Session, docente_id: int, anio: int, periodo: str):
+    subquery_materias = (
+        select(DocenteMateria.materia_id)
+        .where(DocenteMateria.docente_id == docente_id)
+        .where(DocenteMateria.anio == anio)
+        .where(DocenteMateria.periodo == periodo)
+    ).scalar_subquery()
+
+    total_respuestas = db.scalar(
+        select(func.count(Respuesta.id))
+        .join(EncuestaCompletada, Respuesta.encuesta_completada_id == EncuestaCompletada.id)
+        .where(EncuestaCompletada.materia_id.in_(subquery_materias))
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+        .where(Respuesta.opcion_id.isnot(None)) 
+    )
+
+    if not total_respuestas or total_respuestas == 0:
+        return []
+
+    resultados = db.execute(
+        select(
+            Opcion.contenido,
+            func.count(Respuesta.id).label("cantidad")
+        )
+        .join(Respuesta, Respuesta.opcion_id == Opcion.id)
+        .join(EncuestaCompletada, Respuesta.encuesta_completada_id == EncuestaCompletada.id)
+        .where(EncuestaCompletada.materia_id.in_(subquery_materias))
+        .where(EncuestaCompletada.anio == anio)
+        .where(EncuestaCompletada.periodo == periodo)
+        .group_by(Opcion.contenido)
+    ).all()
+
+    lista_final = []
+    for row in resultados:
+        opcion_texto = row.contenido
+        cantidad = row.cantidad
+        porcentaje = (cantidad / total_respuestas) * 100
+        lista_final.append({"opcion_id": opcion_texto, "porcentaje": round(porcentaje, 2)})
+
+    return lista_final

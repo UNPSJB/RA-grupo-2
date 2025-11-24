@@ -3,14 +3,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select 
 from typing import List
 from src.database import get_db
-from src.docentes import schemas, services, models
 from src.asociaciones.models import Periodo
-from src.materias.schemas import Materia
-from src.docentes import services as docente_services
+from src.docentes import schemas
+from src.materias import schemas as materia_schemas
+from src.docentes import models as docente_models
 from src.asociaciones.docente_materia.models import DocenteMateria
-from src.datosEstadisticos import services as estadisticas_services
 from src.materias.models import Materia
 from src.informe_catedra_completado.models import InformeCatedraCompletado
+from src.docentes import services
+from src.docentes import services as docente_services
+from src.datosEstadisticos import services as estadisticas_services
 from src.informe_catedra_completado import services as informe_services
 
 router = APIRouter(prefix="/docentes", tags=["docentes"])
@@ -68,10 +70,10 @@ def get_dashboard_docente(
     ID_ENCUESTA_BASICO = 1
     ID_ENCUESTA_SUPERIOR = 4
 
-    total = estadisticas_services.get_cantidad_total_encuestas_docente(db, docente_id, anio, periodo)
-    basico = estadisticas_services.get_promedio_encuestas_docente_por_ciclo(db, docente_id, anio, periodo, ID_ENCUESTA_BASICO)
-    superior = estadisticas_services.get_promedio_encuestas_docente_por_ciclo(db, docente_id, anio, periodo, ID_ENCUESTA_SUPERIOR)
-
+    cantidad_total = estadisticas_services.get_cantidad_total_encuestas_docente(db, docente_id, anio, periodo)
+    stats_basico = estadisticas_services.get_promedio_encuestas_docente_por_ciclo(db, docente_id, anio, periodo, ID_ENCUESTA_BASICO)
+    stats_superior = estadisticas_services.get_promedio_encuestas_docente_por_ciclo(db, docente_id, anio, periodo, ID_ENCUESTA_SUPERIOR)
+    stats_general = estadisticas_services.get_promedio_general_docente(db, docente_id, anio, periodo)
     stmt_materias = (
         select(Materia)
         .join(DocenteMateria, Materia.id == DocenteMateria.materia_id)
@@ -102,12 +104,11 @@ def get_dashboard_docente(
         
         completados_count = len(informes_hechos)
         ids_materias_hechas = [i.docente_materia.materia_id for i in informes_hechos]
+        docente_info = services.leer_docente(db, docente_id)
+        nombre_completo = f"{docente_info.nombre} {docente_info.apellido}" if docente_info else "Desconocido"
 
         for materia in materias_db:
             if materia.id not in ids_materias_hechas:
-                docente_nombre = db.scalar(select(models.Docente).where(models.Docente.id == docente_id))
-                nombre_completo = f"{docente_nombre.nombre} {docente_nombre.apellido}" if docente_nombre else "Mí mismo"
-
                 pendientes_lista.append({
                     "materia": materia.nombre,
                     "docente_responsable": nombre_completo
@@ -122,9 +123,10 @@ def get_dashboard_docente(
     }
 
     return schemas.DashboardDocenteResponse(
-        total_encuestas_completadas=total,
-        estadisticas_basico=basico,
-        estadisticas_superior=superior,
+        total_encuestas_completadas=cantidad_total, 
+        estadisticas_general=stats_general,        
+        estadisticas_basico=stats_basico,
+        estadisticas_superior=stats_superior,
         materias_del_ciclo=lista_materias_info,
         progreso=progreso_data,
         pendientes=pendientes_lista
