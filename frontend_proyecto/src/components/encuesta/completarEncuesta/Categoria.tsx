@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PreguntaItem from "./PreguntaItem";
 import type { Categoria } from "../../../types/types";
+import api from "../../../services/api";
 
 interface Pregunta {
   id: number;
@@ -42,30 +43,30 @@ export default function PreguntasCategoria({ categoria, onRespuesta, onQuestions
   const [dropdownAbierto, setDropdownAbierto] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/categorias/${categoria.id}/preguntas`)
-      .then((res) => res.json())
-      .then((data: Pregunta[]) => {
-        setPreguntas(data);
-        if (onQuestionsLoaded) {
-            onQuestionsLoaded(categoria.id, data.map(p => ({ 
-                id: p.id, 
-                enunciado: p.enunciado,
-                obligatoria: Boolean(Number(p.obligatoria)) 
-            })));
-        }
-      })
-      .catch((err) => console.error(err));
-  }, [categoria.id]);
+    api.get(`/categorias/${categoria.id}/preguntas`)
+      .then((res) => {
+        const data: Pregunta[] = res.data;
+        setPreguntas(data);
+        if (onQuestionsLoaded) {
+            onQuestionsLoaded(categoria.id, data.map(p => ({ 
+                id: p.id, 
+                enunciado: p.enunciado,
+                obligatoria: Boolean(Number(p.obligatoria)) 
+            })));
+        }
+      })
+      .catch((err) => console.error(err));
+  }, [categoria.id]);
 
   const cargarOpciones = (preguntaId: number) => {
     if (opciones[preguntaId]) return;
-    fetch(`http://localhost:8000/preguntas/${preguntaId}/opciones`)
-      .then((res) => res.json())
-      .then((data : Opcion[]) => {
-        setOpciones((prev) => ({ ...prev, [preguntaId]: data }));
-      })
-      .catch((err) => console.error(err));
-  };
+    api.get(`/preguntas/${preguntaId}/opciones`)
+      .then((res) => {
+        const data: Opcion[] = res.data;
+        setOpciones((prev) => ({ ...prev, [preguntaId]: data }));
+      })
+      .catch((err) => console.error(err));
+  };
 
   const seleccionarOpcion = (preguntaId: number, opcionId: number) => {
     onRespuesta(preguntaId, opcionId, undefined);
