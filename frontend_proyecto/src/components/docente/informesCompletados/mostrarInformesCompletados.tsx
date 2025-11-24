@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+//instancia api
+import api from "../../../services/api";
 import { DOCENTE_ID, MostrarPeriodo } from "../../../constants";
 import type { Docente } from "../../../types/types";
 import ROUTES from "../../../paths";
@@ -17,24 +19,12 @@ export default function InformeCatedraCompletadoDocente() {
   const docenteId = DOCENTE_ID; // hardcoedado 
 
   useEffect(() => {
-
-    //docente
-    fetch(`http://127.0.0.1:8000/docentes/${docenteId}`)
-    .then(res=>{
-      if (!res.ok) throw new Error("Error al obtener el docente");
-        return res.json();
-    })
-    .then(setDocente)
-    .catch(console.error);
-
-    // Informes completados del docente
-    fetch(`http://127.0.0.1:8000/informe-catedra-completado/docente/${docenteId}/completados`)
-      .then(res => {
-        if (!res.ok) throw new Error("Error al obtener los informes del docente");
-        return res.json();
-      })
-      .then(setInformes)
-      .catch(console.error);
+    api.get(`/docentes/${docenteId}`)
+      .then(res => setDocente(res.data)) 
+      .catch(err => console.error("Error al obtener el docente:", err));
+    api.get(`/informe-catedra-completado/docente/${docenteId}/completados`)
+      .then(res => setInformes(res.data))
+      .catch(err => console.error("Error al obtener los informes del docente:", err));
   }, [docenteId]);
 
   return (

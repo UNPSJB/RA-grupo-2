@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 import { CampoTextArea } from "./Campos";
+//instancia api
+import api from "../../../services/api";
 
 interface RespuestasSeccion2C {
     aspectos_positivos_ensenanza: string | null;
@@ -50,14 +52,18 @@ export default function Pregunta2C({
                 setError(null);
                 notificarValidacion?.(false); // Bloqueo durante fetch
 
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2C/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/tabla_pregunta_2C/",
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
-
-                if (!res.ok) {
-                    throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
-                }
-                const data = await res.json();
+                const data = res.data;
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
                 }
@@ -83,13 +89,10 @@ export default function Pregunta2C({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Error al obtener información (Pregunta 2C):", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }

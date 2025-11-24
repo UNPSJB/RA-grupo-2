@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+// instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "./ContenidoPasos";
@@ -159,43 +161,43 @@ export default function CompletarInformeCatedra() {
       setLoading(false);
       return;
     }
-    fetch(`http://127.0.0.1:8000/informes_catedra/${informeBaseId}/categorias_con_preguntas`)
+    api.get(`/informes_catedra/${informeBaseId}/categorias_con_preguntas`)
       .then((res) => {
-        if (!res.ok) throw new Error("Error de conexión al cargar estructura.");
-        return res.json();
-      })
-      .then((data: CategoriaConPreguntas[]) => {
+        const data: CategoriaConPreguntas[] = res.data;
         const dataOrdenada = [...data].sort((a, b) => a.cod.localeCompare(b.cod, "es", { sensitivity: "base" }));
         setCategoriasConPreguntas(dataOrdenada);
       })
       .catch((err) => {
-        console.error(err);
-        setError(err instanceof Error ? err.message : "Error desconocido.");
+        console.error("Error fetching estructura informe:", err);
+        setError(err.response?.data?.detail || err.message);
       })
       .finally(() => setLoading(false));
   }, [informeBaseId]);
 
   useEffect(() => {
     setDatosEstadisticos([]);
-    if (!materiaId) return;
+    const params = { id_materia: materiaId, anio, periodo };
 
-    fetch(`http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
-      .then((res) => { if (!res.ok) throw new Error("Error datos estadísticos"); return res.json(); })
-      .then((data) => {
+    api.get('/datos_estadisticos/', { params })
+      .then((res) => {
+        const data = res.data;
         if (data.length !== 0) {
-          const dataOrdenada = [...data].sort((a, b) => a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" }));
+          const dataOrdenada = [...data].sort((a: any, b: any) => a.categoria_cod.localeCompare(b.categoria_cod, "es", { sensitivity: "base" }));
           setDatosEstadisticos(dataOrdenada);
         }
       })
-      .catch(() => setMensaje("No se pudieron cargar estadísticas automáticas."))
+      .catch((error) => {
+        console.error(error);
+        setMensaje("Error al obtener los datos estadísticos.");
+      })
       .finally(() => setLoading(false));
   }, [materiaId, anio, periodo]);
 
   useEffect(() => {
-    if (!materiaId) return;
-    fetch(`http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`)
-      .then((res) => { if (!res.ok) throw new Error("Error cantidad"); return res.json(); })
-      .then((data) => { setCantidad(data); })
+    const params = { id_materia: materiaId, anio, periodo };
+
+    api.get('/datos_estadisticos/cantidad_encuestas_completadas', { params })
+      .then((res) => { setCantidad(res.data); })
       .catch((error) => { console.error(error); });
   }, [anio, materiaId, periodo]);
 
@@ -242,28 +244,22 @@ export default function CompletarInformeCatedra() {
       respuestas: respuestasFormateadas,
     };
     try {
-      const res = await fetch("http://127.0.0.1:8000/informe-catedra-completado/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datosParaBackend),
-      });
-      if (!res.ok) throw new Error("Error al enviar el informe.");
-
-      const data = await res.json();
-      fetch(`http://127.0.0.1:8000/datos_estadisticos/guardar_datos/${data.id}`, { method: "POST" }).catch(console.error);
-
+      await api.post("/informe-catedra-completado/", datosParaBackend);
       setMensaje("¡Informe enviado con éxito!");
       setTimeout(() => { navigate(ROUTES.INFORMES_CATEDRA_PENDIENTES); }, 2000);
-    } catch (err: unknown) {
-      console.error(err);
-      setMensaje(`Error: ${err instanceof Error ? err.message : "Desconocido"}`);
-    } finally { setEnviando(false); }
+    } catch (err: any) {
+      console.error("Error enviando informe:", err);
+      const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+      setMensaje(`Error: ${errorMsg}`);
+    } finally {
+      setEnviando(false);
+    }
   };
 
 
-  if (!docenteMateriaId || !materiaNombre) return <div className="alert alert-danger m-4">Error: Faltan datos.</div>;
-  if (loading) return <div className="d-flex justify-content-center mt-5"><div className="spinner-border text-primary"></div></div>;
-  if (error) return <div className="alert alert-danger m-4">{error}</div>;
+  if (!docenteMateriaId || !materiaNombre) return <div className="alert alert-danger">Error: Faltan datos.</div>;
+  if (loading) return <div className="d-flex justify-content-center"><div className="spinner-border text-primary"></div></div>;
+  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
     <div className="bg-light">

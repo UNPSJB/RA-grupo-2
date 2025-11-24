@@ -12,6 +12,8 @@ import EquipamientoBibliografia from "./Pregunta1";
 import type { Pregunta, Respuesta } from "../../../types/types";
 import DesempenoAuxiliares from "./Pregunta4";
 import ObservacionesComentarios from "./Pregunta5";
+// instancia api
+import api from "../../../services/api";
 
 const TABS_MAP = new Map([
     ["0", "Datos Generales"], ["1", "1. Recursos"], ["2", "2. Horas/Justificación"],
@@ -76,21 +78,20 @@ export default function CompletarInformeSintetico() {
             setLoading(false);
             return;
         }
-        fetch(`http://127.0.0.1:8000/informes_sinteticos_base/${informeBaseId}/preguntas`)
+        api.get(`/informes_sinteticos_base/${informeBaseId}/preguntas`)
             .then((res) => {
-                if (!res.ok) throw new Error("No se pudo cargar las preguntas.");
-                return res.json();
-            })
-            .then((data: Pregunta[]) => {
+                const data: Pregunta[] = res.data;
+                
                 const ordenadas = data.sort((a, b) => a.orden - b.orden);
                 setPreguntas(ordenadas);
-                if (ordenadas.length > 0 && preguntaActivaId === null) {
+                if (ordenadas.length > 0) {
                     setPreguntaActivaId(ordenadas[0].id);
                 }
             })
             .catch((err) => {
-                console.error("Error:", err);
-                setError(err.message);
+                console.error("Error fetching preguntas del informe:", err);
+                const msg = err.response?.data?.detail || err.message || "Error al cargar preguntas";
+                setError(msg);
             })
             .finally(() => setLoading(false));
     }, [informeBaseId]);
@@ -168,22 +169,20 @@ export default function CompletarInformeSintetico() {
         }
 
         try {
-            const res = await fetch(
-                "http://127.0.0.1:8000/informes_sinteticos_completados/completados/",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(datosParaBackend),
-                }
+            await api.post(
+                "/informes_sinteticos_completados/completados/",
+                datosParaBackend
             );
-            if (!res.ok) throw new Error("Error al enviar el informe");
 
             setMensaje("¡Informe enviado con éxito!");
             setTimeout(() => {
                 navigate(ROUTES.CARRERAS_DPTO(dpto.id));
             }, 2000);
-        } catch (err: Error | unknown) {
-            setMensaje(`Error: ${(err as Error).message}`);
+
+        } catch (err: any) {
+            console.error("Error enviando informe:", err);
+            const errorMsg = err.response?.data?.detail || err.message || "Error desconocido al enviar.";
+            setMensaje(`Error: ${errorMsg}`);
         } finally {
             setEnviando(false);
         }

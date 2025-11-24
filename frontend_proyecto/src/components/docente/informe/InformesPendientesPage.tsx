@@ -8,7 +8,6 @@ import { PERIODO_ACTUAL, MostrarPeriodo} from "../../../constants";
 import ROUTES from "../../../paths";
 import { EsPeriodoInformeCatedra } from "../../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../../secretaria/definirFechas/PopUpPeriodo"
-import { mostrarPeriodo } from "../../informeSintetico/informesSinteticosCompletados/InformeSinteticoDetail";
 
 type InformePendiente = {
   materia_id: number;
@@ -79,7 +78,7 @@ export default function InformesPendientesPage() {
       <div className="card shadow">
         <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
-            Informes Pendientes ({mostrarPeriodo(PERIODO_ACTUAL)} {ANIO_ACTUAL})
+            Informes Pendientes ({MostrarPeriodo(PERIODO_ACTUAL)} {ANIO_ACTUAL})
           </h1>
         </div>
         <div className="card-body">

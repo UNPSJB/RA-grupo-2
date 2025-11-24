@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 // instancia api
 import api from "../../../services/api"; 
-import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
+import { MostrarPeriodo } from "../../../constants";
 import type { Departamento } from "../../../types/types";
 import ROUTES from "../../../paths";
 
@@ -50,7 +50,7 @@ export default function InformeCatedraList() {
                       <div>
                         <span className="text-muted me-3">{i + 1}.</span>
                         <span className="fw-bold">
-                          {inf.titulo} – ({mostrarPeriodo(inf.periodo)})
+                          {inf.titulo} – ({MostrarPeriodo(inf.periodo)})
                         </span>
                       </div>
                       <Link

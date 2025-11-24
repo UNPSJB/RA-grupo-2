@@ -1,4 +1,6 @@
 import { useEffect, useState, Fragment } from "react";
+//instancia api
+import api from "../../../services/api";
 import { ANIO_ACTUAL, PERIODO_ACTUAL, MostrarPeriodo } from "../../../constants";
 
 interface InformeActividad {
@@ -85,26 +87,23 @@ export default function CompletarInformeCatedraFuncion({
 
     const fetchData = async () => {
       try {
-        const relacionRes = await fetch(`http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`);
-        if (!relacionRes.ok) throw new Error("Error al obtener relación docente-materia");
-        const relacion = await relacionRes.json();
-
+        const relacionRes = await api.get(`/docentes/materia_relacion/${docenteMateriaId}`);
+        const relacion = relacionRes.data;
         const docenteId = relacion.docente_id;
         const materiaIdRelacion = relacion.materia_id;
         const anio = relacion.anio ?? ANIO_ACTUAL;
         const periodo = relacion.periodo ?? PERIODO_ACTUAL;
+        const materiaRes = await api.get(`/materias/${materiaIdRelacion}`);
+        const materia = materiaRes.data;
+        const docenteRes = await api.get(`/docentes/${docenteId}`);
+        const docente = docenteRes.data;
+        const alumnosRes = await api.get(`/alumnos/materia/${materiaIdRelacion}/cursantes`, {
+          params: { anio, periodo }
+        });
+        const alumnos = alumnosRes.data;
 
-        const materiaRes = await fetch(`http://127.0.0.1:8000/materias/${materiaIdRelacion}`);
-        if (!materiaRes.ok) throw new Error("Error al obtener materia");
-        const materia = await materiaRes.json();
+        const cantidadAlumnos = alumnos.length;
 
-        const docenteRes = await fetch(`http://127.0.0.1:8000/docentes/${docenteId}`);
-        if (!docenteRes.ok) throw new Error("Error al obtener docente");
-        const docente = await docenteRes.json();
-
-        const alumnosRes = await fetch(`http://127.0.0.1:8000/alumnos/materia/${materiaIdRelacion}/cursantes?anio=${anio}&periodo=${periodo}`);
-        if (!alumnosRes.ok) throw new Error("Error al obtener alumnos");
-        const alumnos = await alumnosRes.json();
 
         const datosBase: InformeActividad = {
           sede: materia.departamento?.sede?.nombre || "Sin asignar",
@@ -113,7 +112,7 @@ export default function CompletarInformeCatedraFuncion({
           actividadCurricular: materia.nombre,
           codigoActividadCurricular: materia.matricula,
           docenteResponsable: `${docente.nombre} ${docente.apellido}`,
-          cantidadAlumnos: alumnos.length,
+          cantidadAlumnos,
           cantidadComisionesTeoricas: 1,
           cantidadComisionesPracticas: 1,
           JTP: null,
@@ -125,7 +124,9 @@ export default function CompletarInformeCatedraFuncion({
         onDatosGenerados?.(datosBase);
 
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error cargando datos de cátedra:", err);
+        const msg = err.response?.data?.detail || err.message || "Error desconocido.";
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -133,6 +134,7 @@ export default function CompletarInformeCatedraFuncion({
 
     fetchData();
   }, [docenteMateriaId, isReadOnly, datosIniciales]);
+
 
   if (loading) return <div className="d-flex justify-content-center p-5"><div className="spinner-border text-primary"></div></div>;
   if (error) return <p className="text-danger">Error: {error}</p>;
