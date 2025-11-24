@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./components/guards/ProtectedRoute";
 // --- PAGINAS COMUNES ---
 import LoginPage from "./components/login/LoginPage";
 import Menu from "./components/menu";
+import UserDashboard from "./components/UserDashboard";
 
 // --- PAGINAS ALUMNOS ---
 import EncuestasPage from "./components/encuesta/EncuestasPage";
@@ -47,7 +48,7 @@ function App() {
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
       <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
       <Route element={<AuthLayout />}>
-        <Route path={ROUTES.HOME} element={<Menu />} />
+        <Route path={ROUTES.HOME} element={<UserDashboard />} />
         {/* B. Rutas de ALUMNOS */}
         <Route element={<ProtectedRoute allowedRoles={['alumno', 'admin']} />}>
           <Route path={ROUTES.ENCUESTAS_DISPONIBLES} element={<EncuestasPage />} />
