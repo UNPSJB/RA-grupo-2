@@ -351,9 +351,8 @@ export default function InformeCatedraDetalle() {
                 </Link>
               ) : (
                 <button
-                  className="btn btn-primary rounded-pill px-4"
+                  className="btn btn-theme-primary rounded-pill px-4"
                   onClick={() => goToStep(currentStep + 1)}
-                  style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
                 >
                   Siguiente
                 </button>
