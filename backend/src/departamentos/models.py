@@ -18,3 +18,5 @@ class Departamento(ModeloBase):
     carreras: Mapped[Optional[List["Carrera"]]] = relationship("Carrera", back_populates="departamento")
     materias: Mapped[List["Materia"]] = relationship("Materia", back_populates="departamento")
     sede: Mapped["Sede"] = relationship("Sede", back_populates="departamentos")
+
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="departamento")
