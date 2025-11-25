@@ -19,6 +19,7 @@ export default function EncuestasPage() {
   const [alumno, setAlumno] = useState<Alumno>()
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
   const periodoEncuesta = EsPeriodoEncuesta();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!alumnoId) return;
@@ -36,8 +37,15 @@ export default function EncuestasPage() {
       .catch((err) => {
         console.error("Error al obtener encuestas:", err);
         setEncuestas([]);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [alumnoId]);
+
+  if (loading) {
+    return (
+      <div className="text-center mt-4">Cargando informes pendientes...</div>
+    );
+  }
 
   if (!periodoEncuesta) {
     return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"} />;
