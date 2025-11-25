@@ -39,7 +39,16 @@ const getIcon = (title: string) => {
   if (t.includes("encuesta") || t.includes("asignar")) return <Icons.Checklist />;
   if (t.includes("informe") || t.includes("catedra")) return <Icons.Document />;
   if (t.includes("fecha") || t.includes("definir")) return <Icons.Calendar />;
-  if (t.includes("sintetico") || t.includes("estadistica")) return <Icons.Chart />;
+
+  if (
+    t.includes("grafico") ||
+    t.includes("gráfico") ||
+    t.includes("graficos") ||
+    t.includes("gráficos") ||
+    t.includes("estadistic")
+  ) {
+    return <Icons.Chart />;
+  }
   return <Icons.Form />;
 };
 
