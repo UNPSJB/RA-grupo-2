@@ -181,11 +181,13 @@ export default function InformeCatedraDetalle() {
     return mapaRespuestas;
   }, [informe]);
 
-  const datosGenerales = useMemo(() => {
+const datosGenerales = useMemo(() => {
     if (!informe) return {};
     return {
-      cicloLectivo: informe.anio ?? undefined,
-      periodo: informe.periodo ?? undefined,
+      anio: informe.anio,      
+      materiaId: informe.materiaId, 
+      periodo: informe.periodo,
+      cicloLectivo: informe.anio, 
       cantidadAlumnos: informe.cantidadAlumnos,
       cantidadComisionesTeoricas: informe.cantidadComisionesTeoricas,
       cantidadComisionesPracticas: informe.cantidadComisionesPracticas,
@@ -309,7 +311,8 @@ export default function InformeCatedraDetalle() {
                 paddingRight: "15px",
               }}
             >
-              <ContenidoPasos
+            <ContenidoPasos
+                datosIniciales={datosGenerales}
                 currentStep={currentStep}
                 isReadOnly={true}
                 categoriasConPreguntas={gruposBase}
@@ -317,15 +320,25 @@ export default function InformeCatedraDetalle() {
                 datosEstadisticos={datosEstadisticos}
                 cantidad={cantidad}
                 docenteMateriaId={informe.docente_materia_id}
-                datosIniciales={datosGenerales}
-                manejarCambio={() => { }}
-                onDatosGenerados={() => { }}
+                manejarCambio={() => {}}
+                onDatosGenerados={() => {}}
                 nombresFuncion={{
                   JTP: informe.JTP,
                   aux1: informe.aux_primera,
                   aux2: informe.aux_segunda,
                 }}
-              />
+                setNombresFuncion={{
+                  SetJTP: () => {},
+                  SetAux1: () => {},
+                  SetAux2: () => {},
+                }}
+                cantidadesComisiones={{
+                  teoricas: informe.cantidadComisionesTeoricas,
+                  practicas: informe.cantidadComisionesPracticas,
+                  }} 
+                setCantidadesComisiones={() => {}}
+            />
+
             </div>
           </div>
 
