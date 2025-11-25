@@ -113,7 +113,7 @@ const dashboardLinks = (role: string) => {
     baseLinks.push(
       { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
       { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
-      { title: "Graficos Estádisticos", to: ROUTES.HOME }
+      { title: "Graficos Estádisticos", to: ROUTES.DASHBOARD_DOCENTE }
     );
   }
   if (role === 'departamento') {
