@@ -138,8 +138,9 @@ export default function Pregunta2B({
         field: K,
         value: Tabla2BItem[K]
     ) => {
-        const updated = [...itemsTabla];
-        updated[index][field] = value;
+        const updated = itemsTabla.map((itm, idx) =>
+        idx === index ? { ...itm, [field]: value } : itm
+    );
         setItems(updated);
 
         const respuestas: Respuesta[] = updated.map((itm) => ({
