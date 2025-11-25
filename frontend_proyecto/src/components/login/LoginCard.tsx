@@ -187,10 +187,12 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
               </div>
 
               <div className="d-flex justify-content-between align-items-center mb-4">
+                {/*
                 <div className="form-check">
                   <input type="checkbox" className="form-check-input" id="remember" style={{ borderColor: isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', backgroundColor: 'transparent' }} />
                   <label className={`form-check-label small ${isDarkMode ? 'text-light opacity-75' : 'text-secondary'}`} htmlFor="remember">Recordarme</label>
                 </div>
+                */}
                 <a href="#" className={`text-decoration-none small fw-bold ${isDarkMode ? 'text-info' : 'text-primary'}`}>
                   ¿Olvidaste tu contraseña?
                 </a>
