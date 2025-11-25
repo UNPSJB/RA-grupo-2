@@ -24,48 +24,8 @@ export default function Navbar() {
   };
 
   // Lógica de enlaces rápidos (Replicada para el Dropdown)
-  const getQuickLinks = (role: string | undefined) => {
-    if (!role) return [];
-    const baseLinks = [];
-    
-    if (role === 'secretaria_academica') {
-      baseLinks.push(
-        { title: "Crear Informe", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
-        { title: "Crear Encuesta", to: ROUTES.ENCUESTA_BASE_NUEVA },
-        { title: "Asignar Materias", to: ROUTES.ASIGNAR_MATERIA_INFORME },
-        { title: "Informes Sintéticos", to: ROUTES.INFORMES_SINTETICOS }
-      );
-    }
-    if (role === 'alumno') {
-      baseLinks.push(
-        { title: "Encuestas Disponibles", to: ROUTES.ENCUESTAS_DISPONIBLES },
-        { title: "Mis Encuestas", to: ROUTES.ENCUESTAS_COMPLETADAS }
-      );
-    }
-    if (role === 'docente') {
-      baseLinks.push(
-        { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-        { title: "Historial Informes", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS }
-      );
-    }
-    if (role === 'departamento') {
-      baseLinks.push(
-        { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO},
-        { title: "Informes Cátedra", to: ROUTES.INFORMES_CATEDRA }
-      );
-    }
-    if (role === 'admin') {
-      baseLinks.push(
-        { title: "Encuestas", to: ROUTES.ENCUESTAS_DISPONIBLES },
-        { title: "Informes Cátedra", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-        { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO},
-        { title: "Configuración", to: ROUTES.DEFINIR_FECHAS }
-      );
-    }
-    return baseLinks;
-  };
 
-  const quickLinks = getQuickLinks(role);
+
 
   return (
     <nav
@@ -182,30 +142,10 @@ export default function Navbar() {
               }}
             >
               {/* Header */}
-              <li className="px-4 py-3 bg-light border-bottom">
-                 <div className="fw-bold text-dark">{userName}</div>
-                 <div className="small text-muted">{userRoleLabel}</div>
-              </li>
+              
 
               {/* Quick Links Section */}
-              {quickLinks.length > 0 && (
-                <>
-                  <li><h6 className="dropdown-header text-uppercase small ls-1 mt-2 mb-1 ps-3 text-primary">Accesos Rápidos</h6></li>
-                  {quickLinks.map((link, idx) => (
-                    <li key={idx}>
-                      <Link 
-                        className="dropdown-item px-3 py-2 d-flex align-items-center gap-2 small" 
-                        to={link.to}
-                        style={{ color: 'var(--color-text-secondary)' }}
-                      >
-                         <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-brand-primary)'}}></span>
-                         {link.title}
-                      </Link>
-                    </li>
-                  ))}
-                  <li><hr className="dropdown-divider opacity-25 my-2" /></li>
-                </>
-              )}
+              
 
               {/* Actions */}
               <li>
