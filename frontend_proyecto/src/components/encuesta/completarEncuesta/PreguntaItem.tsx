@@ -3,6 +3,7 @@ import DropdownOpciones from "./DropdownOpciones";
 interface Pregunta {
   id: number;
   enunciado: string;
+  obligatoria?: boolean | number | string;
 }
 
 interface Opcion {
@@ -37,6 +38,7 @@ export default function PreguntaItem({
   onChangeTexto,
 }: Props) {
   const opcionSeleccionada = opciones.find((o) => o.id === seleccionada);
+  const esObligatoria = Boolean(Number(pregunta.obligatoria));
 
   return (
     <div className="col-12 mb-3">
@@ -44,7 +46,10 @@ export default function PreguntaItem({
         <div className="card-body d-flex flex-column">
           <div className="mb-2">
             <span className="text-muted me-2">{index + 1}.</span>
-            <span>{pregunta.enunciado}</span>
+            <span>
+                {pregunta.enunciado} 
+                {esObligatoria && <span className="text-danger fw-bold ms-1">*</span>}
+            </span>
           </div>
 
           {esAbierta ? (

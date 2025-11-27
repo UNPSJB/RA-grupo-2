@@ -1,5 +1,7 @@
 import { useEffect, useState, Fragment } from "react";
-import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
+//instancia api
+import api from "../../../services/api";
+import { ANIO_ACTUAL, PERIODO_ACTUAL, MostrarPeriodo } from "../../../constants";
 
 interface InformeActividad {
   sede: string;
@@ -27,6 +29,8 @@ interface Props {
     SetAux1: React.Dispatch<React.SetStateAction<string>>;
     SetAux2: React.Dispatch<React.SetStateAction<string>>;
   };
+  cantidadesComisiones?: { teoricas: number; practicas: number };
+  setCantidadesComisiones?: (tipo: 'teoricas' | 'practicas', valor: number) => void;
 }
 
 export default function CompletarInformeCatedraFuncion({
@@ -36,17 +40,39 @@ export default function CompletarInformeCatedraFuncion({
   datosIniciales,
   nombresFuncion,
   setNombresFuncion,
+  cantidadesComisiones,
+  setCantidadesComisiones
 }: Props) {
   const [data, setData] = useState<InformeActividad | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cantidadComisionesTeoricas, setCantidadComisionesTeoricas] =
-    useState(1);
-  const [cantidadComisionesPracticas, setCantidadComisionesPracticas] =
-    useState(1);
-  const JTP = nombresFuncion?.JTP ?? "";
-  const aux1 = nombresFuncion?.aux1 ?? "";
-  const aux2 = nombresFuncion?.aux2 ?? "";
+
+  const [localJTP, setLocalJTP] = useState(nombresFuncion?.JTP || "");
+  const [localAux1, setLocalAux1] = useState(nombresFuncion?.aux1 || "");
+  const [localAux2, setLocalAux2] = useState(nombresFuncion?.aux2 || "");
+
+  const [localTeoricas, setLocalTeoricas] = useState(
+    (cantidadesComisiones?.teoricas !== undefined && cantidadesComisiones.teoricas !== -1)
+      ? cantidadesComisiones.teoricas
+      : 1
+  );
+  const [localPracticas, setLocalPracticas] = useState(
+    (cantidadesComisiones?.practicas !== undefined && cantidadesComisiones.practicas !== -1)
+      ? cantidadesComisiones.practicas
+      : 1
+  );
+
+  useEffect(() => { setNombresFuncion?.SetJTP(localJTP); }, [localJTP, setNombresFuncion]);
+  useEffect(() => { setNombresFuncion?.SetAux1(localAux1); }, [localAux1, setNombresFuncion]);
+  useEffect(() => { setNombresFuncion?.SetAux2(localAux2); }, [localAux2, setNombresFuncion]);
+
+  useEffect(() => {
+    if (localTeoricas >= 0) setCantidadesComisiones?.('teoricas', localTeoricas);
+  }, [localTeoricas, setCantidadesComisiones]);
+
+  useEffect(() => {
+    if (localPracticas >= 0) setCantidadesComisiones?.('practicas', localPracticas);
+  }, [localPracticas, setCantidadesComisiones]);
 
   useEffect(() => {
     if (isReadOnly) {
@@ -61,87 +87,58 @@ export default function CompletarInformeCatedraFuncion({
 
     const fetchData = async () => {
       try {
-        const relacionRes = await fetch(
-          `http://127.0.0.1:8000/docentes/materia_relacion/${docenteMateriaId}`
-        );
-        if (!relacionRes.ok)
-          throw new Error("Error al obtener la relación docente-materia");
-        const relacion = await relacionRes.json();
-
+        const relacionRes = await api.get(`/docentes/materia_relacion/${docenteMateriaId}`);
+        const relacion = relacionRes.data;
         const docenteId = relacion.docente_id;
         const materiaIdRelacion = relacion.materia_id;
         const anio = relacion.anio ?? ANIO_ACTUAL;
         const periodo = relacion.periodo ?? PERIODO_ACTUAL;
-
-        const materiaRes = await fetch(
-          `http://127.0.0.1:8000/materias/${materiaIdRelacion}`
-        );
-        if (!materiaRes.ok) throw new Error("Error al obtener la materia");
-        const materia = await materiaRes.json();
-
-        const docenteRes = await fetch(
-          `http://127.0.0.1:8000/docentes/${docenteId}`
-        );
-        if (!docenteRes.ok) throw new Error("Error al obtener el docente");
-        const docente = await docenteRes.json();
-
-        const alumnosRes = await fetch(
-          `http://127.0.0.1:8000/alumnos/materia/${materiaIdRelacion}/cursantes?anio=${anio}&periodo=${periodo}`
-        );
-        if (!alumnosRes.ok) throw new Error("Error al obtener alumnos");
-        const alumnos = await alumnosRes.json();
+        const materiaRes = await api.get(`/materias/${materiaIdRelacion}`);
+        const materia = materiaRes.data;
+        const docenteRes = await api.get(`/docentes/${docenteId}`);
+        const docente = docenteRes.data;
+        const alumnosRes = await api.get(`/alumnos/materia/${materiaIdRelacion}/cursantes`, {
+          params: { anio, periodo }
+        });
+        const alumnos = alumnosRes.data;
 
         const cantidadAlumnos = alumnos.length;
 
-        const datos: InformeActividad = {
-          sede: materia.departamento?.sede?.nombre || "Sin asignar.",
+
+        const datosBase: InformeActividad = {
+          sede: materia.departamento?.sede?.nombre || "Sin asignar",
           cicloLectivo: anio,
           periodo: periodo,
           actividadCurricular: materia.nombre,
           codigoActividadCurricular: materia.matricula,
           docenteResponsable: `${docente.nombre} ${docente.apellido}`,
           cantidadAlumnos,
-          cantidadComisionesTeoricas,
-          cantidadComisionesPracticas,
-          JTP,
-          aux1,
-          aux2,
+          cantidadComisionesTeoricas: 1,
+          cantidadComisionesPracticas: 1,
+          JTP: null,
+          aux1: null,
+          aux2: null,
         };
 
-        setData(datos);
+        setData(datosBase);
+        onDatosGenerados?.(datosBase);
+
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error cargando datos de cátedra:", err);
+        const msg = err.response?.data?.detail || err.message || "Error desconocido.";
+        setError(msg);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [
-    docenteMateriaId,
-    cantidadComisionesTeoricas,
-    cantidadComisionesPracticas,
-    isReadOnly,
-    datosIniciales,
-  ]);
-
-  useEffect(() => {
-    if (!data) return;
-    onDatosGenerados?.(data);
-  }, [
-    data?.cantidadComisionesTeoricas,
-    data?.cantidadComisionesPracticas,
-    data?.JTP,
-    data?.aux1,
-    data?.aux2
-  ]);
+  }, [docenteMateriaId, isReadOnly, datosIniciales]);
 
 
-  if (loading) return <p>Cargando información de la cátedra...</p>;
-  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
-  if (!data) {
-    return isReadOnly ? <p>Cargando...</p> : <p>No hay datos para mostrar.</p>;
-  }
+  if (loading) return <div className="d-flex justify-content-center p-5"><div className="spinner-border text-primary"></div></div>;
+  if (error) return <p className="text-danger">Error: {error}</p>;
+  if (!data) return isReadOnly ? <p>Cargando...</p> : <p>No hay datos.</p>;
 
   return (
     <Fragment>
@@ -150,32 +147,33 @@ export default function CompletarInformeCatedraFuncion({
       <div className="row g-3">
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Materia</p>
-          <p>{data.actividadCurricular}</p>
+          <p className="fw-medium">{data.actividadCurricular}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Código</p>
-          <p>{data.codigoActividadCurricular}</p>
+          <p className="fw-medium">{data.codigoActividadCurricular}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Sede</p>
-          <p>{data.sede}</p>
+          <p className="fw-medium">{data.sede}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Docente Responsable</p>
-          <p>{data.docenteResponsable}</p>
+          <p className="fw-medium">{data.docenteResponsable}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Ciclo Lectivo</p>
-          <p>{data.cicloLectivo}</p>
+          <p className="fw-medium">{data.cicloLectivo}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Período</p>
-          <p>{data.periodo}</p>
+          <p className="fw-medium">{MostrarPeriodo(data.periodo)}</p>
         </div>
         <div className="col-md-4">
           <p className="mb-1 text-muted small">Alumnos Inscriptos</p>
-          <p>{data.cantidadAlumnos}</p>
+          <p className="fw-medium">{data.cantidadAlumnos}</p>
         </div>
+
         <div className="col-md-12">
           {isReadOnly ? (
             data.JTP?.trim() && (
@@ -186,22 +184,19 @@ export default function CompletarInformeCatedraFuncion({
             )
           ) : (
             <>
-              <label htmlFor="JTP" className="form-label">
-                JTP
-              </label>
+              <label htmlFor="JTP" className="form-label">JTP</label>
               <input
                 type="text"
                 className="form-control"
                 id="JTP"
-                min="0"
-                value={JTP}
-                onChange={(e) => {
-                  setNombresFuncion?.SetJTP(e.target.value);
-                }}
+                value={localJTP}
+                onChange={(e) => setLocalJTP(e.target.value)}
+                placeholder="Nombre del JTP"
               />
             </>
           )}
         </div>
+
         <div className="col-md-12">
           {isReadOnly ? (
             data.aux1?.trim() && (
@@ -212,23 +207,19 @@ export default function CompletarInformeCatedraFuncion({
             )
           ) : (
             <>
-              <label htmlFor="aux1" className="form-label">
-                Auxiliar de Primera
-              </label>
-
+              <label htmlFor="aux1" className="form-label">Auxiliar de Primera</label>
               <input
                 type="text"
                 className="form-control"
                 id="aux1"
-                min="0"
-                value={aux1}
-                onChange={(e) => {
-                  setNombresFuncion?.SetAux1(e.target.value);
-                }}
+                value={localAux1}
+                onChange={(e) => setLocalAux1(e.target.value)}
+                placeholder="Nombre del Auxiliar 1ra"
               />
             </>
           )}
         </div>
+
         <div className="col-md-12">
           {isReadOnly ? (
             data.aux2?.trim() && (
@@ -239,19 +230,14 @@ export default function CompletarInformeCatedraFuncion({
             )
           ) : (
             <>
-              <label htmlFor="aux2" className="form-label">
-                Auxiliar de Segunda
-              </label>
-
+              <label htmlFor="aux2" className="form-label">Auxiliar de Segunda</label>
               <input
                 type="text"
                 className="form-control"
                 id="aux2"
-                min="0"
-                value={aux2}
-                onChange={(e) => {
-                  setNombresFuncion?.SetAux2(e.target.value);
-                }}
+                value={localAux2}
+                onChange={(e) => setLocalAux2(e.target.value)}
+                placeholder="Nombre del Auxiliar 2da"
               />
             </>
           )}
@@ -264,47 +250,35 @@ export default function CompletarInformeCatedraFuncion({
       <div className="row g-3">
         <div className="col-md-6">
           <label htmlFor="comisionesTeoricas" className="form-label">
-            Comisiones Teóricas
+            Comisiones Teóricas <span className="text-danger">*</span>
           </label>
-
           {isReadOnly ? (
-            <p className="form-control-plaintext ps-2 pt-0">
-              {data?.cantidadComisionesTeoricas ?? "N/A"}
-            </p>
+            <p className="form-control-plaintext ps-2">{data?.cantidadComisionesTeoricas}</p>
           ) : (
             <input
               type="number"
               className="form-control"
               id="comisionesTeoricas"
-              min="0"
-              value={cantidadComisionesTeoricas}
-              onChange={(e) => {
-                const value = parseInt(e.target.value) || 0;
-                setCantidadComisionesTeoricas(value);
-              }}
+              min="1"
+              value={localTeoricas}
+              onChange={(e) => setLocalTeoricas(parseInt(e.target.value) || 0)}
             />
           )}
         </div>
         <div className="col-md-6">
           <label htmlFor="comisionesPracticas" className="form-label">
-            Comisiones Prácticas
+            Comisiones Prácticas <span className="text-danger">*</span>
           </label>
-
           {isReadOnly ? (
-            <p className="form-control-plaintext ps-2 pt-0">
-              {data?.cantidadComisionesPracticas ?? "N/A"}
-            </p>
+            <p className="form-control-plaintext ps-2">{data?.cantidadComisionesPracticas}</p>
           ) : (
             <input
               type="number"
               className="form-control"
               id="comisionesPracticas"
-              min="0"
-              value={cantidadComisionesPracticas}
-              onChange={(e) => {
-                const value = parseInt(e.target.value) || 0;
-                setCantidadComisionesPracticas(value);
-              }}
+              min="1"
+              value={localPracticas}
+              onChange={(e) => setLocalPracticas(parseInt(e.target.value) || 0)}
             />
           )}
         </div>

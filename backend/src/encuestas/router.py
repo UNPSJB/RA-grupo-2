@@ -4,6 +4,8 @@ from src.database import get_db
 from src.encuestas import schemas, services
 from src.categorias import schemas as categoria_schemas
 from src.preguntas import schemas as pregunta_schemas
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/encuestas", tags=["encuestas"])
 
@@ -14,7 +16,7 @@ def read_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.leer_encuesta(db, encuesta_id)  
 
 @router.post("/", response_model=schemas.Encuesta)
-def create_encuesta(encuesta: schemas.EncuestaCreate, db: Session = Depends(get_db)):
+def create_encuesta(encuesta: schemas.EncuestaCreate, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_encuesta(db, encuesta)
 
 @router.get("/{encuesta_id}/categorias", response_model=list[categoria_schemas.CategoriaEncuesta])
@@ -26,5 +28,5 @@ def read_preguntas_encuesta(encuesta_id: int, db: Session = Depends(get_db)):
     return services.listar_preguntas_encuesta(db, encuesta_id)
 
 @router.get("/", response_model=list[schemas.Encuesta])
-def read_encuestas(db: Session = Depends(get_db)):
+def read_encuestas(db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.listar_encuestas(db)

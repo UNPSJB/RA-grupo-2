@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import EncuestasDisponibles from "./EncuestasDisponibles";
 import type { Alumno } from "../../types/types.ts"
-import { ALUMNO_ID } from "../../constants.ts"
 import { EsPeriodoEncuesta } from "../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
+import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 type EncuestaDisponible = {
   materia: string;
@@ -13,32 +14,52 @@ type EncuestaDisponible = {
 };
 
 export default function EncuestasPage() {
-  const alumnoId = ALUMNO_ID; // hardcodeado por ahora
+  const { currentUser } = useAuth();
+  const alumnoId = currentUser?.alumno_id;
   const [alumno, setAlumno] = useState<Alumno>()
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
   const periodoEncuesta = EsPeriodoEncuesta();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}`)
+    if (!alumnoId) return;
+    api.get(`/alumnos/${alumnoId}`)
       .then(res => {
-        if (!res.ok) throw new Error("Error al obtener el alumno");
-        return res.json();
+        setAlumno(res.data);
       })
-      .then(setAlumno)
       .catch(console.error);
 
-    fetch(`http://127.0.0.1:8000/alumnos/${alumnoId}/encuestas_disponibles`)
-      .then((res) => res.json())
-      .then((data: EncuestaDisponible[]) => setEncuestas(data))
+    api.get(`/alumnos/${alumnoId}/encuestas_disponibles`)
+      .then((res) => {
+        const data: EncuestaDisponible[] = res.data;
+        setEncuestas(data);
+      })
       .catch((err) => {
         console.error("Error al obtener encuestas:", err);
         setEncuestas([]);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [alumnoId]);
 
-if (!periodoEncuesta) {
-  return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"}/>;
-}
+  if (loading) {
+    return (
+      <div className="text-center mt-4">Cargando informes pendientes...</div>
+    );
+  }
+
+  if (!alumnoId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-danger" role="alert">
+          No se pudo obtener la información del alumno. Por favor, inicie sesión nuevamente.
+        </div>
+      </div>
+    );
+  }
+
+  if (!periodoEncuesta) {
+    return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"} />;
+  }
 
   return (
     <div className="container py-4">
@@ -56,5 +77,4 @@ if (!periodoEncuesta) {
       </div>
     </div>
   );
-
 }

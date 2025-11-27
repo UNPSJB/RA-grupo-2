@@ -2,18 +2,20 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.preguntas import schemas, services
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/preguntas", tags=["preguntas"])
 
 # Rutas para preguntas
 
 @router.post("/cerrada", response_model=schemas.PreguntaCerrada)
-def create_pregunta_cerrada(pregunta: schemas.PreguntaCerradaCreate, db: Session = Depends(get_db)):
+def create_pregunta_cerrada(pregunta: schemas.PreguntaCerradaCreate, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_pregunta_cerrada(db, pregunta)
 
 
 @router.post("/abierta", response_model=schemas.PreguntaAbierta)
-def create_pregunta_abierta(pregunta: schemas.PreguntaAbiertaCreate,db: Session = Depends(get_db)):
+def create_pregunta_abierta(pregunta: schemas.PreguntaAbiertaCreate,db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_pregunta_abierta(db, pregunta)
 
 @router.get("/", response_model=list[schemas.Pregunta])

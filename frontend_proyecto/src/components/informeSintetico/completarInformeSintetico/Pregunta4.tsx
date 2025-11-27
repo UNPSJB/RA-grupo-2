@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import type { Materia } from "../../../types/types";
+import type { Materia} from "../../../types/types";
 import { CampoTextArea, CampoCheckbox } from "./Campos";
+//instancia api
+import api from "../../../services/api";
 
 const CALIFICACIONES = [
     { code: 'E', label: 'E' },
@@ -41,6 +43,7 @@ interface Props {
     anio: number;
     periodo: string;
     manejarCambio?: (items: Respuesta[]) => void;
+    notificarValidacion?: (valido: boolean) => void; 
 }
 
 const boolsToCode = (detalle: DesempenoAuxiliarDetalle): string => {
@@ -53,7 +56,7 @@ const boolsToCode = (detalle: DesempenoAuxiliarDetalle): string => {
 };
 
 export default function DesempenoAuxiliares({
-    departamentoId, carreraId, pregunta, anio, periodo, manejarCambio
+    departamentoId, carreraId, pregunta, anio, periodo, manejarCambio, notificarValidacion
 }: Props) {
     const [itemsTabla, setItems] = useState<TablaDesempenoAuxiliar[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -66,16 +69,20 @@ export default function DesempenoAuxiliares({
             try {
                 setIsLoading(true);
                 setError(null);
+                notificarValidacion?.(false); 
 
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/desempeno_auxiliares/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/desempeno_auxiliares/",
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({ detail: res.statusText }));
-                    throw new Error(`Error HTTP ${res.status}: ${errData.detail || res.statusText}`);
-                }
-                const data: TablaDesempenoAuxiliar[] = await res.json();
+                const data: TablaDesempenoAuxiliar[] = res.data;
 
                 if (!Array.isArray(data)) {
                     throw new Error("El formato de los datos recibidos no es válido.");
@@ -83,7 +90,7 @@ export default function DesempenoAuxiliares({
 
                 setItems(data);
 
-                const respuestasIniciales = data.map(materiaItem => ({
+                const respuestasIniciales: Respuesta[] = data.map(materiaItem => ({
                     pregunta_id: pregunta.id,
                     materia_id: materiaItem.materia.id,
                     texto_respuesta: JSON.stringify(
@@ -96,13 +103,10 @@ export default function DesempenoAuxiliares({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Error al obtener desempeño de auxiliares:", err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Error desconocido");
-                }
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }
@@ -110,6 +114,34 @@ export default function DesempenoAuxiliares({
 
         fetchData();
     }, [departamentoId, carreraId, anio, periodo, pregunta.id]);
+
+    useEffect(() => {
+        if (isLoading) {
+            notificarValidacion?.(false);
+            return;
+        }
+
+        if (itemsTabla.length === 0 && !isLoading) {
+            notificarValidacion?.(true);
+            return;
+        }
+
+        const hayError = itemsTabla.some(materia => {
+            return materia.auxiliares.some(aux => {
+                const tieneCalificacion = 
+                    aux.calificacion_E || aux.calificacion_MB || 
+                    aux.calificacion_B || aux.calificacion_R || aux.calificacion_I;
+                
+
+                const tieneJustificacion = aux.justificacion && aux.justificacion.trim() !== "";
+
+                return !tieneCalificacion || !tieneJustificacion;
+            });
+        });
+
+        notificarValidacion?.(!hayError);
+    }, [itemsTabla, notificarValidacion, isLoading]);
+
 
     const handleChange = (
         materiaIndex: number,
@@ -123,35 +155,47 @@ export default function DesempenoAuxiliares({
         if (typeof value === 'boolean' && field.startsWith('calificacion_')) {
             CALIFICACIONES.forEach(c => {
                 const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
-                (aux[califKey] as boolean) = false;
+                (aux as any)[califKey] = false;
             });
 
             if (value === true) {
-                (aux[field] as boolean) = true;
+                (aux as any)[field] = true;
             }
 
-        } else if (typeof value === 'string' && field === 'justificacion') {
-            (aux[field] as string) = value;
-        } else if (typeof value === 'string' && field === 'nombre_apellido') {
-            (aux[field] as string) = value;
+        } else if (typeof value === 'string' && (field === 'justificacion' || field === 'nombre_apellido')) {
+            (aux as any)[field] = value;
         }
 
         setItems(updatedItems);
 
-        const respuestas = updatedItems.map(materiaItem => ({
+        const respuestas: Respuesta[] = updatedItems.map(materiaItem => ({
             pregunta_id: pregunta.id,
             materia_id: materiaItem.materia.id,
             texto_respuesta: JSON.stringify(
-                materiaItem.auxiliares.map(aux => ({
-                    nombre: aux.nombre_apellido,
-                    calificacion: boolsToCode(aux),
-                    justificacion: aux.justificacion,
+                materiaItem.auxiliares.map(a => ({
+                    nombre: a.nombre_apellido,
+                    calificacion: boolsToCode(a),
+                    justificacion: a.justificacion,
                 }))
             )
         }));
 
         manejarCambio?.(respuestas);
     };
+
+    const isError = (mIndex: number, aIndex: number, type: 'calif' | 'justif') => {
+        const aux = itemsTabla[mIndex]?.auxiliares[aIndex];
+        if (!aux) return false;
+
+        if (type === 'calif') {
+            return !(aux.calificacion_E || aux.calificacion_MB || aux.calificacion_B || aux.calificacion_R || aux.calificacion_I);
+        }
+        if (type === 'justif') {
+            return !aux.justificacion || aux.justificacion.trim() === "";
+        }
+        return false;
+    };
+
 
     if (isLoading) return <div className="text-center text-secondary">Cargando desempeño de auxiliares...</div>;
     if (error) return <div className="alert alert-danger"><strong>Error:</strong> {error}</div>;
@@ -207,15 +251,17 @@ export default function DesempenoAuxiliares({
                                                 <tr key={aux.nombre_apellido}>
                                                     <td>
                                                         {aux.nombre_apellido}
+                                                        {isError(mIndex, aIndex, 'calif') && <div className="text-danger small mt-1">Seleccione calif.</div>}
                                                     </td>
                                                     {CALIFICACIONES.map(c => {
                                                         const califKey = `calificacion_${c.code}` as keyof DesempenoAuxiliarDetalle;
                                                         return (
-                                                            <CampoCheckbox
-                                                                key={c.code}
-                                                                checked={aux[califKey] as boolean}
-                                                                onChange={(isChecked) => handleChange(mIndex, aIndex, califKey, isChecked)}
-                                                            />
+                                                            <td key={c.code} className="text-center">
+                                                                <CampoCheckbox
+                                                                    checked={aux[califKey] as boolean}
+                                                                    onChange={(isChecked) => handleChange(mIndex, aIndex, califKey, isChecked)}
+                                                                />
+                                                            </td>
                                                         );
                                                     })}
                                                     <td>
@@ -223,6 +269,7 @@ export default function DesempenoAuxiliares({
                                                             label={null}
                                                             value={aux.justificacion}
                                                             onChange={(v) => handleChange(mIndex, aIndex, 'justificacion', v)}
+                                                            error={isError(mIndex, aIndex, 'justif')}
                                                         />
                                                     </td>
                                                 </tr>
@@ -237,7 +284,6 @@ export default function DesempenoAuxiliares({
                                         </tbody>
                                     </table>
                                 </div>
-
                             </div>
                         </div>
                     </div>

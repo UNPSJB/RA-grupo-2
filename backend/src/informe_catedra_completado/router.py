@@ -4,11 +4,13 @@ from src.database import get_db
 from src.informe_catedra_completado import schemas, services, models
 from typing import List
 from src.asociaciones.models import Periodo
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_docente, tiene_rol_departamento
 
 router = APIRouter(prefix="/informe-catedra-completado", tags=["informes-catedra-completados"])
 
 @router.get("/docente/{docente_id}/pendientes", response_model=List[schemas.InformePendiente])
-def listar_informes_pendientes(docente_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+def listar_informes_pendientes(docente_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_docente)):
     return services.obtener_informes_pendientes(db, docente_id, anio, periodo)
 
 @router.get("/docente/{docente_id}/completados", response_model=List[schemas.InformeCatedraCompletado])
@@ -23,7 +25,8 @@ def verificar_informe_catedra_completado(docente_materia_id: int, db: Session = 
 @router.post("/", response_model=schemas.InformeCatedraCompletado)
 def crear_informe_catedra_completado(
     informe: schemas.InformeCatedraCompletadoConRespuestasCreate, 
-    db: Session = Depends(get_db) 
+    db: Session = Depends(get_db),
+    user: user_schemas.User = Depends(tiene_rol_docente)
 ):
     return services.crear_informe_completado(db, informe)
 
@@ -32,7 +35,7 @@ def obtener_informe_catedra_completado(informe_id: int, db: Session = Depends(ge
     return services.obtener_informe_completado_detalle(db, informe_id)
 
 @router.get("/departamento/{departamento_id}", response_model=List[schemas.InformeCatedraCompletado])
-def obtener_informes_por_departamento(departamento_id: int, db: Session = Depends(get_db)):
+def obtener_informes_por_departamento(departamento_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_departamento)):
     return services.obtener_informes_por_departamento(db, departamento_id)
 
 @router.get("/departamento/{departamento_id}/progreso", response_model=dict)

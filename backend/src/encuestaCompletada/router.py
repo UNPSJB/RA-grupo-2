@@ -4,31 +4,33 @@ from src.database import get_db
 from src.encuestaCompletada import schemas, services
 from typing import List
 from src.asociaciones.models import Periodo
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_alumno
 
 router = APIRouter(prefix="/encuesta-completada", tags=["encuestas-completadas"])
 
 @router.get("/existe")
-def verificar_encuesta_completada(alumno_id: int, encuesta_id: int, materia_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+def verificar_encuesta_completada(alumno_id: int, encuesta_id: int, materia_id: int, anio: int, periodo: Periodo, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):
     existe = services.verificar_encuesta_existente(db, alumno_id, encuesta_id, materia_id, anio, periodo)
     return {"existe": existe}
 
 
 @router.post("/", response_model=schemas.EncuestaCompletada)
-def crear_encuesta_completada(encuesta: schemas.EncuestaCompletadaCreate, db: Session = Depends(get_db)):
+def crear_encuesta_completada(encuesta: schemas.EncuestaCompletadaCreate, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):
     return services.crear_encuesta_completada(db, encuesta)
 
 
 @router.post("/con-respuestas", response_model=schemas.EncuestaCompletada)
-def crear_encuesta_completa_con_respuestas(encuesta_data: schemas.EncuestaCompletadaConRespuestasCreate, db: Session = Depends(get_db)):
+def crear_encuesta_completa_con_respuestas(encuesta_data: schemas.EncuestaCompletadaConRespuestasCreate, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):
     return services.crear_encuesta_completa_con_respuestas(db, encuesta_data)
 
 
 @router.get("/{encuesta_id}", response_model=schemas.EncuestaCompletada)
-def obtener_encuesta_completada(encuesta_id: int, db: Session = Depends(get_db)):
+def obtener_encuesta_completada(encuesta_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):
     return services.obtener_encuesta_completada(db, encuesta_id)
 
 @router.get("/alumno/{alumno_id}", response_model=List[schemas.EncuestaCompletada])
-def obtener_encuestas_por_alumno(alumno_id: int, db: Session = Depends(get_db)):
+def obtener_encuestas_por_alumno(alumno_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):
     return services.obtener_encuestas_por_alumno(db, alumno_id)
 
 

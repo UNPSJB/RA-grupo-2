@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { mostrarPeriodo } from "./InformeCatedraCompletadoDetail";
+// instancia api
+import api from "../../../services/api";
+import { MostrarPeriodo } from "../../../constants";
 import type { Departamento } from "../../../types/types";
 import ROUTES from "../../../paths";
+import { useAuth } from "../../../context/AuthContext";
 
 interface InformeCatedraCompletado {
   id: number;
@@ -12,21 +15,31 @@ interface InformeCatedraCompletado {
 }
 
 export default function InformeCatedraList() {
+  const { currentUser } = useAuth();
+  const departamentoId = currentUser?.departamento_id;
   const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
-  const departamentoId = 1; 
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/departamentos/${departamentoId}`)
-      .then(res => res.json())
-      .then(setDepartamento)
-      .catch(console.error);
-    fetch(`http://127.0.0.1:8000/informe-catedra-completado/departamento/${departamentoId}`)
-      .then(res => res.json())
-      .then(setInformes)
-      .catch(console.error);
+    if(!departamentoId) return;
+    api.get(`/departamentos/${departamentoId}`)
+      .then(res => setDepartamento(res.data))
+      .catch(err => console.error("Error cargando departamento:", err));
+
+    api.get(`/informe-catedra-completado/departamento/${departamentoId}`)
+      .then(res => setInformes(res.data))
+      .catch(err => console.error("Error cargando informes:", err));
+
   }, [departamentoId]);
 
+  if (!departamentoId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-warning">Cargando departamento..</div>
+      </div>
+    );
+  }
+  
   return (
     <div className="container py-4">
       <div className="card">
@@ -48,7 +61,7 @@ export default function InformeCatedraList() {
                       <div>
                         <span className="text-muted me-3">{i + 1}.</span>
                         <span className="fw-bold">
-                          {inf.titulo} – ({mostrarPeriodo(inf.periodo)})
+                          {inf.titulo} – ({MostrarPeriodo(inf.periodo)})
                         </span>
                       </div>
                       <Link

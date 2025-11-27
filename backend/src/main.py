@@ -1,6 +1,5 @@
-import os
+from src.settings import ENV
 from contextlib import asynccontextmanager
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from src.database import engine
 from src.models import Base, ModeloBase
@@ -19,9 +18,6 @@ from src.preguntas.router import router as preguntas_router
 from src.categorias.router import router as categorias_router
 from src.respuestas.router import router as respuestas_router
 from src.encuestaCompletada.router import router as encuesta_completada_router
-from src.opciones.router import router as opciones_router
-from src.preguntas.router import router as preguntas_router
-from src.categorias.router import router as categorias_router
 from src.informe_catedra_base.router  import router as informes_catedra_base_router
 from src.informe_catedra_completado.router  import router as informes_catedra_completado_router
 from src.datosEstadisticos.router import router as datos_estadisticos_router
@@ -31,13 +27,12 @@ from src.respuesta_informe_sintetico.router import router as respuestas_informe_
 from src.filtros.router import router as filtros_router
 from src.periodos_apertura.router import router as periodos_apertura_router
 from src.sedes.router import router as sedes_router
+from src.auth.router import router as auth_router
+from src.users.router import router as users_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
-load_dotenv()
-
-ENV = os.getenv("ENV")
-ROOT_PATH = os.getenv(f"ROOT_PATH_{ENV.upper()}")
+ROOT_PATH = (f"ROOT_PATH_{ENV.upper()}")
 
 
 @asynccontextmanager
@@ -79,3 +74,5 @@ app.include_router(respuestas_informe_sintetico_router)
 app.include_router(filtros_router)
 app.include_router(periodos_apertura_router)
 app.include_router(sedes_router)
+app.include_router(auth_router)
+app.include_router(users_router)

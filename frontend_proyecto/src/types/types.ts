@@ -36,6 +36,7 @@ export interface Pregunta {
     cod: string;
     orden: number;
     enunciado: string;
+    ogligatoria: boolean;
 }
 
 export interface Respuesta {

@@ -4,12 +4,16 @@ from src.database import get_db
 from src.informe_sintetico_completado.models import InformeSinteticoCompletado
 from src.informe_sintetico_completado import schemas, services
 from typing import List, Optional
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_departamento
+
 router = APIRouter(prefix="/informes_sinteticos_completados", tags=["informes_sinteticos_completados"])
 
 @router.post("/completados/", response_model=schemas.InformeSinteticoCompletado, status_code=status.HTTP_201_CREATED)
 def create_informe_completado(
     informe: schemas.InformeSinteticoCompletadoCreate, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: user_schemas.User = Depends(tiene_rol_departamento)
 ):
     try:
         return services.create_informe_completado(db, informe)
@@ -38,7 +42,7 @@ def get_informe_completado(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Error al obtener informe completado: {str(e)}")
 
 @router.get("/tabla_pregunta_2B/")
-def get_tabla_pregunta_2B(id_dpto: int, id_carrera: int, anio: int, periodo: str, db: Session = Depends(get_db)):
+def get_tabla_pregunta_2B(id_dpto: int, id_carrera: int, anio: int, periodo: str, db: Session = Depends(get_db), user: user_schemas.User = Depends(tiene_rol_departamento)):
     try:
         elementos = services.get_elementos_pregunta2B(db, id_dpto, id_carrera, anio, periodo)
         return elementos
@@ -51,7 +55,8 @@ def get_tabla_porcentaje_horas(
     id_carrera: int = Query(...), 
     anio: int = Query(...), 
     periodo: str = Query(...),
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_departamento)):
     try:
         elementos = services.get_elementos_pregunta2(db, id_dpto, id_carrera, anio, periodo)
         return elementos
@@ -64,7 +69,8 @@ def obtener_informacion_general(
     id_carrera: int,
     anio: int,
     periodo: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: user_schemas.User = Depends(tiene_rol_departamento)
 ):
     try:
         elementos = services.obtener_informacion_general(db, id_dpto, id_carrera, anio, periodo)
@@ -80,7 +86,8 @@ def obtener_temas_desarrollados(
     id_carrera: int,
     anio: int,
     periodo: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_departamento)
 ):
     try:
         elementos = services.obtener_temas_desarrollados(db, id_dpto, id_carrera, anio, periodo)
@@ -94,7 +101,8 @@ def get_preguntas_2C(
     id_carrera: int = Query(...),
     anio: int = Query(...),
     periodo: str = Query(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_departamento)
 ):
     try:
         elementos = services.get_elementos_pregunta2C(db, id_dpto, id_carrera, anio, periodo)
@@ -110,7 +118,8 @@ def get_bibliografia_equipamiento(
     id_carrera: int = Query(...), 
     anio: int = Query(...), 
     periodo: str = Query(...),
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_departamento)):
 
     try:
         elementos = services.get_bibliografia_equipamiento(db, id_dpto, id_carrera, anio, periodo)
@@ -124,7 +133,8 @@ def get_actividades_docentes_por_materia(
     id_carrera: int,
     anio: int,
     periodo: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_departamento)
 ):
     try:
         elementos = services.get_actividades_docentes(db, id_dpto, id_carrera, anio, periodo)
@@ -139,7 +149,8 @@ def get_desempeno_auxiliares(
     id_carrera: int = Query(...), 
     anio: int = Query(...), 
     periodo: str = Query(...),
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_departamento)):
     try:
         elementos = services.get_desempeno_auxiliares(db, id_dpto, id_carrera, anio, periodo)
         return elementos

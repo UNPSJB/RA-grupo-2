@@ -16,4 +16,6 @@ class Docente(ModeloBase):
     apellido: Mapped[str] = mapped_column(String, nullable=False,index=True)
     materias_asociadas: Mapped[List["DocenteMateria"]] =  relationship("DocenteMateria", back_populates="docente")
 
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="docente")
+
    # informe_catedra_completado: Mapped[list["InformeCatedraCompletado"]] = relationship("InformeCatedraCompletado", back_populates="docente")

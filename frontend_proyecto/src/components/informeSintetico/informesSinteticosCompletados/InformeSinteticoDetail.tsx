@@ -1,13 +1,19 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchInforme, fetchPreguntasBase } from "./informesService"; 
-import type { InformeCompletado, Pregunta } from "../../../types/types"; 
-import ContenidoInformeSintetico from "./ContenidoPasosSinteticos"; 
+import { fetchInforme, fetchPreguntasBase } from "./informesService";
+import type { InformeCompletado, Pregunta, Carrera, Departamento } from "../../../types/types";
+import ContenidoInformeSintetico from "./ContenidoPasosSinteticos";
 import ROUTES from "../../../paths";
+import { pdf } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import InformeSinteticoPDF from "./vistas/InformeCompletoPDF";
+import { useAuth } from "../../../context/AuthContext";
+import api from "../../../services/api";
+
 
 const TABS_MAP = new Map([
-    ["0", "Datos Generales"], ["1", "1. Recursos"], ["2", "2. Horas/Justificación"], 
-    ["2.A", "2.A. Contenidos"], ["2.B", "2.B. Encuestas"], ["2.C", "2.C. Reflexión"], 
+    ["0", "Datos Generales"], ["1", "1. Recursos"], ["2", "2. Horas/Justificación"],
+    ["2.A", "2.A. Contenidos"], ["2.B", "2.B. Encuestas"], ["2.C", "2.C. Reflexión"],
     ["3", "3. Actividades del Equipo"], ["4", "4. Valoración"], ["5", "5. Observaciones"],
 ]);
 
@@ -23,18 +29,31 @@ const syntheticSteps = [
     { name: '5. Observaciones', cod: '5' },
 ];
 
-export function mostrarPeriodo(periodo: string) {
-    switch (periodo) {
-        case "PRIMER_CUATRI": return "Primer Cuatrimestre";
-        case "SEGUNDO_CUATRI": return "Segundo Cuatrimestre";
-        case "ANUAL": return "Anual";
-        default: return periodo;
-    }
-}
-
 function InformeSinteticoDetail() {
-    const { id, id_dpto } = useParams<{ id: string, id_dpto: string }>();
-    const [informe, setInforme] = useState<InformeCompletado | null>(null); 
+    const [carrera, setCarrera] = useState<Carrera | null>(null);
+    const [departamento, setDepartamento] = useState<Departamento | null>(null);
+    const { currentUser } = useAuth();
+    const rol = currentUser?.role_name;
+
+    const handleDownloadPDF = async () => {
+        if (!informe || !carrera || !departamento) return;
+
+        const blob = await pdf(
+            <InformeSinteticoPDF
+                informe={informe}
+                preguntas={preguntasOrdenadas}
+                respuestas={informe.respuestas}
+                carrera={carrera}
+                dpto={departamento}
+            />
+
+        ).toBlob();
+
+        saveAs(blob, `Informe_${informe.titulo}.pdf`);
+    };
+
+    const { id } = useParams<{ id: string }>();
+    const [informe, setInforme] = useState<InformeCompletado | null>(null);
     const [preguntasBase, setPreguntasBase] = useState<Pregunta[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -44,20 +63,20 @@ function InformeSinteticoDetail() {
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    
+
     const preguntasOrdenadas = useMemo(() => {
         if (preguntasBase.length === 0) return [];
         return [...preguntasBase].sort((a, b) => a.orden - b.orden);
     }, [preguntasBase]);
-    
-    const totalSteps = preguntasOrdenadas.length; 
+
+    const totalSteps = preguntasOrdenadas.length;
     const isLastStep = totalSteps > 0 && currentStep === totalSteps - 1;
     const isFirstStep = currentStep === 0;
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (scrollRef.current) {
             setIsDragging(true);
-            e.preventDefault(); 
+            e.preventDefault();
             setStartX(e.pageX - scrollRef.current.offsetLeft);
             setScrollLeft(scrollRef.current.scrollLeft);
         }
@@ -67,34 +86,47 @@ function InformeSinteticoDetail() {
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!isDragging || !scrollRef.current) return;
         const x = e.pageX - scrollRef.current.offsetLeft;
-        const walk = (x - startX) * 1.5; 
+        const walk = (x - startX) * 1.5;
         scrollRef.current.scrollLeft = scrollLeft - walk;
     };
 
-    useEffect(() => {
-        if (!id) {
-            setError("ID de informe no proporcionado");
-            setLoading(false);
-            return;
-        }
+useEffect(() => {
+    if (!id) {
+        setError("ID de informe no proporcionado");
+        setLoading(false);
+        return;
+    }
 
-        const fetchData = async () => {
-            try {
-                const dataInforme: InformeCompletado = await fetchInforme(id);
-                setInforme(dataInforme);
-                const dataPreguntas: Pregunta[] = await fetchPreguntasBase(dataInforme.informe_base_id);
-                setPreguntasBase(dataPreguntas);
-                if (dataPreguntas.length > 0) setCurrentStep(0);
-            } catch (err: any) {
-                console.error(err);
-                setError(err.message || "Error al cargar los datos del informe.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [id]);
-    
+    const fetchData = async () => {
+        try {
+            const dataInforme: InformeCompletado = await fetchInforme(id);
+            setInforme(dataInforme);
+
+            const dataPreguntas: Pregunta[] = await fetchPreguntasBase(dataInforme.informe_base_id);
+            setPreguntasBase(dataPreguntas);
+            if (dataPreguntas.length > 0) setCurrentStep(0);
+
+            const resCarrera = await api.get(`/carreras/${dataInforme.carrera_id}`);
+            const dataCarrera = resCarrera.data;
+            setCarrera(dataCarrera);
+
+            const resDpto = await api.get(`/departamentos/${dataCarrera.departamento_id}`);
+            setDepartamento(resDpto.data);
+
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || "Error al cargar los datos del informe.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchData();
+}, [id]);
+
+
+
+
     useEffect(() => {
         if (scrollRef.current) {
             const activeElement = scrollRef.current.querySelector('.nav-item a.active');
@@ -106,8 +138,8 @@ function InformeSinteticoDetail() {
                 });
             }
         }
-    }, [currentStep, preguntasOrdenadas]); 
-    
+    }, [currentStep, preguntasOrdenadas]);
+
     const preguntaActual = preguntasOrdenadas[currentStep];
 
     if (loading || error || !informe) return (
@@ -115,23 +147,31 @@ function InformeSinteticoDetail() {
             {loading ? <p>Cargando...</p> : <div className="alert alert-danger">{error || "Informe no encontrado."}</div>}
         </div>
     );
+
     const returnPath = (() => {
-    if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
-        return ROUTES.INFORMES_SINTETICOS_COMPLETADOS(id_dpto);
-    }
-    return ROUTES.INFORMES_SINTETICOS;
-})();
+        if (rol === "departamento") {
+            return ROUTES.INFORMES_SINTETICOS_COMPLETADOS;
+        } else {
+            return ROUTES.INFORMES_SINTETICOS;
+        }
+    })();
+
     return (
-        <div className="bg-light"> 
+        <div className="bg-light">
             <div className="container-lg py-4">
+                <div className="text-end mt-0 mb-3 me-4">
+                    <button onClick={handleDownloadPDF} className="btn btn-theme-primary rounded-pill px-4">
+                        Exportar PDF
+                    </button>
+                </div>
                 <div className="card shadow-sm border-0 rounded-3">
                     <div className="card-header bg-unpsjb-header text-center rounded-top-3">
                         <h1 className="h4 mb-0 text-white">{informe.titulo}</h1>
                     </div>
-                    
-                    <div className="card-body p-4 p-md-5"> 
+
+                    <div className="card-body p-4 p-md-5">
                         <style>
-                          {`
+                            {`
                             .horizontal-scroll-hidden::-webkit-scrollbar { display: none; }
                             .horizontal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
                             .is-dragging { cursor: grabbing !important; }
@@ -156,10 +196,10 @@ function InformeSinteticoDetail() {
                           `}
                         </style>
 
-                        <div 
-                            ref={scrollRef} 
+                        <div
+                            ref={scrollRef}
                             className={`horizontal-scroll-hidden mb-4 ${isDragging ? 'is-dragging' : ''}`}
-                            style={{ overflowX: 'auto'}}
+                            style={{ overflowX: 'auto' }}
                             onMouseDown={handleMouseDown}
                             onMouseLeave={handleMouseLeave}
                             onMouseUp={handleMouseUp}
@@ -169,15 +209,14 @@ function InformeSinteticoDetail() {
                                 {syntheticSteps.map((step, index) => {
                                     const pregunta = preguntasOrdenadas[index];
                                     const isStepValid = !!pregunta;
-                                    
+
                                     return (
                                         <li key={step.cod} className="nav-item">
                                             <a
-                                                className={`nav-link ${
-                                                    currentStep === index 
-                                                        ? "active" 
-                                                        : "text-muted"
-                                                } ${!isStepValid ? 'disabled' : ''}`}
+                                                className={`nav-link ${currentStep === index
+                                                    ? "active"
+                                                    : "text-muted"
+                                                    } ${!isStepValid ? 'disabled' : ''}`}
                                                 href="#"
                                                 onClick={(e) => {
                                                     e.preventDefault();
@@ -216,7 +255,7 @@ function InformeSinteticoDetail() {
                         </div>
 
                     </div>
-                    
+
                     <div className="card-footer bg-white border-0 rounded-bottom-3 p-4">
                         <div className="d-flex justify-content-between">
                             {!isFirstStep ? (
@@ -227,21 +266,21 @@ function InformeSinteticoDetail() {
                                     Anterior
                                 </button>
                             ) : (
-                                <div /> 
+                                <div />
                             )}
-                            
+
                             {isLastStep ? (
-                                    <Link
-                                        to={returnPath} 
-                                        className="btn btn-primary rounded-pill px-4" 
-                                    >
-                                        Volver al listado
-                                    </Link>
-                                ) : (
+                                <Link
+                                    to={returnPath}
+                                    className="btn btn-theme-primary rounded-pill px-4"
+                                >
+                                    Volver al listado
+                                </Link>
+                            ) : (
                                 <button
-                                    className="btn btn-primary rounded-pill px-4"
+                                    className="btn btn-theme-primary rounded-pill px-4"
                                     onClick={() => setCurrentStep(currentStep + 1)}
-                                    disabled={totalSteps === 0 || currentStep >= totalSteps - 1} 
+                                    disabled={totalSteps === 0 || currentStep >= totalSteps - 1}
                                 >
                                     Siguiente
                                 </button>
@@ -250,7 +289,7 @@ function InformeSinteticoDetail() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

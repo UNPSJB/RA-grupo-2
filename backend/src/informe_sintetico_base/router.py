@@ -4,11 +4,14 @@ from src.informe_sintetico_base import schemas, services, exceptions
 from src.pregunta_informe_sintetico import schemas as pregunta_schemas
 from src.database import get_db
 from typing import List
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/informes_sinteticos_base", tags=["informes_sinteticos_base"])
 
 @router.post("/", response_model=schemas.InformeSinteticoBase, status_code=status.HTTP_201_CREATED)
-def crear_informe_sintetico_base_route(informe: schemas.InformeSinteticoBaseCreate, db: Session = Depends(get_db)):
+def crear_informe_sintetico_base_route(informe: schemas.InformeSinteticoBaseCreate, db: Session = Depends(get_db), 
+    user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_informe_sintetico_base(db, informe)
 
 @router.get("/", response_model=List[schemas.InformeSinteticoBase])

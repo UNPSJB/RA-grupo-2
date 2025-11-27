@@ -3,17 +3,19 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.categorias import schemas, services
 from src.preguntas import schemas as pregunta_schemas
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/categorias", tags=["categorias"])
 
 # Rutas para categorias
 
 @router.post("/paraEncuesta/", response_model=schemas.CategoriaEncuesta)
-def create_categoria_encuesta(categoria: schemas.CategoriaEncuestaCreate, db: Session = Depends(get_db)):
+def create_categoria_encuesta(categoria: schemas.CategoriaEncuestaCreate, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_categoria_encuesta(db, categoria)
 
 @router.post("/paraInforme/", response_model=schemas.CategoriaInformeBase)
-def create_categoria_informe(categoria: schemas.CategoriaInformeBaseCreate, db: Session = Depends(get_db)):
+def create_categoria_informe(categoria: schemas.CategoriaInformeBaseCreate, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_categoria_informe(db, categoria)
 
 @router.get("/", response_model=list[schemas.Categoria])

@@ -1,5 +1,5 @@
 const ROUTES = {
-  HOME: "/",
+  HOME: "/menu",
   //LOGIN
   LOGIN: "/login",
 
@@ -10,22 +10,21 @@ const ROUTES = {
   ENCUESTA_COMPLETADA_DETALLE: (id: number | string = ":id") => `/alumnos/encuestas-completadas/${id}`,
 
   //DOCENTES
-  MATERIAS_ASIGNADAS: (id:number | string = ":id") => `/docentes/${id}/materias-asignadas`,
-  DETALLE_MATERIA: (id: number | string = ":id") => `/docentes/materias-asignadas/${id}`,
   INFORMES_CATEDRA_PENDIENTES: "/docentes/informes-pendientes",
   COMPLETAR_INFORME_CATEDRA: "/docentes/informes-pendientes/completar",
   INFORMES_CATEDRA_COMPLETADOS: "/docentes/informes-catedra-completados",
   INFORME_CATEDRA_COMPLETADO_DETALLE: (id: number | string = ":id") => `/docentes/informes-catedra-completados/${id}`,
+  DASHBOARD_DOCENTE: "/docentes/dashboard-estadistico",
 
   //DEPARTAMENTOS
-  CARRERAS_DPTO: (id_dpto:number | string = ":id_dpto") => `/departamento/${id_dpto}/carreras`,
+  CARRERAS_DPTO: `/departamento/carreras`,
   CARRERA: (id: number | string = ":id") => `/departamento/carreras/${id}`,
   COMPLETAR_INFORME_SINTETICO: "/departamento/carreras/completar-informe-sintetico",
   INFORMES_CATEDRA: "/departamento/informes-catedra",
   INFORME_CATEDRA_DETALLE: (id: number | string = ":id") => `/departamento/informes-catedra/${id}`,
   DASHBOARD_DPTO: "/departamento/dashboard",
-  INFORMES_SINTETICOS_COMPLETADOS: (id_dpto: number | string = ":id_dpto") => `/departamento/${id_dpto}/informes-sinteticos-completados`,
-  INFORME_SINTETICO_DETALLE: (id_dpto: number | string = ":id_dpto", id: number | string = ":id") => `/departamento/${id_dpto}/informes-sinteticos-completados/${id}`,
+  INFORMES_SINTETICOS_COMPLETADOS: `/departamento/informes-sinteticos-completados`,
+  INFORME_SINTETICO_DETALLE: (id: number | string = ":id") => `/departamento/informes-sinteticos-completados/${id}`,
   
   //SECRETARÍA ACADÉMICA
   INFORMES_SINTETICOS: "/secretaria/informes-sinteticos-completados",

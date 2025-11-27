@@ -76,7 +76,7 @@ export default function VistaReflexionDocente({
                         <div className="accordion-item" key={item.materia.id}>
                             <h2 className="accordion-header" id={`headingVP2C_${index}`}>
                                 <button
-                                    className="accordion-button collapsed"
+                                    className="accordion-button"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target={`#collapseVP2C_${index}`}
@@ -88,9 +88,8 @@ export default function VistaReflexionDocente({
                             </h2>
                             <div
                                 id={`collapseVP2C_${index}`}
-                                className="accordion-collapse collapse"
+                                className="accordion-collapse collapse show"
                                 aria-labelledby={`headingVP2C_${index}`}
-                                data-bs-parent="#accordionVistaP2C"
                             >
                                 <div className="accordion-body">
                                     <div className="row g-3">

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DOCENTE_ID } from "../../../constants";
+// instancia api
+import api from "../../../services/api";
+import { useAuth } from "../../../context/AuthContext";
 import { ANIO_ACTUAL } from "../../../constants";
-import { PERIODO_ACTUAL } from "../../../constants";
+import { PERIODO_ACTUAL, MostrarPeriodo } from "../../../constants";
 import ROUTES from "../../../paths";
 import { EsPeriodoInformeCatedra } from "../../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../../secretaria/definirFechas/PopUpPeriodo"
@@ -14,7 +16,8 @@ type InformePendiente = {
 };
 
 export default function InformesPendientesPage() {
-  const docenteId = DOCENTE_ID;
+  const { currentUser } = useAuth();
+  const docenteId = currentUser?.docente_id;
   const [informes, setInformes] = useState<InformePendiente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,23 +25,19 @@ export default function InformesPendientesPage() {
   const periodoInforme = EsPeriodoInformeCatedra();
 
   useEffect(() => {
-    fetch(
-      `http://127.0.0.1:8000/informe-catedra-completado/docente/${docenteId}/pendientes?anio=${ANIO_ACTUAL}&periodo=${PERIODO_ACTUAL}`
-    )
+    api.get(`/informe-catedra-completado/docente/${docenteId}/pendientes`, {
+      params: {
+        anio: ANIO_ACTUAL,
+        periodo: PERIODO_ACTUAL
+      }
+    })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(
-            `Error ${res.status}: No se pudo obtener la lista de pendientes.`
-          );
-        }
-        return res.json();
-      })
-      .then((data: InformePendiente[]) => {
-        setInformes(data);
+        setInformes(res.data);
       })
       .catch((err) => {
         console.error("Error al obtener informes:", err);
-        setError(err.message);
+        const errorMsg = err.response?.data?.detail || err.message || "Error desconocido al cargar pendientes.";
+        setError(errorMsg);
         setInformes([]);
       })
       .finally(() => setLoading(false));
@@ -52,7 +51,7 @@ export default function InformesPendientesPage() {
         materiaId: informe.materia_id,
         anio: ANIO_ACTUAL,
         periodo: PERIODO_ACTUAL,
-        informeBaseId: 3, // Asumimos que el informe base siempre es el ID 1
+        informeBaseId: 3,
       },
     });
   };
@@ -72,7 +71,17 @@ export default function InformesPendientesPage() {
   }
 
   if (!periodoInforme) {
-    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"}/>;
+    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"} />;
+  }
+
+  if (!docenteId) {
+    return (
+      <div className="container py-4">
+        <div className="alert alert-danger" role="alert">
+          No se pudo obtener la información del docente. Por favor, inicie sesión nuevamente.
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -80,7 +89,7 @@ export default function InformesPendientesPage() {
       <div className="card shadow">
         <div className="card-header bg-unpsjb-header">
           <h1 className="h4 mb-0">
-            Informes Pendientes ({PERIODO_ACTUAL} {ANIO_ACTUAL})
+            Informes Pendientes ({MostrarPeriodo(PERIODO_ACTUAL)} {ANIO_ACTUAL})
           </h1>
         </div>
         <div className="card-body">

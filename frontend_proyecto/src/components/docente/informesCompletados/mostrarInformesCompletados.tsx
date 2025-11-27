@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { PERIODO_ACTUAL, DOCENTE_ID } from "../../../constants";
+//instancia api
+import api from "../../../services/api";
+import { MostrarPeriodo } from "../../../constants";
 import type { Docente } from "../../../types/types";
 import ROUTES from "../../../paths";
+import { useAuth } from "../../../context/AuthContext";
 
 interface InformeCatedraCompletado {
   id: number;
@@ -13,28 +16,17 @@ interface InformeCatedraCompletado {
 
 export default function InformeCatedraCompletadoDocente() {
   const [informes, setInformes] = useState<InformeCatedraCompletado[]>([]);
+  const { currentUser } = useAuth();
+  const docenteId = currentUser?.docente_id;
   const [docente, setDocente] = useState<Docente>();
-  const docenteId = DOCENTE_ID; // hardcoedado 
 
   useEffect(() => {
-
-    //docente
-    fetch(`http://127.0.0.1:8000/docentes/${docenteId}`)
-    .then(res=>{
-      if (!res.ok) throw new Error("Error al obtener el docente");
-        return res.json();
-    })
-    .then(setDocente)
-    .catch(console.error);
-
-    // Informes completados del docente
-    fetch(`http://127.0.0.1:8000/informe-catedra-completado/docente/${docenteId}/completados`)
-      .then(res => {
-        if (!res.ok) throw new Error("Error al obtener los informes del docente");
-        return res.json();
-      })
-      .then(setInformes)
-      .catch(console.error);
+    api.get(`/docentes/${docenteId}`)
+      .then(res => setDocente(res.data))
+      .catch(err => console.error("Error al obtener el docente:", err));
+    api.get(`/informe-catedra-completado/docente/${docenteId}/completados`)
+      .then(res => setInformes(res.data))
+      .catch(err => console.error("Error al obtener los informes del docente:", err));
   }, [docenteId]);
 
   return (
@@ -59,7 +51,7 @@ export default function InformeCatedraCompletadoDocente() {
                       <div>
                         <span className="text-muted me-3">{i + 1}.</span>
                         <span className="fw-bold">
-                          {inf.titulo} – {inf.anio} ({PERIODO_ACTUAL})
+                          {inf.titulo} – ({MostrarPeriodo(inf.periodo)})
                         </span>
                       </div>
                       <Link

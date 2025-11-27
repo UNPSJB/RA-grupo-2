@@ -1,10 +1,11 @@
-// src/components/departamento/informeSintetico/ListaInformeSintetico.tsx
-
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link} from "react-router-dom";
 import { fetchInformes } from "../../informeSintetico/informesSinteticosCompletados/informesService"; 
 import ROUTES from "../../../paths"; 
 import type { Departamento } from "../../../types/types";
+import { MostrarPeriodo } from "../../../constants";
+import api from "../../../services/api"; 
+import { useAuth } from "../../../context/AuthContext";
 
 interface Informe {
   id: number;
@@ -15,17 +16,18 @@ interface Informe {
 
 function ListaInformeSintetico() {
   const [informes, setInformes] = useState<Informe[]>([]);
-  const { id_dpto } = useParams<{ id_dpto: string }>(); 
+  const { currentUser } = useAuth();
+  const id_dpto = currentUser?.departamento_id;
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
 
   useEffect(() => {
-    const departamentoId = id_dpto ? parseInt(id_dpto) : null; 
+    const departamentoId = id_dpto; 
     
     if (departamentoId) {
-        fetch(`http://127.0.0.1:8000/departamentos/${departamentoId}`)
-          .then((res) => res.json())
-          .then((data) => setDepartamento(data))
+        api.get(`/departamentos/${departamentoId}`)
+          .then((res) => setDepartamento(res.data))
           .catch((err) => console.error("Error cargando departamento:", err));
+          
         fetchInformes(departamentoId) 
           .then(setInformes)
           .catch((err) => console.error("Error cargando informes completados:", err));
@@ -36,6 +38,7 @@ function ListaInformeSintetico() {
         console.warn("ID de departamento no disponible en la URL.");
     }
   }, [id_dpto]); 
+  
   if (!departamento) {
     return (
       <div className="container py-4">
@@ -44,7 +47,7 @@ function ListaInformeSintetico() {
     );
   }
 
-  return (
+  if(id_dpto)return (
     <div className="container py-4">
       <div className="card">
         <div className="card-header bg-unpsjb-header">
@@ -62,10 +65,10 @@ function ListaInformeSintetico() {
                       <span className="fw-bold">
                         {inf.titulo} 
                       </span>
-                      <span className="text"> – {inf.periodo} {inf.anio}</span>
+                      <span className="text"> – {MostrarPeriodo(inf.periodo)} {inf.anio}</span>
                     </div>
                     <Link
-                        to={ROUTES.INFORME_SINTETICO_DETALLE(id_dpto, inf.id)} 
+                        to={ROUTES.INFORME_SINTETICO_DETALLE(inf.id)} 
                         className="btn btn-theme-primary rounded-pill px-4"
                         >
                       Ver Informe

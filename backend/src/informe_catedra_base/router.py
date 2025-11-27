@@ -4,12 +4,14 @@ from src.informe_catedra_base import schemas, services, exceptions
 from src.categorias import schemas as categoria_schemas
 from src.database import get_db
 from typing import List
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/informes_catedra",tags=["informes_catedra_base"]
 )
 
 @router.post("/", response_model=schemas.InformeCatedra)
-def crear_informe_catedra_base(informe: schemas.InformeCatedraBase, db: Session = Depends(get_db)):
+def crear_informe_catedra_base(informe: schemas.InformeCatedraBase, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_secretaria)):
     return services.crear_informe_catedra_base(db, informe)
 @router.get("/", response_model=list[schemas.InformeCatedra])
 def get_informes_catedra_base(db: Session = Depends(get_db)):

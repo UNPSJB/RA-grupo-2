@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.pregunta_informe_sintetico import schemas, services
 from typing import List
+from src.users import schemas as user_schemas
+from src.auth.dependencies import tiene_rol_secretaria
 
 router = APIRouter(prefix="/preguntas_sintetico", tags=["preguntas_informe_sintetico"])
 
@@ -10,7 +12,8 @@ router = APIRouter(prefix="/preguntas_sintetico", tags=["preguntas_informe_sinte
 def create_pregunta_sintetico_route(
     informe_base_id: int, 
     pregunta: schemas.PreguntaInformeSinteticoCreate, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: user_schemas.User = Depends(tiene_rol_secretaria)
 ):
     return services.crear_pregunta_sintetico(db, pregunta, informe_base_id)
 
