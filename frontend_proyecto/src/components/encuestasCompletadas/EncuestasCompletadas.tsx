@@ -3,6 +3,7 @@ import type { Materia } from "../../types/types";
 import { Link } from "react-router-dom";
 import ROUTES from "../../paths";
 import { MostrarPeriodo } from "../../constants";
+import api from "../../services/api";
 
 type Respuesta = {
   id: number;
@@ -30,14 +31,17 @@ export default function EncuestasCompletadas({ encuestas }: Props) {
   const [materias, setMaterias] = useState<Materia[]>([]);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/materias`)
-      .then((res) => res.json())
-      .then((data: Materia[]) => setMaterias(data))
+    api
+      .get("/materias")
+      .then((res) => {
+        setMaterias(res.data as Materia[]);
+      })
       .catch((err) => {
         console.error("Error al obtener materias:", err);
         setMaterias([]);
       });
   }, [encuestas]);
+
 
   if (encuestas.length === 0) {
     return (

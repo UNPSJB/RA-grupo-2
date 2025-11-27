@@ -7,6 +7,8 @@ import ROUTES from "../../../paths";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import InformeSinteticoPDF from "./vistas/InformeCompletoPDF";
+import { useAuth } from "../../../context/AuthContext";
+import api from "../../../services/api";
 
 
 const TABS_MAP = new Map([
@@ -27,18 +29,11 @@ const syntheticSteps = [
     { name: '5. Observaciones', cod: '5' },
 ];
 
-export function mostrarPeriodo(periodo: string) {
-    switch (periodo) {
-        case "PRIMER_CUATRI": return "Primer Cuatrimestre";
-        case "SEGUNDO_CUATRI": return "Segundo Cuatrimestre";
-        case "ANUAL": return "Anual";
-        default: return periodo;
-    }
-}
-
 function InformeSinteticoDetail() {
     const [carrera, setCarrera] = useState<Carrera | null>(null);
     const [departamento, setDepartamento] = useState<Departamento | null>(null);
+    const { currentUser } = useAuth();
+    const rol = currentUser?.role_name;
 
     const handleDownloadPDF = async () => {
         if (!informe || !carrera || !departamento) return;
@@ -57,7 +52,7 @@ function InformeSinteticoDetail() {
         saveAs(blob, `Informe_${informe.titulo}.pdf`);
     };
 
-    const { id, id_dpto } = useParams<{ id: string, id_dpto: string }>();
+    const { id } = useParams<{ id: string }>();
     const [informe, setInforme] = useState<InformeCompletado | null>(null);
     const [preguntasBase, setPreguntasBase] = useState<Pregunta[]>([]);
     const [loading, setLoading] = useState(true);
@@ -95,44 +90,40 @@ function InformeSinteticoDetail() {
         scrollRef.current.scrollLeft = scrollLeft - walk;
     };
 
-    useEffect(() => {
-        if (!id) {
-            setError("ID de informe no proporcionado");
+useEffect(() => {
+    if (!id) {
+        setError("ID de informe no proporcionado");
+        setLoading(false);
+        return;
+    }
+
+    const fetchData = async () => {
+        try {
+            const dataInforme: InformeCompletado = await fetchInforme(id);
+            setInforme(dataInforme);
+
+            const dataPreguntas: Pregunta[] = await fetchPreguntasBase(dataInforme.informe_base_id);
+            setPreguntasBase(dataPreguntas);
+            if (dataPreguntas.length > 0) setCurrentStep(0);
+
+            const resCarrera = await api.get(`/carreras/${dataInforme.carrera_id}`);
+            const dataCarrera = resCarrera.data;
+            setCarrera(dataCarrera);
+
+            const resDpto = await api.get(`/departamentos/${dataCarrera.departamento_id}`);
+            setDepartamento(resDpto.data);
+
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || "Error al cargar los datos del informe.");
+        } finally {
             setLoading(false);
-            return;
         }
+    };
 
-        const fetchData = async () => {
-            try {
-                const dataInforme: InformeCompletado = await fetchInforme(id);
-                setInforme(dataInforme);
+    fetchData();
+}, [id]);
 
-                const dataPreguntas: Pregunta[] = await fetchPreguntasBase(dataInforme.informe_base_id);
-                setPreguntasBase(dataPreguntas);
-                if (dataPreguntas.length > 0) setCurrentStep(0);
-
-                const resCarrera = await fetch(`http://127.0.0.1:8000/carreras/${dataInforme.carrera_id}`);
-                if (resCarrera.ok) {
-                    const dataCarrera = await resCarrera.json();
-                    setCarrera(dataCarrera);
-
-                    const resDpto = await fetch(`http://127.0.0.1:8000/departamentos/${dataCarrera.departamento_id}`);
-                    if (resDpto.ok) {
-                        const dataDpto = await resDpto.json();
-                        setDepartamento(dataDpto);
-                    }
-                }
-
-            } catch (err: any) {
-                console.error(err);
-                setError(err.message || "Error al cargar los datos del informe.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [id]);
 
 
 
@@ -156,12 +147,15 @@ function InformeSinteticoDetail() {
             {loading ? <p>Cargando...</p> : <div className="alert alert-danger">{error || "Informe no encontrado."}</div>}
         </div>
     );
+
     const returnPath = (() => {
-        if (id_dpto && id_dpto !== ':id_dpto' && id_dpto.toUpperCase() !== 'ID_DPTO') {
-            return ROUTES.INFORMES_SINTETICOS_COMPLETADOS(id_dpto);
+        if (rol === "departamento") {
+            return ROUTES.INFORMES_SINTETICOS_COMPLETADOS;
+        } else {
+            return ROUTES.INFORMES_SINTETICOS;
         }
-        return ROUTES.INFORMES_SINTETICOS;
     })();
+
     return (
         <div className="bg-light">
             <div className="container-lg py-4">

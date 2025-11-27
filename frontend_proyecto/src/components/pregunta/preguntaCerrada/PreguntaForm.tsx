@@ -3,6 +3,7 @@ import OpcionesSelector from "./OpcionesSelector";
 import NuevaOpcionForm from "./NuevaOpcionForm";
 import MensajeExito from "./MensajeExito";
 import CategoriaSelector from "./CategoriaSelector";
+import api from "../../../services/api";
 
 interface Opcion {
   id: number;
@@ -23,18 +24,21 @@ export default function PreguntaForm() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>("");
 
-
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/opciones")
-      .then((res) => res.json())
-      .then((data) => setOpciones(Array.isArray(data) ? data : []))
+    api.get("/opciones")
+      .then((res) => {
+        const data = res.data;
+        setOpciones(Array.isArray(data) ? data : []);
+      })
       .catch((err) => console.error("Error cargando opciones:", err));
   }, []);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/encuestas/1/categorias") //hardcodeado encuesta 1
-      .then((res) => res.json())
-      .then((data) => setCategorias(Array.isArray(data) ? data : []))
+    api.get("/encuestas/1/categorias")
+      .then((res) => {
+        const data = res.data;
+        setCategorias(Array.isArray(data) ? data : []);
+      })
       .catch((err) => console.error("Error cargando categorias:", err));
   }, []);
 
@@ -60,19 +64,11 @@ export default function PreguntaForm() {
       return;
     }
 
-    fetch("http://127.0.0.1:8000/preguntas/cerrada", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        categoria_id: Number(categoriaSeleccionada),
-        enunciado,
-        opcion_ids: opcionSeleccionadas,
-      }),
+    api.post("/preguntas/cerrada", {
+      categoria_id: Number(categoriaSeleccionada),
+      enunciado,
+      opcion_ids: opcionSeleccionadas,
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error creando pregunta");
-        return res.json();
-      })
       .then(() => {
         setMensajeExito("¡La pregunta fue creada con éxito!");
         setEnunciado("");
@@ -92,7 +88,6 @@ export default function PreguntaForm() {
       )}
 
       <form onSubmit={handleSubmit}>
-        {/* Enunciado */}
         <div className="mb-3">
           <label className="form-label fw-bold">Enunciado</label>
           <input
@@ -104,21 +99,18 @@ export default function PreguntaForm() {
           />
         </div>
 
-        {/* Selector de categoría */}
         <CategoriaSelector
           categorias={categorias}
           categoriaSeleccionada={categoriaSeleccionada}
           onChange={(id) => setCategoriaSeleccionada(id)}
         />
 
-        {/* Selector de opciones */}
         <OpcionesSelector
           opciones={opciones}
           opcionSeleccionadas={opcionSeleccionadas}
           toggleOpcion={toggleOpcion}
         />
 
-        {/* Form para crear nueva opción */}
         <NuevaOpcionForm
           onOpcionCreada={(opcion) => {
             setOpciones([...opciones, opcion]);
@@ -126,7 +118,6 @@ export default function PreguntaForm() {
           }}
         />
 
-        {/* Botón guardar */}
         <div className="d-flex justify-content-end mt-3">
           <button type="submit" className="btn btn-primary">
             Guardar Pregunta

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
+// instancia api
+import api from "../../../services/api";
 
 interface NecesidadesItem { materia: Materia; equipamiento: string; bibliografia: string; }
 interface NecesidadesEstado { materia: Materia; equipamiento: string[]; bibliografia: string[]; }
@@ -33,13 +35,18 @@ export default function EquipamientoBibliografia({
                 setError(null);
                 notificarValidacion?.(false);
 
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/bibliografia_equipamiento/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/bibliografia_equipamiento/", 
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
-
-                if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
-                
-                const data: NecesidadesItem[] = await res.json();
+                const data: NecesidadesItem[] = res.data;
                 if (!Array.isArray(data)) throw new Error("Formato inválido");
 
                 const separar = (s: string): string[] => {
@@ -65,8 +72,10 @@ export default function EquipamientoBibliografia({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "Error desconocido");
+            } catch (err: any) {
+                console.error("Error al obtener necesidades:", err);
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }

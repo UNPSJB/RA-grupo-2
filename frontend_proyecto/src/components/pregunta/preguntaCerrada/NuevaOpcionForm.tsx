@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "../../../services/api";
 
 interface Opcion {
   id: number;
@@ -15,13 +16,9 @@ export default function NuevaOpcionForm({ onOpcionCreada }: Props) {
   const handleAgregarOpcion = () => {
     if (!nuevaOpcion.trim()) return;
 
-    fetch("http://127.0.0.1:8000/opciones", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contenido: nuevaOpcion }),
-    })
-      .then((res) => res.json())
-      .then((data: Opcion) => {
+    api.post("/opciones", { contenido: nuevaOpcion })
+      .then((res) => {
+        const data: Opcion = res.data;
         onOpcionCreada(data);
         setNuevaOpcion("");
       })

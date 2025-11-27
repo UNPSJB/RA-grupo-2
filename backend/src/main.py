@@ -1,4 +1,4 @@
-from settings import ENV
+from src.settings import ENV
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from src.database import engine

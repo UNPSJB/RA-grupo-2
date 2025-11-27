@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import ROUTES from "../../paths";
 import { MostrarPeriodo } from "../../constants";
+import api from "../../services/api";
 
 export interface Categoria {
   id: number;
@@ -82,62 +83,49 @@ export default function EncuestaCompletadaDetalle() {
     const walk = (x - startX) * 1.5;
     scrollRef.current.scrollLeft = scrollLeft - walk;
   };
+useEffect(() => {
+  if (!id) return;
 
-  useEffect(() => {
-    if (!id) return;
+  api.get(`/encuesta-completada/${id}`)
+    .then(async (res) => {
+      const data: EncuestaCompletada = res.data;
+      setEncuesta(data);
 
-    fetch(`http://127.0.0.1:8000/encuesta-completada/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener la encuesta completada");
-        return res.json();
-      })
-      .then(async (data: EncuestaCompletada) => {
-        setEncuesta(data);
+      api.get(`/materias/${data.materia_id}`)
+        .then((res) => setMateria(res.data))
+        .catch(() => setMateria(null));
 
-        // Fetch materia
-        fetch(`http://127.0.0.1:8000/materias/${data.materia_id}`)
-          .then((res) => res.json())
-          .then((m: Materia) => setMateria(m))
-          .catch(() => setMateria(null));
+      api.get(`/categorias/`)
+        .then((res) => setCategoriasInfo(res.data))
+        .catch(() => setCategoriasInfo([]));
 
-        // Fetch categorías
-        fetch("http://127.0.0.1:8000/categorias/")
-          .then((res) => res.json())
-          .then((cats: Categoria[]) => setCategoriasInfo(cats))
-          .catch(() => setCategoriasInfo([]));
+      const preguntasTemp: Record<number, Pregunta> = {};
+      const opcionesTemp: Record<number, Opcion[]> = {};
 
-        // Preguntas + opciones
-        const preguntasTemp: Record<number, Pregunta> = {};
-        const opcionesTemp: Record<number, Opcion[]> = {};
+      await Promise.all(
+        data.respuestas.map(async (r) => {
+          try {
+            const pRes = await api.get(`/preguntas/${r.pregunta_id}`);
+            const pregunta: Pregunta = pRes.data;
+            preguntasTemp[r.pregunta_id] = pregunta;
 
-        await Promise.all(
-          data.respuestas.map(async (r) => {
-            const pRes = await fetch(
-              `http://127.0.0.1:8000/preguntas/${r.pregunta_id}`
-            );
-            if (pRes.ok) {
-              const pregunta: Pregunta = await pRes.json();
-              preguntasTemp[r.pregunta_id] = pregunta;
-
-              if (pregunta.tipo === "cerrada") {
-                const oRes = await fetch(
-                  `http://127.0.0.1:8000/preguntas/${pregunta.id}/opciones`
-                );
-                if (oRes.ok) {
-                  const ops: Opcion[] = await oRes.json();
-                  opcionesTemp[pregunta.id] = ops;
-                }
-              }
+            if (pregunta.tipo === "cerrada") {
+              const oRes = await api.get(`/preguntas/${pregunta.id}/opciones`);
+              opcionesTemp[pregunta.id] = oRes.data;
             }
-          })
-        );
+          } catch (err) {
+            console.error("Error cargando pregunta/opciones", err);
+          }
+        })
+      );
 
-        setPreguntas(preguntasTemp);
-        setOpciones(opcionesTemp);
-      })
-      .catch(() => setError("No se pudo cargar la encuesta completada"))
-      .finally(() => setLoading(false));
-  }, [id]);
+      setPreguntas(preguntasTemp);
+      setOpciones(opcionesTemp);
+    })
+    .catch(() => setError("No se pudo cargar la encuesta completada"))
+    .finally(() => setLoading(false));
+}, [id]);
+
 
   const categorias = Object.values(preguntas).reduce((acc, p) => {
     if (!acc[p.categoria_id]) acc[p.categoria_id] = [];

@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import PreguntasCategoria from "./Categoria";
 import MensajeExito from "../../pregunta/preguntaCerrada/MensajeExito";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import type { Categoria, Materia } from "../../../types/types";
+import api from "../../../services/api";
 
 interface Respuesta {
   pregunta_id: number;
@@ -156,17 +157,14 @@ export default function CompletarEncuesta() {
   const handleTabClick = (idCategoria: number) => {
     const targetIndex = categorias.findIndex(c => c.id === idCategoria);
 
-    // Navegación libre hacia atrás o en lo ya desbloqueado
     if (targetIndex <= maxStepReached) {
       setMensaje(null);
       setCategoriaActivaId(idCategoria);
       return;
     }
 
-    // Avanzar al siguiente inmediato requiere validación
     if (targetIndex === maxStepReached + 1) {
       if (validarCategoriaActual()) {
-        // BLINDAJE AQUÍ TAMBIÉN
         setMaxStepReached(prev => Math.max(prev, targetIndex));
         setCategoriaActivaId(idCategoria);
       }
@@ -184,12 +182,12 @@ export default function CompletarEncuesta() {
     });
   };
 
-  const manejarCambioRespuestas = (pregunta_id: number, opcion_id: number | null, texto?: string) => {
+  const manejarCambioRespuestas = useCallback((pregunta_id: number, opcion_id: number | null, texto?: string) => {
     setRespuestasGlobales((prev) => {
       const existentes = prev.filter((r) => r.pregunta_id !== pregunta_id);
       return [...existentes, { pregunta_id, opcion_id, texto_respuesta: texto ?? null }];
     });
-  };
+  }, []);
 
   const enviarEncuesta = async () => {
     if (!validarTodoParaEnviar()) return;
@@ -206,17 +204,14 @@ export default function CompletarEncuesta() {
     };
 
     try {
-      const res = await fetch('http://localhost:8000/encuesta-completada/con-respuestas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos),
-      });
-      if (!res.ok) throw new Error('Error al enviar encuesta');
+      await api.post('/encuesta-completada/con-respuestas', datos);
       setMensajeExito('¡La encuesta fue completada con éxito!');
       setRespuestasGlobales([]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setMensaje(<div className="alert alert-danger mb-3"><i className="bi bi-wifi-off me-2"></i> Error al enviar.</div>);
+    
+      const errorMessage = err.response?.data?.detail || 'Error al enviar la encuesta';
+      setMensaje(<div className="alert alert-danger mb-3"><i className="bi bi-wifi-off me-2"></i> {errorMessage}</div>);
     } finally {
       setEnviando(false);
     }
@@ -243,11 +238,15 @@ export default function CompletarEncuesta() {
 
   useEffect(() => {
     const { materiaId, encuestaId = 1 } = location.state || {};
-    if (materiaId) fetch(`http://127.0.0.1:8000/materias/${materiaId}`).then(res => res.json()).then(setMateria).catch(console.error);
+    if (materiaId) {
+      api.get(`/materias/${materiaId}`)
+        .then(res => setMateria(res.data))
+        .catch(console.error);
+    }
     setLoading(true);
-    fetch(`http://localhost:8000/encuestas/${encuestaId}/categorias`)
-      .then((res) => res.json())
-      .then((todas: Categoria[]) => {
+    api.get(`/encuestas/${encuestaId}/categorias`)
+      .then((res) => {
+        const todas: Categoria[] = res.data;
         const dataOrdenada = [...todas].sort((a, b) => a.cod.localeCompare(b.cod, 'es', { sensitivity: 'base' }));
         setCategorias(dataOrdenada);
         if (dataOrdenada.length > 0) setCategoriaActivaId(dataOrdenada[0].id);

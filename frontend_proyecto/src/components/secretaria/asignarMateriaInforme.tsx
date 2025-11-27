@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+// instancia api
+import api from "../../services/api";
 
 interface Materia {
   id: number;
@@ -28,7 +30,6 @@ interface AsignarFormularios {
   informe_catedra_id: number | null;
 }
 
-const API_URL = "http://127.0.0.1:8000";
 
 export default function AsignarFormularios() {
   const [materias, setMaterias] = useState<Materia[]>([]);
@@ -53,24 +54,15 @@ export default function AsignarFormularios() {
       try {
         const [materiasRes, encuestasRes, informesRes, departamentosRes] =
           await Promise.all([
-            fetch(`${API_URL}/materias/`),
-            fetch(`${API_URL}/encuestas/`),
-            fetch(`${API_URL}/informes_catedra/`),
-            fetch(`${API_URL}/departamentos/`),
+            api.get("/materias/"),
+            api.get("/encuestas/"),
+            api.get("/informes_catedra/"),
+            api.get("/departamentos/"),
           ]);
-
-        if (!materiasRes.ok) throw new Error("Error al cargar materias");
-        if (!encuestasRes.ok) throw new Error("Error al cargar encuestas");
-        if (!informesRes.ok) throw new Error("Error al cargar informes");
-        if (!departamentosRes.ok) throw new Error("Error al cargar departamentos"); 
-
-        const [materiasData, encuestasData, informesData, departamentosData] =
-          await Promise.all([
-            materiasRes.json(),
-            encuestasRes.json(),
-            informesRes.json(),
-            departamentosRes.json(), 
-          ]);
+        const materiasData = materiasRes.data;
+        const encuestasData = encuestasRes.data;
+        const informesData = informesRes.data;
+        const departamentosData = departamentosRes.data;
 
         setMaterias(materiasData);
         setEncuestas(encuestasData);
@@ -82,10 +74,10 @@ export default function AsignarFormularios() {
         });
         setDepartamentoMap(newMap);
         
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Error desconocido al cargar datos"
-        );
+      } catch (err: any) {
+        console.error("Error cargando datos iniciales:", err);
+        const msg = err.response?.data?.detail || err.message || "Error desconocido al cargar datos";
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -135,23 +127,14 @@ export default function AsignarFormularios() {
     };
 
     try {
-      const response = await fetch(`${API_URL}/materias/asignar-formularios/`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Error al guardar los cambios");
-      }
-
+      const response = await api.patch("/materias/asignar-formularios/", payload);
+      const data = response.data;
       setSuccessMessage(data.message || "Asignación exitosa");
-    } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : "Error desconocido al guardar"
-      );
+
+    } catch (err: any) {
+      console.error("Error al asignar:", err);
+      const msg = err.response?.data?.detail || err.message || "Error desconocido al guardar";
+      setSubmitError(msg);
     }
   };
 
@@ -269,7 +252,7 @@ export default function AsignarFormularios() {
             )}
             <button
               type="submit"
-              className="btn btn-primary w-100"
+              className="btn btn-theme-primary w-100"
               disabled={selectedMaterias.size === 0 || (!selectedEncuesta && !selectedInforme)}
             >
               Asignar Formularios a {selectedMaterias.size} Materias

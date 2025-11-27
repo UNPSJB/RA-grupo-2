@@ -5,8 +5,10 @@ import ContenidoPasos from "../../docente/informe/ContenidoPasos";
 import type { Categoria } from "../../../types/types";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-import InformeCatedraPDF from "./InformeCatedraPDF";
-
+import InformeCatedraPDF from "./InformeCatedraPdf";
+// instancia de axios 
+import api from "../../../services/api";
+import { useAuth } from "../../../context/AuthContext";
 
 interface Pregunta {
   id: number;
@@ -14,6 +16,7 @@ interface Pregunta {
   tipo: string;
   categoria_id: number;
   categoria: Categoria;
+  obligatoria:boolean;
 }
 
 export interface Opcion {
@@ -62,19 +65,6 @@ type RespuestaValor = {
   texto_respuesta: string | null;
 };
 
-export function mostrarPeriodo(periodo: string) {
-  switch (periodo) {
-    case "PRIMER_CUATRI":
-      return "Primer Cuatrimestre";
-    case "SEGUNDO_CUATRI":
-      return "Segundo Cuatrimestre";
-    case "ANUAL":
-      return "Anual";
-    default:
-      return periodo;
-  }
-}
-
 export default function InformeCatedraDetalle() {
   const handlePDF = async () => {
     if (!informe) return;
@@ -91,6 +81,8 @@ export default function InformeCatedraDetalle() {
   };
 
   const { id } = useParams<{ id: string }>();
+  const { currentUser } = useAuth();
+  const rol = currentUser?.role_name;
   const [informe, setInforme] = useState<InformeCompletadoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,19 +114,16 @@ export default function InformeCatedraDetalle() {
 
     const fetchInforme = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/informe-catedra-completado/${id}`);
-        if (!res.ok) throw new Error("Error al obtener el informe");
-        const dataInforme: InformeCompletadoDetalle = await res.json();
+        const res = await api.get(`/informe-catedra-completado/${id}`);
+        const dataInforme: InformeCompletadoDetalle = res.data;
 
         setInforme(dataInforme);
 
         if (dataInforme.informe_catedra_base_id) {
-          const resBase = await fetch(
-            `http://127.0.0.1:8000/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`
+          const resBase = await api.get(
+            `/informes_catedra/${dataInforme.informe_catedra_base_id}/categorias_con_preguntas`
           );
-          if (!resBase.ok) throw new Error("No se pudo cargar la estructura base del informe.");
-
-          const dataBase: CategoriaConPreguntas[] = await resBase.json();
+          const dataBase: CategoriaConPreguntas[] = resBase.data;
           const dataOrdenada = [...dataBase].sort((a, b) =>
             a.cod.localeCompare(b.cod, "es", { sensitivity: "base" })
           );
@@ -148,38 +137,30 @@ export default function InformeCatedraDetalle() {
 
         const { materiaId, anio, periodo } = dataInforme;
 
-        fetch(
-          `http://127.0.0.1:8000/datos_estadisticos/?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            if (data && data.length > 0) {
-              const dataOrdenada = [...data].sort((a, b) =>
-                a.categoria_cod.localeCompare(b.categoria_cod, "es", {
-                  sensitivity: "base",
-                })
-              );
-              setDatosEstadisticos(dataOrdenada);
-            }
-          });
+        const paramsEstadistica = {
+          id_materia: materiaId,
+          anio: anio,
+          periodo: periodo
+        };
+        const resEstadisticas = await api.get('/datos_estadisticos/', { params: paramsEstadistica });
+        const dataStats = resEstadisticas.data;
 
-        fetch(
-          `http://127.0.0.1:8000/opciones`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            if (data) {
-              SetOpciones(data);
-            }
-          });
+        if (dataStats && dataStats.length > 0) {
+          const dataOrdenada = [...dataStats].sort((a: any, b: any) =>
+            a.categoria_cod.localeCompare(b.categoria_cod, "es", {
+              sensitivity: "base",
+            })
+          );
+          setDatosEstadisticos(dataOrdenada);
+        }
 
-        fetch(
-          `http://127.0.0.1:8000/datos_estadisticos/cantidad_encuestas_completadas?id_materia=${materiaId}&anio=${anio}&periodo=${periodo}`
-        )
-          .then((res) => res.json())
-          .then((data) => setCantidad(data));
+        const resCantidad = await api.get('/datos_estadisticos/cantidad_encuestas_completadas', { params: paramsEstadistica });
+        setCantidad(resCantidad.data);
+
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error cargando detalles:", err);
+        const mensaje = err.response?.data?.detail || err.message || "Error desconocido al obtener el informe.";
+        setError(mensaje);
       } finally {
         setLoading(false);
       }
@@ -200,11 +181,13 @@ export default function InformeCatedraDetalle() {
     return mapaRespuestas;
   }, [informe]);
 
-  const datosGenerales = useMemo(() => {
+const datosGenerales = useMemo(() => {
     if (!informe) return {};
     return {
-      cicloLectivo: informe.anio ?? undefined,
-      periodo: informe.periodo ?? undefined,
+      anio: informe.anio,      
+      materiaId: informe.materiaId, 
+      periodo: informe.periodo,
+      cicloLectivo: informe.anio, 
       cantidadAlumnos: informe.cantidadAlumnos,
       cantidadComisionesTeoricas: informe.cantidadComisionesTeoricas,
       cantidadComisionesPracticas: informe.cantidadComisionesPracticas,
@@ -233,13 +216,21 @@ export default function InformeCatedraDetalle() {
     );
   }
 
+  const returnPath = (() => {
+    if (rol === "departamento") {
+      return ROUTES.INFORMES_CATEDRA;
+    } else {
+      return ROUTES.INFORMES_CATEDRA_COMPLETADOS;
+    }
+  })();
+
   if (error) {
     return (
       <div className="container py-4">
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Error</h4>
           <p>{error}</p>
-          <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-outline-danger">
+          <Link to={returnPath} className="btn btn-outline-danger">
             Volver al listado
           </Link>
         </div>
@@ -253,7 +244,7 @@ export default function InformeCatedraDetalle() {
         <div className="alert alert-warning" role="alert">
           No se encontró el informe solicitado.
         </div>
-        <Link to={ROUTES.INFORMES_CATEDRA} className="btn btn-secondary">
+        <Link to={returnPath} className="btn btn-secondary">
           Volver al listado
         </Link>
       </div>
@@ -320,7 +311,8 @@ export default function InformeCatedraDetalle() {
                 paddingRight: "15px",
               }}
             >
-              <ContenidoPasos
+            <ContenidoPasos
+                datosIniciales={datosGenerales}
                 currentStep={currentStep}
                 isReadOnly={true}
                 categoriasConPreguntas={gruposBase}
@@ -328,15 +320,25 @@ export default function InformeCatedraDetalle() {
                 datosEstadisticos={datosEstadisticos}
                 cantidad={cantidad}
                 docenteMateriaId={informe.docente_materia_id}
-                datosIniciales={datosGenerales}
-                manejarCambio={() => { }}
-                onDatosGenerados={() => { }}
+                manejarCambio={() => {}}
+                onDatosGenerados={() => {}}
                 nombresFuncion={{
                   JTP: informe.JTP,
                   aux1: informe.aux_primera,
                   aux2: informe.aux_segunda,
                 }}
-              />
+                setNombresFuncion={{
+                  SetJTP: () => {},
+                  SetAux1: () => {},
+                  SetAux2: () => {},
+                }}
+                cantidadesComisiones={{
+                  teoricas: informe.cantidadComisionesTeoricas,
+                  practicas: informe.cantidadComisionesPracticas,
+                  }} 
+                setCantidadesComisiones={() => {}}
+            />
+
             </div>
           </div>
 
@@ -354,7 +356,7 @@ export default function InformeCatedraDetalle() {
               )}
               {isLastStep ? (
                 <Link
-                  to={ROUTES.INFORMES_CATEDRA}
+                  to={returnPath}
                   className="btn btn-primary rounded-pill px-4"
                   style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
                 >
@@ -362,9 +364,8 @@ export default function InformeCatedraDetalle() {
                 </Link>
               ) : (
                 <button
-                  className="btn btn-primary rounded-pill px-4"
+                  className="btn btn-theme-primary rounded-pill px-4"
                   onClick={() => goToStep(currentStep + 1)}
-                  style={{ backgroundColor: "#005ec2", borderColor: "#005ec2" }}
                 >
                   Siguiente
                 </button>

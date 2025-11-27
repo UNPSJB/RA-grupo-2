@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
     role_id: Optional[int] = None
-
+    role_name: str
 
 class UserCreate(BaseModel):
     username: str
@@ -19,6 +19,9 @@ class UserCreate(BaseModel):
 class User(UserBase):
     id: int
     role_name: str
+    alumno_id: Optional[int] = None
+    docente_id: Optional[int] = None
+    departamento_id: Optional[int] = None
     model_config = {"from_attributes": True}
 
 
@@ -32,3 +35,4 @@ class UserUpdate(BaseModel):
 class UserDelete(BaseModel):
     id: int
     msg: str
+

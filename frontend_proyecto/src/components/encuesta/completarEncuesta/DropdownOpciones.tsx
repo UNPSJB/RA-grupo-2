@@ -40,7 +40,10 @@ export default function DropdownOpciones({
             <li key={o.id}>
               <button
                 className={`dropdown-item ${seleccionada === o.id ? "active" : ""}`}
-                onClick={() => onSeleccionar(o.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSeleccionar(o.id);
+                }}
               >
                 {o.contenido}
                </button>

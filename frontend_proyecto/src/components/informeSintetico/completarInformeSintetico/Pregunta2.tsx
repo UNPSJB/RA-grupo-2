@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import type { Materia, Pregunta, Respuesta } from "../../../types/types";
 import { CampoTextArea, CampoPorcentaje } from "./Campos";
 
+//instancia api
+import api from "../../../services/api";
+
 interface TablaPregunta2Item {
     materia: Materia;
     porcentaje_teoricas: number | null;
@@ -44,15 +47,21 @@ export default function Pregunta2({
                 setError(null);
                 notificarValidacion?.(false); 
 
-                const res = await fetch(
-                    `http://127.0.0.1:8000/informes_sinteticos_completados/tabla_pregunta_2/?id_dpto=${departamentoId}&id_carrera=${carreraId}&anio=${anio}&periodo=${periodo}`
+                const res = await api.get(
+                    "/informes_sinteticos_completados/tabla_pregunta_2/", 
+                    {
+                        params: {
+                            id_dpto: departamentoId,
+                            id_carrera: carreraId,
+                            anio: anio,
+                            periodo: periodo
+                        }
+                    }
                 );
-
-                if (!res.ok) throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
-                const data = await res.json();
+                const data = res.data;
                 if (!Array.isArray(data)) throw new Error("Formato inválido");
 
-                const itemsIniciales: TablaPregunta2Item[] = data.map((itm) => ({
+                const itemsIniciales: TablaPregunta2Item[] = data.map((itm: any) => ({
                     materia: itm.materia,
                     porcentaje_teoricas: itm.porcentaje_teoricas ? parseFloat(itm.porcentaje_teoricas) : null,
                     porcentaje_practicas: itm.porcentaje_practicas ? parseFloat(itm.porcentaje_practicas) : null,
@@ -62,7 +71,7 @@ export default function Pregunta2({
                 setItems(itemsIniciales);
                 setItemsOriginales(JSON.parse(JSON.stringify(itemsIniciales)));
 
-                const respuestasIniciales = data.map((itm) => ({
+                const respuestasIniciales = data.map((itm: any) => ({
                     pregunta_id: pregunta.id,
                     texto_respuesta: JSON.stringify({
                         porcentaje_teoricas: itm.porcentaje_teoricas,
@@ -73,8 +82,10 @@ export default function Pregunta2({
                 }));
                 manejarCambio?.(respuestasIniciales);
 
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "Error desconocido");
+            } catch (err: any) {
+                console.error("Error al obtener información:", err);
+                const errorMsg = err.response?.data?.detail || err.message || "Error desconocido";
+                setError(errorMsg);
             } finally {
                 setIsLoading(false);
             }

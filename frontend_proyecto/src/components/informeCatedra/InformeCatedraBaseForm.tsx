@@ -1,8 +1,72 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CategoriaManager from "./ManejadorCategoria"; 
 import OpcionesManager from "./ManejadorOpciones";  
 import ROUTES from "../../paths"; 
+import api from "../../services/api";
+
+// --- COMPONENTE INTERNO: SELECT PERSONALIZADO ---
+const CustomSelect = ({ label, value, options, onChange, disabled, placeholder = "Seleccione..." }: any) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Cerrar si se hace click fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find((opt: any) => opt.value === value);
+
+    return (
+        <div className="position-relative" ref={containerRef}>
+            <label className="form-label fw-bold">{label}</label>
+            <div 
+                className={`form-select d-flex align-items-center justify-content-between ${disabled ? 'bg-light text-muted' : 'bg-white'}`}
+                style={{ 
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    backgroundImage: 'none' // <--- ¡ESTO QUITA LA DOBLE FLECHA!
+                }}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+            >
+                <span className={!selectedOption ? 'text-muted' : ''}>
+                    {selectedOption ? selectedOption.label : placeholder}
+                </span>
+                {/* Flechita SVG con tu color */}
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 5l6 6 6-6"/>
+                </svg>
+            </div>
+
+            {isOpen && (
+                <div className="card shadow-lg position-absolute w-100 start-0 border-0" 
+                     style={{ zIndex: 1050, top: '105%', maxHeight: '250px', overflowY: 'auto' }}>
+                    <ul className="list-unstyled m-0 p-1">
+                        {options.map((opt: any) => (
+                            <li 
+                                key={opt.value}
+                                className="px-3 py-2 rounded-2 cursor-pointer custom-option-item"
+                                style={{ cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setIsOpen(false);
+                                }}
+                            >
+                                {opt.label}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+// --- FIN COMPONENTE ---
 
 interface CategoriaTemp { cod: string; texto: string; }
 interface PreguntaTemp { 
@@ -30,9 +94,11 @@ export default function InformeCatedraBaseForm() {
     const [esObligatoria, setEsObligatoria] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:8000/opciones")
-            .then((res) => res.json())
-            .then((data) => setOpcionesCatalogo(Array.isArray(data) ? data : []))
+        api.get("/opciones")
+            .then((res) => {
+                const data = res.data;
+                setOpcionesCatalogo(Array.isArray(data) ? data : []);
+            })
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
 
@@ -75,40 +141,24 @@ export default function InformeCatedraBaseForm() {
         setCargando(true);
 
         try {
-            const resInforme = await fetch("http://localhost:8000/informes_catedra/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ titulo }),
-            });
-            if (!resInforme.ok) {
-                const errorData = await resInforme.json();
-                throw new Error(errorData.detail || "Error al crear el informe base.");
-            }
-            const { id: informeId } = await resInforme.json();
+            const resInforme = await api.post("/informes_catedra/", { titulo });
+            const { id: informeId } = resInforme.data;
             const categoriasCreadas = [];
             
             for (const categoriaTemp of categorias) {
-                const resCat = await fetch("http://localhost:8000/categorias/paraInforme/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        cod: categoriaTemp.cod,
-                        texto: categoriaTemp.texto || "",
-                        informe_base_id: informeId,
-                    }),
+                const resCat = await api.post("/categorias/paraInforme/", {
+                    cod: categoriaTemp.cod,
+                    texto: categoriaTemp.texto || "",
+                    informe_base_id: informeId,
                 });
-                if (!resCat.ok) {
-                    const errorData = await resCat.json();
-                    throw new Error(errorData.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`);
-                }
-                const categoriaCreada = await resCat.json();
+                const categoriaCreada = resCat.data;
                 categoriasCreadas.push(categoriaCreada);
             }
 
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
                 if (!categoria) continue;
-                const endpoint = preg.tipo === 'cerrada' ? "http://localhost:8000/preguntas/cerrada" : "http://localhost:8000/preguntas/abierta";   
+                const endpoint = preg.tipo === 'cerrada' ? "/preguntas/cerrada" : "/preguntas/abierta";   
                 const payload = {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
@@ -116,29 +166,31 @@ export default function InformeCatedraBaseForm() {
                     obligatoria: preg.obligatoria,
                     ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }),
                 };
-                const resPreg = await fetch(endpoint, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload),
-                });
-
-                if (!resPreg.ok) {
-                     const errorData = await resPreg.json();
-                     throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
-                }
+                await api.post(endpoint, payload);
             }
 
             alert("Informe creado con éxito.");
             navigate(ROUTES.HOME);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error en la cascada de creación:", error);
-            const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
+            const messageToShow = error.response?.data?.detail || error.message || "Error desconocido al procesar la solicitud.";
             alert(`Fallo en la creación del informe. Error: ${messageToShow}`);
         } finally {
             setCargando(false);
         }
     };
+
+    // --- PREPARAR OPCIONES PARA EL SELECT PERSONALIZADO ---
+    const tipoOptions = [
+        { value: 'abierta', label: 'Abierta' },
+        { value: 'cerrada', label: 'Cerrada' }
+    ];
+
+    const categoriaOptions = categorias.map(cat => ({
+        value: cat.cod,
+        label: `${cat.cod} ${cat.texto ? `- ${cat.texto}` : ''}`
+    }));
 
     return (
         <div className="container py-4">
@@ -170,28 +222,28 @@ export default function InformeCatedraBaseForm() {
                         <div className="card mb-4 p-3"> 
                             <div className="row mb-3">
                                 <div className="col-md-3">
-                                    <label className="form-label fw-bold">Tipo</label>
-                                    <select 
-                                        className="form-select" 
-                                        value={nuevoTipoPregunta} 
-                                        onChange={(e) => { setNuevoTipoPregunta(e.target.value as 'abierta' | 'cerrada'); setOpcionesSeleccionadas([]); }} 
+                                    {/* USANDO EL NUEVO SELECT PERSONALIZADO */}
+                                    <CustomSelect 
+                                        label="Tipo"
+                                        value={nuevoTipoPregunta}
+                                        options={tipoOptions}
                                         disabled={cargando || categorias.length === 0}
-                                    >
-                                        <option value="abierta">Abierta</option>
-                                        <option value="cerrada">Cerrada</option>
-                                    </select>
+                                        onChange={(val: any) => { 
+                                            setNuevoTipoPregunta(val as 'abierta' | 'cerrada'); 
+                                            setOpcionesSeleccionadas([]); 
+                                        }}
+                                    />
                                 </div>
                                 <div className="col-md-9">
-                                    <label className="form-label fw-bold">Categoría</label>
-                                    <select 
-                                        className="form-select" 
-                                        value={categoriaSeleccionada} 
-                                        onChange={(e) => setCategoriaSeleccionada(e.target.value)} 
+                                    {/* USANDO EL NUEVO SELECT PERSONALIZADO */}
+                                    <CustomSelect 
+                                        label="Categoría"
+                                        value={categoriaSeleccionada}
+                                        options={categoriaOptions}
                                         disabled={cargando || categorias.length === 0}
-                                    >
-                                        <option value="">Seleccione categoría</option>
-                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
-                                    </select>
+                                        placeholder="Seleccione categoría"
+                                        onChange={(val: any) => setCategoriaSeleccionada(val)}
+                                    />
                                 </div>
                             </div>
                             <div className="mb-3">

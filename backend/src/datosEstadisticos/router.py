@@ -24,3 +24,16 @@ def obtener_respuestas_abiertas(
     db: Session = Depends(get_db)
 ):
     return services.obtener_respuestas_abiertas_por_materia(db, id_materia, anio, periodo)
+
+@router.get("/materia/{id_materia}", response_model=schemas.EstadisticasMateriaCompleto)
+def get_estadisticas_materia(
+    id_materia: int, 
+    anio: int, 
+    periodo: Periodo, 
+    db: Session = Depends(get_db)
+):
+    return services.obtener_datos_estadisticos_con_detalle(db, id_materia, anio, periodo)
+
+@router.get("/cantidad_inscriptos", response_model=int)
+def get_cantidad_inscriptos(id_materia: int, anio: int, periodo: Periodo, db: Session = Depends(get_db)):
+    return services.obtener_cantidad_inscriptos(db, id_materia, anio, periodo)

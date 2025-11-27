@@ -1,16 +1,78 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CategoriaManager from "../informeCatedra/ManejadorCategoria"
 import OpcionesManager from "../informeCatedra/ManejadorOpciones";
 import ROUTES from "../../paths";
+import api from "../../services/api";
+
+// --- COMPONENTE INTERNO: SELECT PERSONALIZADO ---
+const CustomSelect = ({ label, value, options, onChange, disabled, placeholder = "Seleccione..." }: any) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find((opt: any) => opt.value === value);
+
+    return (
+        <div className="position-relative" ref={containerRef}>
+            <label className="form-label fw-bold">{label}</label>
+            <div
+                className={`form-select d-flex align-items-center justify-content-between ${disabled ? 'bg-light text-muted' : 'bg-white'}`}
+                style={{
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    backgroundImage: 'none' // <--- ESTA LÍNEA ES LA QUE ELIMINA LA DOBLE FLECHA
+                }}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+            >
+                <span className={!selectedOption ? 'text-muted' : ''}>
+                    {selectedOption ? selectedOption.label : placeholder}
+                </span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--color-brand-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 5l6 6 6-6" />
+                </svg>
+            </div>
+
+            {isOpen && (
+                <div className="card shadow-lg position-absolute w-100 start-0 border-0"
+                    style={{ zIndex: 1050, top: '105%', maxHeight: '250px', overflowY: 'auto' }}>
+                    <ul className="list-unstyled m-0 p-1">
+                        {options.map((opt: any) => (
+                            <li
+                                key={opt.value}
+                                className="px-3 py-2 rounded-2 cursor-pointer custom-option-item"
+                                style={{ cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setIsOpen(false);
+                                }}
+                            >
+                                {opt.label}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+// --- FIN COMPONENTE ---
 
 interface CategoriaTemp { cod: string; texto: string; }
-interface PreguntaTemp { 
-    enunciado: string; 
-    categoria_cod: string; 
-    tipo: 'abierta' | 'cerrada'; 
-    opcion_ids: number[]; 
-    obligatoria: boolean; 
+interface PreguntaTemp {
+    enunciado: string;
+    categoria_cod: string;
+    tipo: 'abierta' | 'cerrada';
+    opcion_ids: number[];
+    obligatoria: boolean;
 }
 interface Opcion { id: number; contenido: string; }
 
@@ -21,20 +83,20 @@ export default function EncuestaBaseForm() {
 
     const [categorias, setCategorias] = useState<CategoriaTemp[]>([]);
     const [preguntas, setPreguntas] = useState<PreguntaTemp[]>([]);
-    const [opcionesCatalogo, setOpcionesCatalogo] = useState<Opcion[]>([]); 
+    const [opcionesCatalogo, setOpcionesCatalogo] = useState<Opcion[]>([]);
 
     const [nuevoEnunciado, setNuevoEnunciado] = useState("");
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
-    const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta'); 
-    const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]); 
-    const [esObligatoria, setEsObligatoria] = useState(false); // Nuevo estado
+    const [nuevoTipoPregunta, setNuevoTipoPregunta] = useState<'abierta' | 'cerrada'>('abierta');
+    const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState<number[]>([]);
+    const [esObligatoria, setEsObligatoria] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:8000/opciones")
-            .then((res) => res.json())
-            .then((data) => setOpcionesCatalogo(Array.isArray(data) ? data : []))
+        api.get("/opciones")
+            .then((res) => setOpcionesCatalogo(Array.isArray(res.data) ? res.data : []))
             .catch((err) => console.error("Error cargando opciones:", err));
     }, []);
+
 
     const agregarPregunta = () => {
         if (!nuevoEnunciado.trim() || !categoriaSeleccionada || categorias.length === 0) {
@@ -51,14 +113,14 @@ export default function EncuestaBaseForm() {
             categoria_cod: categoriaSeleccionada,
             tipo: nuevoTipoPregunta,
             opcion_ids: nuevoTipoPregunta === 'cerrada' ? opcionesSeleccionadas : [],
-            obligatoria: esObligatoria, 
+            obligatoria: esObligatoria,
         };
 
         setPreguntas(prev => [...prev, nuevaPregunta]);
-        
+
         setNuevoEnunciado("");
         setOpcionesSeleccionadas([]);
-        setEsObligatoria(false); 
+        setEsObligatoria(false);
     };
 
     const eliminarPregunta = (index: number) => {
@@ -67,79 +129,65 @@ export default function EncuestaBaseForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!nombre.trim() || categorias.length === 0 || preguntas.length === 0) {
             alert("Complete todos los campos y agregue al menos una categoría y una pregunta.");
             return;
         }
-
         setCargando(true);
 
         try {
-            const resEncuesta = await fetch("http://localhost:8000/encuestas/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nombre }),
-            });
-            if (!resEncuesta.ok) { 
-                const errorData = await resEncuesta.json();
-                throw new Error(errorData.detail || "Error al crear encuesta."); 
-            }
-            const { id: encuestaId } = await resEncuesta.json();
-            const categoriasCreadas = [];
-            
+            const resEncuesta = await api.post("/encuestas/", { nombre });
+            const encuestaId = resEncuesta.data.id;
+            const categoriasCreadas: any[] = [];
+
             for (const categoriaTemp of categorias) {
-                const resCat = await fetch("http://localhost:8000/categorias/paraEncuesta/", { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        cod: categoriaTemp.cod,
-                        texto: categoriaTemp.texto || "",
-                        encuesta_id: encuestaId,
-                    }),
+                const resCat = await api.post("/categorias/paraEncuesta/", {
+                    cod: categoriaTemp.cod,
+                    texto: categoriaTemp.texto || "",
+                    encuesta_id: encuestaId,
                 });
-                if (!resCat.ok) { 
-                    const errorData = await resCat.json();
-                    throw new Error(errorData.detail || `Error al crear categoría ${categoriaTemp.cod}. El código ya está en uso.`); 
-                }
-                const categoriaCreada = await resCat.json();
-                categoriasCreadas.push(categoriaCreada);
+                categoriasCreadas.push(resCat.data);
             }
 
             for (const preg of preguntas) {
                 const categoria = categoriasCreadas.find((c) => c.cod === preg.categoria_cod);
-                if (!categoria) continue; 
-                const endpoint = preg.tipo === 'cerrada' ? "http://localhost:8000/preguntas/cerrada" : "http://localhost:8000/preguntas/abierta";   
-                const payload = {
+                if (!categoria) continue;
+
+                const endpoint = preg.tipo === "cerrada"
+                    ? "/preguntas/cerrada"
+                    : "/preguntas/abierta";
+
+                await api.post(endpoint, {
                     categoria_id: categoria.id,
                     enunciado: preg.enunciado,
-                    obligatoria: preg.obligatoria, 
-                    tipo: preg.tipo, 
-                    ...(preg.tipo === 'cerrada' && { opcion_ids: preg.opcion_ids }), 
-                };
-                const resPreg = await fetch(endpoint, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload),
+                    obligatoria: preg.obligatoria,
+                    tipo: preg.tipo,
+                    ...(preg.tipo === "cerrada" && { opcion_ids: preg.opcion_ids }),
                 });
-
-                if (!resPreg.ok) { 
-                     const errorData = await resPreg.json();
-                     throw new Error(errorData.detail || `Error al crear la pregunta: ${preg.enunciado}`);
-                }
             }
 
             alert("Encuesta creada con éxito.");
             navigate(ROUTES.HOME);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error en la cascada de creación:", error);
-            const messageToShow = error instanceof Error ? error.message : "Error desconocido al procesar la solicitud.";
-            alert(`Fallo en la creación de la encuesta. Error: ${messageToShow}`);
+            const msg = error?.response?.data?.detail || error.message || "Error desconocido";
+            alert(`Fallo en la creación de la encuesta. Error: ${msg}`);
         } finally {
             setCargando(false);
         }
     };
+
+    // Preparar opciones para el CustomSelect
+    const tipoOptions = [
+        { value: 'abierta', label: 'Abierta' },
+        { value: 'cerrada', label: 'Cerrada' }
+    ];
+
+    const categoriaOptions = categorias.map(cat => ({
+        value: cat.cod,
+        label: `${cat.cod} ${cat.texto ? `- ${cat.texto}` : ''}`
+    }));
 
     return (
         <div className="container py-4">
@@ -148,7 +196,7 @@ export default function EncuestaBaseForm() {
                     <h1 className="h4 mb-0">Nueva Encuesta Base</h1>
                 </div>
                 <div className="card-body">
-                    <form onSubmit={handleSubmit}>  
+                    <form onSubmit={handleSubmit}>
                         <div className="mb-4 p-3 border rounded">
                             <label className="form-label fw-bold">Nombre de la Encuesta</label>
                             <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} required disabled={cargando} />
@@ -159,41 +207,45 @@ export default function EncuestaBaseForm() {
                             preguntas={preguntas}
                             cargando={cargando}
                         />
-                        
+
                         <h5 className="mb-3">2. Definición de Preguntas</h5>
                         <div className="card bg-light mb-4 p-3">
                             <div className="row mb-3">
                                 <div className="col-md-3">
-                                    <label className="form-label fw-bold">Tipo</label>
-                                    <select 
-                                        className="form-select" 
-                                        value={nuevoTipoPregunta} 
-                                        onChange={(e) => { setNuevoTipoPregunta(e.target.value as 'abierta' | 'cerrada'); setOpcionesSeleccionadas([]); }} 
-                                        disabled={cargando || categorias.length === 0} 
-                                    >
-                                        <option value="abierta">Abierta</option>
-                                        <option value="cerrada">Cerrada</option>
-                                    </select>
+                                    <CustomSelect
+                                        label="Tipo"
+                                        value={nuevoTipoPregunta}
+                                        options={tipoOptions}
+                                        disabled={cargando || categorias.length === 0}
+                                        onChange={(val: any) => {
+                                            setNuevoTipoPregunta(val as 'abierta' | 'cerrada');
+                                            setOpcionesSeleccionadas([]);
+                                        }}
+                                    />
                                 </div>
                                 <div className="col-md-9">
-                                    <label className="form-label fw-bold">Categoría</label>
-                                    <select className="form-select" value={categoriaSeleccionada} onChange={(e) => setCategoriaSeleccionada(e.target.value)} disabled={cargando || categorias.length === 0} >
-                                        <option value="">Seleccione categoría</option>
-                                        {categorias.map((cat) => ( <option key={cat.cod} value={cat.cod}>{cat.cod} {cat.texto ? `- ${cat.texto}` : ''}</option> ))}
-                                    </select>
+                                    {/* USANDO EL NUEVO SELECT PERSONALIZADO */}
+                                    <CustomSelect
+                                        label="Categoría"
+                                        value={categoriaSeleccionada}
+                                        options={categoriaOptions}
+                                        disabled={cargando || categorias.length === 0}
+                                        placeholder="Seleccione categoría"
+                                        onChange={(val: any) => setCategoriaSeleccionada(val)}
+                                    />
                                 </div>
                             </div>
-                            
+
                             <div className="mb-3">
                                 <label className="form-label fw-bold">Enunciado</label>
                                 <textarea className="form-control" rows={2} value={nuevoEnunciado} onChange={(e) => setNuevoEnunciado(e.target.value)} disabled={cargando || categorias.length === 0} />
                             </div>
 
                             <div className="mb-3 form-check">
-                                <input 
-                                    type="checkbox" 
-                                    className="form-check-input" 
-                                    id="checkObligatoria" 
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id="checkObligatoria"
                                     checked={esObligatoria}
                                     onChange={(e) => setEsObligatoria(e.target.checked)}
                                     disabled={cargando || categorias.length === 0}
@@ -213,11 +265,11 @@ export default function EncuestaBaseForm() {
                                 />
                             )}
                             <div className="d-flex justify-content-end mt-2">
-                                <button 
-                                    type="button" 
-                                    className="btn btn-theme-primary rounded-pill" 
-                                    onClick={agregarPregunta} 
-                                    disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)} 
+                                <button
+                                    type="button"
+                                    className="btn btn-theme-primary rounded-pill"
+                                    onClick={agregarPregunta}
+                                    disabled={cargando || categorias.length === 0 || !nuevoEnunciado.trim() || !categoriaSeleccionada || (nuevoTipoPregunta === 'cerrada' && opcionesSeleccionadas.length === 0)}
                                 >
                                     Agregar Pregunta a la Lista
                                 </button>
@@ -232,10 +284,10 @@ export default function EncuestaBaseForm() {
                                             {preg.obligatoria && <span className="badge bg-danger me-2">OBLIGATORIA</span>}
                                             <strong className="text-primary">[{preg.categoria_cod}]</strong> {preg.enunciado}
                                         </span>
-                                        <button 
-                                                className="btn btn-danger btn-sm rounded-pill" 
-                                            type="button" 
-                                            onClick={() => eliminarPregunta(i)} 
+                                        <button
+                                            className="btn btn-danger btn-sm rounded-pill"
+                                            type="button"
+                                            onClick={() => eliminarPregunta(i)}
                                             disabled={cargando}
                                         >
                                             Eliminar
@@ -245,16 +297,16 @@ export default function EncuestaBaseForm() {
                             </ul>
                         )}
                         <div className="d-flex justify-content-end gap-2 border-top pt-3">
-                            <button 
-                                type="button" 
-                                className="btn btn-secondary rounded-pill" 
-                                onClick={() => navigate(ROUTES.HOME)} 
+                            <button
+                                type="button"
+                                className="btn btn-secondary rounded-pill"
+                                onClick={() => navigate(ROUTES.HOME)}
                                 disabled={cargando}
                             >
                                 Cancelar
                             </button>
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 className="btn btn-theme-primary rounded-pill"
                                 disabled={cargando}
                             >
