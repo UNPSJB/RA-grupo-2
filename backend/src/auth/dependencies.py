@@ -11,7 +11,7 @@ from src.database import get_db
 from src.settings import REFRESH_TOKEN_COOKIE_NAME, TOKEN_URL, SECRET_KEY, ALGORITHM
 from src.auth.schemas import TokenData
 from src.auth.utils import _is_valid_refresh_token, parse_refresh_token
-from src.auth import exceptions
+from src.auth import exceptions 
 from src.users import service as users_service
 from src.users import models as users_models
 from src.users import schemas as users_schemas
@@ -89,7 +89,7 @@ async def has_role(
     )
     if role and user.role_id == role.id:
         return user
-    raise exceptions.PermissionDenied()
+    raise PermissionDenied()
 
 
 async def has_admin_role(
@@ -110,4 +110,4 @@ async def has_access_to_user(
 
     if auth_user.is_admin or int(user_id) == auth_user.id:
         return user_id
-    raise exceptions.PermissionDenied()
+    raise PermissionDenied()
