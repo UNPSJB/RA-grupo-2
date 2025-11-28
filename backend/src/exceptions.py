@@ -50,6 +50,10 @@ class PermissionDenied(DetailedHTTPException):
     STATUS_CODE = status.HTTP_403_FORBIDDEN
     DETAIL = "Permission denied"
 
+    def __init__(self, detail="Permission denied"):
+        self.DETAIL = detail
+        super().__init__()
+
 
 class NotFound(DetailedHTTPException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND

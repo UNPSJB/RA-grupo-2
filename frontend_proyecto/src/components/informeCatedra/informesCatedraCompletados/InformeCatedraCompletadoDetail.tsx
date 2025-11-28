@@ -159,7 +159,10 @@ export default function InformeCatedraDetalle() {
 
       } catch (err: any) {
         console.error("Error cargando detalles:", err);
-        const mensaje = err.response?.data?.detail || err.message || "Error desconocido al obtener el informe.";
+        let mensaje = err.response?.data?.detail || err.message || "Error desconocido al obtener el informe.";
+        if (mensaje?.toLowerCase() === "permission denied") {
+          mensaje = "No tiene permiso para ver este informe";
+        }
         setError(mensaje);
       } finally {
         setLoading(false);
