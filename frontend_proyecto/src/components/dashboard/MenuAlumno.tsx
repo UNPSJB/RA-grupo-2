@@ -6,7 +6,8 @@ const Icons = {
   Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>,
   Checklist: () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M7 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0zM7 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0z"/></svg>,
   Time: () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>,
-  Alert: () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+  Alert: () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>,
+  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/></svg>
 };
 
 const decorationStyle: React.CSSProperties = {
@@ -123,8 +124,18 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
             };
             break;
         case 'UNDEFINED':
+            config = {
+                title: "Periodo no definido",
+                desc: "Las fechas no han sido asignadas por el departamento.",
+                colorClass: "text-secondary",
+                bgColor: "bg-light text-secondary",
+                icon: <Icons.Calendar />,
+                counterLabel: "Sin fecha",
+                counterColor: "#6c757d",
+                borderColor: "#e9ecef"
+            };
+            break;
         default:
-             config.counterLabel = "No acordado";
              break;
     }
 
@@ -181,10 +192,14 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
     );
 }
 
-const ProgressCard = ({ completadas, total, porcentaje }: { completadas: number, total: number, porcentaje: number }) => {
+const ProgressCard = ({ completadas, total, porcentaje, periodDefined }: { completadas: number, total: number, porcentaje: number, periodDefined: boolean }) => {
   const pendientes = total - completadas;
   const colorCompleted = "var(--color-brand-primary)";
-  const colorPending = "#e2e8f0"; 
+  const colorPending = "#e2e8f0";  
+  const colorDisabled = "#e9ecef";
+  const colorTextDisabled = "#adb5bd";
+  const hasData = periodDefined && total > 0;
+  const isWaiting = periodDefined && total === 0;
 
   return (
     <div className="card-modern h-100 p-4 d-flex flex-column animate-fade-up position-relative overflow-hidden">
@@ -192,28 +207,45 @@ const ProgressCard = ({ completadas, total, porcentaje }: { completadas: number,
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="mb-4 text-start">
           <h5 className="fw-bold mb-1 text-dark">Tu Progreso</h5>
-          <p className="text-muted small mb-0">Estado actual de tus obligaciones académicas.</p>
+          <p className="text-muted small mb-0">
+             {!periodDefined 
+                ? "Información no disponible." 
+                : (hasData ? "Estado actual de tus obligaciones." : "No tienes encuestas asignadas.")}
+          </p>
         </div>
         
         <div className="d-flex justify-content-center mb-4 flex-grow-1 align-items-center">
           <div className="position-relative" style={{ width: '160px', height: '160px' }}>
               <svg width="160" height="160" viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="54" fill="none" stroke={colorPending} strokeWidth="12" />
-                  <circle 
-                      cx="60" cy="60" r="54" 
-                      fill="none" 
-                      stroke={colorCompleted}
-                      strokeWidth="12" 
-                      strokeDasharray="339.292" 
-                      strokeDashoffset={339.292 - (339.292 * porcentaje) / 100}
-                      strokeLinecap="round"
-                      transform="rotate(-90 60 60)"
-                      style={{ transition: 'stroke-dashoffset 1s ease-out' }}
-                  />
+                  <circle cx="60" cy="60" r="54" fill="none" stroke={hasData ? colorPending : colorDisabled} strokeWidth="12" />
+                  {hasData && (
+                      <circle 
+                          cx="60" cy="60" r="54" 
+                          fill="none" 
+                          stroke={colorCompleted}
+                          strokeWidth="12" 
+                          strokeDasharray="339.292" 
+                          strokeDashoffset={339.292 - (339.292 * porcentaje) / 100}
+                          strokeLinecap="round"
+                          transform="rotate(-90 60 60)"
+                          style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+                      />
+                  )}
               </svg>
+              
               <div className="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center">
-                  <span className="fw-bold text-dark" style={{ fontSize: '2.2rem' }}>{porcentaje}%</span>
-                  <span className="text-muted fw-bold" style={{fontSize: '0.6rem', letterSpacing: '1px'}}>COMPLETADO</span>
+                  {!periodDefined ? (
+                      <div className="text-muted"><Icons.Lock /></div>
+                  ) : (
+                      <>
+                        <span className="fw-bold text-dark" style={{ fontSize: '2.2rem', color: hasData ? 'inherit' : colorTextDisabled }}>
+                            {hasData ? `${porcentaje}%` : "—"}
+                        </span>
+                        <span className="fw-bold" style={{fontSize: '0.6rem', letterSpacing: '1px', color: hasData ? '#6c757d' : colorTextDisabled }}>
+                            {hasData ? "COMPLETADO" : "SIN DATOS"}
+                        </span>
+                      </>
+                  )}
               </div>
           </div>
         </div>
@@ -221,17 +253,21 @@ const ProgressCard = ({ completadas, total, porcentaje }: { completadas: number,
         <div className="mt-auto">
           <div className="d-flex justify-content-between align-items-center mb-2">
               <div className="d-flex align-items-center gap-2">
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: colorCompleted }}></span>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: hasData ? colorCompleted : colorDisabled }}></span>
                   <span className="text-muted small fw-medium">Completadas</span>
               </div>
-              <span className="fw-bold text-dark">{completadas}</span>
+              <span className={`fw-bold ${hasData ? 'text-dark' : 'text-muted'}`}>
+                  {hasData ? completadas : "-"}
+              </span>
           </div>
           <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: colorPending }}></span>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: hasData ? colorPending : colorDisabled }}></span>
                   <span className="text-muted small fw-medium">Pendientes</span>
               </div>
-              <span className="fw-bold text-dark">{pendientes}</span>
+              <span className={`fw-bold ${hasData ? 'text-dark' : 'text-muted'}`}>
+                  {hasData ? pendientes : "-"}
+              </span>
           </div>
         </div>
       </div>
@@ -244,6 +280,7 @@ const ProgressCard = ({ completadas, total, porcentaje }: { completadas: number,
 export default function MenuAlumno() {
     const links = getRoleLinks('alumno');
     const { fechas, progreso } = useStudentData();
+    const periodDefined = !!(fechas.inicio && fechas.fin);
 
     return (
         <div className="row g-4">
@@ -263,7 +300,8 @@ export default function MenuAlumno() {
                 <ProgressCard 
                     completadas={progreso.completadas} 
                     total={progreso.total} 
-                    porcentaje={progreso.porcentaje} 
+                    porcentaje={progreso.porcentaje}
+                    periodDefined={periodDefined} 
                 />
             </div>
         </div>
