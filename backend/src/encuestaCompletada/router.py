@@ -27,7 +27,9 @@ def crear_encuesta_completa_con_respuestas(encuesta_data: schemas.EncuestaComple
 
 @router.get("/{encuesta_id}", response_model=schemas.EncuestaCompletada)
 def obtener_encuesta_completada(encuesta_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):
-    return services.obtener_encuesta_completada(db, encuesta_id)
+    encuesta= services.obtener_encuesta_completada(db, encuesta_id)
+    services.verificar_permiso_encuesta(encuesta, user)
+    return encuesta
 
 @router.get("/alumno/{alumno_id}", response_model=List[schemas.EncuestaCompletada])
 def obtener_encuestas_por_alumno(alumno_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_alumno)):

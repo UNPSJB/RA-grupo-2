@@ -6,6 +6,12 @@ from src.encuestaCompletada import schemas, models
 from src.encuestaCompletada import exceptions
 from src.encuestaCompletada.models import EncuestaCompletada
 from src.respuestas import schemas as respuestas_schemas
+from src.exceptions import PermissionDenied
+
+def verificar_permiso_encuesta(encuesta, current_user):
+    if encuesta.alumno_id != current_user.alumno_id:
+        raise PermissionDenied("No tiene permiso para ver esta encuesta")
+
 
 def crear_encuesta_completada(db: Session, encuesta_data: schemas.EncuestaCompletadaCreate) -> schemas.EncuestaCompletada:
     encuesta_db = models.EncuestaCompletada(**encuesta_data.model_dump())
