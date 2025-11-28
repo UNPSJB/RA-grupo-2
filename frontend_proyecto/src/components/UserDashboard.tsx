@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import ROUTES from "../paths";
+// 1. IMPORTAR LA CONFIGURACIÓN
+import { getRoleLinks } from "../config/navigationParams"; 
 
-// --- Modern SVG Icons ---
+// --- Mantén tus íconos SVG como estaban ---
 const Icons = {
   Document: () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
@@ -83,8 +84,8 @@ const ActionCard = ({ title, to, index }: { title: string, to: string, index: nu
           </div>
         </div>
 
-        {/* Decoración de fondo */}
-        <div style={{
+         {/* Decoración de fondo */}
+         <div style={{
           position: 'absolute',
           right: -20,
           bottom: -20,
@@ -100,62 +101,14 @@ const ActionCard = ({ title, to, index }: { title: string, to: string, index: nu
   </div>
 );
 
-// --- Logic (Roles) ---
-const dashboardLinks = (role: string) => {
-  const baseLinks = [];
-  if (role === 'secretaria_academica') {
-    baseLinks.push(
-      { title: "Crear Informe de Cátedra Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
-      { title: "Crear Encuesta Base", to: ROUTES.ENCUESTA_BASE_NUEVA },
-      { title: "Asignar Formularios a Materias", to: ROUTES.ASIGNAR_MATERIA_INFORME },
-      { title: "Definir fechas de apertura", to: ROUTES.DEFINIR_FECHAS },
-      { title: "Informes Sintéticos", to: ROUTES.INFORMES_SINTETICOS }
-    );
-  }
-  if (role === 'alumno') {
-    baseLinks.push(
-      { title: "Encuestas Disponibles", to: ROUTES.ENCUESTAS_DISPONIBLES },
-      { title: "Encuestas Completadas", to: ROUTES.ENCUESTAS_COMPLETADAS }
-    );
-  }
-  if (role === 'docente') {
-    baseLinks.push(
-      { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-      { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
-      { title: "Graficos Estádisticos", to: ROUTES.DASHBOARD_DOCENTE }
-    );
-  }
-  if (role === 'departamento') {
-    baseLinks.push(
-      { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO},
-      { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS},
-      { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA },
-      { title: "Graficos Estádisticos", to: ROUTES.DASHBOARD_DPTO }
-    );
-  }
-  if (role === 'admin') {
-    baseLinks.push(
-      { title: "Encuestas Disponibles", to: ROUTES.ENCUESTAS_DISPONIBLES },
-      { title: "Encuestas Completadas", to: ROUTES.ENCUESTAS_COMPLETADAS },
-      { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-      { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
-      { title: "Informes Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO},
-      { title: "Informes Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS},
-      { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA },
-      { title: "Crear Informe de Cátedra Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
-      { title: "Crear Encuesta Base", to: ROUTES.ENCUESTA_BASE_NUEVA },
-      { title: "Asignar Formularios a Materias", to: ROUTES.ASIGNAR_MATERIA_INFORME },
-      { title: "Definir fechas", to: ROUTES.DEFINIR_FECHAS },
-      { title: "Informes Sintéticos", to: ROUTES.INFORMES_SINTETICOS }
-    );
-  }
-  return baseLinks;
-};
+// --- ELIMINADA la función local dashboardLinks() ---
 
 export default function UserDashboard() {
   const { currentUser } = useAuth();
   const userRole = currentUser?.role_name || 'Invitado';
-  const links = dashboardLinks(userRole);
+  
+  // 2. USAR LA NUEVA FUNCIÓN IMPORTADA
+  const links = getRoleLinks(userRole);
   
   // Date formatting
   const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });

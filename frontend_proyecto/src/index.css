@@ -446,3 +446,101 @@ a:hover { color: var(--color-brand-hover); }
     background-color: var(--color-brand-primary) !important;
     color: white !important;
 }
+/* =========================================================
+   4. COMPONENTES FLOTANTES (Floating Menu)
+   ========================================================= */
+
+.fixed-menu-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1050; /* Por encima del footer y otros elementos */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.menu-trigger {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  
+  /* AQUI APLICAMOS TU GRADIENTE */
+  background: var(--gradient-primary);
+  
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-lg); /* Usamos tu variable de sombra */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.menu-trigger:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-glow); /* Efecto de brillo azul al pasar el mouse */
+}
+
+.menu-trigger.active {
+  background: var(--color-danger); /* Usamos tu rojo definido en variables para cerrar */
+  transform: rotate(90deg);
+  box-shadow: var(--shadow-md);
+}
+
+.menu-options {
+  margin-bottom: 15px;
+  
+  /* Usamos las variables de superficie y bordes de vidrio */
+  background: var(--color-surface);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 200px;
+  
+  /* Lógica de Animación */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.9);
+  transition: all 0.2s ease-out;
+  transform-origin: bottom right;
+}
+
+.menu-options.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  text-decoration: none;
+  
+  color: var(--color-text-primary); /* Tu color de texto principal */
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  /* Usamos tu azul clarito para el hover */
+  background-color: var(--color-brand-light); 
+  color: var(--color-brand-primary);
+}
+
+.item-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+  color: var(--color-brand-primary); /* Iconos en azul corporativo */
+}
