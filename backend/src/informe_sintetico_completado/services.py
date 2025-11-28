@@ -15,6 +15,23 @@ from src.docentes.models import Docente
 from src.categorias.models import Categoria
 from src.respuesta_informe_sintetico.models import RespuestaInformeSintetico 
 from src.carreras.models import Carrera
+from src.exceptions import PermissionDenied
+from src.users.models import User
+
+def verificar_permiso_informe_sintetico(informe: schemas.InformeSinteticoCompletado, current_user: User, db):
+    if current_user.role_name != "departamento":
+        return
+    
+    carrera = db.query(Carrera).filter(
+        Carrera.id == informe.carrera_id
+    ).first()
+
+    if not carrera:
+        raise PermissionDenied("Carrera asociada no encontrada")
+
+    if carrera.departamento_id != current_user.departamento_id:
+        raise PermissionDenied("No tiene permiso para ver informes de otro departamento")
+
 
 def get_informes_completados(db: Session, id_dpto: Optional[int] = None): 
     query = db.query(models.InformeSinteticoCompletado)\
