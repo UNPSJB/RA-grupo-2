@@ -5,6 +5,7 @@ import { EsPeriodoEncuesta } from "../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useStudentData } from "../../hooks/useStudentData"; 
 
 type EncuestaDisponible = {
   materia: string;
@@ -20,6 +21,7 @@ export default function EncuestasPage() {
   const [encuestas, setEncuestas] = useState<EncuestaDisponible[]>([]);
   const periodoEncuesta = EsPeriodoEncuesta();
   const [loading, setLoading] = useState(true);
+  const { fechas} = useStudentData();
 
   useEffect(() => {
     if (!alumnoId) return;
@@ -57,9 +59,16 @@ export default function EncuestasPage() {
     );
   }
 
-  if (!periodoEncuesta) {
-    return <PopupPeriodoCerrado msg={"El periodo para contestar las encuestas no está abierto"} />;
-  }
+if (!periodoEncuesta) {
+  return (
+    <PopupPeriodoCerrado
+      msg="El periodo para contestar las encuestas no está abierto"
+      fecha_inicio={fechas.inicio}
+      fecha_fin={fechas.fin}
+    />
+  );
+}
+
 
   return (
     <div className="container py-4">

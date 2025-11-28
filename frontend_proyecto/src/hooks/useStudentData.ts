@@ -18,7 +18,7 @@ interface EncuestaCompletada {
     periodo: string;      
 }
 
-interface PeriodoFechas {
+export interface PeriodoFechas {
     inicio_encuesta: string;
     fin_encuesta: string;
 }
