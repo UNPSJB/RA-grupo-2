@@ -193,7 +193,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ isDarkMode }) => {
                   <label className={`form-check-label small ${isDarkMode ? 'text-light opacity-75' : 'text-secondary'}`} htmlFor="remember">Recordarme</label>
                 </div>
                 */}
-                <a href="#" className={`text-decoration-none small fw-bold ${isDarkMode ? 'text-info' : 'text-primary'}`}>
+                <a href="https://guarani.unp.edu.ar/unpata/acceso/recuperar" className={`text-decoration-none small fw-bold ${isDarkMode ? 'text-info' : 'text-primary'}`}>
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
