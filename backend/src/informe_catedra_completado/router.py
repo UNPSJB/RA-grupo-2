@@ -5,7 +5,8 @@ from src.informe_catedra_completado import schemas, services, models
 from typing import List
 from src.asociaciones.models import Periodo
 from src.users import schemas as user_schemas
-from src.auth.dependencies import tiene_rol_docente, tiene_rol_departamento
+from src.auth.dependencies import tiene_rol_docente, tiene_rol_departamento, get_current_user
+from src.exceptions import PermissionDenied
 
 router = APIRouter(prefix="/informe-catedra-completado", tags=["informes-catedra-completados"])
 
@@ -31,8 +32,15 @@ def crear_informe_catedra_completado(
     return services.crear_informe_completado(db, informe)
 
 @router.get("/{informe_id}", response_model=schemas.InformeCatedraCompletadoDetalle)
-def obtener_informe_catedra_completado(informe_id: int, db: Session = Depends(get_db)):
+def obtener_informe_catedra_completado(
+    informe_id: int, 
+    db: Session = Depends(get_db),
+    user: user_schemas.User = Depends(get_current_user)
+):
+    informe_model = services.obtener_informe_completado(db, informe_id)
+    services.verificar_permiso_informe(informe_model, user, db)
     return services.obtener_informe_completado_detalle(db, informe_id)
+
 
 @router.get("/departamento/{departamento_id}", response_model=List[schemas.InformeCatedraCompletado])
 def obtener_informes_por_departamento(departamento_id: int, db: Session = Depends(get_db),user: user_schemas.User = Depends(tiene_rol_departamento)):

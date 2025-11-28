@@ -12,6 +12,36 @@ from src.preguntas.models import Pregunta
 from src.encuestaCompletada.models import EncuestaCompletada
 from src.asociaciones.models import materia_carrera
 from src.departamentos.models import Departamento
+from src.exceptions import PermissionDenied
+from src.asociaciones.docente_materia.models import DocenteMateria
+from src.users.models import User
+
+def verificar_permiso_informe(informe: schemas.InformeCatedraCompletadoDetalle, current_user: User, db: Session):
+    docente_materia = db.query(DocenteMateria).filter(
+        DocenteMateria.id == informe.docente_materia_id
+    ).first()
+
+    if not docente_materia:
+        raise PermissionDenied("Docente-materia no encontrado para este informe")
+
+    materia = db.query(Materia).filter(
+        Materia.id == docente_materia.materia_id
+    ).first()
+
+    if not materia:
+        raise PermissionDenied("Materia asociada no encontrada")
+
+    if current_user.role_name == "docente":
+        if current_user.docente_id != docente_materia.docente_id:
+            raise PermissionDenied("No tiene permiso para ver este informe")
+
+    elif current_user.role_name == "departamento":
+        if current_user.departamento_id != materia.departamento_id:
+            raise PermissionDenied("No tiene permiso para ver informes de otro departamento")
+
+    else:
+        raise PermissionDenied("Su rol no tiene permiso para acceder a informes")
+
 
 
 def obtener_informes_pendientes(db: Session, docente_id: int,anio: int,periodo: Periodo) -> List[dict]:
@@ -133,7 +163,7 @@ def obtener_informes_por_departamento(db: Session, departamento_id: int) -> List
     return informes
 
 
-def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
+def obtener_informe_completado_detalle(db: Session, informe_id: int) -> schemas.InformeCatedraCompletadoDetalle:
     stmt = (
         select(models.InformeCatedraCompletado)
         .where(models.InformeCatedraCompletado.id == informe_id)
@@ -153,7 +183,7 @@ def obtener_informe_completado_detalle(db: Session, informe_id: int) -> dict:
     if not informe:
         raise exceptions.InformeCompletadoNoEncontrado()
     
-    informe_dict = {
+    informe_dict: schemas.InformeCatedraCompletadoDetalle = {
         "id": informe.id,
         "docente_materia_id": informe.docente_materia_id,
         "informe_catedra_base_id": informe.informe_catedra_base_id,

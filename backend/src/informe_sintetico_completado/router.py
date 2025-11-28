@@ -5,7 +5,7 @@ from src.informe_sintetico_completado.models import InformeSinteticoCompletado
 from src.informe_sintetico_completado import schemas, services
 from typing import List, Optional
 from src.users import schemas as user_schemas
-from src.auth.dependencies import tiene_rol_departamento
+from src.auth.dependencies import tiene_rol_departamento, get_current_user
 
 router = APIRouter(prefix="/informes_sinteticos_completados", tags=["informes_sinteticos_completados"])
 
@@ -31,12 +31,13 @@ def get_informes_completados(
         raise HTTPException(status_code=500, detail=f"Error al obtener informes completados: {str(e)}")
     
 @router.get("/completados/{id}", response_model=schemas.InformeSinteticoCompletado)
-def get_informe_completado(id: int, db: Session = Depends(get_db)):
+def get_informe_completado(id: int, db: Session = Depends(get_db), user: user_schemas.User = Depends(get_current_user)):
     try:
         informe = services.get_informe_completado(db, id) 
         
         if not informe:
             raise HTTPException(status_code=404, detail="Informe completado no encontrado")
+        services.verificar_permiso_informe_sintetico(informe, user, db)
         return informe 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener informe completado: {str(e)}")
