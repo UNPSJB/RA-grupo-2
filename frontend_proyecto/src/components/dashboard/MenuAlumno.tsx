@@ -126,7 +126,7 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
         case 'UNDEFINED':
             config = {
                 title: "Periodo no definido",
-                desc: "Las fechas no han sido asignadas por el departamento.",
+                desc: "Las fechas no han sido asignadas.",
                 colorClass: "text-secondary",
                 bgColor: "bg-light text-secondary",
                 icon: <Icons.Calendar />,
