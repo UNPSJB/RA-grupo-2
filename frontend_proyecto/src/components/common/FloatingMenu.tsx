@@ -4,19 +4,18 @@ import { useAuth } from "../../context/AuthContext";
 import ROUTES from "../../paths";
 import { getRoleLinks } from "../../config/navigationParams";
 
-// Íconos actualizados con un estilo más consistente
 const Icons = {
   Menu: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>,
   Close: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
   Drag: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="12" r="1" /><circle cx="9" cy="5" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="19" r="1" /></svg>,
-  // Usamos ChevronRight para un look más moderno de "ir a"
-  Arrow: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  Arrow: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>,
+  SmallX: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 };
 
 export default function FloatingMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // LÓGICA DE ARRASTRE (Sin cambios)
+  const [isVisible, setIsVisible] = useState(true);
+
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
@@ -24,6 +23,8 @@ export default function FloatingMenu() {
 
   const { currentUser } = useAuth();
   const location = useLocation();
+
+  if (!isVisible) return null;
 
   if (location.pathname === ROUTES.LOGIN || location.pathname === ROUTES.HOME) return null;
 
@@ -33,8 +34,9 @@ export default function FloatingMenu() {
 
   if (availableLinks.length === 0) return null;
 
-  // --- HANDLERS DE ARRASTRE (Sin cambios) ---
   const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.widget-dismiss-btn')) return;
+
     if (e.button !== 0) return;
     isDragging.current = false;
     dragStart.current = { x: e.clientX, y: e.clientY };
@@ -69,6 +71,11 @@ export default function FloatingMenu() {
     setIsOpen(!isOpen);
   };
 
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsVisible(false);
+  };
+
   return (
     <div 
       className={`draggable-widget ${isOpen ? 'open' : ''}`}
@@ -79,16 +86,21 @@ export default function FloatingMenu() {
       onMouseDown={handleMouseDown}
     >
       
-      {/* MENÚ (Aparece arriba) */}
+      <button 
+        className="widget-dismiss-btn" 
+        onClick={handleDismiss}
+        title="Ocultar accesos rápidos"
+      >
+        <Icons.SmallX />
+      </button>
+
       <div className="widget-menu">
         {availableLinks.map((link, index) => (
             <Link 
               key={index} 
               to={link.to} 
               className="widget-link"
-              // --- AQUÍ ESTÁ LA MAGIA DE LA CASCADA ---
               style={{ 
-                // Retraso base de 0.05s + 0.07s por cada ítem subsiguiente
                 animationDelay: `${0.05 + index * 0.07}s` 
               }}
               onClick={(e) => {
@@ -97,20 +109,18 @@ export default function FloatingMenu() {
               }}
             >
               <span>{link.title}</span>
-              {/* Clase auxiliar para animar la flecha */}
               <span className="link-arrow"><Icons.Arrow /></span>
             </Link>
         ))}
       </div>
 
-      {/* BOTÓN TRIGGER (Sin cambios mayores, solo iconos actualizados) */}
       <div 
         className="widget-trigger"
         onClick={handleClick}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.5px' }}>
-                {isOpen ? 'Cerrar' : 'Acciones'}
+                {isOpen ? 'Cerrar' : 'Accesos Rapidos'}
             </span>
         </div>
 

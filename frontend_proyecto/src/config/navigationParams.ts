@@ -1,6 +1,5 @@
 import ROUTES from "../paths";
 
-// Definimos la estructura de un item del menú
 export interface MenuItem {
   title: string;
   to: string;
@@ -47,7 +46,7 @@ export const getRoleLinks = (role: string): MenuItem[] => {
     );
   }
 
-  // --- ADMIN (Ve todo) ---
+  // --- ADMIN ---
   if (role === 'admin') {
     baseLinks.push(
       { title: "Encuestas Disp.", to: ROUTES.ENCUESTAS_DISPONIBLES },
@@ -55,7 +54,6 @@ export const getRoleLinks = (role: string): MenuItem[] => {
       { title: "Informes Sintéticos", to: ROUTES.CARRERAS_DPTO},
       { title: "Crear Informe Base", to: ROUTES.INFORME_CATEDRA_BASE_NUEVO },
       { title: "Definir Fechas", to: ROUTES.DEFINIR_FECHAS }
-      // Puedes agregar el resto aquí si lo deseas
     );
   }
 

@@ -616,3 +616,42 @@ a:hover { color: var(--color-brand-hover); }
     color: white;
     opacity: 1;
 }
+/* --- BOTÓN DE CERRAR (DISMISS) --- */
+.widget-dismiss-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  color: #94a3b8; /* Gris suave */
+  z-index: 10;
+  
+  /* Animación de entrada */
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Mostrar solo cuando el usuario pasa el mouse por el widget */
+.draggable-widget:hover .widget-dismiss-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Efecto al pasar el mouse sobre la X (se pone roja) */
+.widget-dismiss-btn:hover {
+  background: #ef4444; /* Rojo */
+  color: white;
+  border-color: #ef4444;
+}
