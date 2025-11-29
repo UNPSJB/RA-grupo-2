@@ -8,49 +8,37 @@ interface Props {
   estadisticasSuperior: EstadisticasData | null;
 }
 
-export default function EstadisticasTabs({
-  estadisticasBasico,
-  estadisticasSuperior
-}: Props) {
+export default function EstadisticasTabs({ estadisticasBasico, estadisticasSuperior }: Props) {
   const [tabActiva, setTabActiva] = useState<'basico' | 'superior'>('basico');
 
   const datosActivos = tabActiva === 'basico' ? estadisticasBasico : estadisticasSuperior;
   const colsDashlet = tabActiva === 'basico' ? 'row-cols-md-3' : 'row-cols-md-4';
-  const noDataText = tabActiva === 'basico' 
-    ? 'No hay datos de estadísticas para el Ciclo Básico.' 
-    : 'No hay datos de estadísticas para el Ciclo Superior.';
+  const noDataText = 'No hay datos estadísticos disponibles para este ciclo.';
 
   const hayDatosReales = datosActivos && 
-                         datosActivos.promedio_general.length > 0 &&
-                         datosActivos.promedio_general.some(item => item.porcentaje > 0);
+                         datosActivos.promedio_general.length > 0;
 
   return (
-    <div className="card shadow-lg rounded-3"> 
-      <div className="card-header bg-transparent border-0 pt-3 px-3">
-        <ul className="nav nav-pills card-header-pills">
-          <li className="nav-item">
-            <button 
-              className={`nav-link ${tabActiva === 'basico' ? 'active' : ''}`} 
-              onClick={() => setTabActiva('basico')}
-            >
-              Resumen Ciclo Básico (1º y 2º Año)
-            </button>
-          </li>
-          <li className="nav-item">
-            <button 
-              className={`nav-link ${tabActiva === 'superior' ? 'active' : ''}`}
-              onClick={() => setTabActiva('superior')}
-            >
-              Resumen Ciclo Superior (3º+ Año)
-            </button>
-          </li>
-        </ul>
+    <div className="w-100"> 
+      <div className="d-flex border-bottom mb-4 pb-2">
+        <button 
+            className={`btn btn-sm me-2 rounded-pill fw-medium ${tabActiva === 'basico' ? 'btn btn-theme-primary' : 'btn-light text-secondary'}`} 
+            onClick={() => setTabActiva('basico')}
+        >
+            Ciclo Básico (1º y 2º)
+        </button>
+        <button 
+            className={`btn btn-sm rounded-pill fw-medium ${tabActiva === 'superior' ? 'btn btn-theme-primary' : 'btn-light text-secondary'}`}
+            onClick={() => setTabActiva('superior')}
+        >
+            Ciclo Superior (3º+)
+        </button>
       </div>
       
-      <div className="card-body p-4">
+      <div className="animate-fade-up">
         {hayDatosReales ? (
           <>
-            <div className={`row row-cols-1 ${colsDashlet} g-3 mb-4`}>
+            <div className={`row ${colsDashlet} g-3 mb-5`}>
               {datosActivos!.promedio_general.map(item => (
                 <Dashlet
                   key={item.opcion_id}
@@ -59,13 +47,12 @@ export default function EstadisticasTabs({
                 />
               ))}
             </div>
-            <hr className="my-4" />
-            <div style={{ height: '600px' }}>
+            <div style={{ height: '500px', width: '100%' }}>
               <GraficoBarrasEstadisticas datosApi={datosActivos!.promedio_por_categoria} />
             </div>
           </>
         ) : ( 
-          <div className="text-center text-muted p-4">
+          <div className="text-center text-muted py-5 bg-light rounded-3">
             <p className="mb-0">{noDataText}</p>
           </div>
         )}
