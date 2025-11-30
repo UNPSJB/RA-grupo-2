@@ -9,9 +9,8 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
-ChartJS.defaults.color = getResolvedColor('--color-text-primary');
-ChartJS.defaults.borderColor = getResolvedColor('--color-grafico-gris');
-ChartJS.defaults.font.family = "'Montserrat', sans-serif";
+ChartJS.defaults.color = '#334155'; 
+ChartJS.defaults.borderColor = getResolvedColor('--color-border');
 
 interface ProgresoData {
   completados: number;
@@ -65,98 +64,151 @@ export default function DashboardDepartamento() {
           api.get(`/filtros/periodos`),
           api.get(`/departamentos/${DEPARTAMENTO_ID}/carreras`)
         ]);
-        const anios: number[] = resAnios.data;
-        const periodos: string[] = resPeriodos.data;
-        const carreras: Carrera[] = resCarreras.data;
-        setAniosList(anios);
-        setPeriodosList(periodos);
-        setCarrerasList(carreras);
-        if (anios.length > 0) setAnio(anios[0]);
-        if (periodos.length > 0) setPeriodo(periodos[0]);
-      } catch (error) {
-        console.error("Error cargando filtros:", error);
-      } finally {
-        setIsLoadingFilters(false);
-      }
+        setAniosList(resAnios.data);
+        setPeriodosList(resPeriodos.data);
+        setCarrerasList(resCarreras.data);
+        if (resAnios.data.length > 0) setAnio(resAnios.data[0]);
+        if (resPeriodos.data.length > 0) setPeriodo(resPeriodos.data[0]);
+      } catch (error) { console.error("Error filtros", error); } 
+      finally { setIsLoadingFilters(false); }
     };
     cargarFiltros();
   }, []); 
 
   useEffect(() => {
-    if (isLoadingFilters || !anio || !periodo) { return; }
+    if (isLoadingFilters || !anio || !periodo) return;
     const cargarDatosDelDashboard = async () => {
       setIsLoadingData(true);
       try {
-        const params = {
-          anio: String(anio),
-          periodo: periodo,
-          ...(carreraId && { carrera_id: String(carreraId) })
-        };
-        const response = await api.get(
-          `/departamentos/${DEPARTAMENTO_ID}/dashboard-completo`,
-          { params }
-        );
-        const data = response.data;
-        setProgresoData(data.progreso);
-        setEstadisticasBasico(data.estadisticas_basico);
-        setEstadisticasSuperior(data.estadisticas_superior);
-        setPendientesData(data.pendientes);
-      } catch (error) {
-        console.error("Error cargando datos del dashboard:", error);
-      } finally {
-        setIsLoadingData(false);
-      }
+        const params = { anio: String(anio), periodo: periodo, ...(carreraId && { carrera_id: String(carreraId) }) };
+        const response = await api.get(`/departamentos/${DEPARTAMENTO_ID}/dashboard-completo`, { params });
+        setProgresoData(response.data.progreso);
+        setEstadisticasBasico(response.data.estadisticas_basico);
+        setEstadisticasSuperior(response.data.estadisticas_superior);
+        setPendientesData(response.data.pendientes);
+      } catch (error) { console.error("Error dashboard", error); } 
+      finally { setIsLoadingData(false); }
     };
     cargarDatosDelDashboard();
   }, [anio, periodo, carreraId, isLoadingFilters]);
 
-  if (isLoadingFilters) {
-      return <div className="container mt-4"><p>Cargando filtros...</p></div>
-  }
+  const cardStyle = {
+    background: 'var(--color-surface)',
+    borderRadius: 'var(--radius-lg)',
+    border: 'var(--glass-border)',
+    boxShadow: 'var(--shadow-sm)',
+    padding: '1.5rem',
+    height: '100%',
+    transition: 'all 0.3s ease'
+  };
+
+  if (isLoadingFilters) return <div className="mt-5 text-center text-muted">Cargando sistema...</div>;
 
   return (
-    <div className="container mt-4">
-      <h2 className="h4 mb-3">Dashboard Departamento</h2>
-      <FiltrosDashboard
-        anio={anio}
-        periodo={periodo}
-        carreraId={carreraId}
-        aniosList={aniosList}
-        periodosList={periodosList}
-        carrerasList={carrerasList}
-        onAnioChange={setAnio}
-        onPeriodoChange={setPeriodo}
-        onCarreraChange={setCarreraId}
-      />
+    <div className="mt-5 animate-fade-up">
+      <div className="text-center mb-5">
+        <h2 className="display-6 fw-bolder mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <span className="text-gradient">Resumen Estadístico</span>
+        </h2>
+        <p className="text-muted mx-auto" style={{maxWidth: '700px', fontWeight: 300}}>
+            Visualice el estado de cumplimiento de los informes de cátedra y los resultados de encuestas académicas.
+        </p>
+      </div>
+
+      <div className="mb-5" style={cardStyle}>
+         <div className="d-flex justify-content-between align-items-center mb-3">
+             <h6 className="text-uppercase text fw-medium mb-0" style={{fontSize: '0.90rem', letterSpacing: '1px'}}>
+                Filtros Globales
+             </h6>
+         </div>
+         
+         <FiltrosDashboard
+            anio={anio}
+            periodo={periodo}
+            carreraId={carreraId}
+            aniosList={aniosList}
+            periodosList={periodosList}
+            carrerasList={carrerasList}
+            onAnioChange={setAnio}
+            onPeriodoChange={setPeriodo}
+            onCarreraChange={setCarreraId}
+        />
+      </div>
+
       {isLoadingData ? (
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Cargando datos...</span>
-          </div>
+        <div className="text-center py-5">
+           <div className="spinner-border" style={{color: 'var(--color-brand-primary)'}} role="status"/>
         </div>
       ) : (
         <>
-          <div className="row">
-            <div className="col-md-5">
-              <ProgresoDona
-                progresoData={progresoData}
-                anio={anio}
-              />
+          <div className="mb-4 border-bottom pb-2">
+            <h4 className="h5 fw-bold mb-0">
+                <span className="text-gradient">Gestión de Informes de Cátedra</span>
+            </h4>
+            <small style={{color: 'var(--color-text-secondary)'}}>Seguimiento de entregas y cumplimiento</small>
+        </div>
+
+          <div className="row g-4 mb-5">
+            <div className="col-lg-4 col-md-12">
+              <div style={cardStyle}>
+                <h6 className="fw-medium text-center mb-4 text-uppercase" 
+                    style={{
+                        color: '#334155',
+                        fontSize: '0.90rem', 
+                        letterSpacing: '1.0px'
+                    }}>
+                    PROGRESO DE INFORMES ({anio})
+                </h6>
+                <div className="d-flex justify-content-center align-items-center" style={{minHeight: '200px'}}>
+                    <div style={{ maxWidth: '240px', width: '100%' }}> 
+                        <ProgresoDona progresoData={progresoData} anio={anio} />
+                    </div>
+                </div>
+              </div>
             </div>
-            <div className="col-md-7">
-              <TablaPendientes pendientesData={pendientesData} />
+
+            <div className="col-lg-8 col-md-12">
+              <div style={cardStyle}>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="fw-medium mb-0 text-uppercase" 
+                        style={{
+                            color: '#334155', 
+                            fontSize: '0.90rem', 
+                            letterSpacing: '1.0px'
+                        }}>
+                        INFORMES PENDIENTES
+                    </h5>
+                  </div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <TablaPendientes pendientesData={pendientesData} />
+                  </div>
+              </div>
             </div>
           </div>
-          <div className="row mt-4 mb-4">
-            <div className="col-12">
-              <EstadisticasTabs
-                estadisticasBasico={estadisticasBasico}
-                estadisticasSuperior={estadisticasSuperior}
-              />
+
+          <hr className="my-5 opacity-10" />
+          
+          <div className="mb-4 border-bottom pb-2 mt-5"> 
+            <h4 className="h5 fw-bold mb-0">
+                <span className="text-gradient">Resultados de Encuestas</span>
+            </h4>
+            <small style={{color: 'var(--color-text-secondary)'}}>
+                Opinión estudiantil sobre las cátedras.
+            </small>
+        </div>
+
+        <div className="row mb-5">
+          <div className="col-12">
+            <div style={cardStyle}>
+                <EstadisticasTabs
+                  estadisticasBasico={estadisticasBasico}
+                  estadisticasSuperior={estadisticasSuperior}
+                />
             </div>
           </div>
+        </div>
         </>
       )}
     </div>
   );
-};
+}
