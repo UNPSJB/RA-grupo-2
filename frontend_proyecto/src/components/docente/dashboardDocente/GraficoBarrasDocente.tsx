@@ -1,31 +1,22 @@
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend,
-  type ChartOptions 
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface OpcionPorcentaje {
-  opcion_id: string;
-  porcentaje: number;
+interface OpcionPorcentaje { 
+  opcion_id: string; 
+  porcentaje: number; 
 }
 
-export interface CategoriaEstadistica {
-  categoria_cod: string;   
+interface CategoriaEstadistica { 
+  categoria_cod: string; 
   categoria_texto: string; 
-  promedio_categoria: OpcionPorcentaje[];
-  preguntas: any[];
+  promedio_categoria: OpcionPorcentaje[]; 
+  preguntas: any[]; 
 }
 
-interface Props {
-  datosApi: CategoriaEstadistica[];
+interface Props { 
+  datosApi: CategoriaEstadistica[]; 
 }
 
 const getSortOrder = (cod: string) => {
@@ -39,36 +30,29 @@ const getSortOrder = (cod: string) => {
 };
 
 const getColorParaOpcion = (opcion: string) => {
-    const op = opcion.toLowerCase();
-    if (op.includes('si') || op.includes('muy bueno')) return '#2e7d32';
-    if (op.includes('bueno')) return '#66bb6a';
-    if (op.includes('regular') || op.includes('npo')) return '#ffa726';
-    if (op.includes('no') || op.includes('malo')) return '#ef5350';
-    return '#bdbdbd';
+  const op = opcion.toLowerCase();
+  if (op.includes('si') || op.includes('muy bueno')) return '#2e7d32';
+  if (op.includes('bueno')) return '#66bb6a';
+  if (op.includes('regular') || op.includes('npo')) return '#ffa726';
+  if (op.includes('no') || op.includes('malo')) return '#ef5350';
+  return '#bdbdbd';
 };
 
 export default function GraficoBarrasDocente({ datosApi }: Props) {
   const categoriaMap = new Map<string, string>();
-  datosApi.forEach(cat => {
-    categoriaMap.set(cat.categoria_cod, cat.categoria_texto);
-  });
+  datosApi.forEach(cat => { categoriaMap.set(cat.categoria_cod, cat.categoria_texto); });
 
   const transformarDatosParaGrafico = (datos: CategoriaEstadistica[]) => {  
-    let datosFiltrados = datos
-      .filter(cat => cat.categoria_cod !== 'G'); 
-
-    datosFiltrados.sort((a, b) => {
-      return getSortOrder(a.categoria_cod) - getSortOrder(b.categoria_cod);
-    });
+    let datosFiltrados = datos.filter(cat => cat.categoria_cod !== 'G'); 
+    datosFiltrados.sort((a, b) => getSortOrder(a.categoria_cod) - getSortOrder(b.categoria_cod));
 
     const labels = datosFiltrados.map(cat => cat.categoria_cod); 
-    
     const opcionesSet = new Set<string>();
-    datosFiltrados.forEach(cat => {
-      cat.promedio_categoria.forEach(op => {
-        opcionesSet.add(op.opcion_id);
-      });
+
+    datosFiltrados.forEach(cat => { 
+      cat.promedio_categoria.forEach(op => opcionesSet.add(op.opcion_id)); 
     });
+
     const opcionesUnicas = Array.from(opcionesSet);
 
     const datasets = opcionesUnicas.map((opcion) => {
@@ -77,27 +61,25 @@ export default function GraficoBarrasDocente({ datosApi }: Props) {
         const opcionData = categoria?.promedio_categoria.find(op => op.opcion_id === opcion);
         return opcionData ? opcionData.porcentaje : 0;
       });
+
       return {
         label: opcion,
-        data: data,
+        data,
         backgroundColor: getColorParaOpcion(opcion),
         barPercentage: 0.6,
+        borderRadius: 4
       };
     });
 
     return { labels, datasets };
   };
 
-  const options: ChartOptions<'bar'> = {
+  const options = {
     indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { 
-        display: true,
-        position: 'bottom' as const,
-        labels: { boxWidth: 12, font: { size: 11 } }
-      },
+      legend: { display: false },
       title: { display: false },
       tooltip: {
         callbacks: {
@@ -105,8 +87,7 @@ export default function GraficoBarrasDocente({ datosApi }: Props) {
             const codigoLabel = tooltipItems[0].label; 
             const textoLargo = categoriaMap.get(codigoLabel) || codigoLabel;
             return `${codigoLabel}: ${textoLargo}`;
-          },
-          label: (context: any) => ` ${context.dataset.label}: ${context.raw.toFixed(1)}%`
+          }
         }
       }
     },
@@ -114,20 +95,31 @@ export default function GraficoBarrasDocente({ datosApi }: Props) {
       x: { 
         stacked: true,
         max: 100, 
-        grid: { color: '#f0f0f0' },
-        ticks: { font: { size: 11 } }
+        grid: { color: '#f1f5f9' },
+        ticks: { 
+          color: '#64748b',
+          font: { size: 10, weight: '700', family: "'Inter', sans-serif" } 
+        },
+        title: { 
+          display: true, 
+          text: 'PORCENTAJE (%)', 
+          color: '#64748b',
+          font: { size: 10, weight: '800' },
+          padding: { top: 10 }
+        }
       },
       y: { 
         stacked: true,
         grid: { display: false },
         ticks: { 
-            font: { weight: 'bold' as const } 
+          color: '#475569',
+          font: { size: 11, weight: '700' } 
         }
-      },
-    },
+      }
+    }
   };
 
   const data = transformarDatosParaGrafico(datosApi);
 
-  return <Bar options={options} data={data} />;
-};
+  return <Bar options={options as any} data={data} />;
+}
