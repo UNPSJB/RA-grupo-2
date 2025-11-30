@@ -83,7 +83,7 @@ export default function GraficoBarrasEstadisticas({ datosApi }: Props) {
         display: true, 
         text: 'Resumen Estadístico por Categoría',
         font: {
-          size: 18, 
+          size: 16, 
           weight: 500 
         }
       },
@@ -103,7 +103,7 @@ export default function GraficoBarrasEstadisticas({ datosApi }: Props) {
         max:100, 
         title: { display: true, text: 'Porcentaje (%)' ,
           font: {
-          size: 15, 
+          size: 14, 
           weight: 500 
         }
       }
