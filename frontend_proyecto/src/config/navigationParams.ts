@@ -31,8 +31,7 @@ export const getRoleLinks = (role: string): MenuItem[] => {
   if (role === 'docente') {
     baseLinks.push(
       { title: "Informes Pendientes", to: ROUTES.INFORMES_CATEDRA_PENDIENTES },
-      { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS },
-      { title: "Gráficos Estadísticos", to: ROUTES.DASHBOARD_DOCENTE }
+      { title: "Informes Completados", to: ROUTES.INFORMES_CATEDRA_COMPLETADOS }
     );
   }
 
@@ -41,8 +40,7 @@ export const getRoleLinks = (role: string): MenuItem[] => {
     baseLinks.push(
       { title: "Inf. Sintéticos Pendientes", to: ROUTES.CARRERAS_DPTO},
       { title: "Inf. Sintéticos Completados", to: ROUTES.INFORMES_SINTETICOS_COMPLETADOS},
-      { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA },
-      { title: "Gráficos Estadísticos", to: ROUTES.DASHBOARD_DPTO }
+      { title: "Informes de Cátedra", to: ROUTES.INFORMES_CATEDRA }
     );
   }
 
