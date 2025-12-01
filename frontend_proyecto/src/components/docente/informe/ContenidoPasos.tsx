@@ -35,6 +35,8 @@ interface ContenidoPasosProps {
   setCantidadesComisiones?: (tipo: 'teoricas' | 'practicas', valor: number) => void;
   isReadOnly?: boolean;
   datosIniciales?: any;
+  anio_informe: number|null;
+  periodo_informe: string|null;
 }
 
 const normalizarString = (texto: string): string => {
@@ -56,7 +58,9 @@ export default function ContenidoPasos({
   cantidadesComisiones,
   setCantidadesComisiones,
   isReadOnly = false,
-  datosIniciales
+  datosIniciales,
+  anio_informe,
+  periodo_informe
 }: ContenidoPasosProps) {
 
   const categoria1 = categoriasConPreguntas.find(cat => cat.cod === "1");
@@ -272,7 +276,7 @@ export default function ContenidoPasos({
                   Faltan datos de la materia para cargar las estadísticas.
               </div>
           )}
-          <RespuestasAbiertas docenteMateriaId={docenteMateriaId} />
+          <RespuestasAbiertas docenteMateriaId={docenteMateriaId} anio_informe={anio_informe} periodo_informe={periodo_informe} />
         </Fragment>
       );
 
