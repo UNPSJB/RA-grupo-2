@@ -75,24 +75,21 @@ export default function GraficoBarrasEstadisticas({ datosApi }: Props) {
     indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
+    layout: { padding: { left: 0, right: 10, top: 0, bottom: 0 } },
     plugins: {
-      legend: { 
-        display: false 
-      },
-      title: { 
-        display: true, 
-        text: 'Resumen Estadístico por Categoría',
-        font: {
-          size: 16, 
-          weight: 500 
-        }
-      },
+      legend: { display: false },
+      title: { display: false }, 
       tooltip: {
+        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+        padding: 10,
+        cornerRadius: 6,
+        titleFont: { family: "'Inter', sans-serif", size: 13 },
+        bodyFont: { family: "'Inter', sans-serif", size: 12 },
         callbacks: {
           title: (tooltipItems: any) => {
             const codigoLabel = tooltipItems[0].label; 
             const textoLargo = categoriaMap.get(codigoLabel) || codigoLabel;
-            return `${codigoLabel}: ${textoLargo}`;
+            return `${codigoLabel} - ${textoLargo}`;
           }
         }
       }
@@ -100,21 +97,52 @@ export default function GraficoBarrasEstadisticas({ datosApi }: Props) {
     scales: {
       x: { 
         stacked: true,
-        max:100, 
-        title: { display: true, text: 'Porcentaje (%)' ,
-          font: {
-          size: 14, 
-          weight: 500 
+        max: 100,
+        grid: { color: '#f1f5f9', drawBorder: false }, 
+        ticks: { 
+            color: '#64748b', 
+            font: { size: 11, weight: '500', family: "'Inter', sans-serif" } 
+        },
+        title: { 
+          display: true, 
+          text: 'PORCENTAJE (%)', 
+          color: '#64748b', 
+          font: { size: 11, weight: '700', family: "'Inter', sans-serif" },
+          padding: { top: 10 }
         }
-      }
       },
       y: { 
         stacked: true,
+        grid: { display: false, drawBorder: false }, 
+        ticks: { 
+            color: '#475569', 
+            padding: 10, 
+            font: { size: 12, weight: '600', family: "'Inter', sans-serif" }
+        }
       },
     },
   };
 
   const data = transformarDatosParaGrafico(datosApi);
 
-  return <Bar options={options} data={data} />;
+  return (
+    <div className="w-100 h-100 d-flex flex-column">
+        <h6 
+            className="fw-bold mb-3 text-uppercase" 
+            style={{
+                color: '#64748b', 
+                fontSize: '0.8rem', 
+                letterSpacing: '0.5px',
+                paddingLeft: '520px' 
+            }}
+        >
+            RESUMEN ESTADÍSTICO POR CATEGORÍA
+        </h6>
+        
+        {/* GRÁFICO */}
+        <div style={{ flex: 1, minHeight: 0 }}>
+            <Bar options={options as any} data={data} />
+        </div>
+    </div>
+  );
 };
