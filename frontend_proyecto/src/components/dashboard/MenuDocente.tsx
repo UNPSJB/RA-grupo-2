@@ -1,6 +1,8 @@
 import { useTeacherData } from "../../hooks/useTeacherData"; 
 import { getRoleLinks } from "../../config/navigationParams";
 import { ActionCard } from "./ActionCard";
+import DashboardDocente from "../docente/dashboardDocente/DashboardDocentes"; 
+import ROUTES from "../../paths"; 
 
 const Icons = {
   Document: () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/></svg>,
@@ -41,7 +43,7 @@ const getPeriodState = (inicio: Date | null, fin: Date | null) => {
     if (hoy >= fechaInicio && hoy <= fechaFin) {
         const diffTime = fechaFin.getTime() - hoy.getTime();
         const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (days <= 5) return { type: 'CLOSING_SOON', days }; // Alerta de 5 días para docentes
+        if (days <= 5) return { type: 'CLOSING_SOON', days }; 
         return { type: 'OPEN', days };
     }
 
@@ -65,8 +67,8 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
     switch (type) {
         case 'FUTURE':
             config = {
-                title: "Próxima Apertura",
-                desc: `La carga de informes inicia el ${inicio?.toLocaleDateString()}`,
+                title: "Próxima Entrega",
+                desc: `Presentación habilitada desde el ${inicio?.toLocaleDateString()}`,
                 colorClass: "text-primary",
                 bgColor: "bg-primary-subtle text-primary",
                 icon: <Icons.Time />,
@@ -93,7 +95,7 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
                 desc: `Fecha límite: ${fin?.toLocaleDateString()}`,
                 colorClass: "text-success",
                 bgColor: "bg-success-subtle text-success",
-                icon: <Icons.Document />, // Icono de documento para informes
+                icon: <Icons.Document />, 
                 counterLabel: "Días restantes",
                 counterColor: "var(--color-success)",
                 borderColor: "#bbf7d0"
@@ -192,8 +194,8 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
     );
 }
 
-const ProgressCard = ({ completados, total, porcentaje, periodDefined }: { completados: number, total: number, porcentaje: number, periodDefined: boolean }) => {
-  const pendientes = total - completados;
+const ProgressCard = ({ completadas, total, porcentaje, periodDefined }: { completadas: number, total: number, porcentaje: number, periodDefined: boolean }) => {
+  const pendientes = total - completadas;
   
   const colorCompleted = "var(--color-brand-primary)";
   const colorPending = "#e2e8f0"; 
@@ -258,7 +260,7 @@ const ProgressCard = ({ completados, total, porcentaje, periodDefined }: { compl
                   <span className="text-muted small fw-medium">Entregados</span>
               </div>
               <span className={`fw-bold ${hasData ? 'text-dark' : 'text-muted'}`}>
-                  {hasData ? completados : "-"}
+                  {hasData ? completadas : "-"}
               </span>
           </div>
           <div className="d-flex justify-content-between align-items-center">
@@ -281,29 +283,44 @@ const ProgressCard = ({ completados, total, porcentaje, periodDefined }: { compl
 export default function MenuDocente() {
     const links = getRoleLinks('docente');
     const { fechas, progreso } = useTeacherData();
+    
+    const linksFiltrados = links.filter(link => link.to !== ROUTES.DASHBOARD_DOCENTE);
+    
     const periodDefined = !!(fechas.inicio && fechas.fin);
 
     return (
-        <div className="row g-4">
-            <div className="col-lg-8 d-flex flex-column gap-4">
-                <PeriodSection inicio={fechas.inicio} fin={fechas.fin} />
-                
-                <div className="row g-4">
-                    {links.map((link, index) => (
-                        <div key={index} className="col-12 col-md-6">
-                            <ActionCard {...link} index={index + 1} />
-                        </div>
-                    ))}
+        <div className="d-flex flex-column gap-5">
+            <div className="row g-4">
+                <div className="col-lg-8 d-flex flex-column gap-4">
+                    <PeriodSection inicio={fechas.inicio} fin={fechas.fin} />
+                    
+                    <div className="row g-4">
+                        {linksFiltrados.map((link, index) => (
+                            <div key={index} className="col-12 col-md-6">
+                                <ActionCard {...link} index={index + 1} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="col-lg-4">
+                    <ProgressCard 
+                        completadas={progreso.completados} 
+                        total={progreso.total} 
+                        porcentaje={progreso.porcentaje}
+                        periodDefined={periodDefined} 
+                    />
                 </div>
             </div>
 
-            <div className="col-lg-4">
-                <ProgressCard 
-                    completados={progreso.completados} 
-                    total={progreso.total} 
-                    porcentaje={progreso.porcentaje}
-                    periodDefined={periodDefined} 
-                />
+            <div className="animate-fade-up">
+                <div className="d-flex align-items-center gap-3 mb-4">
+                    <hr className="flex-grow-1 text-secondary opacity-25" />
+                    <span className="text-muted small fw-bold text-uppercase tracking-wider">Estadísticas Detalladas</span>
+                    <hr className="flex-grow-1 text-secondary opacity-25" />
+                </div>
+                
+                <DashboardDocente />
             </div>
         </div>
     );

@@ -340,6 +340,8 @@ const datosGenerales = useMemo(() => {
                   practicas: informe.cantidadComisionesPracticas,
                   }} 
                 setCantidadesComisiones={() => {}}
+                anio_informe={informe.anio}
+                periodo_informe={informe.periodo}
             />
 
             </div>

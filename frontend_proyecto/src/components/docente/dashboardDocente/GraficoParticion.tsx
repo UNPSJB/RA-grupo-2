@@ -1,5 +1,6 @@
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { getResolvedColor } from '../../../utils/colors';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -12,13 +13,16 @@ export default function GraficoParticipacion({ completadas, totalAlumnos }: Prop
   const pendientes = Math.max(0, totalAlumnos - completadas);
   const porcentaje = totalAlumnos > 0 ? Math.round((completadas / totalAlumnos) * 100) : 0;
 
+  const colorPrincipal = getResolvedColor('--color-brand-primary') || '#005ec2';
+  const colorFondo = '#e2e8f0';
+
   const data = {
     labels: ['Encuestas Recibidas', 'Sin Responder'],
     datasets: [
       {
         data: [completadas, pendientes],
-        backgroundColor: ['#0d6efd', '#e9ecef'],
-        hoverBackgroundColor: ['#0b5ed7', '#dee2e6'],
+        backgroundColor: [colorPrincipal, colorFondo],
+        hoverBackgroundColor: [colorPrincipal, colorFondo],
         borderWidth: 0,
       },
     ],
@@ -27,28 +31,22 @@ export default function GraficoParticipacion({ completadas, totalAlumnos }: Prop
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '75%',
+    cutout: '80%',
+    hover: { mode: null },
     plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
+      legend: { display: false },
+      tooltip: { 
         enabled: true,
-        callbacks: {
-            label: function(context: any) {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                return `${label}: ${value} alumnos`;
-            }
-        }
+        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+        callbacks: { label: (ctx: any) => ` ${ctx.label}: ${ctx.raw}` }
       }
     }
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '160px', display: 'flex', justifyContent: 'center' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '160px', height: '160px', position: 'relative' }}>
-          <Doughnut data={data} options={options} />
+          <Doughnut data={data} options={options as any} />
           <div style={{
             position: 'absolute',
             top: '50%',
@@ -57,8 +55,8 @@ export default function GraficoParticipacion({ completadas, totalAlumnos }: Prop
             textAlign: 'center',
             pointerEvents: 'none'
           }}>
-            <h3 className="mb-0 fw-bold text-primary">{porcentaje}%</h3>
-            <small className="text-muted text-uppercase" style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>
+            <h3 className="mb-0 fw-bold" style={{color: colorPrincipal}}>{porcentaje}%</h3>
+            <small className="text-secondary text-uppercase fw-bold" style={{ fontSize: '0.6rem', letterSpacing: '0.5px' }}>
               Participación
             </small>
           </div>
