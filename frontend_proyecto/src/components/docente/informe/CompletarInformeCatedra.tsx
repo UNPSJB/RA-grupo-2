@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // instancia api
 import api from "../../../services/api";
-import { ANIO_ACTUAL } from "../../../constants";
+import { ANIO_ACTUAL, PERIODO_ACTUAL } from "../../../constants";
 import ROUTES from "../../../paths";
 import ContenidoPasos from "./ContenidoPasos";
 
@@ -323,6 +323,8 @@ export default function CompletarInformeCatedra() {
                 setNombresFuncion={{ SetJTP, SetAux1, SetAux2 }}
                 cantidadesComisiones={{ teoricas: cantidadComisionesTeoricas, practicas: cantidadComisionesPracticas }}
                 setCantidadesComisiones={handleComisionesChange}
+                anio_informe={ANIO_ACTUAL}
+                periodo_informe={periodo}
               />
             </div>
           </div>
