@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-// instancia api
 import api from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
 import { ANIO_ACTUAL } from "../../../constants";
@@ -24,7 +23,11 @@ export default function InformesPendientesPage() {
   const navigate = useNavigate();
   const periodoInforme = EsPeriodoInformeCatedra();
 
+  const [filtroMateria, setFiltroMateria] = useState<string>("");
+
   useEffect(() => {
+    if (!docenteId) return;
+
     api.get(`/informe-catedra-completado/docente/${docenteId}/pendientes`, {
       params: {
         anio: ANIO_ACTUAL,
@@ -35,13 +38,28 @@ export default function InformesPendientesPage() {
         setInformes(res.data);
       })
       .catch((err) => {
-        console.error("Error al obtener informes:", err);
+        console.error(err);
         const errorMsg = err.response?.data?.detail || err.message || "Error desconocido al cargar pendientes.";
         setError(errorMsg);
         setInformes([]);
       })
       .finally(() => setLoading(false));
   }, [docenteId]);
+
+  const opciones = useMemo(() => {
+    const materias = Array.from(new Set(informes.map(i => i.materia_nombre))).sort();
+    return { materias };
+  }, [informes]);
+
+  const informesFiltrados = useMemo(() => {
+    return informes.filter(inf => {
+      return filtroMateria ? inf.materia_nombre === filtroMateria : true;
+    });
+  }, [informes, filtroMateria]);
+
+  const limpiarFiltros = () => {
+    setFiltroMateria("");
+  };
 
   const handleCompletar = (informe: InformePendiente) => {
     navigate(ROUTES.COMPLETAR_INFORME_CATEDRA, {
@@ -93,13 +111,43 @@ export default function InformesPendientesPage() {
           </h1>
         </div>
         <div className="card-body">
-          {informes.length === 0 ? (
+          
+          <div className="d-flex flex-wrap align-items-center justify-content-between bg-light p-3 rounded-3 mb-4 border">
+             <div className="d-flex flex-wrap align-items-center gap-4">
+                <div className="d-flex align-items-center">
+                   <label className="text-muted fw-bold small me-2 text-uppercase" style={{fontSize: '0.75rem'}}>Materia:</label>
+                   <select 
+                      className="form-select form-select-sm border-0 bg-white shadow-sm" 
+                      style={{maxWidth: '250px', cursor: 'pointer'}}
+                      value={filtroMateria}
+                      onChange={(e) => setFiltroMateria(e.target.value)}
+                      disabled={opciones.materias.length === 0}
+                   >
+                      <option value="">TODAS</option>
+                      {opciones.materias.map(m => <option key={m} value={m}>{m}</option>)}
+                   </select>
+                </div>
+
+                {filtroMateria && (
+                   <button onClick={limpiarFiltros} className="btn btn-link text-danger p-0"><i className="bi bi-x-circle-fill"></i></button>
+                )}
+             </div>
+
+             <div className="text-end mt-2 mt-md-0">
+                 <span className="text-muted fw-bold small text-uppercase" style={{fontSize: '0.75rem'}}>PENDIENTES:</span>
+                 <span className="ms-2 fs-5 fw-bold text-danger">{informesFiltrados.length}</span>
+             </div>
+          </div>
+
+          {informesFiltrados.length === 0 ? (
             <div className="alert alert-info text-center">
-              No hay informes pendientes por completar
+              {informes.length === 0 
+                 ? "No hay informes pendientes por completar" 
+                 : "No hay pendientes para la materia seleccionada"}
             </div>
           ) : (
             <div>
-              {informes.map((informe, i) => (
+              {informesFiltrados.map((informe, i) => (
                 <div key={informe.docente_materia_id} className="col-12 mb-3">
                   <div className="card">
                     <div className="card-body d-flex justify-content-between align-items-center">
