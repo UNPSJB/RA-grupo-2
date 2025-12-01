@@ -3,8 +3,9 @@ import MenuAlumno from "./dashboard/MenuAlumno";
 import MenuDocente from "./dashboard/MenuDocente";
 import MenuDepartamento from "./dashboard/MenuDepartamento";
 import MenuSecretaria from "./dashboard/MenuSecretaria";
+
 const MenuAdmin = () => {
-    return <div className="text-center">Bienvenido Administrador</div>;
+    return <div className="text-center" style={{ color: 'var(--color-text-primary)' }}>Bienvenido Administrador</div>;
 };
 
 export default function UserDashboard() {
@@ -45,8 +46,8 @@ export default function UserDashboard() {
           <h1 className="display-5 fw-bold mb-3 text-gradient">
             Hola, {currentUser?.username}
           </h1>
-          <p className="lead text-secondary mx-auto" style={{ maxWidth: '600px' }}>
-            Bienvenido al <span className="fw-semibold text-dark"> Sistema Integral de Gestión Académica</span>.
+          <p className="lead mx-auto" style={{ maxWidth: '600px', color: 'var(--color-text-secondary)' }}>
+            Bienvenido al <span className="fw-semibold" style={{ color: 'var(--color-text-primary)' }}> Sistema Integral de Gestión Académica</span>.
           </p>
         </div>
       </div>

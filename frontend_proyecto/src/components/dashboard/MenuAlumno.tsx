@@ -54,11 +54,11 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
     let config = {
         title: "Cargando...",
         desc: "Obteniendo información...",
-        colorClass: "text-muted",
-        bgColor: "bg-light text-secondary",
+        stateClass: "state-muted",
+        textColor: "var(--color-text-secondary)",
         icon: <Icons.Calendar />,
         counterLabel: "-",
-        counterColor: "#6c757d",
+        counterColor: "var(--color-text-secondary)",
         borderColor: "transparent"
     };
 
@@ -67,93 +67,91 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
             config = {
                 title: "Próxima Apertura",
                 desc: `Habilitado desde el ${inicio?.toLocaleDateString()}`,
-                colorClass: "text-primary",
-                bgColor: "bg-primary-subtle text-primary",
+                stateClass: "state-info",
+                textColor: "var(--color-brand-primary)",
                 icon: <Icons.Time />,
                 counterLabel: "Días para abrir",
                 counterColor: "var(--color-brand-primary)",
-                borderColor: "var(--color-brand-light)"
+                borderColor: "var(--state-info-border)"
             };
             break;
         case 'COMING_SOON':
             config = {
                 title: "Apertura Inminente",
                 desc: `Prepárate, inicia el ${inicio?.toLocaleDateString()}`,
-                colorClass: "text-warning",
-                bgColor: "bg-warning-subtle text-warning-emphasis",
+                stateClass: "state-warning",
+                textColor: "var(--state-warning-text)",
                 icon: <Icons.Time />,
                 counterLabel: "Días para abrir",
-                counterColor: "#eab308",
-                borderColor: "#fef08a"
+                counterColor: "var(--state-warning-text)",
+                borderColor: "var(--state-warning-border)"
             };
             break;
         case 'OPEN':
             config = {
                 title: "Periodo de Encuestas Abierto",
                 desc: `Cierre: ${fin?.toLocaleDateString()}`,
-                colorClass: "text-success",
-                bgColor: "bg-success-subtle text-success",
+                stateClass: "state-success",
+                textColor: "var(--state-success-text)",
                 icon: <Icons.Checklist />,
                 counterLabel: "Días restantes",
-                counterColor: "var(--color-success)",
-                borderColor: "#bbf7d0"
+                counterColor: "var(--state-success-text)",
+                borderColor: "var(--state-success-border)"
             };
             break;
         case 'CLOSING_SOON':
             config = {
                 title: "Cierre Inminente",
                 desc: `¡Atención! Cierra el ${fin?.toLocaleDateString()}`,
-                colorClass: "text-danger",
-                bgColor: "bg-danger-subtle text-danger",
+                stateClass: "state-danger",
+                textColor: "var(--state-danger-text)",
                 icon: <Icons.Alert />,
                 counterLabel: "Días restantes",
-                counterColor: "var(--color-danger)",
-                borderColor: "#fecaca"
+                counterColor: "var(--state-danger-text)",
+                borderColor: "var(--state-danger-border)"
             };
             break;
         case 'CLOSED':
             config = {
                 title: "Periodo Cerrado",
                 desc: `Finalizó el ${fin?.toLocaleDateString()}`,
-                colorClass: "text-danger",
-                bgColor: "bg-danger-subtle text-danger",
+                stateClass: "state-danger",
+                textColor: "var(--state-danger-text)",
                 icon: <Icons.Calendar />,
                 counterLabel: "Finalizado",
-                counterColor: "var(--color-danger)",
-                borderColor: "#fecaca"
+                counterColor: "var(--state-danger-text)",
+                borderColor: "var(--state-danger-border)"
             };
             break;
         case 'UNDEFINED':
             config = {
                 title: "Periodo no definido",
                 desc: "Las fechas no han sido asignadas.",
-                colorClass: "text-secondary",
-                bgColor: "bg-light text-secondary",
+                stateClass: "state-muted",
+                textColor: "var(--color-text-secondary)",
                 icon: <Icons.Calendar />,
                 counterLabel: "Sin fecha",
-                counterColor: "#6c757d",
-                borderColor: "#e9ecef"
+                counterColor: "var(--color-text-secondary)",
+                borderColor: "var(--state-muted-border)"
             };
             break;
         default:
              break;
     }
 
-    const titleStyle = type === 'COMING_SOON' ? { color: '#ca8a04' } : {}; 
-
     return (
         <div className="row g-3">
             <div className="col-md-8 col-xl-9">
                 <div className="card-modern p-4 h-100 d-flex flex-row align-items-center gap-4 animate-fade-up position-relative overflow-hidden">
                     <div 
-                        className={`d-flex align-items-center justify-content-center rounded-4 shadow-sm ${config.bgColor}`}
+                        className={`d-flex align-items-center justify-content-center rounded-4 shadow-sm ${config.stateClass}`}
                         style={{ minWidth: '56px', height: '56px', position: 'relative', zIndex: 1 }}
                     >
                         {config.icon}
                     </div>
                     <div style={{ position: 'relative', zIndex: 1 }}>
-                        <h5 className={`fw-bold mb-1 ${config.colorClass}`} style={titleStyle}>{config.title}</h5>
-                        <div className="small fw-medium text-muted">{config.desc}</div>
+                        <h5 className="fw-bold mb-1" style={{ color: config.textColor }}>{config.title}</h5>
+                        <div className="small fw-medium" style={{ color: 'var(--color-text-secondary)' }}>{config.desc}</div>
                     </div>
                     <div style={decorationStyle} />
                 </div>
@@ -164,7 +162,7 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
                     className="card-modern h-100 d-flex flex-column align-items-center justify-content-center animate-fade-up position-relative overflow-hidden"
                     style={{ 
                         border: `2px solid ${config.borderColor}`,
-                        background: type === 'UNDEFINED' ? '#f8f9fa' : 'white'
+                        background: 'var(--color-surface)'
                     }}
                 >
                    {type === 'CLOSED' || type === 'UNDEFINED' ? (
@@ -172,7 +170,7 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
                            <h3 className="fw-bold mb-0" style={{ color: config.counterColor }}>
                                {type === 'CLOSED' ? "X" : "—"}
                            </h3>
-                           <small className="text-muted fw-bold" style={{fontSize: '0.7rem'}}>
+                           <small className="fw-bold" style={{fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
                                {config.counterLabel}
                            </small>
                        </div>
@@ -181,7 +179,7 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
                            <span className="fw-bold" style={{ color: config.counterColor, lineHeight: 1, fontSize: '2.5rem' }}>
                                {days}
                            </span>
-                           <div className="text-muted fw-bold text-uppercase mt-1" style={{fontSize: '0.65rem', letterSpacing: '1px'}}>
+                           <div className="fw-bold text-uppercase mt-1" style={{fontSize: '0.65rem', letterSpacing: '1px', color: 'var(--color-text-secondary)' }}>
                                {config.counterLabel}
                            </div>
                        </div>
@@ -195,19 +193,18 @@ const PeriodSection = ({ inicio, fin }: { inicio: Date | null, fin: Date | null 
 const ProgressCard = ({ completadas, total, porcentaje, periodDefined }: { completadas: number, total: number, porcentaje: number, periodDefined: boolean }) => {
   const pendientes = total - completadas;
   const colorCompleted = "var(--color-brand-primary)";
-  const colorPending = "#e2e8f0";  
-  const colorDisabled = "#e9ecef";
-  const colorTextDisabled = "#adb5bd";
+  const colorPending = "var(--color-border)";  
+  const colorDisabled = "var(--color-bg-body)";
+  const colorTextDisabled = "var(--color-text-secondary)";
   const hasData = periodDefined && total > 0;
-  const isWaiting = periodDefined && total === 0;
-
+  
   return (
     <div className="card-modern h-100 p-4 d-flex flex-column animate-fade-up position-relative overflow-hidden">
       
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="mb-4 text-start">
-          <h5 className="fw-bold mb-1 text-dark">Tu Progreso</h5>
-          <p className="text-muted small mb-0">
+          <h5 className="fw-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>Tu Progreso</h5>
+          <p className="small mb-0" style={{ color: 'var(--color-text-secondary)' }}>
              {!periodDefined 
                 ? "Información no disponible." 
                 : (hasData ? "Estado actual de tus obligaciones." : "No tienes encuestas asignadas.")}
@@ -217,7 +214,7 @@ const ProgressCard = ({ completadas, total, porcentaje, periodDefined }: { compl
         <div className="d-flex justify-content-center mb-4 flex-grow-1 align-items-center">
           <div className="position-relative" style={{ width: '160px', height: '160px' }}>
               <svg width="160" height="160" viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="54" fill="none" stroke={hasData ? colorPending : colorDisabled} strokeWidth="12" />
+                  <circle cx="60" cy="60" r="54" fill="none" stroke={hasData ? colorPending : colorPending} strokeWidth="12" style={{opacity: 0.5}} />
                   {hasData && (
                       <circle 
                           cx="60" cy="60" r="54" 
@@ -235,13 +232,13 @@ const ProgressCard = ({ completadas, total, porcentaje, periodDefined }: { compl
               
               <div className="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center">
                   {!periodDefined ? (
-                      <div className="text-muted"><Icons.Lock /></div>
+                      <div style={{ color: 'var(--color-text-secondary)' }}><Icons.Lock /></div>
                   ) : (
                       <>
-                        <span className="fw-bold text-dark" style={{ fontSize: '2.2rem', color: hasData ? 'inherit' : colorTextDisabled }}>
+                        <span className="fw-bold" style={{ fontSize: '2.2rem', color: hasData ? 'var(--color-text-primary)' : colorTextDisabled }}>
                             {hasData ? `${porcentaje}%` : "—"}
                         </span>
-                        <span className="fw-bold" style={{fontSize: '0.6rem', letterSpacing: '1px', color: hasData ? '#6c757d' : colorTextDisabled }}>
+                        <span className="fw-bold" style={{fontSize: '0.6rem', letterSpacing: '1px', color: hasData ? 'var(--color-text-secondary)' : colorTextDisabled }}>
                             {hasData ? "COMPLETADO" : "SIN DATOS"}
                         </span>
                       </>
@@ -254,18 +251,18 @@ const ProgressCard = ({ completadas, total, porcentaje, periodDefined }: { compl
           <div className="d-flex justify-content-between align-items-center mb-2">
               <div className="d-flex align-items-center gap-2">
                   <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: hasData ? colorCompleted : colorDisabled }}></span>
-                  <span className="text-muted small fw-medium">Completadas</span>
+                  <span className="small fw-medium" style={{ color: 'var(--color-text-secondary)' }}>Completadas</span>
               </div>
-              <span className={`fw-bold ${hasData ? 'text-dark' : 'text-muted'}`}>
+              <span className="fw-bold" style={{ color: hasData ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>
                   {hasData ? completadas : "-"}
               </span>
           </div>
           <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
                   <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: hasData ? colorPending : colorDisabled }}></span>
-                  <span className="text-muted small fw-medium">Pendientes</span>
+                  <span className="small fw-medium" style={{ color: 'var(--color-text-secondary)' }}>Pendientes</span>
               </div>
-              <span className={`fw-bold ${hasData ? 'text-dark' : 'text-muted'}`}>
+              <span className="fw-bold" style={{ color: hasData ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>
                   {hasData ? pendientes : "-"}
               </span>
           </div>

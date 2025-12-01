@@ -71,6 +71,26 @@
   --color-grafico-amarillo: #e9c46a;   
   --color-grafico-rojo: #e76f51;       
   --color-grafico-gris: #94a3b8;
+  /* ESTADOS (Modo Claro: Fondos pastel, textos oscuros) */
+  --state-success-bg: #d1fae5;       /* Verde muy suave */
+  --state-success-text: #065f46;     /* Verde oscuro */
+  --state-success-border: #6ee7b7;
+
+  --state-warning-bg: #fef3c7;       /* Amarillo suave */
+  --state-warning-text: #92400e;     /* Naranja/Marrón oscuro */
+  --state-warning-border: #fcd34d;
+
+  --state-danger-bg: #fee2e2;        /* Rojo suave */
+  --state-danger-text: #991b1b;      /* Rojo oscuro */
+  --state-danger-border: #fca5a5;
+
+  --state-info-bg: #e0f2fe;          /* Azul suave */
+  --state-info-text: #075985;        /* Azul oscuro */
+  --state-info-border: #7dd3fc;
+
+  --state-muted-bg: #f1f5f9;         /* Gris suave */
+  --state-muted-text: #64748b;       /* Gris medio */
+  --state-muted-border: #cbd5e1;
 }
 
 /* --- DARK MODE (Deep Space) --- */
@@ -113,6 +133,26 @@
     --color-grafico-amarillo: #FFBF00;
     --color-grafico-rojo: #FF5C5C;
     --color-grafico-gris: #64748b;
+
+    --state-success-bg: rgba(6, 95, 70, 0.4); 
+    --state-success-text: #6ee7b7;    /* Verde claro brillante */
+    --state-success-border: rgba(16, 185, 129, 0.3);
+
+    --state-warning-bg: rgba(146, 64, 14, 0.4);
+    --state-warning-text: #fcd34d;    /* Amarillo brillante */
+    --state-warning-border: rgba(245, 158, 11, 0.3);
+
+    --state-danger-bg: rgba(153, 27, 27, 0.4);
+    --state-danger-text: #fca5a5;     /* Rojo claro brillante */
+    --state-danger-border: rgba(239, 68, 68, 0.3);
+
+    --state-info-bg: rgba(7, 89, 133, 0.4);
+    --state-info-text: #7dd3fc;       /* Azul claro brillante */
+    --state-info-border: rgba(14, 165, 233, 0.3);
+
+    --state-muted-bg: rgba(30, 41, 59, 0.6);
+    --state-muted-text: #94a3b8;
+    --state-muted-border: #334155;
   }
 }
 

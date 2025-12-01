@@ -3,7 +3,6 @@ import ROUTES from "../../paths";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 
-// Fallback final si todo falla
 const DEFAULT_LOCATION = {
   lat: -43.249, 
   lon: -65.305,
@@ -104,7 +103,7 @@ export default function Navbar() {
         className="container-fluid glass-panel rounded-4 px-4 py-2 d-flex justify-content-between align-items-center position-relative"
         style={{
           boxShadow: scrolled ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
-          background: scrolled ? 'var(--color-surface-glass)' : 'rgba(255,255,255,0.6)',
+          background: 'var(--color-surface-glass)', 
         }}
       >
         {/* BRANDING */}
@@ -144,13 +143,11 @@ export default function Navbar() {
 
         <div className="navbar-nav ms-auto d-flex flex-row align-items-center gap-3">
           
-          {/* WIDGET CLIMA */}
+          {/* WIDGET CLIMA*/}
           {!loadingWeather && weather && (
             <div 
-              className="d-none d-lg-flex align-items-center gap-2 px-3 py-1 rounded-pill fade-in"
+              className="d-none d-lg-flex align-items-center gap-2 py-1 fade-in"
               style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-                border: '1px solid rgba(0,0,0,0.05)',
                 fontSize: '0.9rem',
                 color: 'var(--color-text-secondary)'
               }}
@@ -161,15 +158,15 @@ export default function Navbar() {
                  {weather.temp}°C
                </span>
                <span 
-                 className="small text-muted text-truncate" 
-                 style={{ fontSize: '0.75rem', maxWidth: '100px' }}
+                 className="small text-truncate" 
+                 style={{ fontSize: '0.75rem', maxWidth: '100px', color: 'var(--color-text-secondary)' }}
                >
                  {weather.city}
                </span>
             </div>
           )}
 
-          {/* USER CAPSULE - TAMAÑO RESTAURADO (NORMAL) */}
+          {/* USER CAPSULE */}
           <li className="nav-item dropdown position-relative list-unstyled">
              <a
               className="nav-link d-flex align-items-center gap-3 ps-1 pe-3 py-1 rounded-pill" 
@@ -179,7 +176,7 @@ export default function Navbar() {
               data-bs-toggle="dropdown"
               aria-expanded="false"
               style={{ 
-                background: 'rgba(var(--color-surface), 0.5)',
+                background: 'var(--color-surface)', 
                 border: '1px solid var(--color-border)',
                 transition: 'all 0.2s ease',
                 cursor: 'pointer'
@@ -190,10 +187,10 @@ export default function Navbar() {
               <div 
                 className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
                 style={{ 
-                  width: '38px',   /* Volvió a 38px */
-                  height: '38px',  /* Volvió a 38px */
+                  width: '38px',
+                  height: '38px',
                   background: 'var(--gradient-primary)',
-                  fontSize: '0.9rem' /* Letra inicial normal */
+                  fontSize: '0.9rem'
                 }}
               >
                 {userName.charAt(0).toUpperCase()}
@@ -208,7 +205,7 @@ export default function Navbar() {
                 </span>
               </div>
               
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="ms-2 text-muted" viewBox="0 0 16 16">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="ms-2" viewBox="0 0 16 16" style={{ color: 'var(--color-text-secondary)' }}>
                 <path fillRule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
               </svg>
             </a>
@@ -218,8 +215,9 @@ export default function Navbar() {
               className="dropdown-menu dropdown-menu-end mt-3 border-0 shadow-lg p-0 rounded-4 overflow-hidden" 
               aria-labelledby="userDropdown"
               style={{ 
-                minWidth: '240px', /* Ancho estándar */
+                minWidth: '240px',
                 background: 'var(--color-surface)',
+                border: 'var(--glass-border)',
                 position: 'absolute',
                 right: 0
               }}
@@ -229,7 +227,6 @@ export default function Navbar() {
                   className="dropdown-item px-3 py-2 d-flex align-items-center gap-2 text-danger fw-medium"
                   href="#" 
                   onClick={handleLogout}
-                  /* Quitamos el fontSize grande extra */
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                      <path fillRule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>

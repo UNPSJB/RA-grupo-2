@@ -64,7 +64,7 @@ const getIcon = (title: string) => {
 export const ActionCard = ({ title, to, index }: { title: string, to: string, index: number }) => (
   <Link to={to} className="text-decoration-none h-100">
     <div 
-      className="card-modern h-100 p-4 d-flex flex-row align-items-center gap-4 animate-fade-up"
+      className="card-modern h-100 p-4 d-flex flex-row align-items-center gap-4 animate-fade-up position-relative overflow-hidden"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div 
@@ -73,17 +73,18 @@ export const ActionCard = ({ title, to, index }: { title: string, to: string, in
           minWidth: '64px', 
           height: '64px', 
           background: 'var(--gradient-primary)',
-          color: 'white'
+          color: 'white',
+          position: 'relative', zIndex: 1
         }}
       >
         {getIcon(title)}
       </div>
       
-      <div className="flex-grow-1">
-        <h5 className="fw-bold mb-1 text-dark" style={{ fontSize: '1.05rem' }}>
+      <div className="flex-grow-1" style={{ position: 'relative', zIndex: 1 }}>
+        <h5 className="fw-bold mb-1" style={{ fontSize: '1.05rem', color: 'var(--color-text-primary)' }}>
           {title}
         </h5>
-        <div className="d-flex align-items-center text-primary small fw-medium">
+        <div className="d-flex align-items-center small fw-medium" style={{ color: 'var(--color-brand-primary)' }}>
           <span>Acceder ahora</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="ms-1" viewBox="0 0 16 16" style={{transition: 'transform 0.2s'}} >
             <path fillRule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
@@ -100,7 +101,8 @@ export const ActionCard = ({ title, to, index }: { title: string, to: string, in
         background: 'var(--color-brand-light)',
         borderRadius: '50%',
         opacity: 0.5,
-        zIndex: -1
+        zIndex: 0, 
+        pointerEvents: 'none'
       }} />
     </div>
   </Link>
