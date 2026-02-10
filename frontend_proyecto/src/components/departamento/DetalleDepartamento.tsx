@@ -5,6 +5,7 @@ import { EsPeriodoInformeSintetico } from "../secretaria/definirFechas/EstamosEn
 import PopupPeriodoCerrado from "../secretaria/definirFechas/PopUpPeriodo"
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useDepartmentData } from "../../hooks/useDepartmentData";
 
 function DetalleDepartamento() {
   const { currentUser } = useAuth();
@@ -12,6 +13,7 @@ function DetalleDepartamento() {
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const periodoInforme = EsPeriodoInformeSintetico();
+  const { fechas} = useDepartmentData();
 
   useEffect(() => {
     if(!id_dpto) return;
@@ -35,7 +37,7 @@ function DetalleDepartamento() {
   }
 
   if (!periodoInforme) {
-    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"}/>;
+    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"} fecha_inicio={fechas.inicio} fecha_fin={fechas.fin}/>;
   }
 
   return (

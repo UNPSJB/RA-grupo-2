@@ -7,6 +7,7 @@ import { PERIODO_ACTUAL, MostrarPeriodo } from "../../../constants";
 import ROUTES from "../../../paths";
 import { EsPeriodoInformeCatedra } from "../../secretaria/definirFechas/EstamosEnPeriodo"
 import PopupPeriodoCerrado from "../../secretaria/definirFechas/PopUpPeriodo"
+import { useTeacherData } from "../../../hooks/useTeacherData"; 
 
 type InformePendiente = {
   materia_id: number;
@@ -22,6 +23,7 @@ export default function InformesPendientesPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const periodoInforme = EsPeriodoInformeCatedra();
+  const { fechas} = useTeacherData();
 
   const [filtroMateria, setFiltroMateria] = useState<string>("");
 
@@ -89,7 +91,7 @@ export default function InformesPendientesPage() {
   }
 
   if (!periodoInforme) {
-    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"} />;
+    return <PopupPeriodoCerrado msg={"El periodo para completar los informes no está abierto"} fecha_inicio={fechas.inicio} fecha_fin={fechas.fin} />;
   }
 
   if (!docenteId) {

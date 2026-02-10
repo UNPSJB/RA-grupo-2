@@ -24,9 +24,11 @@ interface RelacionDocenteMateria {
 
 interface Props {
   docenteMateriaId: number;
+  anio_informe: number|null,
+  periodo_informe: string|null;
 }
 
-export default function RespuestasAbiertas({ docenteMateriaId }: Props) {
+export default function RespuestasAbiertas({ docenteMateriaId , anio_informe,periodo_informe}: Props) {
   const [categorias, setCategorias] = useState<DatosAbiertosCategoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +42,8 @@ export default function RespuestasAbiertas({ docenteMateriaId }: Props) {
         const relacion: RelacionDocenteMateria = relacionRes.data;
         
         const materiaId = relacion.materia_id;
-        const anio = relacion.anio ?? ANIO_ACTUAL;
-        const periodo = relacion.periodo ?? PERIODO_ACTUAL;
+        const anio = anio_informe? anio_informe:relacion.anio;
+        const periodo = periodo_informe? periodo_informe:relacion.periodo;
         const respuestasRes = await api.get('/datos_estadisticos/respuestas_abiertas', {
           params: {
             id_materia: materiaId,
